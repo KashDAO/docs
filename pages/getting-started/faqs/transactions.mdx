@@ -1,0 +1,399 @@
+---
+title: 'Transaction'
+description: 'Common questions about transactions and fees'
+icon: 'arrow-right-arrow-left'
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Transaction Basics
+
+<AccordionGroup>
+  <Accordion title="How do transactions work on Kash?">
+    **Seamless Transaction Processing**
+    
+    **Transaction Flow:**
+    1. **Prediction Placement:** Submit prediction via @kash_bot or web interface
+    2. **Gas Sponsorship:** Kash covers all gas fees for user transactions
+    3. **Smart Contract Execution:** Automated processing on Base network
+    4. **Confirmation:** Instant confirmation with transaction hash
+    
+    **Supported Currencies:**
+    - **Primary:** USDC (USD Coin) for all prediction activities
+    - **Accepted:** ETH, WETH, DAI (automatically converted to USDC)
+    - **Rewards:** $KASH tokens for incentives and bonuses
+    - **Auto-conversion:** Seamless currency conversion when needed
+    
+    **Transaction Types:**
+    - Prediction placement and position management
+    - Deposits and withdrawals
+    - Market creation and curation
+    - Reward claims and distributions
+    
+    **Processing Times:**
+    - Prediction placement: Instant execution
+    - Network confirmation: 1-2 minutes on Base
+    - Withdrawal processing: Immediate to wallet
+    - Cross-chain transfers: 5-15 minutes depending on network
+  </Accordion>
+  
+  <Accordion title="What fees does Kash charge?">
+    **Transparent Fee Structure**
+    
+    **Platform Fees:**
+    - **Prediction Fee:** 2% on all predictions (buying or selling shares)
+    - **No Additional Fees On:** Deposits, withdrawals, or account maintenance
+    - **Gas Fees:** Sponsored by Kash (users pay nothing)
+    - **Currency Conversion:** Minimal spread for auto-conversions
+    
+    **Fee Calculation Example:**
+    ```
+    Prediction Amount: $100 USDC
+    Platform Fee: $100 × 2% = $2.00
+    Total Cost: $102.00
+    If winning: Full payout received (fee already paid)
+    ```
+    
+    **Fee Usage:**
+    - Treasury funding for monthly $KASH buybacks
+    - Platform development and maintenance
+    - Security audits and improvements
+    - Community rewards and incentives
+    
+    **No Hidden Costs:**
+    - All fees clearly displayed before transaction
+    - No subscription or membership fees
+    - No withdrawal or deposit charges
+    - No account maintenance fees
+  </Accordion>
+  
+  <Accordion title="Why did my transaction fail?">
+    **Common Transaction Issues**
+    
+    **Insufficient Balance:**
+    - Check wallet balance covers prediction amount plus 2% fee
+    - Account for potential slippage in volatile markets
+    - Ensure sufficient USDC for the specific prediction
+    - Consider auto-conversion delays for non-USDC deposits
+    
+    **Market-Related Issues:**
+    - Market may have closed before transaction processed
+    - Liquidity constraints for large prediction amounts
+    - Price movement affecting available odds
+    - Market resolution already in progress
+    
+    **Technical Issues:**
+    - Network congestion causing delays
+    - Invalid command format in social media prediction
+    - Browser or device connectivity problems
+    - Temporary system maintenance or updates
+    
+    **Resolution Steps:**
+    1. Check account balance and market status
+    2. Retry transaction with correct parameters
+    3. Use alternative interface (bot vs web)
+    4. Check community for known issues
+  </Accordion>
+</AccordionGroup>
+
+# Transaction History and Tracking
+
+<AccordionGroup>
+  <Accordion title="How do I view my transaction history?">
+    **Multiple Access Methods**
+    
+    **Via @kash_bot:**
+    - Send DM: "history" for recent transactions
+    - Send DM: "balance" for current account status
+    - Send DM: "stats" for performance summary
+    - Use specific commands for filtered results
+    
+    **Via Web Dashboard:**
+    - Visit kash.bot and connect with X account
+    - Access comprehensive transaction dashboard
+    - Filter by date, market, or transaction type
+    - View detailed transaction information
+    
+    **Via Blockchain Explorer:**
+    - View all transactions on basescan.org
+    - Search by wallet address or transaction hash
+    - Public verification of all activity
+    - Permanent, immutable record
+    
+    **Transaction Details Include:**
+    - Prediction amount, odds, and potential payout
+    - Market information and outcome
+    - Transaction hash for blockchain verification
+    - Timestamp and confirmation status
+    - 2% platform fee breakdown
+  </Accordion>
+  
+  <Accordion title="Can I cancel or modify a transaction?">
+    **Transaction Finality and Options**
+    
+    **Transaction Immutability:**
+    - All confirmed transactions are final and cannot be cancelled
+    - Blockchain technology ensures transaction permanence
+    - No reversal mechanism for completed predictions
+    - Smart contracts execute automatically upon confirmation
+    
+    **Early Exit Options:**
+    - **Sell Position:** Exit prediction before market resolution (if liquidity available)
+    - **Partial Sales:** Reduce position size while maintaining exposure
+    - **Market Liquidity:** Exit depends on available market liquidity
+    - **Price Impact:** Large positions may face slippage when exiting
+    
+    **Before Confirmation:**
+    - Double-check prediction details before final submission
+    - Verify market terms and resolution criteria
+    - Confirm prediction amount and potential payout
+    - Review transaction summary carefully
+    
+    **Risk Management:**
+    - Start with smaller prediction amounts to learn platform
+    - Use position sizing appropriate to risk tolerance
+    - Consider market volatility when placing predictions
+    - Monitor positions regularly for exit opportunities
+  </Accordion>
+  
+  <Accordion title="How long do withdrawals take?">
+    **Withdrawal Processing Timeline**
+    
+    **Standard Withdrawals:**
+    - **Execution:** Processing begins immediately once requested
+    - **Network Confirmation:** 1-2 minutes on Base network
+    - **Wallet Receipt:** Funds appear after blockchain confirmation
+    - **Automated Processing:** No manual approval required
+    
+    **Processing Factors:**
+    - **Network Congestion:** May affect confirmation times
+    - **Transaction Size:** All sizes processed equally
+    - **Destination:** Base network addresses process fastest
+    - **Cross-Chain:** Additional time for bridging to other networks
+    
+    **Cross-Chain Withdrawals:**
+    - Base to Ethereum mainnet: 5-15 minutes
+    - Base to other L2s: Variable depending on bridge
+    - Cross-chain fees may apply (paid by user)
+    - Bridge security and confirmation requirements
+    
+    **Withdrawal Considerations:**
+    - **No Minimum:** Withdraw any amount
+    - **Network Fees:** Standard blockchain fees apply
+    - **24/7 Processing:** Available anytime
+    - **Immediate Initiation:** Withdrawals start processing immediately
+  </Accordion>
+</AccordionGroup>
+
+# Advanced Transaction Features
+
+<AccordionGroup>
+  <Accordion title="How does gas sponsorship work?">
+    **Gas Fee Coverage**
+    
+    **Platform Gas Sponsorship:**
+    - **All User Transactions:** Kash covers gas fees for all user actions
+    - **Seamless Experience:** No need to hold ETH for gas
+    - **Account Abstraction:** ERC-4337 enables gasless transactions
+    - **PayMaster System:** Automated gas payment system
+    
+    **Covered Transactions:**
+    - **Prediction Placement:** All prediction activity
+    - **Position Management:** Buying and selling shares
+    - **Market Creation:** Creating new prediction markets
+    - **Governance:** Voting on DAO proposals
+    
+    **Technical Implementation:**
+    - **Smart Contract Integration:** Built into platform architecture
+    - **Automated Processing:** No user intervention required
+    - **Base Network Optimization:** Efficient gas usage
+    - **Cost Management:** Platform optimizes gas costs
+    
+    **User Benefits:**
+    - **Simplified Onboarding:** No need to understand gas fees
+    - **Lower Barriers:** Easier access for new users
+    - **Predictable Costs:** Only 2% platform fee
+    - **Focus on Prediction:** Concentrate on markets, not fees
+  </Accordion>
+  
+  <Accordion title="What happens during network congestion?">
+    **Network Performance Management**
+    
+    **During High Traffic:**
+    - **Prioritized Processing:** Platform transactions receive priority
+    - **Gas Optimization:** Efficient gas usage reduces impact
+    - **Queue Management:** Fair processing order maintained
+    - **Status Updates:** Real-time network status information
+    
+    **User Experience:**
+    - **Consistent Performance:** Minimal impact on user experience
+    - **Transparent Communication:** Clear status updates
+    - **Alternative Access:** Multiple interfaces available
+    - **Patience Required:** Some delays possible during extreme congestion
+    
+    **Platform Response:**
+    - **Monitoring Systems:** Real-time network monitoring
+    - **Scaling Solutions:** Base network efficiency
+    - **Fallback Options:** Alternative processing methods
+    - **User Communication:** Proactive status updates
+    
+    **Best Practices:**
+    - **Off-Peak Usage:** Consider timing for large transactions
+    - **Patience:** Allow extra time during busy periods
+    - **Multiple Attempts:** Retry if initial attempt fails
+    - **Status Checking:** Monitor transaction status
+  </Accordion>
+  
+  <Accordion title="How do I track transaction status?">
+    **Transaction Monitoring**
+    
+    **Real-Time Tracking:**
+    - **Transaction Hash:** Unique identifier for each transaction
+    - **Blockchain Explorer:** View status on basescan.org
+    - **Platform Updates:** Real-time status in dashboard
+    - **Confirmation Progress:** Track confirmation blocks
+    
+    **Status Indicators:**
+    - **Pending:** Transaction submitted, awaiting confirmation
+    - **Confirmed:** Transaction included in blockchain
+    - **Completed:** Transaction fully processed
+    - **Failed:** Transaction rejected or failed
+    
+    **Monitoring Tools:**
+    - **@kash_bot:** Query transaction status via DM
+    - **Web Dashboard:** Visual transaction status
+    - **Blockchain Explorer:** Independent verification
+    - **Mobile Interface:** Track on mobile devices
+    
+    **Troubleshooting:**
+    - **Stuck Transactions:** Check network status
+    - **Failed Transactions:** Review error messages
+    - **Delayed Confirmations:** Allow additional time
+    - **Support Resources:** Community help available
+  </Accordion>
+</AccordionGroup>
+
+# Transaction Security
+
+<AccordionGroup>
+  <Accordion title="How secure are my transactions?">
+    **Multi-Layer Security**
+    
+    **Blockchain Security:**
+    - **Base Network:** Secured by Ethereum-equivalent security
+    - **Immutable Records:** Transactions cannot be altered
+    - **Cryptographic Verification:** All transactions cryptographically signed
+    - **Decentralized Validation:** Multiple validators confirm transactions
+    
+    **Platform Security:**
+    - **Smart Contract Audits:** Regular security reviews
+    - **MPC Wallet Integration:** Enhanced wallet security
+    - **Authentication Required:** X account verification for all transactions
+    - **Fraud Detection:** Automated monitoring systems
+    
+    **User Security:**
+    - **Private Key Control:** You maintain control through X account
+    - **Transaction Verification:** Review all details before confirmation
+    - **Transparent Operations:** All activity publicly verifiable
+    - **Secure Infrastructure:** Enterprise-grade security measures
+    
+    **Best Practices:**
+    - **Verify Addresses:** Double-check all addresses
+    - **Secure Access:** Use secure devices and networks
+    - **Regular Monitoring:** Check account activity regularly
+    - **Report Issues:** Alert community to security concerns
+  </Accordion>
+  
+  <Accordion title="What if I send funds to the wrong address?">
+    **Address Verification and Recovery**
+    
+    **Prevention is Key:**
+    - **Double-Check Addresses:** Verify all addresses before sending
+    - **Test Transactions:** Use small amounts for new addresses
+    - **Copy-Paste Carefully:** Avoid manual typing of addresses
+    - **Address Validation:** Platform validates address format
+    
+    **If Funds Are Sent Incorrectly:**
+    - **Blockchain Finality:** Confirmed transactions cannot be reversed
+    - **Address Ownership:** Funds go to whoever controls the address
+    - **No Recovery Mechanism:** Platform cannot recover misdirected funds
+    - **Contact Recipient:** If known, contact address owner directly
+    
+    **Common Mistakes:**
+    - **Wrong Network:** Sending to different blockchain
+    - **Typos:** Incorrect address characters
+    - **Old Addresses:** Using outdated addresses
+    - **Exchange Addresses:** Sending to exchange without memo
+    
+    **Protection Measures:**
+    - **Address Book:** Save frequently used addresses
+    - **QR Codes:** Use QR codes when available
+    - **Small Test:** Test with small amount first
+    - **Verification:** Confirm address with recipient
+  </Accordion>
+  
+  <Accordion title="How do I report transaction problems?">
+    **Problem Resolution Process**
+    
+    **Initial Assessment:**
+    - **Verify Transaction:** Check transaction hash on blockchain
+    - **Check Network Status:** Confirm Base network status
+    - **Review Details:** Ensure correct parameters used
+    - **Wait for Confirmation:** Allow sufficient time
+    
+    **Getting Help:**
+    - **@kash_bot:** AI assistance for common issues
+    - **Discord Community:** Peer support and troubleshooting
+    - **Documentation:** Comprehensive guides and FAQs
+    - **GitHub Issues:** Technical problem reporting
+    
+    **Information to Provide:**
+    - **Transaction Hash:** Unique transaction identifier
+    - **Wallet Address:** Your Base wallet address
+    - **Problem Description:** Clear explanation of issue
+    - **Screenshots:** Visual evidence if helpful
+    - **Timeline:** When problem occurred
+    
+    **Resolution Process:**
+    - **Community Review:** Experienced users provide guidance
+    - **Technical Analysis:** Community technical review
+    - **Documentation:** Issue logged for future reference
+    - **Follow-up:** Confirmation of resolution
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+All transactions on Kash are final once confirmed on the blockchain. Always verify transaction details carefully before confirming, as completed transactions cannot be reversed.
+</Warning>
+
+<Tip>
+Kash covers all gas fees for user transactions, so you only pay the 2% platform fee. This makes the platform accessible without needing to manage ETH for gas costs.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Wallet Guide"
+    icon="wallet"
+    href="/pages/getting-started/faqs/wallet-and-funds"
+  >
+    Learn about wallet management
+  </Card>
+  <Card
+    title="Security"
+    icon="shield"
+    href="/pages/getting-started/faqs/security"
+  >
+    Transaction security best practices
+  </Card>
+</CardGroup>

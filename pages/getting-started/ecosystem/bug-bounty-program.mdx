@@ -1,0 +1,283 @@
+---
+title: 'Bug Bounty'
+description: 'Help Us Build a Safer Platform'
+icon: 'bug'
+---
+
+<Note>
+  Security is fundamental to Kash's mission. We encourage community members and security researchers to report vulnerabilities responsibly. Security contributions may be eligible for recognition and rewards through our Community Incentives program.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Security Reporting
+
+<AccordionGroup>
+  <Accordion title="What to Report">
+    **Security Issues We Want to Know About**
+    
+    **Critical Security Issues:**
+    - **Smart contract vulnerabilities** affecting user funds or market integrity
+    - **Wallet security issues** related to MPC technology or account access
+    - **Market resolution problems** that could lead to incorrect payouts
+    - **Bot security vulnerabilities** in @kash_bot interactions
+    
+    **Platform Security Concerns:**
+    - **Authentication bypasses** or unauthorized access methods
+    - **Transaction manipulation** or incorrect fee calculations
+    - **Data privacy issues** or information disclosure vulnerabilities
+    - **Oracle manipulation** or resolution system exploits
+    
+    **Infrastructure Issues:**
+    - **API security vulnerabilities** in platform endpoints
+    - **Database security issues** or data exposure risks
+    - **Network security problems** affecting platform availability
+    - **Integration vulnerabilities** with Base network or third-party services
+  </Accordion>
+  
+  <Accordion title="How to Report">
+    **Responsible Disclosure Process**
+    
+    **Contact Information:**
+    - **Security Email:** security@kash.bot for all security-related reports
+    - **Response Time:** We aim to acknowledge reports within 24 hours
+    - **Investigation:** Security team will investigate and provide updates
+    - **Resolution:** We'll work with you to understand and fix the issue
+    
+    **Report Format:**
+    ```
+    Subject: Security Issue - [Brief Description]
+    
+    1. Issue Summary: Brief description of the vulnerability
+    2. Impact Assessment: Potential impact and affected systems
+    3. Reproduction Steps: Detailed steps to reproduce the issue
+    4. Supporting Evidence: Screenshots, logs, or proof of concept
+    5. Suggested Fix: Recommendations for resolution (optional)
+    6. Contact Info: How we can reach you for follow-up
+    ```
+    
+    **What to Include:**
+    - **Detailed description** of the security issue
+    - **Step-by-step reproduction** instructions
+    - **Impact assessment** and potential consequences
+    - **Supporting evidence** like screenshots or transaction hashes
+  </Accordion>
+</AccordionGroup>
+
+# Security Guidelines
+
+<Tabs>
+  <Tab title="Responsible Testing">
+    **How to Test Safely and Responsibly**
+    
+    **Acceptable Testing:**
+    - **Use test accounts** for security research when possible
+    - **Limit testing scope** to avoid disrupting other users
+    - **Document findings** thoroughly for clear reporting
+    - **Respect user privacy** and avoid accessing personal data
+    
+    **Testing Best Practices:**
+    - **Start with low-impact tests** before attempting more complex exploits
+    - **Use minimal data** necessary to demonstrate the vulnerability
+    - **Avoid automated scanning** that could impact platform performance
+    - **Test on testnets** when possible to avoid mainnet risks
+    
+    **What Not to Do:**
+    - **Don't access** other users' accounts or private information
+    - **Don't disrupt** platform services or availability
+    - **Don't perform** large-scale automated attacks
+    - **Don't publicly disclose** vulnerabilities before reporting them
+  </Tab>
+  
+  <Tab title="Scope and Focus">
+    **Areas of Interest for Security Research**
+    
+    **Smart Contract Security:**
+    - **Market creation** and prediction logic
+    - **Payout calculations** and fund distribution
+    - **Access controls** and permission systems
+    - **Integration security** with Base network
+    
+    **Platform Security:**
+    - **Wallet generation** and MPC security
+    - **Transaction routing** and fee calculations
+    - **Bot interaction** security and command processing
+    - **API endpoints** and data validation
+    
+    **AI System Security:**
+    - **Market resolution** accuracy and manipulation resistance
+    - **Natural language processing** vulnerabilities
+    - **Oracle integration** and data verification
+    - **Anti-manipulation** systems and detection
+  </Tab>
+</Tabs>
+
+# Community Contribution
+
+<AccordionGroup>
+  <Accordion title="Recognition and Rewards">
+    **How We Recognize Security Contributions**
+    
+    **Community Recognition:**
+    - **Public acknowledgment** for significant security contributions
+    - **Security contributor** status and community recognition
+    - **Direct collaboration** with development team on improvements
+    - **Contribution tracking** for ongoing security research
+    
+    **Potential Rewards:**
+    - **$KASH token rewards** for verified security contributions through Community Incentives
+    - **Priority access** to new features and beta testing opportunities
+    - **Enhanced platform privileges** for trusted security researchers
+    - **Networking opportunities** with development and security teams
+    
+    **Reward Considerations:**
+    - **Impact assessment** determines the significance of contributions
+    - **Quality of reporting** and responsible disclosure practices
+    - **Collaboration** and assistance with resolution efforts
+    - **Community benefit** and protection of user funds
+  </Accordion>
+  
+  <Accordion title="Ongoing Collaboration">
+    **Building Long-term Security Partnerships**
+    
+    **Security Community:**
+    - **Regular communication** with active security researchers
+    - **Feedback integration** on security improvements and features
+    - **Early access** to new features for security evaluation
+    - **Community forums** for security discussion and collaboration
+    
+    **Professional Development:**
+    - **Skill building** through real-world security research
+    - **Portfolio development** with verified security contributions
+    - **Industry networking** with security professionals
+    - **Career opportunities** in blockchain and DeFi security
+    
+    **Platform Improvement:**
+    - **Continuous security** enhancement through community input
+    - **Proactive vulnerability** identification and resolution
+    - **Security best practices** development and documentation
+    - **Industry leadership** in prediction market security
+  </Accordion>
+</AccordionGroup>
+
+# Advanced Security Research
+
+<AccordionGroup>
+  <Accordion title="Circuit Audits and Multi-Prover Models">
+    **Advanced Security for High-Stakes Markets**
+    
+    **Circuit Audit Process:**
+    - **Tier 1 Audits:** Standard security review for all circuits by established firms
+    - **Tier 2 Audits:** Enhanced review for high-value market resolution circuits
+    - **Tier 3 Audits:** Formal verification and mathematical proof of circuit correctness
+    - **Continuous Monitoring:** Ongoing security assessment of deployed circuits
+    
+    **Multi-Prover Architecture:**
+    - **Redundant Verification:** Multiple independent provers for critical market resolutions
+    - **Consensus Mechanisms:** Majority agreement required for high-stakes outcomes
+    - **Prover Diversity:** Different implementations to avoid systematic vulnerabilities
+    - **Fallback Systems:** Alternative resolution methods if primary provers fail
+    
+    **High-Stakes Market Criteria:**
+    - **Volume Thresholds:** Markets with >$100K total volume get enhanced security
+    - **Public Interest:** Markets with significant social or economic impact
+    - **Complexity Assessment:** Markets requiring sophisticated data analysis
+    - **Risk Evaluation:** Markets with potential for manipulation or disputes
+    
+    **Security Benefits:**
+    - **Fault Tolerance:** System continues operating even if individual components fail
+    - **Attack Resistance:** Multiple independent systems must be compromised simultaneously
+    - **Verification Confidence:** Mathematical certainty of resolution correctness
+    - **Transparency:** All audit reports and verification proofs publicly available
+    
+    **Research Opportunities:**
+    - **Circuit Analysis:** Review zero-knowledge circuit implementations
+    - **Prover Verification:** Test multi-prover consensus mechanisms
+    - **Audit Process:** Participate in formal verification processes
+    - **Security Testing:** Evaluate high-stakes market security measures
+  </Accordion>
+</AccordionGroup>
+
+# Getting Started
+
+<AccordionGroup>
+  <Accordion title="For Security Researchers">
+    **How to Begin Security Research on Kash**
+    
+    **Preparation Steps:**
+    - **Study platform documentation** to understand system architecture
+    - **Review smart contracts** and open source code repositories
+    - **Understand prediction markets** and unique security considerations
+    - **Familiarize yourself** with Base network and ERC-4337 standards
+    
+    **Research Approach:**
+    - **Start with documentation** review and system understanding
+    - **Identify potential** attack vectors and vulnerability classes
+    - **Develop testing methodology** that respects platform and users
+    - **Plan responsible disclosure** timeline and communication strategy
+    
+    **Best Practices:**
+    - **Collaborate professionally** with the security team
+    - **Document findings** thoroughly and clearly
+    - **Suggest practical** mitigation strategies when possible
+    - **Maintain confidentiality** until issues are resolved
+  </Accordion>
+  
+  <Accordion title="For Community Members">
+    **How Regular Users Can Contribute to Security**
+    
+    **Everyday Security Awareness:**
+    - **Report suspicious activity** or unusual platform behavior
+    - **Share security concerns** with the community and support team
+    - **Follow security best practices** for account and fund protection
+    - **Stay informed** about security updates and best practices
+    
+    **Community Vigilance:**
+    - **Watch for phishing** attempts and fraudulent communications
+    - **Report fake accounts** or impersonation attempts
+    - **Verify information** through official channels before acting
+    - **Help educate** other users about security risks and protection
+    
+    **Contribution Methods:**
+    - **General feedback** through support channels and community forums
+    - **Bug reports** for non-security issues through normal support
+    - **Feature suggestions** that could improve platform security
+    - **Community education** and security awareness initiatives
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+Always report security issues privately to security@kash.bot before public disclosure. Public disclosure of vulnerabilities before they're fixed can put user funds and the platform at risk.
+</Warning>
+
+<Tip>
+Security research is most effective when combined with deep understanding of the platform's architecture and user needs. Take time to understand how Kash works before looking for potential issues.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Security FAQ"
+    icon="shield"
+    href="/pages/getting-started/faqs/security"
+  >
+    Learn about platform security
+  </Card>
+  <Card
+    title="Support"
+    icon="headset"
+    href="/pages/getting-started/faqs/support"
+  >
+    Get help from support team
+  </Card>
+</CardGroup>

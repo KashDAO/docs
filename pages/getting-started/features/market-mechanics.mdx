@@ -1,0 +1,509 @@
+---
+title: 'Market Mechanics'
+description: 'How Prediction Markets Work'
+icon: 'gears'
+---
+
+<Note>
+Understanding how Kash's automated market mechanics work helps you make better predictions and maximize returns.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# How Market Creation Works
+
+**AI agents create all markets** through a comprehensive validation process. While users can suggest markets, the actual creation involves rigorous AI evaluation and quality control.
+
+<Tabs>
+  <Tab title="AI-Driven Creation">
+    **Automated Market Detection**
+    
+    **5 Specialized AI Personas** continuously monitor social signals:
+    - **Crypto-Degen Agent:** Token listings, ETF approvals, DeFi milestones
+    - **Sports Agent:** Match outcomes, player performance, championships
+    - **Tech Agent:** Product launches, AI breakthroughs, earnings results
+    - **Macro Agent:** Interest rate decisions, economic indicators, elections
+    - **Pop-Culture Agent:** Award shows, album drops, celebrity drama
+    
+    **Creation Process:**
+    1. **Signal Detection** - AI identifies trending topics with prediction potential
+    2. **Quality Assessment** - Validates verifiable outcomes and clear criteria
+    3. **Market Generation** - Creates binary YES/NO markets with resolution parameters
+    4. **Instant Deployment** - Markets go live with automatic liquidity bootstrap
+  </Tab>
+  
+  <Tab title="User Suggestions">
+    **Community-Driven Market Ideas**
+    
+    **How to Suggest Markets:**
+    - **Tag @kash_bot** in social media posts about future events
+    - **Direct requests** with clear YES/NO questions
+    - **Natural conversation** - AI detects prediction intent in discussions
+    
+    **Validation Process:**
+    - **AI evaluation** of suggestion quality and verifiability
+    - **Mira Network validation** ensures objective resolution criteria
+    - **Content safety checks** prevent prohibited topics
+    - **Duplicate prevention** avoids overlapping markets
+    
+    **What Gets Approved:**
+    - Clear binary outcomes with verifiable sources
+    - Timely events resolving within 30 days
+    - Public interest and engagement potential
+    - Objective resolution criteria
+  </Tab>
+</Tabs>
+
+---
+
+# Core Market Structure
+
+<AccordionGroup>
+  <Accordion title="Binary Prediction Markets">
+    **Simple YES/NO Outcomes**
+    
+    Every Kash market has exactly two possible outcomes:
+    - **YES:** The stated event will happen
+    - **NO:** The stated event will not happen
+    - **Winner-take-all:** Only one outcome can be correct at resolution
+    - **Clear criteria:** Each market specifies exact resolution conditions
+    
+    **Example Market:**
+    ```
+    "Will Bitcoin reach $150,000 by March 1, 2025?"
+    YES: $0.65 (65% implied probability)
+    NO: $0.35 (35% implied probability)
+    Total: $1.00 (complete market)
+    ```
+  </Accordion>
+  
+  <Accordion title="Share-Based Trading">
+    **Outcome Tokens as Tradeable Assets**
+    
+    - **Share Pricing:** Ranges from $0.01 to $0.99 per share
+    - **Market Completeness:** YES + NO prices always equal $1.00
+    - **Probability Reflection:** Share price directly represents market consensus
+    - **Continuous Trading:** Prices update with every transaction
+    
+    **Share Value at Resolution:**
+    - Winning outcome shares: $1.00 each
+    - Losing outcome shares: $0.00 each
+  </Accordion>
+  
+  <Accordion title="Automated Market Maker (CPAMM)">
+    **Constant Product Formula for Liquidity**
+    
+    Kash uses a Constant Product Automated Market Maker (CPAMM):
+    - **Instant Liquidity:** Always available for trades of any size
+    - **No Order Books:** Eliminates need for manual market making
+    - **Price Discovery:** Automatic adjustment based on supply and demand
+    - **Mathematical Pricing:** Follows x × y = k invariant for fair pricing
+    
+    **Technical Implementation:**
+    - Built on Base blockchain for low fees and fast execution
+    - Smart contracts handle all trading logic automatically
+    - Integrated with Uniswap v4 architecture for efficiency
+  </Accordion>
+</AccordionGroup>
+
+# Pricing and Liquidity
+
+<Tabs>
+  <Tab title="How Prices Work">
+    **Probability-Based Pricing**
+    
+    Market prices directly reflect outcome probabilities:
+    - **YES at $0.70** = 70% implied probability
+    - **NO at $0.30** = 30% implied probability
+    - **Always sums to $1.00** for complete market
+    - **Prices adjust** with each trade based on supply and demand
+    
+    **Price Movement Drivers:**
+    - **Buying Pressure:** Increases price of purchased outcome
+    - **Selling Pressure:** Decreases price of sold outcome
+    - **Trade Size:** Larger trades create bigger price impacts
+    - **Market Depth:** More liquidity reduces price volatility
+  </Tab>
+  
+  <Tab title="Liquidity System">
+    **Automated Liquidity Bootstrap**
+    
+    **Passive LP Vault Solution:**
+    - **Instant Allocation:** Vault automatically deploys USDC to new markets
+    - **Balanced Positioning:** Provides equal value liquidity to both YES and NO outcomes
+    - **ERC-4626 Standard:** Industry-standard vault interface for deposits and withdrawals
+    - **Principal Protection:** Delta-neutral strategy ensures original USDC preserved
+    
+    **Liquidity Sources:**
+    - **Primary:** Automated liquidity provision from Kash's Passive LP Vault
+    - **Secondary:** Individual user manual liquidity provision
+    - **Tertiary:** Market making from experienced traders
+    - **Auxiliary:** Cross-market arbitrage flows
+  </Tab>
+  
+  <Tab title="Trade Impact">
+    **Understanding Price Movement**
+    
+    | Trade Size | Typical Price Impact | Liquidity Requirement |
+    |------------|---------------------|---------------------|
+    | $10 | ~0.1% | Low |
+    | $100 | ~1% | Medium |
+    | $1,000 | ~3-5% | High |
+    | $10,000+ | ~10-15% | Very High |
+    
+    **Impact Factors:**
+    - Current market liquidity depth
+    - Distance from 50/50 pricing
+    - Recent trading volume
+    - Market age and maturity
+  </Tab>
+</Tabs>
+
+---
+
+# Complete Market Lifecycle
+
+<Steps>
+  <Step title="Market Creation & Validation">
+    **AI-Driven Process with Quality Control**
+    - AI agents detect trending topics or process user suggestions
+    - **Validation phase:** Mira Network ensures verifiable outcomes and clear criteria
+    - **Content safety:** AI checks prevent prohibited topics
+    - **Market parameters set:** Question, resolution criteria, trusted sources, 30-day maximum deadline
+    - **Instant Liquidity Bootstrap:** Passive LP Vault automatically deploys USDC
+  </Step>
+  
+  <Step title="Active Trading Period">
+    **Open Price Discovery**
+    - Continuous trading available 24/7
+    - Prices fluctuate based on new information and trader activity
+    - Market consensus develops through collective prediction
+    - Real-time odds visible in X conversations and web interface
+    - Maximum duration: 30 days before automatic closure
+  </Step>
+  
+  <Step title="Market Closure">
+    **Trading Freeze**
+    - Trading halts at predetermined closure time
+    - All positions locked at final prices
+    - No new predictions accepted after closure
+    - Preparation for automated resolution begins
+  </Step>
+  
+  <Step title="Automated Resolution">
+    **AI-Powered Settlement with Cryptographic Proofs**
+    - **zkTLS Verification:** Reclaim Protocol fetches data with cryptographic proof of authenticity
+    - **AI Analysis:** EZKL zero-knowledge ML proves correct YES/NO determination
+    - **Combined Proof:** zk-SNARK submitted to resolution contract on Base blockchain
+    - **Instant Settlement:** Winners automatically receive $1.00 per winning share
+    - **Platform fee:** 2% charged on all predictions
+  </Step>
+</Steps>
+
+# Fee Structure and Economics
+
+<AccordionGroup>
+  <Accordion title="Platform Fees">
+    **2% Fee on All Trades**
+    
+    **Fee Application:**
+    - **2%** fee on all trades (buying or selling shares)
+    - **No additional fees** on winnings, losses, or holding positions
+    - **Transparent** calculation shown before and after each trade
+    
+    **Example Calculation:**
+    ```
+    Trade: $100 on YES at $0.40 = 250 shares
+    Platform Fee: $100 × 2% = $2.00
+    Net Cost: $102.00 total
+    If YES wins: 250 shares × $1.00 = $250
+    Net Profit: $250 - $102 = $148.00 (145% return)
+    ```
+  </Accordion>
+  
+  <Accordion title="Gasless Trading">
+    **Platform-Sponsored Transactions**
+    
+    - **All transaction fees covered** by Kash protocol
+    - **ERC-4337 Integration:** Account abstraction enables sponsored transactions
+    - **No ETH Required:** Users don't need to hold ETH for gas fees
+    - **Base Network:** Low underlying costs due to Layer-2 efficiency
+    
+    **What's Covered:**
+    - Market creation transactions
+    - Prediction placement and position changes
+    - Resolution and payout transactions
+    - Wallet funding and withdrawal operations
+  </Accordion>
+  
+  <Accordion title="Slippage Protection">
+    **Advanced Price Impact Mitigation**
+    
+    **Multi-Layer Protection:**
+    - **Automatic Slippage Limits:** 5% maximum slippage on social media predictions
+    - **Dynamic Pricing:** Real-time price updates prevent stale price execution
+    - **MEV Protection:** Large trades routed through private mempools
+    - **Batch Execution:** Multiple trades executed simultaneously at fair prices
+    
+    **How It Works:**
+    ```
+    Social Media Prediction: "YES $100"
+    1. System checks current market price
+    2. Calculates maximum shares at 5% slippage
+    3. Executes trade with price protection
+    4. Refunds excess if better price achieved
+    ```
+    
+    **Protection Levels:**
+     - **Small Predictions (under $50):** 2% maximum slippage tolerance
+     - **Medium Predictions (over $50):** 5% maximum slippage tolerance
+     - **Large Predictions (over $100):** Automatic routing to RFQ system
+     - **Institutional Predictions (over $200):** MEV protection with batch execution
+    
+    **User Benefits:**
+    - **Predictable Costs:** Know maximum cost before trade execution
+    - **Fair Pricing:** Protection against price manipulation
+    - **Automatic Optimization:** System finds best execution path
+    - **Refund Protection:** Excess funds returned if better price achieved
+  </Accordion>
+  
+  <Accordion title="Revenue Model">
+    **Sustainable Protocol Economics**
+    
+    **Revenue Sources:**
+    - 2% platform fee on all trades
+    - Interest earned on idle USDC deposits
+    - Potential MEV capture from transaction ordering
+    
+    **Revenue Usage:**
+    - Monthly $KASH token buybacks
+    - Protocol development and security improvements
+    - User acquisition and community rewards
+    - Automated liquidity provisioning for new markets
+  </Accordion>
+</AccordionGroup>
+
+# Advanced Features
+
+<Tabs>
+  <Tab title="Position Management">
+    **Flexible Trading Options**
+    
+    **Buying and Selling:**
+    - Purchase YES or NO shares at current market price
+    - Exit positions before market resolution
+    - Sell into automated liquidity pool
+    - Lock in profits or limit losses
+    
+    **Portfolio Tracking:**
+    - Real-time position values and P&L
+    - Historical performance analytics
+    - Export capabilities for tax reporting
+  </Tab>
+  
+  <Tab title="Passive LP Vault">
+    **Automated Liquidity Provision**
+    
+    **How It Works:**
+    - **Deposit USDC:** Lock funds for 30 days to earn yield while supporting the ecosystem
+    - **Automatic Deployment:** Your funds automatically provide liquidity to new prediction markets
+    - **Principal Protection:** Mathematical guarantee you'll receive your original USDC back
+    - **Yield Generation:** Earn from trading fees, external yield (Aave), and $KASH rewards
+    - **Smart Rebalancing:** AI automatically adjusts positions to maintain optimal liquidity
+    
+    **Why Principal is Protected:**
+    The vault uses concentrated liquidity that automatically rebalances around the current market price. This means you're always holding equal value of YES and NO shares, so regardless of which outcome wins, you receive the same amount back. It's like being a casino house - you profit from the action, not from picking sides.
+    
+    **Expected Returns:**
+    - **Target 6% APY** from multiple sources:
+      - Trading fees from markets you provide liquidity to
+      - Interest earned on idle USDC through Aave integration
+      - $KASH token rewards for supporting ecosystem growth
+      - Compounding effects from reinvestment
+    
+    **Perfect For:**
+    - Users who want steady returns without active trading
+    - Those who believe in Kash's growth but prefer lower risk
+    - Anyone wanting to earn yield on USDC while supporting prediction markets
+  </Tab>
+  
+  <Tab title="Leverage Trading">
+    **Advanced Options for Qualified Users**
+    
+    **How Leverage Works:**
+    - **2x Maximum Leverage:** Amplify your position size up to double your available balance
+    - **Qualification Required:** Must demonstrate consistent accuracy and responsible trading
+    - **Interest Fee:** 5% fee on borrowed amount paid to treasury upon settlement
+    - **Automatic Risk Management:** Positions monitored to prevent excessive losses
+    
+    **Qualification Criteria:**
+    - **Track Record:** Minimum 20 completed predictions with 60%+ accuracy rate
+    - **Account History:** At least 30 days of active platform usage
+    - **Risk Assessment:** AI evaluation of trading patterns and risk management
+    - **Financial Capacity:** Demonstrated ability to cover potential losses
+    
+    **Example Leverage Trade:**
+    ```
+    Your Balance: $500
+    Leverage: 2x
+    Position Size: $1,000 on YES at $0.40 = 2,500 shares
+    Interest Fee: $500 × 5% = $25
+    If YES wins: 2,500 × $1.00 = $2,500
+    Net Profit: $2,500 - $1,000 - $25 = $1,475 (195% return on your $500)
+    ```
+    
+    **Risk Protection:**
+    - **Liquidation Safeguards:** Automatic position closure if losses approach your balance
+    - **Interest Transparency:** All fees clearly displayed before trade execution
+    - **Educational Resources:** Leverage trading guides and risk management tips
+  </Tab>
+</Tabs>
+
+---
+
+# Resolution and Settlement
+
+<AccordionGroup>
+  <Accordion title="Trusted Data Sources">
+    **Pre-Defined Resolution Criteria**
+    
+    Each market specifies exact resolution parameters:
+    - **Primary Sources:** Official websites, APIs, verified data feeds
+    - **Secondary Sources:** Backup verification from reputable outlets
+    - **Resolution Criteria:** Specific language defining winning conditions
+    - **Dispute Process:** Community governance for edge cases
+    
+    **Common Source Types:**
+    - Government agencies and official bodies
+    - Sports leagues and official results pages
+    - Financial data providers (Bloomberg, Reuters)
+    - Company investor relations and SEC filings
+  </Accordion>
+  
+  <Accordion title="Cryptographic Resolution Process">
+    **Trustless Settlement with Zero-Knowledge Proofs**
+    
+    **How It Works (Step-by-Step):**
+    1. **Market Closure:** Trading stops at predetermined time
+    2. **Secure Data Fetching:** AI agent connects to pre-specified trusted source (e.g., official results page)
+    3. **zkTLS Authentication:** Cryptographic proof generated that data actually came from the claimed website
+    4. **AI Analysis:** Natural Language Processing model analyzes the fetched data to determine YES/NO outcome
+    5. **Zero-Knowledge Proof:** Mathematical proof generated that the AI model made the correct decision on authentic data
+    6. **Blockchain Verification:** Combined proof submitted to smart contract on Base blockchain
+    7. **Instant Settlement:** Contract automatically pays winners $1.00 per winning share
+    
+    **Why This Matters:**
+    - **No human bias** - AI follows predetermined rules consistently
+    - **Cryptographically secure** - impossible to fake data sources or manipulate AI decisions
+    - **Instant resolution** - no waiting for committees or manual verification
+    - **Publicly verifiable** - anyone can check that resolution was correct
+    - **Dispute-resistant** - mathematical proofs eliminate most potential disagreements
+    
+    **Trust Through Technology:**
+    Instead of trusting a person or company to determine outcomes fairly, you're trusting mathematics and cryptography - the same technology that secures Bitcoin and Ethereum. The AI model weights are public, the data sources are specified in advance, and the entire process generates cryptographic proofs that can be independently verified.
+    
+    **Publicly Verifiable AI Models:**
+    - **Open Model Weights:** All AI model parameters publicly available for inspection
+    - **Deterministic Inference:** Same inputs always produce identical outputs
+    - **Cryptographic Commitment:** Model weights committed to blockchain before market creation
+    - **Version Control:** All model updates tracked and governed by community
+    
+    **Auditability Features:**
+    - **Reproducible Results:** Anyone can verify AI decisions using public weights
+    - **Model Transparency:** Complete neural network architecture publicly documented
+    - **Training Data Disclosure:** Information about training datasets and methodologies
+    - **Bias Detection:** Community can analyze models for potential biases or manipulation
+    
+    **How Model Verification Works:**
+    ```
+    Verification Process:
+    1. Download public model weights from IPFS/Arweave
+    2. Run same input data through model locally
+    3. Compare your result with on-chain resolution
+    4. Mathematical proof confirms identical computation
+    ```
+    
+    **Privacy-Preserving Features:**
+    - **Selective Disclosure:** Only necessary data elements are revealed in proofs
+    - **Data Minimization:** Personal information in source data is automatically redacted
+    - **Computation Privacy:** AI inference happens without exposing sensitive intermediate values
+    - **Audit Without Exposure:** Verification possible without revealing private data sources
+    
+    **Community Oversight:**
+    The combination of public model weights and zero-knowledge proofs creates unprecedented transparency. The community can verify that AI models are fair and unbiased, while the zkTLS system ensures the data being analyzed is authentic. This eliminates the need to trust any centralized authority for market resolution.
+    
+    **Technical Proof Chain Architecture:**
+    - **Layer 1 - Data Authenticity:** zkTLS proves data came from claimed source
+    - **Layer 2 - AI Inference:** EZKL proves correct model execution on authentic data
+    - **Layer 3 - Result Verification:** Combined proof submitted to Base blockchain
+    - **Layer 4 - Community Audit:** Public verification of entire proof chain
+    
+    **Proof Composition Process:**
+    ```
+    Proof Chain Generation:
+    1. zkTLS generates proof P1: "Data D came from source S"
+    2. EZKL generates proof P2: "Model M correctly processed D → Result R"
+    3. Proof combiner creates P3: "P1 ∧ P2 → R is valid"
+    4. P3 submitted to resolution contract on Base
+    5. Smart contract verifies P3 and executes payout
+    ```
+    
+    **Cryptographic Guarantees:**
+    - **Non-repudiation:** Impossible to deny data source or AI decision
+    - **Immutability:** Proofs cannot be modified after generation
+    - **Verifiability:** Anyone can independently verify the proof chain
+    - **Privacy-Preservation:** Sensitive data elements remain hidden
+  </Accordion>
+  
+  <Accordion title="Edge Case Handling">
+    **Comprehensive Coverage**
+    
+    **Market Invalidation:**
+    - Event cancelled or significantly changed
+    - All participants receive full refund of original stakes
+    - No fees charged for invalid markets
+    
+    **Ambiguous Outcomes:**
+    - Community governance process activated
+    - $KASH token holders vote on resolution
+    - Majority decision determines final outcome
+    
+    **Technical Failures:**
+    - Backup resolution mechanisms available
+    - User funds always protected
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+Understanding these market mechanics gives you an edge in prediction trading. The combination of AI validation, automated liquidity, and cryptographic resolution creates the most advanced prediction market system available.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Start Trading"
+    icon="chart-line"
+    href="/pages/getting-started/guides/predicting"
+  >
+    Learn to make predictions
+  </Card>
+  <Card
+    title="Find Markets"
+    icon="magnifying-glass"
+    href="/pages/getting-started/guides/finding-opportunities"
+  >
+    Discover opportunities
+  </Card>
+</CardGroup>
+
+# Market Structure

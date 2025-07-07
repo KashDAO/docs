@@ -1,0 +1,299 @@
+---
+title: 'Tokenomics'
+description: 'The $KASH Token Economy'
+icon: 'coins'
+---
+
+<Note>
+$KASH is the native token powering the Kash ecosystem, designed with automated buybacks, community incentives, and decentralized governance participation.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Token Distribution
+
+<Note>
+Total supply allocated with community-first approach: 65% to community, 25% to team/advisors, 10% to investors.
+</Note>
+
+### Community Allocations (65% - Governance Controlled)
+
+| **Category** | **% of Supply** | **Available at TGE** | **Lock-Up (months)** | **Monthly Vesting** | **Purpose** |
+|--------------|-----------------|----------------------|----------------------|---------------------|-------------|
+| **Community Incentives** | 25.00% | 0.00% | 0 | 36 | Ecosystem growth, staking rewards, liquidity incentives |
+| **DAO Treasury** | 24.00% | 5.00% | 9 | 36 | Protocol development, security audits, buyback funding |
+| **Marketing & Partnerships** | 4.00% | 50.00% | 0 | 36 | User acquisition, KOL partnerships |
+| **CEX Listings & Liquidity** | 4.00% | 50.00% | 0 | 12 | Exchange listings, market making |
+| **Community Airdrops** | 4.00% | 50.00% | 0 | 6 | Early adopter rewards, engagement campaigns |
+| **Strategic Partnerships** | 4.00% | 0.00% | 0 | 36 | Technology integrations, corporate collaborations |
+
+### Team & Advisor Allocations (25% - Fixed)
+
+| **Category** | **% of Supply** | **Available at TGE** | **Lock-Up (months)** | **Monthly Vesting** | **Purpose** |
+|--------------|-----------------|----------------------|----------------------|---------------------|-------------|
+| **Team & Contributors** | 20.00% | 0.00% | 9 | 36 | Core team, early contributors |
+| **Advisors** | 5.00% | 0.00% | 9 | 24 | Expert guidance, partnership development |
+
+### Investor Allocations (10% - Fixed)
+
+| **Category** | **% of Supply** | **Available at TGE** | **Lock-Up (months)** | **Monthly Vesting** | **Purpose** |
+|--------------|-----------------|----------------------|----------------------|---------------------|-------------|
+| **Private Investors** | 10.00% | 0-5% | 6 | 18-24 | Investors across multiple rounds |
+
+<Warning>
+Community allocations (65%) may be re-bucketed or adjusted through DAO governance. Team and investor allocations (35%) remain fixed and cannot be modified by governance.
+</Warning>
+
+---
+
+# Token Utility
+
+<Tabs>
+  <Tab title="Core Functions">
+    **Primary Token Uses**
+    
+    **Prediction Currency:**
+    - Alternative to USDC for placing predictions
+    - Automatic swap to USDC when predicting with $KASH
+    - Seamless prediction experience across all markets
+    
+    **Governance Rights:**
+    - Vote on protocol upgrades and changes
+    - Influence fee structures and parameters
+    - Direct community fund allocation decisions
+    - Emergency protocol decisions
+    
+    **Staking & Rewards:**
+    - Stake for yield and governance weight
+    - Earn additional $KASH through participation
+    - Enhanced voting power with longer locks
+  </Tab>
+  
+  <Tab title="Earning Opportunities">
+    **Ways to Earn $KASH**
+    
+    **AI-Driven Engagement Rewards:**
+    - Variable ratio rewards for frequent predictions using prediction neural behavioral techniques
+    - Near-miss psychological reward techniques to ensure user retention
+    - Re-engagement bonuses for at-risk users to prevent churn
+    - Performance-based multipliers for successful predictions
+    
+    **Community Growth:**
+    - Create viral content and earn tokens through AI-tracked engagement
+    - Multi-level referral rewards for bringing new users
+    - Community competition prizes and leaderboard rewards
+    
+    **Platform Participation:**
+    - Market creation rewards for successful markets
+    - Prediction accuracy bonuses for consistent performance
+    - Liquidity provision yields and LP rewards
+    - Validator staking rewards for running market validation
+    
+    **Social Media Promotion:**
+    - Earn for sharing markets and driving engagement
+    - KOL incentives and paid promotions through tokens
+    - Viral content creation bonuses tracked by AI
+    - Community building incentives for ecosystem growth
+  </Tab>
+  
+  <Tab title="Staking Benefits">
+    **Lock Periods and Rewards**
+    
+    | Lock Duration | Governance Weight | Additional Benefits |
+    |---------------|-------------------|-------------------|
+    | 30 days | 1.2x multiplier | Basic governance rights |
+    | 90 days | 1.5x multiplier | Priority support access |
+    | 180 days | 2.0x multiplier | Beta feature access |
+    | 365 days | 3.0x multiplier | Maximum governance weight |
+    
+    **Staking Rewards:**
+    - APY based on platform performance
+    - Governance participation bonuses
+    - Compound staking options
+    - Early access to new features
+    
+    **Governance Participation:**
+    - Minimum 1,000 $KASH for basic voting
+    - 10,000 $KASH for proposal submission
+    - 100,000 $KASH for major protocol changes
+    - Bonus APY for active voters
+  </Tab>
+</Tabs>
+
+---
+
+# Token Buyback Mechanism
+
+<AccordionGroup>
+  <Accordion title="Automated Buyback System">
+    **Monthly Treasury Operations**
+    
+    **Revenue Sources:**
+    - **2% Trading Fees:** Primary revenue from all prediction market trades
+    - **Aave Lending Yield:** Interest earned on idle USDC deposits in treasury
+    - **Auto Swap Revenue:** Small spread capture from 0x protocol token conversions
+    - **MEV Capture:** Revenue from transaction optimization and private mempool routing
+    - **Strategic Partnerships:** Revenue sharing from ecosystem integrations
+    
+    **Monthly Buyback Process:**
+    1. Treasury accumulates USDC from platform fees
+    2. Smart contract calculates optimal buyback amount
+    3. Automated purchase from USDC/KASH liquidity pool
+    4. Bought tokens distributed for community incentives
+    
+    **Smart Buyback Formula:**
+    ```
+    Bₘ = min((0.005 × S / V̄) × Vₘᵉᵐᵃ, 0.01 × S)
+    
+    Where:
+    - Vₘᵉᵐᵃ = γVₘ + (1-γ)Vₘ₋₁ᵉᵐᵃ (exponential moving average)
+    - γ = 0.3 (smoothing factor, variable based on market metrics)
+    - V̄ = 1/12 × Σ(Vₘ₋ᵢᵉᵐᵃ) for i=1 to 12 (12-month average)
+    - S = total supply of $KASH tokens
+    ```
+    
+    **Buyback Constraints:**
+    - Maximum 1% of supply bought back per month
+    - Targets ~0.5% of supply in liquidity pool (similar to Sky/MakerDAO)
+    - Formula engineered to yield around 0.5% buyback rate
+    - Creates consistent buying pressure from protocol success
+  </Accordion>
+  
+  <Accordion title="Treasury Architecture">
+    **Professional Asset Management**
+    
+    **Treasury Flow Diagram:**
+    ```mermaid
+    graph TD
+        A["Platform Fees (2%)"] --> B["Treasury Core Module"]
+        B --> C["Asset Manager Module"]
+        C --> D["Aave (Yield)"]
+        D --> E["Yield Returns"]
+        E --> B
+        B --> F["Smart Burn Module"]
+        F --> G["Monthly $KASH Buybacks"]
+        G --> H["Community Rewards Module"]
+        B --> I["Bond Depository Module"]
+        B --> J["Risk Fund Module"]
+        
+        style A fill:#e1f5fe
+        style B fill:#fff3e0
+        style F fill:#f3e5f5
+        style G fill:#e8f5e8
+        style H fill:#fff8e1
+    ```
+    
+    **Module Interactions:**
+    - **Treasury Core Module:** Central hub storing all USDC, $KASH, LP tokens, and sub-fund balances
+    - **Asset Manager Module:** Automatically deploys idle USDC to Aave for yield generation
+    - **Smart Burn Module:** Calculates and executes monthly $KASH buybacks from accumulated fees
+    - **Bond Depository Module:** Enables LPs to buy $KASH at discount for fast liquidity bootstrapping
+    - **Risk Fund Module:** Maintains reserves for bug bounties and insurance coverage
+    - **Community Rewards Module:** Distributes bought-back tokens as staking rewards and incentives
+    
+    **Operational Flow:**
+    1. **Fee Collection:** 2% trading fees accumulate in Treasury Core
+    2. **Yield Generation:** Idle USDC automatically deployed to Aave for interest
+    3. **Monthly Buyback:** Smart contract calculates optimal $KASH purchase amount
+    4. **Token Distribution:** Bought tokens distributed to stakers and community programs
+    5. **Risk Management:** Portion allocated to risk fund for platform security
+    
+    **Governance Controls:**
+    - **Parameter Adjustment:** Community can modify buyback formulas and allocation percentages
+    - **Yield Strategy:** Governance approves new yield protocols and risk parameters
+    - **Emergency Powers:** Multi-sig can pause operations in extreme circumstances
+    - **Transparency:** All treasury operations publicly auditable on-chain
+  </Accordion>
+  
+  <Accordion title="Revenue Generation from Lending and Swaps">
+    **Maximizing Treasury Efficiency**
+    
+    **Aave Integration for Yield:**
+    - **Idle USDC Deployment:** Treasury automatically deposits unused USDC into Aave
+    - **Conservative Risk Profile:** Only blue-chip lending protocols with proven track records
+    - **Yield Optimization:** Smart contract monitors rates and rebalances for optimal returns
+    - **Liquidity Management:** Maintains sufficient liquid reserves for platform operations
+    
+    **Auto Swap Revenue Model:**
+    - **0x Protocol Integration:** Users can predict with any ERC-20 token (ETH, WETH, DAI, etc.)
+    - **Automatic Conversion:** Tokens instantly swapped to USDC for predicting
+    - **Spread Capture:** Small percentage of swap spread retained by treasury
+    - **Gas Optimization:** Batch swaps reduce overall transaction costs
+    
+    **Revenue Distribution:**
+    ```
+    Example Monthly Revenue Breakdown:
+    - Trading Fees (2%): $45,000 (primary source)
+    - Aave Lending Yield: $3,200 (on $2M treasury)
+    - Auto Swap Spreads: $1,800 (from token conversions)
+    - MEV Capture: $2,000 (from large trade protection)
+    Total: $52,000 → $KASH Buybacks
+    ```
+    
+    **Risk Management:**
+    - **Diversified Yield Sources:** Multiple revenue streams reduce dependency
+    - **Conservative Allocation:** Maximum 70% of treasury in yield protocols
+    - **Emergency Withdrawal:** Instant liquidity access for platform needs
+    - **Regular Audits:** Quarterly reviews of yield strategy performance
+  </Accordion>
+  
+  <Accordion title="Economic Alignment">
+    **Sustainable Protocol Economics**
+    
+    **Revenue Model:**
+    - 2% fee on all trading volume
+    - Variable interest on USDC deposits
+    - No entity profits - all goes to community
+    - Transparent fee distribution
+    
+    **Community Benefits:**
+    - Monthly buybacks create demand
+    - Community rewards drive engagement
+    - Staking yields incentivize holding
+    - Governance participation increases utility
+    
+    **Growth Mechanics:**
+    - Higher trading volume → larger buybacks
+    - Better rewards → more engagement → network effects
+    - Platform success directly benefits token holders
+    - Community ownership drives innovation
+    
+    **Risk Management:**
+    - Maximum 1% monthly buyback limit
+    - Controlled token release schedules
+    - Emergency pause mechanisms
+    - Community governance oversight
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+$KASH tokenomics prioritize community ownership and sustainable growth. The combination of automated buybacks, utility-driven demand, and governance participation creates a robust economic model where platform success directly benefits all token holders.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Start Earning"
+    icon="coins"
+    href="/pages/getting-started/ecosystem/incentives-and-rewards"
+  >
+    Discover reward opportunities
+  </Card>
+  <Card
+    title="Governance"
+    icon="landmark"
+    href="/pages/getting-started/ecosystem/governance"
+  >
+    Participate in decisions
+  </Card>
+</CardGroup>

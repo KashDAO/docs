@@ -1,0 +1,198 @@
+---
+title: 'Withdrawing'
+description: 'How to withdraw your winnings and funds'
+icon: 'arrow-left'
+---
+
+<Note>
+Your funds, your control - withdraw winnings and deposits anytime with instant processing.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Withdrawal Overview
+
+## What You Can Withdraw
+- **USDC** - Primary currency for all withdrawals
+- **Winnings** - Instantly available after market resolution
+- **Original deposits** - No lock-up periods
+- **$KASH token rewards** - Auto-converted to USDC
+
+## Processing & Fees
+<AccordionGroup>
+  <Accordion title="Processing Time">
+    - **Instant execution** - No manual approval needed
+    - **Network confirmation** - 1-2 minutes on Base
+    - **24/7 availability** - Withdraw anytime
+    - **No waiting periods** - Funds immediately accessible
+  </Accordion>
+  <Accordion title="Fee Structure">
+    - **No withdrawal fees** - Only 2% fee on trades applies
+    - **Gas fees covered** - Kash sponsors all network fees
+    - **No hidden charges** - Fees clearly displayed upfront
+    - **Auto-conversion included** - No extra fees for token swaps
+  </Accordion>
+  <Accordion title="Security Features">
+    - **You control the destination** - Send to any Base address
+    - **Non-custodial** - Kash never holds your funds
+    - **Instant settlement** - No intermediary delays
+    - **Transparent on-chain** - All transactions verifiable
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+**Before every withdrawal:**
+- **Double-check destination addresses** - No undo button exists
+- **Confirm Base network** - Wrong network = lost funds
+- **Start with small test amounts** - Verify process works
+- **Save verified addresses** - For future use
+- **Keep transaction records** - For tax and tracking purposes
+
+
+# Withdrawal Methods
+
+<Tabs>
+  <Tab title="X (Twitter) DM">
+    **Withdraw directly through messaging @kash_bot**
+    
+    <Steps>
+      <Step title="Send withdrawal request">
+        - Message @kash_bot: "withdraw [amount]" 
+        - Or use: "withdraw all" for full balance
+        - Specify amount in USDC (e.g., "withdraw 500")
+      </Step>
+      <Step title="Provide destination address">
+        - Reply with your external wallet address (Base network)
+        - Must be a valid Base address starting with 0x
+        - Bot will verify address format
+      </Step>
+      <Step title="Confirm the transaction">
+        - Review amount, address, and fees
+        - Reply "yes" to confirm withdrawal
+        - Reply "cancel" to abort
+      </Step>
+      <Step title="Receive confirmation">
+        - USDC sent to your address on Base network
+        - Transaction hash provided for tracking
+        - Funds arrive in 1-2 minutes
+      </Step>
+    </Steps>
+
+    **Example conversation:**
+    ```
+    You: "withdraw 500"
+    @kash_bot: "Send 500 USDC to which address? (Base network only)"
+    You: "0x123...abc"
+    @kash_bot: "Confirm: Send 500 USDC to 0x123...abc? (No withdrawal fees)"
+    You: "yes"
+    @kash_bot: "Withdrawal complete! TX: 0xdef...789"
+    ```
+  </Tab>
+  
+  <Tab title="Web Dashboard">
+    **Use the web interface for detailed control**
+    
+    <Steps>
+      <Step title="Access withdrawal page">
+        - Visit kash.bot and sign in
+        - Click "Withdraw" or "Send Funds"
+        - View current balance
+      </Step>
+      <Step title="Enter withdrawal details">
+        - Select amount or click "Max"
+        - Enter destination address (Base network)
+        - Review fees and net amount
+      </Step>
+      <Step title="Confirm and execute">
+        - Double-check all details
+        - Click "Confirm Withdrawal"
+        - Sign transaction if prompted
+      </Step>
+      <Step title="Track transaction">
+        - View transaction status
+        - Get transaction hash for tracking
+        - Receive email confirmation
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="To Exchanges">
+    **Withdraw directly to centralized exchanges**
+    
+    <Steps>
+      <Step title="Get exchange deposit address">
+        - Log into your CEX account
+        - Navigate to USDC deposits
+        - **Important:** Select Base network
+        - Copy the deposit address
+      </Step>
+      <Step title="Withdraw from Kash">
+        - Use either DM or web method above
+        - Paste exchange address as destination
+        - Verify it's the correct Base address
+      </Step>
+      <Step title="Confirm arrival">
+        - USDC appears in exchange account
+        - Usually takes 2-5 minutes
+        - Available for trading immediately
+      </Step>
+    </Steps>
+    
+    **Supported exchanges with Base:**
+    - Coinbase / Coinbase Pro
+    - Binance
+    - Kraken
+    - OKX
+    - Most major centralized exchanges
+  </Tab>
+</Tabs>
+
+---
+
+# After Withdrawal
+
+## Confirmation Signs
+**Your withdrawal was successful when you see:**
+- **Transaction hash provided** by @kash_bot or dashboard
+- **Blockchain confirmation** (usually within 2 minutes)
+- **Funds appear in destination** wallet or exchange
+- **Kash balance updated** to reflect withdrawal
+
+## Troubleshooting
+If your withdrawal doesn't arrive:
+1. **Check the transaction hash** on Base block explorer
+2. **Verify correct network** - ensure destination supports Base
+3. **Contact support** - DM @kash_bot with transaction details
+4. **Allow extra time** - some exchanges may take longer to credit
+
+<Tip>
+Your funds are always yours. Kash provides the prediction platform, but you maintain complete control over deposits and withdrawals!
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Winning & Payouts"
+    icon="trophy-star"
+    href="/pages/getting-started/guides/winning"
+  >
+    Understand winnings and payouts
+  </Card>
+  <Card
+    title="Depositing Funds"
+    icon="arrow-right"
+    href="/pages/getting-started/guides/depositing"
+  >
+    Fund your wallet to start predicting
+  </Card>
+</CardGroup>

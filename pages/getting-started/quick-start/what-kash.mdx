@@ -1,0 +1,306 @@
+---
+title: What is Kash?
+description: "An AI-Powered Decentralized Prediction Markets Protocol on Base, Fully Embedded into Social Media"
+icon: "question"
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# An AI-Powered Decentralized Prediction Markets Protocol
+
+Kash is a cutting-edge decentralized prediction markets platform that enables **anyone to create and trade on outcome markets directly from X (Twitter) posts**. Built on Base (Coinbase's Ethereum Layer-2 network), Kash uses blockchain technology, AI agents, and zero-knowledge cryptography to create a seamless social prediction experience.
+
+Unlike traditional prediction markets where only platforms can create markets through approval processes, Kash enables **permissionless market creation** - anyone can create markets instantly without gatekeepers or restrictions.
+
+---
+
+# What Makes Kash Different
+
+<AccordionGroup>
+  <Accordion title="AI-Powered Market Creation, Validation & Resolution">
+    **5 Specialized AI Personas** continuously monitor social media trends and automatically create relevant prediction markets:
+    - **Crypto-Degen Agent:** Token listings, ETF approvals, DeFi milestones
+    - **Sports Agent:** Match outcomes, player performance, championship winners
+    - **Tech Agent:** Product launches, AI breakthroughs, earnings results
+    - **Macro Agent:** Interest rate decisions, economic indicators, elections
+    - **Pop-Culture Agent:** Award shows, album drops, celebrity drama
+    
+    Markets appear instantly when events become trending, ensuring you never miss an opportunity.
+  </Accordion>
+  
+  <Accordion title="Social Media Native">
+    **Predict directly from X without leaving your feed:**
+    - Reply to market posts with "YES \$50" or "NO \$100"
+    - Interact with @kash_bot using natural language
+    - Markets appear in trending social discussions
+    - Turn any conversation into a prediction market
+    
+    No complex interfaces or separate apps required.
+  </Accordion>
+  
+  <Accordion title="Truly Trustless">
+    **Mathematical guarantees, not trust:**
+    - **zkTLS + Zero-Knowledge ML:** Cryptographic proof of correct outcomes
+    - **Non-custodial wallets:** You always control your funds
+    - **Automated resolution:** No human bias or manipulation
+    - **Publicly verifiable:** Anyone can verify resolution correctness
+    
+    Outcomes are proven mathematically, not decided by committees.
+  </Accordion>
+  
+  <Accordion title="Gasless Experience">
+    **Seamless onboarding and trading:**
+    - 2-click account creation via X login
+    - Gas fees sponsored by the protocol
+    - Automatic token swaps (use any crypto)
+    - No seed phrases or browser extensions needed
+    
+    Feels like using a traditional app, powered by blockchain.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+# How Kash Works
+
+<Steps>
+  <Step title="Event Detection & Signal Processing">
+    **AI Personas Monitor Trending Topics**
+    
+    **How the 5 AI Agents Work Together:**
+    - **Crypto-Degen Agent:** Monitors DeFi protocols, token launches, regulatory news, and crypto Twitter influencers
+    - **Sports Agent:** Tracks game schedules, player news, injury reports, and prediction market movements
+    - **Tech Agent:** Follows product launches, earnings calendars, patent filings, and tech industry announcements
+    - **Macro Agent:** Watches economic indicators, Fed meetings, election polls, and geopolitical events
+    - **Pop-Culture Agent:** Scans entertainment news, award shows, celebrity social media, and viral trends
+    
+    **Collaborative Intelligence:**
+    Each agent scores potential markets in their specialty, then a coordinator combines scores to identify the highest-potential opportunities. This prevents any single agent from flooding the system and ensures diverse, high-quality market creation across all interest areas.
+    
+    **Signal Processing:**
+    - **Real-time monitoring** of X, Reddit, news feeds, and existing prediction markets
+    - **Prediction-Neural Behavioral Score** based on engagement, uncertainty, and viral potential
+    - **Cross-validation** between agents prevents duplicate or low-quality markets
+    - **User requests** can also trigger market creation via @kash_bot interactions
+  </Step>
+  
+  <Step title="Market Creation">
+    **Automated Market Deployment**
+    - **AI-Generated Markets:** Validated trending events automatically become binary prediction markets
+    - **User-Proposed Markets:** @kash_bot processes custom market requests from social media interactions
+    - **Market Parameters:** Question, resolution criteria, trusted data sources, and 30-day maximum deadline are set
+    - **Smart Contract Deployment:** New prediction market contracts deployed on Base blockchain
+  </Step>
+  
+  <Step title="Market Validation">
+    **Quality Control & Verification**
+    - **Mira Network Validation:** Decentralized validators ensure markets are verifiable, binary, and have reliable sources
+    - **Content Safety:** AI checks prevent prohibited topics (death, harm, manipulation)
+    - **Resolution Clarity:** Verification that outcomes can be determined objectively from specified sources
+    - **Duplicate Prevention:** System prevents creation of identical or overlapping markets
+  </Step>
+  
+  <Step title="Instant Liquidity Bootstrap">
+    **Automated Market Making**
+    - **Passive LP Vault:** ERC-4626 vault automatically deploys USDC liquidity to new markets
+    - **Uniswap v4 Integration:** Concentrated liquidity positioned around current market probability
+    - **No Cold Start Problem:** Every market launches with professional-grade liquidity and minimal slippage
+    - **Continuous Rebalancing:** Smart contract hooks automatically adjust liquidity as prices change
+  </Step>
+  
+  <Step title="Trade Execution & Price Discovery">
+    **Social Trading Begins**
+    - **Natural Language Prediction:** Users place predictions by replying "YES \$50" or "NO \$100" to market posts
+    - **Automatic Token Conversion:** 0x aggregation swaps ETH, WETH, or DAI to USDC seamlessly
+    - **Gas Sponsorship:** ERC-4337 paymaster covers all transaction fees for users
+    - **Real-Time Pricing:** Constant Product AMM adjusts prices with each trade based on supply and demand
+    - **MEV Protection:** Large trades protected via private mempools and off-chain RFQ systems
+  </Step>
+  
+  <Step title="Market Resolution">
+    **Trustless Outcome Determination**
+    - **Trading Closure:** Market automatically closes at predetermined deadline
+    - **Data Fetching:** ElizaOS resolution agent fetches outcome data from pre-specified trusted sources
+    - **zkTLS Verification:** Reclaim Protocol generates cryptographic proof that data came from authentic website
+    - **AI Analysis:** EZKL zero-knowledge ML proves the AI model correctly determined YES/NO outcome
+    - **Combined Proof:** Both proofs merged into single zk-SNARK submitted to resolution contract
+  </Step>
+  
+  <Step title="Automatic Settlement">
+    **Instant Payout Distribution**
+    - **Proof Verification:** Smart contract verifies the zero-knowledge proof on-chain
+    - **Winner Determination:** Contract automatically determines winning outcome based on verified proof
+    - **Instant Payout:** Winners receive $1.00 per winning share immediately
+    - **Fund Distribution:** Losers receive nothing, funds instantly available in winner wallets
+    - **Dispute Fallback:** Rare edge cases can be challenged through community governance with $KASH token voting
+  </Step>
+</Steps>
+
+---
+
+# Market Mechanics
+
+<Tabs>
+  <Tab title="How Pricing Works">
+    **Probability-Based Pricing**
+    
+    Market prices directly reflect outcome probabilities:
+    - **YES at $0.70** = 70% implied probability
+    - **NO at $0.30** = 30% implied probability
+    - **Always sums to $1.00** for complete market
+    - **Prices adjust** with each trade based on supply and demand
+    
+    **Example:**
+    ```
+    Market: "Will Bitcoin reach $100k by March 1st?"
+    YES: $0.65 (65% chance)
+    NO: $0.35 (35% chance)
+    ```
+  </Tab>
+  
+  <Tab title="Binary Outcomes">
+    **Simple YES/NO Structure**
+    
+    Every Kash market has exactly two outcomes:
+    - **YES:** The event will happen as stated
+    - **NO:** The event will not happen as stated
+    - **Clear resolution criteria** specified at market creation
+    - **Verifiable sources** predetermined for outcome verification
+    
+    **Market Examples:**
+    - "Will the Lakers win tonight's game?"
+    - "Will Apple announce a new iPhone model this month?"
+    - "Will the Fed raise rates at the next meeting?"
+  </Tab>
+  
+  <Tab title="Payouts & Fees">
+    **Winner-Take-All System**
+    
+    **Winning Scenario:**
+    - Correct outcome shares pay **$1.00 each**
+    - Incorrect outcome shares pay **$0.00**
+    - **2% platform fee** on all trades
+    - **Instant settlement** upon market resolution
+    
+    **Example Calculation:**
+    ```
+    Your prediction: 100 YES shares at $0.60 = $60 cost
+    Platform fee: $60 × 2% = $1.20
+    Total cost: $61.20
+    If YES wins: 100 shares × $1.00 = $100 payout
+    Net profit: $100 - $61.20 = $38.80 (63% return)
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+# Core Technology Stack
+
+<AccordionGroup>
+  <Accordion title="Blockchain Infrastructure">
+    **Built on Base for Performance**
+    
+    - **Base Network:** Coinbase's Ethereum Layer-2 for fast, low-cost transactions
+    - **Smart Contracts:** CPAMM (Constant Product Automated Market Maker) for liquidity
+    - **Account Abstraction:** ERC-4337 standard for gasless user experience
+    - **MPC Wallets:** Privy technology for non-custodial key management
+    - **0x Integration:** Automatic token swaps for seamless prediction
+  </Accordion>
+  
+  <Accordion title="AI-Powered Operations">
+    **Intelligent Market Management**
+    
+    - **Social Signal Processing:** Real-time analysis of trending topics across platforms
+    - **Market Creation Engine:** Automated binary market generation with quality control
+    - **Natural Language Processing:** Understands prediction commands in conversation
+    - **Resolution System:** Cryptographic proof verification of outcomes
+    - **Risk Management:** AI-driven fraud detection and prevention
+  </Accordion>
+
+  <Accordion title="Zero-Knowledge Proof System">
+    **Trustless Resolution Technology**
+    
+    - **Reclaim Protocol zkTLS:** Proves data fetched from websites is authentic
+    - **EZKL Zero-Knowledge ML:** Proves AI models make correct decisions on verified data
+    - **Combined zk-SNARK proofs:** Mathematical guarantee of resolution correctness
+    - **Privacy-preserving:** Proves correctness without revealing unnecessary data
+    - **Publicly auditable:** Anyone can verify resolution was correct
+  </Accordion>
+  
+  <Accordion title="Automated Liquidity System">
+    **Instant Market Bootstrap**
+    
+    - **Passive LP Vault:** Users deposit USDC for automated market making
+    - **Principal Protection:** Original USDC amount guaranteed regardless of outcome
+    - **Uniswap v4 Integration:** Concentrated liquidity for maximum capital efficiency
+    - **Smart Rebalancing:** Automatic position adjustments as prices change
+    - **Target 6% APY:** From trading fees + protocol rewards + external yield
+  </Accordion>
+</AccordionGroup>
+
+---
+
+# What Makes This Revolutionary
+
+Kash represents a fundamental shift in how prediction markets operate.
+
+**Revolutionary Aspects:**
+
+- **Permissionless Market Creation:** Anyone can create markets instantly. No centralized processes or human gatekeepers
+- **Zero Learning Curve:** Predict using natural conversation on familiar social media
+- **Truly Decentralized:** No human control over market resolution or fund custody
+- **Real-Time Creation:** Markets appear instantly when events become trending
+- **Social Discovery:** Organic sharing and discovery replace traditional marketing
+- **Cryptographically Secure:** Mathematical proofs ensure fair and tamper-proof outcomes
+- **Automatic Liquidity:** Every market launches with guaranteed liquidity
+
+**Key Benefits:**
+
+- **For Traders:** Access to trending markets the moment they become relevant
+- **For Creators:** Earn rewards for successful market creation and promotion
+- **For Everyone:** Participate in collective intelligence gathering with skin in the game
+
+<Tip>
+Kash transforms prediction markets from complex financial instruments into natural social conversations with real stakes.
+</Tip>
+
+---
+
+# Economic Model
+
+- **Platform Fee**: 2% on all trades
+- **Monthly Buybacks**: Treasury uses fee revenue for $KASH token buybacks
+- **Market Resolution**: Automated resolution within 30-day maximum timeframes
+- **Leveraged Prediction**: Available for qualified users
+- **Creator Rewards**: Earn $KASH tokens for successful market creation
+
+---
+
+<CardGroup cols={2}>
+  <Card
+    title="Create an Account"
+    icon="user-plus"
+    href="/pages/getting-started/guides/creating-an-account"
+  >
+    Get started with Kash in 2 clicks
+  </Card>
+  <Card
+    title="How to Use Kash"
+    icon="compass"
+    href="/pages/getting-started/quick-start/how-kash"
+  >
+    Learn the complete user process
+  </Card>
+</CardGroup>

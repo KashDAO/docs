@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+body {
+    font-family: 'Baloo 2', sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Baloo 2', sans-serif !important;
+}
+
+#sidebar a {
+    transition: color 0.2s ease;
+}
+
+#sidebar a:hover svg {
+    transition: background-color 0.2s ease;
+}
+
+#sidebar a:hover {
+    color: #FBD109 !important;
+    border-color: #FBD109 !important;
+}
+
+#sidebar a:hover svg {
+    background-color: #FBD109 !important;
+}
+
+.dark #sidebar a:hover {
+    color: #FBD109 !important;
+}
+
+.dark #sidebar a:hover svg {
+    background-color: #FBD109 !important;
+}
+
+#sidebar a[aria-current="page"] {
+    color: #FBD109 !important;
+    font-weight: 500;
+}
+
+#sidebar a[aria-current="page"] svg {
+    background-color: #FBD109 !important;
+}
+
+@media (max-width: 1024px) {
+
+    #navigation-items a:hover svg {
+        transition: color 0.2s ease;
+        transition: background-color 0.2s ease;
+    }
+
+    #navigation-items a {
+        transition: color 0.2s ease;
+        transition: background-color 0.2s ease;
+    }
+
+    #navigation-items a div {
+        transition: color 0.2s ease;
+        transition: background-color 0.2s ease;
+    }
+
+    #sidebar a:hover,
+    .sidebar a:hover {
+        background-color: #FBD109 !important;
+        color: #000000 !important;
+    }
+
+    #sidebar-group a:hover {
+        background-color: #FBD109 !important;
+        color: #000000 !important;
+    }
+
+    #sidebar a:hover,
+    .sidebar a:hover svg {
+        background-color: #000000 !important;
+        color: #000000 !important;
+    }
+
+    #sidebar-group a:hover svg {
+        background-color: #000000 !important;
+        color: #000000 !important;
+    }
+}
+
+.step .size-7.rounded-full {
+    background-color: #FBD109 !important;
+    color: white !important;
+}
+
+.dark .step .size-7.rounded-full {
+    color: #000000 !important;
+}
+
+.accordion button:hover {
+    background-color: #FBD109 !important;
+}
+
+.dark .accordion button:hover p {
+    color: #000000 !important;
+}
+
+.dark .accordion button:hover svg {
+    background-color: #000000 !important;
+}
+
+.accordion summary:hover {
+    background-color: #FBD109 !important;
+}
+
+.dark .accordion summary:hover p {
+    color: #000000 !important;
+}
+
+.dark .accordion summary:hover svg {
+    background-color: #000000 !important;
+}
+
+.cursor-pointer button:hover {
+    border-color: #FBD109 !important;
+}
+
+#pagination a:hover span {
+    color: #FBD109 !important;
+}
+
+footer a:hover {
+    color: #FBD109 !important;
+}
+
+footer a:hover svg {
+    background-color: #FBD109 !important;
+}
+
+#navbar-transition-willow .nav-tabs a:hover div {
+    background-color: #FBD109 !important;
+}
+
+#navbar-transition-willow #topbar-cta-button:hover span {
+    color: #FBD109 !important;
+}
+
+#navbar-transition-willow button:hover svg {
+    color: #FBD109 !important;
+}
+
+#table-of-contents-content a:hover {
+    color: #FBD109 !important;
+}
+
+#search-bar-entry:hover {
+    color: #FBD109 !important;
+}
+
+#search-bar-entry:hover svg {
+    color: #FBD109 !important;
+}
+
+#assistant-entry:hover svg {
+    color: #FBD109 !important;
+}
+
+#search-bar-entry-mobile:hover svg {
+    background-color: #FBD109 !important;
+}
+
+#assistant-entry-mobile:hover svg {
+    color: #FBD109 !important;
+}
+
+.h-7.w-5.flex.items-center.justify-end:hover svg {
+    background-color: #FBD109 !important;
+}
+
+.flex.items-center.h-14.py-4.px-5:hover div svg {
+    color: #FBD109 !important;
+}
+
+.chat-assistant-sheet-header div button:hover svg {
+    color: #FBD109 !important;
+}

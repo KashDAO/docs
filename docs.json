@@ -1,0 +1,171 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "willow",
+  "name": "Kash",
+  "description": "Bringing prediction marketplaces to your feed.",
+  "colors": {
+    "primary": "#FBD109",
+    "light": "#FBD109",
+    "dark": "#FBD109"
+  },
+  "favicon": "/assets/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Quick Start",
+            "pages": [
+              "pages/getting-started/quick-start/what-kash",
+              "pages/getting-started/quick-start/where-kash",
+              "pages/getting-started/quick-start/when-kash",
+              "pages/getting-started/quick-start/who-kash",
+              "pages/getting-started/quick-start/why-kash",
+              "pages/getting-started/quick-start/how-kash"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "pages/getting-started/guides/creating-an-account",
+              "pages/getting-started/guides/depositing",
+              "pages/getting-started/guides/withdrawing",
+              "pages/getting-started/guides/predicting",
+              "pages/getting-started/guides/winning",
+              "pages/getting-started/guides/finding-opportunities",
+              "pages/getting-started/guides/creating-opportunities"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "pages/getting-started/features/market-mechanics",
+              "pages/getting-started/features/trading-options",
+              "pages/getting-started/features/natural-language",
+              "pages/getting-started/features/social"
+            ]
+          },
+          {
+            "group": "Ecosystem",
+            "pages": [
+              "pages/getting-started/ecosystem/socials",
+              "pages/getting-started/ecosystem/tokenomics",
+              "pages/getting-started/ecosystem/governance",
+              "pages/getting-started/ecosystem/incentives-and-rewards",
+              "pages/getting-started/ecosystem/competitions-and-tournaments",
+              "pages/getting-started/ecosystem/bug-bounty-program"
+            ]
+          },
+          {
+            "group": "FAQs",
+            "pages": [
+              "pages/getting-started/faqs/account",
+              "pages/getting-started/faqs/security",
+              "pages/getting-started/faqs/settings",
+              "pages/getting-started/faqs/wallet-and-funds",
+              "pages/getting-started/faqs/transactions",
+              "pages/getting-started/faqs/troubleshooting",
+              "pages/getting-started/faqs/support",
+              "pages/getting-started/faqs/legal"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer Docs",
+        "groups": [
+          {
+            "group": "API Documentation",
+            "pages": [
+              "pages/developer-docs/introduction"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Home",
+          "href": "https://kash.bot",
+          "icon": "house",
+          "color": {
+            "light": "#FBD109",
+            "dark": "#FBD109"
+          }
+        },
+        {
+          "anchor": "Community",
+          "href": "https://discord.gg/uD3Vs8d6",
+          "icon": "discord",
+          "color": {
+            "light": "#FBD109",
+            "dark": "#FBD109"
+          }
+        },
+        {
+          "anchor": "Socials",
+          "href": "https://x.com/kash_bot",
+          "icon": "x-twitter",
+          "color": {
+            "light": "#FBD109",
+            "dark": "#FBD109"
+          }
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/assets/cover/round-logo.svg",
+    "dark": "/assets/cover/round-logo.svg"
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "thumbnails": {
+    "appearance": "light",
+    "background": "/assets/thumbnail/thumbnail.png"
+  },
+  "seo": {
+    "metatags": {
+      "description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
+      "keywords": "permissionless, prediction, marketplace, prediction market, prediction marketplace, kash, kash bot, kash docs",
+      "author": "Kash",
+      "og:title": "Docs | Kash",
+      "og:description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
+      "og:site_name": "Kash Docs",
+      "og:type": "website",
+      "og:url": "https://docs.kash.bot",
+      "og:locale": "en_US",
+      "og:image": "/assets/thumbnail/thumbnail.png",
+      "twitter:title": "Kash Bot",
+      "twitter:description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
+      "twitter:image:alt": "Kash Bot",
+      "twitter:card": "summary_large_image",
+      "twitter:site": "@kash_bot",
+      "twitter:creator": "@kash_bot",
+      "twitter:image": "/assets/thumbnail/thumbnail.png",
+      "robots": "index, follow"
+    }
+  },
+  "icons": {
+    "library": "fontawesome"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Kash App",
+      "href": "https://kash.bot"
+    }
+  },
+  "footer": {
+    "socials": {
+      "website": "https://kash.bot",
+      "x": "https://x.com/kash_bot",
+      "discord": "https://discord.gg/uD3Vs8d6",
+      "github": "https://github.com/KashDAO",
+      "telegram": "https://t.me/kashDAO"
+    }
+  }
+}

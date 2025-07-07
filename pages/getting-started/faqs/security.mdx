@@ -1,0 +1,453 @@
+---
+title: 'Security'
+description: 'Common questions about platform and account security'
+icon: 'shield'
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Platform Security Architecture
+
+<AccordionGroup>
+  <Accordion title="How secure is the Kash platform?">
+    **Multi-Layered Security Approach**
+    
+    **Core Security Features:**
+    - **Non-custodial wallets:** You maintain full control of your funds
+    - **MPC Technology:** Multi-Party Computation splits private keys for enhanced security
+    - **Base Network:** Built on Coinbase's secure Layer 2 blockchain
+    - **Smart Contract Audits:** Regular security audits by leading firms
+    
+    **Technical Security:**
+    - **ERC-4337 Account Abstraction:** Advanced wallet security and recovery
+    - **Privy Integration:** Enterprise-grade wallet infrastructure
+    - **zkTLS + EZKL:** Zero-knowledge proofs for trustless market resolution
+    - **ElizaOS Framework:** Secure AI processing and natural language understanding
+    
+    **Operational Security:**
+    - Real-time fraud detection and monitoring
+    - Automated anomaly detection systems
+    - Community-driven security oversight
+    - Bug bounty program with security researchers
+    
+    **Open Source Transparency:**
+    - Open source development for community review
+    - Transparent security practices and reporting
+    - Public audit reports and findings
+    - Community participation in security improvements
+  </Accordion>
+  
+  <Accordion title="What is MPC wallet technology?">
+    **Multi-Party Computation Explained**
+    
+    **How MPC Works:**
+    - Your private key is split into multiple parts
+    - No single party can access your funds
+    - Transactions require cryptographic cooperation
+    - Enhanced security without seed phrase management
+    
+    **Benefits Over Traditional Wallets:**
+    - **No Seed Phrases:** No complex backup requirements
+    - **Social Recovery:** Account recovery through X authentication
+    - **Enhanced Security:** Distributed key management
+    - **User Friendly:** Simplified user experience
+    
+    **Security Advantages:**
+    - Private keys never exist in complete form
+    - Protection against single points of failure
+    - Resistance to key theft and compromise
+    - Advanced cryptographic security protocols
+    
+    **Recovery Process:**
+    - Recovery through verified X account access
+    - Automated key reconstruction process
+    - No manual intervention required
+    - Dependent on X account security
+  </Accordion>
+  
+  <Accordion title="How does Base network security work?">
+    **Layer 2 Blockchain Security**
+    
+    **Base Network Features:**
+    - **Ethereum Security:** Inherits Ethereum mainnet security
+    - **Coinbase Backing:** Supported by major cryptocurrency exchange
+    - **Low Fees:** Cost-effective transactions
+    - **Fast Finality:** Quick transaction confirmation
+    
+    **Security Benefits:**
+    - **Decentralized Validation:** Multiple validators secure the network
+    - **Immutable Transactions:** Blockchain permanence and transparency
+    - **Smart Contract Security:** Audited and verified contract code
+    - **Network Monitoring:** Real-time security monitoring
+    
+    **Transaction Security:**
+    - All transactions are cryptographically signed
+    - Public verification of all market activities
+    - Transparent on-chain record keeping
+    - Protection against double-spending and fraud
+    
+    **Network Reliability:**
+    - High uptime and availability
+    - Redundant infrastructure and failover systems
+    - Regular network upgrades and improvements
+    - Community governance and oversight
+  </Accordion>
+</AccordionGroup>
+
+# Account Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="How do I secure my Kash account?">
+    **Comprehensive Security Checklist**
+    
+    **X Account Security (Critical):**
+    - **Enable 2FA:** Use authenticator app or SMS verification
+    - **Strong Password:** Use unique, complex password for X
+    - **Monitor Sessions:** Regularly check active login sessions
+    - **Verify Emails:** Be cautious of phishing emails claiming to be from X
+    
+    **Kash-Specific Security:**
+    - **Verify Bot:** Only interact with verified @kash_bot account
+    - **Check URLs:** Always verify kash.bot domain before login
+    - **Monitor Notifications:** Review all transaction notifications
+    - **Regular Reviews:** Check account activity and balances regularly
+    
+    **Device and Network Security:**
+    - **Secure Devices:** Use updated, secure devices for access
+    - **Private Networks:** Avoid public WiFi for account access
+    - **Browser Security:** Keep browsers updated and use secure extensions
+    - **Antivirus Software:** Maintain updated security software
+    
+    **Advanced Security Measures:**
+    - Monitor account activity regularly
+    - Use hardware security keys when available
+    - Regularly update all passwords and security settings
+    - Be aware of social engineering attempts
+  </Accordion>
+  
+  <Accordion title="How do session keys and spending limits work?">
+    **Advanced Wallet Security Features**
+    
+    **Session Keys:**
+    - **Temporary Authorization:** Allow @kash_bot to execute small transactions on your behalf
+    - **Limited Scope:** Only for prediction actions, not withdrawals or large transactions
+    - **Time Limits:** Sessions expire automatically after predetermined periods
+    - **Revocable:** You can revoke session access at any time through your X account
+    
+    **Spending Limits:**
+    - **Daily Limits:** Maximum amount that can be predicted per day through automated sessions
+    - **Transaction Limits:** Maximum size per individual prediction without manual approval
+    - **Customizable:** You can adjust limits based on your comfort level
+    - **Override Protection:** Large transactions always require explicit authorization
+    
+    **How It Works:**
+    ```
+    Example: $50 daily limit, $20 per transaction
+    - "YES $15" → Executes automatically via session key
+    - "YES $25" → Requires manual approval due to limit
+    - Total daily predictions > $50 → Manual approval required
+    ```
+    
+    **Security Benefits:**
+    - **Convenience without Risk:** Fast prediction for small amounts, security for large ones
+    - **Granular Control:** You decide exactly what the bot can do automatically
+    - **Audit Trail:** All session activity is logged and reviewable
+    -     **Emergency Revocation:** Instantly disable all automated access if needed
+  </Accordion>
+</AccordionGroup>
+
+# Platform Security Infrastructure
+
+<AccordionGroup>
+  <Accordion title="Multi-Layered Security Architecture">
+    **Comprehensive Security Design**
+    
+    **Wallet Security:**
+    - **MPC technology** for distributed private key management
+    - **Non-custodial design** ensuring users control their funds
+    - **Account abstraction** with ERC-4337 for enhanced security
+    - **Recovery mechanisms** through verified X account access
+    
+    **Smart Contract Security:**
+    - **Professional audits** by leading security firms
+    - **Open source code** for community review and verification
+    - **Formal verification** processes for critical contract functions
+    - **Upgrade mechanisms** with community governance oversight
+    
+    **Zero-Knowledge Circuit Security:**
+    - **Multi-tier audit process** for zkTLS and ZKML circuits
+    - **Independent verification** of circuit logic and constraints
+    - **Formal mathematical proofs** of circuit correctness
+    - **Multi-prover redundancy** for high-stakes market resolution
+    
+    **Network Security:**
+    - **Base blockchain** security inherited from Ethereum
+    - **Decentralized validation** through multiple network validators
+    - **Immutable transactions** with cryptographic verification
+    - **Real-time monitoring** of platform activity and anomalies
+  </Accordion>
+  
+  <Accordion title="Risk Management and Protection">
+    **Comprehensive Risk Mitigation Strategies**
+    
+    **Treasury Security:**
+    - **Risk Fund Module** as part of treasury architecture for security reserves
+    - **Multi-signature controls** for large fund movements
+    - **Emergency protocols** with community governance activation
+    - **Insurance considerations** for smart contract and operational risks
+    
+    **Operational Security:**
+    - **24/7 monitoring** of platform systems and transactions
+    - **Incident response** procedures for security events
+    - **Regular security** assessments and penetration testing
+    - **Staff training** on security best practices and procedures
+    
+    **User Protection:**
+    - **Education programs** on security best practices
+    - **Phishing protection** and user awareness campaigns
+    - **Support systems** for security-related user issues
+    - **Transparent communication** about security updates and incidents
+  </Accordion>
+</AccordionGroup>
+
+# Account Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="What should I do if I suspect unauthorized access?">
+    **Immediate Response Protocol**
+    
+    **Immediate Actions:**
+    1. **Secure X Account:** Change password and enable 2FA immediately
+    2. **Alert Community:** Report security concerns in Discord
+    3. **Review Transactions:** Check recent activity for unauthorized transactions
+    4. **Document Evidence:** Screenshot suspicious activity and messages
+    
+    **Information to Gather:**
+    - X username and account details
+    - Timestamp of suspicious activity
+    - Description of unauthorized actions
+    - Screenshots or evidence of compromise
+    
+    **Community Response:**
+    - Share security concerns with community
+    - Help others identify similar threats
+    - Collaborate on security improvements
+    - Monitor for resolution updates
+    
+    **Prevention Measures:**
+    - Enhanced monitoring of account activity
+    - Improved security practices
+    - Regular security check-ins and updates
+    - Education on security best practices
+  </Accordion>
+  
+  <Accordion title="Can Kash access my funds?">
+    **Non-Custodial Security Model**
+    
+    **Fund Control:**
+    - **You Control:** Only you can authorize transactions
+    - **Non-Custodial:** Kash never holds or controls user funds
+    - **MPC Security:** Private keys distributed and protected
+    - **Smart Contracts:** Automated, transparent fund management
+    
+    **What Kash Can Do:**
+    - Facilitate transactions when you authorize them
+    - Provide wallet infrastructure and security
+    - Process market resolutions and payouts
+    - Offer community support and assistance
+    
+    **What Kash Cannot Do:**
+    - Access or move your funds without authorization
+    - View your private keys or seed phrases
+    - Reverse transactions once confirmed
+    - Freeze or confiscate user funds
+    
+    **Decentralized Nature:**
+    - Community governance for major decisions
+    - Open source code for transparency
+    - Distributed security model
+    - User sovereignty over funds
+  </Accordion>
+</AccordionGroup>
+
+# Common Security Concerns
+
+<AccordionGroup>
+  <Accordion title="How do I identify phishing attempts?">
+    **Recognizing and Avoiding Scams**
+    
+    **Common Phishing Tactics:**
+    - Fake @kash_bot accounts with similar names
+    - Fraudulent emails claiming to be from Kash
+    - Suspicious links requesting account information
+    - Fake customer support contacts
+    
+    **Verification Methods:**
+    - **Official Bot:** Only interact with verified @kash_bot
+    - **Official Domain:** Always use kash.bot (check spelling)
+    - **Official Channels:** Use documented support channels
+    - **No Unsolicited Contact:** Kash won't ask for passwords
+    
+    **Red Flags:**
+    - Requests for passwords or private keys
+    - Urgent demands for immediate action
+    - Suspicious URLs or domains
+    - Poor grammar or spelling in official communications
+    
+    **If You Encounter Phishing:**
+    - Don't click links or provide information
+    - Report suspicious accounts to X and community
+    - Verify through official channels before taking action
+    - Warn community members about identified threats
+  </Accordion>
+  
+  <Accordion title="What happens if I lose my device?">
+    **Device Loss Recovery Process**
+    
+    **Immediate Steps:**
+    1. **Secure X Account:** Change password from another device
+    2. **Enable 2FA:** Add additional security to X account
+    3. **Alert Community:** Notify community of potential security issue
+    4. **Monitor Activity:** Watch for unauthorized transactions
+    
+    **Account Protection:**
+    - MPC technology protects against device-based attacks
+    - Account access requires X authentication
+    - Wallet remains secure even with device compromise
+    - Remote access revocation through X security settings
+    
+    **Recovery Options:**
+    - Access account from new device with X login
+    - Wallet automatically reconnects with authentication
+    - Transaction history and balances preserved
+    - Full functionality restored on new device
+    
+    **Prevention for Future:**
+    - Enable device lock screens and encryption
+    - Use secure cloud backup for important data
+    - Regularly update device security settings
+    - Consider hardware security keys for enhanced protection
+  </Accordion>
+  
+  <Accordion title="How secure are smart contracts?">
+    **Smart Contract Security Assurance**
+    
+    **Security Measures:**
+    - **Professional Audits:** Regular audits by leading security firms
+    - **Open Source:** Code transparency for community review
+    - **Bug Bounty:** Ongoing rewards for security researchers
+    - **Community Review:** Open source development with community oversight
+    
+    **Audit Process:**
+    - Comprehensive code review by multiple firms
+    - Testing against known attack vectors
+    - Economic model analysis and verification
+    - Public audit reports and findings
+    
+    **Continuous Monitoring:**
+    - Real-time transaction monitoring
+    - Automated anomaly detection
+    - Community oversight and reporting
+    - Regular security updates and improvements
+    
+    **Risk Mitigation:**
+    - Conservative approach to protocol changes
+    - Gradual rollout of new features
+    - Community governance for major changes
+    - Emergency procedures for critical issues
+  </Accordion>
+</AccordionGroup>
+
+# Security Resources and Support
+
+<AccordionGroup>
+  <Accordion title="How do I report security issues?">
+    **Security Reporting Process**
+    
+    **Responsible Disclosure:**
+    - **Bug Bounty Program:** Report vulnerabilities through responsible disclosure
+    - **Community Rewards:** Security contributions eligible for $KASH rewards
+    - **Documentation:** Follow security reporting guidelines in bug bounty documentation
+    
+    **Types of Security Issues:**
+    - **Smart Contract Vulnerabilities:** Issues affecting user funds or market integrity
+    - **Platform Security:** Authentication, wallet, or transaction security issues
+    - **AI System Security:** Market resolution or oracle manipulation concerns
+    - **Infrastructure Security:** Network or integration vulnerabilities
+    
+    **Reporting Process:**
+    - **Follow Bug Bounty Guidelines:** Use established responsible disclosure process
+    - **Provide Detailed Information:** Include reproduction steps and impact assessment
+    - **Wait for Response:** Allow time for security team review
+    - **Coordinate Disclosure:** Work with team on appropriate disclosure timing
+    
+    **Community Recognition:**
+    - **Public Acknowledgment:** Security contributors receive community recognition
+    - **$KASH Rewards:** Verified contributions eligible for token rewards
+    - **Collaboration:** Work directly with development team on improvements
+  </Accordion>
+  
+  <Accordion title="What security resources are available?">
+    **Educational and Support Materials**
+    
+    **Documentation:**
+    - Comprehensive security guides and best practices
+    - Technical documentation for developers
+    - Regular security updates and announcements
+    - Community-contributed security resources
+    
+    **Community Resources:**
+    - **Discord Security Channel:** Dedicated security discussions
+    - **Community Education:** Peer-to-peer security learning
+    - **Security Updates:** Regular announcements about security improvements
+    - **Best Practices Sharing:** Community-shared security tips
+    
+    **Development Resources:**
+    - **Open Source Code:** Full transparency for security review
+    - **GitHub Security:** Security-focused development practices
+    - **Audit Reports:** Public security audit results
+    - **Bug Bounty Program:** Structured security research incentives
+    
+    **Monitoring and Alerts:**
+    - **Community Vigilance:** Community-driven security monitoring
+    - **Public Blockchain:** All transactions publicly verifiable
+    - **Real-time Updates:** Immediate notification of security issues
+    - **Collaborative Response:** Community-coordinated security responses
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+Security is a shared responsibility. While Kash provides robust security infrastructure, users must follow best practices to protect their accounts and funds. Never share account credentials or private information.
+</Warning>
+
+<Tip>
+Your security depends primarily on your X account security. The combination of MPC wallet technology, Base network security, and strong X account practices creates multiple layers of protection for your funds.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Account Security"
+    icon="user"
+    href="/pages/getting-started/faqs/account"
+  >
+    Learn about account protection
+  </Card>
+  <Card
+    title="Bug Bounty"
+    icon="bug"
+    href="/pages/getting-started/ecosystem/bug-bounty-program"
+  >
+    Report security issues
+  </Card>
+</CardGroup>

@@ -1,0 +1,269 @@
+---
+title: 'Predicting'
+description: 'How to place make predictions'
+icon: 'crystal-ball'
+---
+
+<Note>
+Turn your insights into returns - making predictions on Kash is as simple as replying to a tweet.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Understanding Market Odds
+
+## How Prediction Markets Work
+Kash uses **binary prediction markets** where prices represent probabilities:
+
+<AccordionGroup>
+  <Accordion title="Price = Probability">
+    - **YES at \$0.72** = 72% chance of event happening
+    - **NO at \$0.28** = 28% chance of event NOT happening
+    - **Always sums to \$1.00** = 100% probability total
+    - **Prices change** as people place predictions and new information emerges
+  </Accordion>
+  <Accordion title="Your Potential Returns">
+    - **Buy YES at \$0.72** - You pay \$0.72 per share
+    - **If YES wins:** You receive \$1.00 per share
+    - **Your profit:** \$0.28 per share (38.9% return)
+    - **If NO wins:** You lose your prediction entirely
+    - **Example:** \$100 prediction → 138.89 shares → \$138.89 if correct
+  </Accordion>
+  <Accordion title="Market Dynamics">
+    - **Early predictions** often get better rates before consensus forms
+    - **Breaking news** can rapidly shift prices
+    - **Large predictions** move rates more than small ones
+    - **Smart money** keeps markets efficient through arbitrage
+    - **Social sentiment** influences prediction patterns
+  </Accordion>
+</AccordionGroup>
+
+# How to Make Predictions
+
+<Tabs>
+  <Tab title="Finding Markets">
+    **Discover active prediction markets**
+    
+    ## Through Your X Feed
+    - **Follow @kash_bot** - Turn on notifications for instant alerts (coming soon)
+    - **Look for market posts** in trending topic discussions
+    - **Tagged in relevant threads** about events you care about
+    - **Shared by other predictors** in your network
+    
+    ## Ask for Recommendations
+    Tweet or DM @kash_bot with (coming soon):
+    - **"Show me markets"** - See all active markets
+    - **"What can I predict on?"** - Get personalized suggestions
+    - **"Markets about [topic]?"** - Find specific category markets
+    - **"Find me crypto predictions"** - Category-specific requests
+    
+    ## Market Post Format
+    ```
+    @kash_bot: "Will the Fed raise rates this month?"
+    Current odds: YES 72% ($0.72) | NO 28% ($0.28)
+    Closes: March 20, 2024 at 2:00 PM EST
+    Reply to predict!
+    ```
+  </Tab>
+  
+  <Tab title="Placing Predictions">
+    **Simple social prediction through replies**
+    
+    ## Easy Reply Format
+    Just reply to any market with:
+    - **"YES 50"** - Predict $50 that the event will happen
+    - **"NO 100"** - Predict $100 that it won't happen
+    - **"YES $25"** - Dollar sign is optional
+    - **"no 10"** - Case doesn't matter
+    
+    ## Automatic Execution
+    1. **@kash_bot confirms** your prediction intent
+    2. **Checks wallet balance** to ensure sufficient funds
+    3. **Executes the trade** at current market price
+    4. **Replies with confirmation** and your position details
+    
+    **Example interaction:**
+    ```
+    You: "YES 100"
+    @kash_bot: "Bought 138.89 YES shares @ $0.72 each
+               Total cost: $100
+               Win if YES: $138.89 (+$38.89 profit)"
+    ```
+  </Tab>
+  
+  <Tab title="Market Resolution">
+    **How outcomes are determined**
+    
+    ## Market Close Process
+    - **Trading stops** at predetermined deadline
+    - **Existing positions locked** - no more changes allowed
+    - **Await final outcome** determination
+    - **Resolution typically within hours** of event conclusion
+    
+    ## AI-Powered Resolution
+    - **Automated data fetching** from trusted sources
+    - **AI verification** of outcome using multiple sources
+    - **Zero-knowledge proofs** ensure trustless resolution
+    - **Instant settlement** to winner wallets
+    - **Transparent process** - all results publicly verifiable
+  </Tab>
+  
+  <Tab title="Advanced Features">
+    **Power user prediction options**
+    
+    ## Leverage Prediction
+    - **Predict up to 2x your balance** with qualifying accounts
+    - **Higher risk, higher reward** potential
+    - **5% interest fee** paid to treasury
+    - **Example:** "YES 200 2x" to leverage a $200 prediction
+    
+    ## Private Predictions
+    **DM @kash_bot for discreet prediction:**
+    - **No public announcements** of your prediction
+    - **Same execution process** as public predictions
+    - **Ideal for large positions** that might move markets
+    - **Maintains prediction anonymity** while staying social
+    
+    ## Limit Orders
+    **Set your preferred entry price:**
+    - **"YES 100 at 0.65"** - Execute when price drops to $0.65
+    - **Executes automatically** when conditions are met
+    - **Good for patient traders** who want specific prices
+    - **Cancel anytime** before execution
+  </Tab>
+</Tabs>
+
+---
+
+# Prediction Strategies
+
+<AccordionGroup>
+  <Accordion title="Information Edge">
+    **Leverage knowledge for better predictions**
+    - **Research before predicting** - Read news, analyze trends, understand context
+    - **Follow reliable sources** - Trust verified accounts and expert analysis
+    - **Spot market inefficiencies** - Find rates that don't match reality
+    - **Act on breaking news** - Be first to capitalize on new information
+  </Accordion>
+  <Accordion title="Portfolio Approach">
+    **Manage risk like a professional trader**
+    - **Diversify across markets** - Don't put all eggs in one basket
+    - **Don't predict entire balance** - Keep reserves for better opportunities
+    - **Take profits regularly** - Lock in gains instead of letting them ride
+    - **Manage risk carefully** - Size predictions according to confidence level
+  </Accordion>
+  <Accordion title="Social Signals">
+    **Learn from the crowd and contrarian opportunities**
+    - **Watch influencer predictions** - Follow successful predictors' strategies
+    - **Monitor sentiment shifts** - Identify when opinion is changing
+    - **Copy successful traders** - Learn from proven track records
+    - **Learn from patterns** - Recognize recurring market behaviors
+  </Accordion>
+</AccordionGroup>
+
+# Managing Your Positions
+
+<AccordionGroup>
+  <Accordion title="Track Your Position">
+    **Stay informed about your investments**
+    - **See current value** - Monitor real-time position worth
+    - **Monitor odds changes** - Watch how probabilities shift
+    - **Calculate profit/loss** - Understand your potential returns
+    - **Decide on exit** - Plan when to sell or hold
+  </Accordion>
+  <Accordion title="Sell Before Close">
+    **Exit positions strategically**
+    - **Lock in profits early** - Secure gains before market closes
+    - **Cut losses if needed** - Minimize damage from bad predictions
+    - **Reply "sell my YES"** - Simple command to exit position
+    - **Instant execution** - Trades happen immediately at market price
+  </Accordion>
+  <Accordion title="Add to Position">
+    **Increase your stake when confident**
+    - **Double down if confident** - Increase position size on strong conviction
+    - **Average your entry price** - Improve overall position cost basis
+    - **"YES 50 more"** - Easy command to add to existing position
+    - **No limits on trades** - Add as many times as you want
+  </Accordion>
+  <Accordion title="Unlimited Trading">
+    **Trade without restrictions**
+    - **No daily limits** on prediction placement
+    - **Post as many predictions** as you want
+    - **Engage in multiple markets** simultaneously
+    - **No throttling** or trading restrictions
+    - **24/7 availability** for active traders
+    - **Perfect for** users who want to maximize their prediction activity
+  </Accordion>
+</AccordionGroup>
+
+---
+
+# Essential Commands & Tips
+
+<Tabs>
+  <Tab title="Quick Commands">
+    **Master these basic commands for efficient trading**
+    
+    | Action | Command | Example |
+    |--------|---------|---------|
+    | Predict on YES | `"YES [amount]"` | `"YES 50"` |
+    | Predict on NO | `"NO [amount]"` | `"NO 100"` |
+    | Check balance | `"balance"` | `"balance"` |
+    | See positions | `"my predictions"` | `"my predictions"` |
+    | Sell position | `"sell [position]"` | `"sell my YES"` |
+    | Find markets | `"show markets"` | `"show markets"` |
+    | Limit order | `"YES [amount] at [price]"` | `"YES 100 at 0.65"` |
+    | Leverage prediction | `"YES [amount] 2x"` | `"YES 200 2x"` |
+  </Tab>
+  
+  <Tab title="Pro Tips">
+    **Advanced strategies for experienced predictors**
+    
+    ## Timing Your Predictions
+    - **Early markets** often have better rates before consensus forms
+    - **Breaking news** creates temporary price inefficiencies
+    - **Market close** approaches can create last-minute opportunities
+    
+    ## Risk Management
+    - **Start small** while learning market dynamics
+    - **Set stop losses** by selling when positions turn negative
+    - **Take profits** at 20-30% gains to compound returns
+    
+    ## Information Sources
+    - **Follow @kash_bot** for instant market alerts
+    - **Monitor news feeds** for breaking developments
+    - **Join prediction communities** for collective intelligence
+  </Tab>
+</Tabs>
+
+<Tip>
+Every expert predictor started with their first prediction. Start small, learn the dynamics, and let your edge compound over time!
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Finding Markets"
+    icon="magnifying-glass"
+    href="/pages/getting-started/guides/finding-opportunities"
+  >
+    Discover markets to predict on
+  </Card>
+  <Card
+    title="Winning & Payouts"
+    icon="trophy-star"
+    href="/pages/getting-started/guides/winning"
+  >
+    Understand winnings and payouts
+  </Card>
+</CardGroup>

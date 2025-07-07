@@ -1,0 +1,244 @@
+---
+title: 'Trading Options'
+description: 'Complete Guide to All Trading Methods'
+icon: 'chart-line'
+---
+
+<Note>
+Kash provides social media integration and advanced trading features as a layer on top of the underlying AMM infrastructure. While the AMMs are accessible on-chain, Kash focuses on making prediction markets accessible through social media and providing professional trading tools.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Core Trading Infrastructure
+
+<AccordionGroup>
+  <Accordion title="Constant Product AMM (CPAMM)">
+    **Underlying Market Engine**
+    
+    **Technical Foundation:**
+    - **Binary Markets:** Every market has exactly two outcomes (YES/NO)
+    - **Share-Based Trading:** Prices range from \$0.01 to \$0.99 per share
+    - **Constant Product Formula:** Automated pricing using x × y = k invariant
+    - **Instant Liquidity:** Always available for trades of any size
+    
+    **Universal Currency Support:**
+    - **USDC Primary:** Main trading currency for all markets
+    - **Automatic Swaps:** 0x integration converts any token to USDC
+    - **Atomic Execution:** Swap and trade happen in single transaction
+    - **Gas Sponsorship:** Platform covers all transaction fees
+    
+    **Built on Base:**
+    - **Low Fees:** Layer-2 efficiency for affordable trading
+    - **Fast Settlement:** 1-2 minute confirmation times
+    - **EVM Compatible:** Full smart contract functionality
+    - **Ethereum Security:** Inherits Ethereum's proven security model
+  </Accordion>
+  
+  <Accordion title="Account Abstraction & Wallet Management">
+    **Seamless User Experience**
+    
+    **MPC Wallet Technology:**
+    - **No Seed Phrases:** Privy MPC eliminates complex key management
+    - **X Account Recovery:** Restore access through Twitter authentication
+    - **Non-Custodial:** You maintain full control of your funds
+    - **Cross-Platform:** Same wallet across all interfaces
+    
+    **ERC-4337 Integration:**
+    - **Gasless Transactions:** Platform sponsors all gas fees
+    - **Batch Operations:** Multiple actions in single transaction
+    - **Session Keys:** Pre-authorized spending limits for convenience
+    - **Smart Wallet Features:** Advanced functionality without complexity
+  </Accordion>
+</AccordionGroup>
+
+# What Kash Provides
+
+<Tabs>
+  <Tab title="Social Media Integration">
+    **X (Twitter) Native Trading**
+    
+    **Core Kash Interface:**
+    ```
+    Reply to market: "YES $100"
+    DM @kash_bot: "50 on NO for the Lakers game"
+    Natural language: "I think yes, 75 dollars"
+    ```
+    
+    **How It Works:**
+    1. **Intent Recognition:** ElizaOS parses your natural language
+    2. **Automatic Execution:** Converts to proper trade parameters
+    3. **Gas Sponsorship:** Platform covers all transaction fees
+    4. **Instant Confirmation:** Public or private confirmation of trade
+    
+    **Key Features:**
+    - **Natural Language Processing:** Predict using conversational language
+    - **Direct Market Creation:** Tag @kash_bot to suggest new markets
+    - **Social Discovery:** Markets appear in trending conversations
+    - **Real-Time Updates:** Live odds and position tracking
+    
+    **Perfect For:**
+    - Social media users who want seamless integration
+    - Casual predictors who prefer conversational interfaces
+    - Anyone wanting to trade without leaving X
+    - Users who don't want to learn complex trading interfaces
+  </Tab>
+  
+  <Tab title="Advanced Trading Layer">
+    **Professional Features on Top of AMM**
+    
+    **What Kash Adds:**
+    - **Request for Quote (RFQ) System:** Off-chain order book for large trades
+    - **Leverage Trading:** 2x amplified positions for qualified users
+    - **MEV Protection:** Comprehensive protection against frontrunning and sandwich attacks
+    - **Limit Orders:** Through the RFQ system for precise execution
+    - **Batch Trading:** Multiple operations in single transaction
+    
+    **RFQ System Details:**
+    - **Off-Chain Matching:** Post limit orders without affecting AMM
+    - **On-Chain Settlement:** Matched trades settle at agreed prices
+    - **Slippage Protection:** Avoid price impact from large trades
+    - **Market Maker Friendly:** Designed for professional traders
+    
+    **Leverage Trading:**
+    - **2x Leverage:** Double your effective position size
+    - **5% Interest Fee:** Paid to KashDAO treasury
+    - **Qualification Required:** Determined by DAO governance
+    - **Risk Management:** Automatic liquidation protection
+    
+    **MEV Protection System:**
+    - **Private Mempool:** Large trades routed through private transaction pools
+    - **Commit-Reveal Schemes:** Two-phase transactions prevent frontrunning
+    - **Batch Auctions:** Multiple trades executed simultaneously at fair prices
+    - **Threshold-Based Routing:** Trades above $1,000 automatically use MEV protection
+    
+    **How MEV Protection Works:**
+    ```
+    Large Trade Process:
+    1. Trade intent submitted privately (not visible to MEV bots)
+    2. Intent batched with other trades in secure environment
+    3. Batch executed at fair market price for all participants
+    4. No frontrunning or sandwich attacks possible
+    ```
+    
+    **Benefits:**
+    - **Fair Pricing:** Large trades execute at true market prices
+    - **Slippage Protection:** Reduced price impact from MEV extraction
+    - **Institutional Ready:** Professional-grade execution for large positions
+    - **Automatic Activation:** No additional steps required for protection
+  </Tab>
+</Tabs>
+
+# What Third Parties Could Build
+
+<AccordionGroup>
+  <Accordion title="Direct AMM Interfaces">
+    **On-Chain Accessibility**
+    
+    **Developer Opportunities:**
+    - **Direct Smart Contract Integration:** Build custom interfaces to AMM
+    - **Web3 Trading Dashboards:** Create professional trading tools
+    - **Mobile Apps:** Native mobile prediction market apps
+    - **API Integrations:** Connect to existing platforms or services
+    
+    **What's Possible:**
+    - **Custom UIs:** Tailored interfaces for specific user groups
+    - **Advanced Analytics:** Detailed market analysis and tracking
+    - **Automated Trading:** Bots and algorithmic trading systems
+    - **Cross-Platform Integration:** Embed markets in other applications
+    
+    **Technical Access:**
+    - **Open Smart Contracts:** All AMM contracts are publicly accessible
+    - **Standard ERC-20:** Outcome tokens follow standard interfaces
+    - **GraphQL APIs:** Query market data and historical information
+    - **Event Logs:** Full transaction and market history on-chain
+  </Accordion>
+  
+  <Accordion title="Platform Integrations">
+    **Expanding the Ecosystem**
+    
+    **Future Possibilities:**
+    - **Telegram Bots:** Similar social integration on other platforms
+    - **Discord Integration:** Server-based prediction markets
+    - **Reddit Integration:** Community-driven market creation
+    - **TikTok Integration:** Short-form video prediction content
+    
+    **Developer Benefits:**
+    - **Proven Infrastructure:** Leverage Kash's battle-tested AMM
+    - **Instant Liquidity:** Access to existing market liquidity
+    - **AI Resolution:** Benefit from zkTLS automated resolution
+    - **Gas Sponsorship:** Optional paymaster integration
+  </Accordion>
+</AccordionGroup>
+
+# Kash's Focus Areas
+
+<Steps>
+  <Step title="Social Media Integration">
+    **Primary Interface Layer**
+    - Native X (Twitter) integration with @kash_bot
+    - Natural language processing for conversational trading
+    - Social discovery and viral market creation
+    - Community engagement and social proof
+  </Step>
+  
+  <Step title="Advanced Trading Features">
+    **Professional Enhancement Layer**
+    - RFQ system for large trades and limit orders
+    - Leverage trading for qualified users
+    - MEV protection for institutional-size positions
+    - Batch operations and smart wallet features
+  </Step>
+  
+  <Step title="AI-Powered Automation">
+    **Intelligence Layer**
+    - ElizaOS for market creation and validation
+    - zkTLS + AI for automated resolution
+    - Personalized market recommendations
+    - Risk management and fraud prevention
+  </Step>
+  
+  <Step title="Ecosystem Development">
+    **Platform Growth**
+    - Developer tools and APIs for third-party builders
+    - Cross-platform expansion roadmap
+    - Community governance and DAO operations
+    - Educational resources and user onboarding
+  </Step>
+</Steps>
+
+<Warning>
+Advanced trading features like leverage amplify both gains and losses. RFQ system access may require qualification criteria. Always understand the risks before using professional trading tools.
+</Warning>
+
+<Tip>
+Kash's architecture separates the social interface layer from the underlying AMM infrastructure. This design allows Kash to focus on user experience while enabling third-party developers to build specialized tools on the same proven foundation.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Natural Language Trading"
+    icon="comment"
+    href="/pages/getting-started/features/natural-language"
+  >
+    Learn conversational trading
+  </Card>
+  <Card
+    title="Social Features"
+    icon="share-nodes"
+    href="/pages/getting-started/features/social"
+  >
+    Explore social integration
+  </Card>
+</CardGroup>

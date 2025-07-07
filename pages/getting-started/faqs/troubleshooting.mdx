@@ -1,0 +1,457 @@
+---
+title: 'Troubleshooting'
+description: 'Common issues and solutions for platform problems'
+icon: 'wrench'
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Common Issues and Solutions
+
+<AccordionGroup>
+  <Accordion title="@kash_bot isn't responding to my commands">
+    **Bot Communication Issues**
+    
+    **Common Causes:**
+    - **X Account Issues:** Problems with your X account or DM settings
+    - **Bot Maintenance:** @kash_bot may be temporarily offline
+    - **Command Format:** Incorrect command syntax
+    - **Rate Limiting:** Too many commands sent too quickly
+    
+    **Quick Solutions:**
+    1. **Check DM Settings:** Ensure you can receive DMs from @kash_bot
+    2. **Verify Command Format:** Use exact command syntax (e.g., "$10 YES on market 123")
+    3. **Wait and Retry:** Wait a few minutes and try again
+    4. **Check Bot Status:** Look for maintenance announcements in Discord
+    
+    **Command Format Examples:**
+    ```
+    $50 YES on market 123
+    $25 USDC NO on market 456
+    balance
+    help
+    ```
+    
+    **Alternative Access:**
+    - **Web Dashboard:** Use kash.bot website for prediction
+    - **Public Replies:** Try replying to @kash_bot tweets
+    - **Community Support:** Ask for help in Discord
+    - **Status Updates:** Check Discord for bot status updates
+  </Accordion>
+  
+  <Accordion title="My prediction didn't go through">
+    **Prediction Transaction Issues**
+    
+    **Common Problems:**
+    - **Insufficient Balance:** Not enough funds in wallet
+    - **Market Closed:** Market may have closed or resolved
+    - **Command Errors:** Incorrect prediction command format
+    - **Network Issues:** Blockchain network congestion
+    
+    **Troubleshooting Steps:**
+    1. **Check Balance:** Verify you have sufficient funds
+    2. **Verify Market:** Confirm market is still open and active
+    3. **Check Command:** Ensure proper prediction command format
+    4. **Wait for Confirmation:** Allow time for blockchain confirmation
+    
+    **Prediction Command Requirements:**
+    - **Clear Amount:** Specify exact amount (e.g., $10, $25 USDC)
+    - **Clear Position:** Specify YES or NO clearly
+    - **Market ID:** Include correct market identifier
+    - **No Ambiguity:** Avoid ambiguous wording
+    
+    **Alternative Prediction:**
+    - **Web Interface:** Use dashboard for complex predictions
+    - **Mobile Browser:** Mobile-optimized prediction interface
+    - **Retry Later:** Try again if network is congested
+    - **Community Help:** Ask for assistance in Discord
+  </Accordion>
+  
+  <Accordion title="I can't access the website">
+    **Website Access Issues**
+    
+    **Quick Fixes:**
+    - **Hard Refresh:** Ctrl+F5 (PC) or Cmd+Shift+R (Mac)
+    - **Clear Cache:** Clear browser cache and cookies
+    - **Try Different Browser:** Test with Chrome, Firefox, or Safari
+    - **Incognito Mode:** Test in private browsing mode
+    
+    **Network Troubleshooting:**
+    - **Check Internet:** Verify internet connection is working
+    - **Try Different Network:** Test with mobile data or different WiFi
+    - **Disable VPN:** Turn off VPN if using one
+    - **DNS Issues:** Try different DNS servers (8.8.8.8, 1.1.1.1)
+    
+    **Browser Optimization:**
+    - **Update Browser:** Ensure browser is latest version
+    - **Disable Extensions:** Temporarily disable browser extensions
+    - **Enable JavaScript:** Verify JavaScript is enabled
+    - **Allow Cookies:** Ensure cookies are enabled for kash.bot
+    
+    **Platform Status:**
+    - **Check Discord:** Look for maintenance announcements
+    - **Community Reports:** Check if others have similar issues
+    - **Social Media:** Follow @kash_bot for updates
+    - **Try Later:** Platform may be under maintenance
+  </Accordion>
+  
+  <Accordion title="My wallet balance is incorrect">
+    **Balance Display Issues**
+    
+    **Common Causes:**
+    - **Sync Delay:** Balance updates may take time
+    - **Pending Transactions:** Transactions still processing
+    - **Cache Issues:** Browser displaying old data
+    - **Network Delays:** Blockchain network congestion
+    
+    **Resolution Steps:**
+    1. **Refresh Page:** Hard refresh the web dashboard
+    2. **Check @kash_bot:** Query balance through bot
+    3. **Wait for Sync:** Allow time for blockchain sync
+    4. **Clear Cache:** Clear browser cache and reload
+    
+    **Verification Methods:**
+    - **Blockchain Explorer:** Check wallet address on Base blockchain
+    - **Multiple Sources:** Compare balance across bot and web
+    - **Transaction History:** Review recent transaction activity
+    - **Community Verification:** Ask community for verification tips
+    
+    **If Balance Still Incorrect:**
+    - **Document Issue:** Screenshot the incorrect balance
+    - **Note Transaction IDs:** Record relevant transaction hashes
+    - **Community Report:** Report issue in Discord
+    - **Provide Details:** Include wallet address and transaction details
+  </Accordion>
+</AccordionGroup>
+
+# Platform Access Issues
+
+<AccordionGroup>
+  <Accordion title="Mobile browser issues">
+    **Mobile Platform Troubleshooting**
+    
+    **Mobile Browser Problems:**
+    - **Update Browser:** Update mobile browser to latest version
+    - **Clear Cache:** Clear mobile browser cache and data
+    - **Responsive Design:** Ensure using mobile-optimized view
+    - **Touch Issues:** Verify touch gestures work properly
+    
+    **iOS Specific Issues:**
+    - **Safari Settings:** Check Safari privacy settings
+    - **iOS Updates:** Update iOS to latest version
+    - **Screen Time:** Check for Screen Time restrictions
+    - **Private Relay:** Disable iCloud Private Relay if enabled
+    
+    **Android Specific Issues:**
+    - **Chrome Settings:** Verify Chrome permissions
+    - **Android Updates:** Update Android to latest version
+    - **Data Saver:** Disable data saver mode
+    - **App Permissions:** Check browser permissions
+    
+    **Mobile Network Issues:**
+    - **WiFi vs Mobile:** Test both WiFi and mobile data
+    - **Signal Strength:** Ensure strong network signal
+    - **Data Limits:** Check for data usage restrictions
+    - **Carrier Blocking:** Verify no carrier restrictions
+    
+    **Optimization Tips:**
+    - **Screen Orientation:** Try portrait and landscape modes
+    - **Zoom Level:** Adjust browser zoom for better visibility
+    - **Text Size:** Increase text size for readability
+    - **Stable Connection:** Use reliable network connection
+  </Accordion>
+  
+  <Accordion title="X account connection problems">
+    **X Integration Issues**
+    
+    **Connection Problems:**
+    - **X Account Status:** Verify X account is active and accessible
+    - **Permission Issues:** Check if X account has DM permissions enabled
+    - **Account Restrictions:** Ensure X account isn't restricted or suspended
+    - **Authentication Errors:** Problems with X login process
+    
+    **Troubleshooting Steps:**
+    1. **Check X Account:** Log into X directly to verify account status
+    2. **Update Permissions:** Ensure DM permissions are enabled
+    3. **Refresh Connection:** Disconnect and reconnect X account
+    4. **Clear Browser Data:** Clear cookies and cache for X and Kash
+    
+    **DM Settings:**
+    - **Allow DMs:** Enable direct messages from anyone
+    - **Message Filtering:** Disable aggressive message filtering
+    - **Verified Accounts:** Ensure verified accounts can message you
+    - **Privacy Settings:** Check X privacy settings
+    
+    **Account Verification:**
+    - **Active Account:** Ensure X account is actively used
+    - **Account Age:** Newer accounts may have restrictions
+    - **Verification Status:** X verification affects some features
+    - **Community Standing:** Account reputation may affect access
+  </Accordion>
+  
+  <Accordion title="Geographic restrictions">
+    **Regional Access Limitations**
+    
+    **Understanding Restrictions:**
+    - **U.S. Users:** Limited to $10 maximum prediction per transaction
+    - **High-Risk Countries:** May have frontend access blocked
+    - **Soft Geofencing:** Based on IP address detection
+    - **Compliance:** Designed to meet regulatory requirements
+    
+    **If Access is Blocked:**
+    - **Check Location:** Verify your current location
+    - **Network Issues:** Try different internet connection
+    - **VPN Impact:** Disable VPN if using one
+    - **Alternative Access:** Decentralized nature may allow alternatives
+    
+    **U.S. User Limitations:**
+    - **Prediction Limit:** Maximum $10 per transaction
+    - **Full Features:** All other features available
+    - **Automatic Detection:** Limit applied automatically
+    - **Compliance:** Designed for U.S. regulatory compliance
+    
+    **Workaround Options:**
+    - **Decentralized Access:** Platform is decentralized
+    - **Community Support:** Community may provide guidance
+    - **Alternative Methods:** Multiple access methods available
+    - **Legal Compliance:** Always comply with local laws
+  </Accordion>
+</AccordionGroup>
+
+# Technical Issues
+
+<AccordionGroup>
+  <Accordion title="Browser compatibility problems">
+    **Browser Support and Issues**
+    
+    **Supported Browsers:**
+    - **Chrome:** Version 90+ (recommended)
+    - **Firefox:** Version 88+
+    - **Safari:** Version 14+
+    - **Edge:** Version 90+
+    
+    **Unsupported Browsers:**
+    - **Internet Explorer:** All versions (discontinued)
+    - **Very Old Browsers:** Browsers over 2 years old
+    - **Modified Browsers:** Heavily customized browsers
+    - **Some Mobile Browsers:** Limited in-app browsers
+    
+    **Required Features:**
+    - **JavaScript:** Must be enabled
+    - **Cookies:** Required for authentication
+    - **Local Storage:** Used for caching
+    - **WebSockets:** Required for real-time updates
+    
+    **Compatibility Testing:**
+    1. **Update Browser:** Update to latest version
+    2. **Check Features:** Verify required features enabled
+    3. **Disable Extensions:** Test without extensions
+    4. **Try Alternative:** Test different supported browser
+    
+    **Performance Optimization:**
+    - **Hardware Acceleration:** Enable GPU acceleration
+    - **Close Tabs:** Close unnecessary browser tabs
+    - **Disable Extensions:** Remove unused extensions
+    - **Regular Maintenance:** Restart browser regularly
+  </Accordion>
+  
+  <Accordion title="Slow performance issues">
+    **Platform Performance Problems**
+    
+    **Client-Side Issues:**
+    - **Internet Speed:** Test connection speed (minimum 5 Mbps recommended)
+    - **Browser Cache:** Clear cache if pages load slowly
+    - **Device Memory:** Close unnecessary applications
+    - **Browser Resources:** Limit number of open tabs
+    
+    **Network Optimization:**
+    - **DNS Settings:** Use fast DNS servers (1.1.1.1, 8.8.8.8)
+    - **Geographic Distance:** Consider distance to servers
+    - **ISP Issues:** Check for internet provider problems
+    - **Network Congestion:** Try during off-peak hours
+    
+    **Platform Factors:**
+    - **Network Congestion:** Base blockchain may be busy
+    - **High Usage:** Platform may experience high traffic
+    - **Maintenance:** Ongoing maintenance may affect speed
+    - **Geographic Location:** Distance from servers affects speed
+    
+    **Optimization Tips:**
+    1. **Speed Test:** Test your internet connection
+    2. **Clear Cache:** Clear browser cache and cookies
+    3. **Close Apps:** Close unnecessary applications
+    4. **Try Later:** Try during off-peak hours
+    
+    **Alternative Access:**
+    - **Mobile Browser:** Try mobile access
+    - **Different Network:** Test with different internet connection
+    - **Bot Interface:** Use @kash_bot for basic functions
+    - **Community Updates:** Check Discord for performance updates
+  </Accordion>
+  
+  <Accordion title="Transaction failures">
+    **Blockchain Transaction Issues**
+    
+    **Common Causes:**
+    - **Network Congestion:** Base blockchain network busy
+    - **Insufficient Funds:** Not enough balance for transaction + fees
+    - **Gas Price Issues:** Transaction gas price too low
+    - **Market Status:** Market may have closed during transaction
+    
+    **Troubleshooting Steps:**
+    1. **Check Balance:** Verify sufficient funds including gas
+    2. **Wait and Retry:** Network congestion may resolve
+    3. **Check Market:** Verify market is still active
+    4. **Use Web Interface:** Try transaction through dashboard
+    
+    **Gas and Fees:**
+    - **Gas Sponsorship:** Kash covers gas fees for most transactions
+    - **Network Fees:** Base network fees may apply
+    - **Transaction Priority:** Higher fees may process faster
+    - **Fee Estimation:** Platform estimates required fees
+    
+    **If Transaction Fails:**
+    - **Transaction Hash:** Note the transaction hash if available
+    - **Error Messages:** Record any error messages
+    - **Community Report:** Report persistent issues in Discord
+    - **Alternative Methods:** Try different transaction method
+    
+    **Prevention:**
+    - **Sufficient Balance:** Maintain adequate balance
+    - **Stable Network:** Use reliable internet connection
+    - **Market Timing:** Check market status before predicting
+    - **Patience:** Allow time for network processing
+  </Accordion>
+</AccordionGroup>
+
+# Getting Help
+
+<AccordionGroup>
+  <Accordion title="When to seek community help">
+    **Community Support Guidelines**
+    
+    **Try Self-Help First:**
+    - **Check Documentation:** Review FAQ and help guides
+    - **Basic Troubleshooting:** Try common fixes first
+    - **Search Discord:** Look for similar issues in community
+    - **Check Announcements:** Look for known issues or maintenance
+    
+    **Seek Community Help When:**
+    - **Persistent Issues:** Problems continue after basic troubleshooting
+    - **Unclear Solutions:** Need clarification on documentation
+    - **Complex Problems:** Issues requiring community expertise
+    - **Platform Status:** Want to verify if others have similar issues
+    
+    **Community Resources:**
+    - **Discord Community:** Active community support
+    - **Peer Assistance:** Other users sharing solutions
+    - **Community Moderators:** Experienced community members
+    - **Shared Knowledge:** Collective problem-solving
+    
+    **How to Ask for Help:**
+    - **Clear Description:** Explain the issue clearly
+    - **Steps Taken:** Describe what you've already tried
+    - **Error Messages:** Include exact error messages
+    - **System Details:** Mention browser, device, and OS
+    - **Screenshots:** Visual evidence when helpful
+  </Accordion>
+  
+  <Accordion title="Reporting persistent issues">
+    **Effective Issue Reporting**
+    
+    **Documentation Process:**
+    1. **Record Details:** Note exact time, actions, and results
+    2. **Capture Evidence:** Screenshots, error messages, transaction IDs
+    3. **Reproduction Steps:** Document how to reproduce the issue
+    4. **Environment Details:** Browser, OS, device, network information
+    
+    **What to Include:**
+    - **Detailed Description:** Clear explanation of the problem
+    - **Steps to Reproduce:** How to recreate the issue
+    - **Expected vs Actual:** What should happen vs what happens
+    - **Error Messages:** Exact text of any error messages
+    - **System Information:** Technical details about your setup
+    
+    **Community Reporting:**
+    - **Discord Channels:** Use appropriate Discord channels
+    - **Community Discussion:** Engage with community for solutions
+    - **Peer Support:** Help others with similar issues
+    - **Collaborative Problem-Solving:** Work together on solutions
+    
+    **Follow-Up:**
+    - **Monitor Responses:** Check for community responses
+    - **Provide Updates:** Share additional information if requested
+    - **Confirm Resolution:** Report when issue is resolved
+    - **Share Solutions:** Help others with similar problems
+  </Accordion>
+  
+  <Accordion title="Emergency situations">
+    **Critical Issue Response**
+    
+    **Emergency Situations:**
+    - **Suspected Account Compromise:** Unauthorized access to account
+    - **Suspicious Transactions:** Unexpected fund movements
+    - **Security Concerns:** Potential security vulnerabilities
+    - **Platform Outage:** Complete inability to access platform
+    
+    **Immediate Actions:**
+    1. **Secure X Account:** Change password and enable 2FA
+    2. **Document Evidence:** Screenshot suspicious activity
+    3. **Alert Community:** Report security concerns in Discord
+    4. **Monitor Activity:** Watch for additional unauthorized actions
+    
+    **Security Response:**
+    - **X Account Security:** Primary security through X account
+    - **Community Alert:** Warn community of potential threats
+    - **Collaborative Response:** Work with community on security
+    - **Documentation:** Keep detailed records of security issues
+    
+    **Platform Outages:**
+    - **Check Community:** Verify if others experience similar issues
+    - **Monitor Announcements:** Look for official updates
+    - **Alternative Access:** Try different access methods
+    - **Patience:** Allow time for issue resolution
+    
+    **Prevention:**
+    - **Strong Security:** Maintain strong X account security
+    - **Regular Monitoring:** Monitor account activity regularly
+    - **Community Awareness:** Stay informed about security issues
+    - **Best Practices:** Follow security best practices
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+If you're experiencing security-related issues or suspect unauthorized account access, secure your X account immediately and alert the community in Discord.
+</Warning>
+
+<Tip>
+Most issues can be resolved by clearing your browser cache and cookies, or by trying a different browser. The community in Discord is also very helpful for troubleshooting.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Community Support"
+    icon="users"
+    href="/pages/getting-started/faqs/support"
+  >
+    Get help from the community
+  </Card>
+  <Card
+    title="Security Help"
+    icon="shield"
+    href="/pages/getting-started/faqs/security"
+  >
+    Security troubleshooting
+  </Card>
+</CardGroup>
