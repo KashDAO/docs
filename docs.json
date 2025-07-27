@@ -61,6 +61,7 @@
             "group": "FAQs",
             "pages": [
               "pages/getting-started/faqs/account",
+              "pages/getting-started/faqs/notifications",
               "pages/getting-started/faqs/security",
               "pages/getting-started/faqs/settings",
               "pages/getting-started/faqs/wallet-and-funds",
@@ -97,7 +98,7 @@
         },
         {
           "anchor": "Community",
-          "href": "https://discord.gg/bKBC3Gyp",
+          "href": "https://discord.gg/bUtjbJNqPQ",
           "icon": "discord",
           "color": {
             "light": "#FBD109",
@@ -163,7 +164,7 @@
     "socials": {
       "website": "https://kash.bot",
       "x": "https://x.com/kash_bot",
-      "discord": "https://discord.gg/bKBC3Gyp",
+      "discord": "https://discord.gg/bUtjbJNqPQ",
       "github": "https://github.com/KashDAO",
       "telegram": "https://t.me/kashDAO"
     }

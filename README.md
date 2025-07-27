@@ -4,7 +4,7 @@ Official documentation for **Kash** - The AI-Powered Decentralized Prediction Ma
 
 [![Website](https://img.shields.io/badge/Website-kash.bot-FBD109)](https://kash.bot)
 [![Twitter](https://img.shields.io/badge/Twitter-@kash_bot-1DA1F2)](https://x.com/kash_bot)
-[![Discord](https://img.shields.io/badge/Discord-Community-7289DA)](https://discord.gg/bKBC3Gyp)
+[![Discord](https://img.shields.io/badge/Discord-Community-7289DA)](https://discord.gg/bUtjbJNqPQ)
 [![Docs](https://img.shields.io/badge/Docs-Live-FBD109)](https://docs.kash.bot)
 
 ## About Kash
@@ -93,7 +93,7 @@ We welcome contributions to improve the documentation:
 - **Website**: [kash.bot](https://kash.bot)
 - **Documentation**: [docs.kash.bot](https://docs.kash.bot)
 - **Twitter**: [@kash_bot](https://x.com/kash_bot)
-- **Discord**: [Community](https://discord.gg/bKBC3Gyp)
+- **Discord**: [Community](https://discord.gg/bUtjbJNqPQ)
 - **GitHub**: [KashDAO](https://github.com/KashDAO)
 - **Telegram**: [KashDAO](https://t.me/kashDAO)
 
