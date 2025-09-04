@@ -40,6 +40,7 @@
           {
             "group": "Features",
             "pages": [
+              "pages/getting-started/features/custom-amm",
               "pages/getting-started/features/market-mechanics",
               "pages/getting-started/features/trading-options",
               "pages/getting-started/features/natural-language",
@@ -98,7 +99,7 @@
         },
         {
           "anchor": "Community",
-          "href": "https://discord.gg/bUtjbJNqPQ",
+          "href": "https://discord.com/invite/n9eumqjMPb",
           "icon": "discord",
           "color": {
             "light": "#FBD109",
@@ -164,7 +165,7 @@
     "socials": {
       "website": "https://kash.bot",
       "x": "https://x.com/kash_bot",
-      "discord": "https://discord.gg/bUtjbJNqPQ",
+      "discord": "https://discord.com/invite/n9eumqjMPb",
       "github": "https://github.com/KashDAO",
       "telegram": "https://t.me/kashDAO"
     }
