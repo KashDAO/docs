@@ -1,0 +1,113 @@
+---
+title: 'Partner API Overview'
+description: 'Embed prediction markets on your website with the Kash Partner API'
+---
+
+# Partner API Overview
+
+The Kash Partner API enables third-party websites to embed prediction markets and threads on their platforms. All embeds are read-only and anonymous - users are directed to Kash for transactions. We automatically track all embeds for revenue sharing purposes.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Iframe Embeds" icon="window">
+    Embed complete threads with a 20-tile market heatmap grid or single market cards on your website
+  </Card>
+  <Card title="REST API" icon="code">
+    Public API endpoints to fetch threads, markets, and real-time data programmatically
+  </Card>
+  <Card title="Revenue Sharing" icon="dollar-sign">
+    Automatic tracking of all embed activity for fair revenue distribution
+  </Card>
+  <Card title="Zero Setup" icon="bolt">
+    No authentication required - just copy the iframe code and start embedding
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+Get started in under 5 minutes:
+
+```html HTML
+<iframe
+  src="https://app.kash.bot/embed/threads/{threadId}/iframe?source=your-site"
+  width="100%"
+  height="900"
+  frameborder="0"
+  allow="clipboard-write"
+  title="Kash Prediction Markets"
+></iframe>
+```
+
+Replace `{threadId}` with an actual thread ID from our [thread list API](/developer-docs/partner-api/endpoints/threads).
+
+## Use Cases
+
+### News & Media Sites
+Embed live prediction markets alongside news articles to drive engagement and provide readers with real-time sentiment data.
+
+### Financial Platforms
+Integrate market probabilities into your financial dashboards and analysis tools.
+
+### Community Forums
+Add prediction markets to discussion threads for interactive forecasting.
+
+### Educational Platforms
+Use markets as teaching tools for economics, statistics, and decision-making courses.
+
+## Authentication
+
+The Partner API is **completely public** and requires **no authentication**. All endpoints are rate-limited by IP address to ensure fair usage.
+
+## Rate Limits
+
+| Endpoint Type | Limit |
+|--------------|-------|
+| GET /api/threads | 50 req/min per IP |
+| GET /api/threads/{id} | 100 req/min per IP |
+| GET /api/threads/{id}/markets | 100 req/min per IP |
+| POST /api/embeds/* | 200 req/min per IP |
+
+Rate limit information is included in response headers:
+```
+X-RateLimit-Limit: 50
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1704067260000
+```
+
+## Base URL
+
+All API requests should be made to:
+```
+https://app.kash.bot/api
+```
+
+All iframe embeds are hosted at:
+```
+https://app.kash.bot/embed
+```
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="Technical Support" icon="headset">
+    Email us at [dev@kash.bot](mailto:dev@kash.bot) for technical questions
+  </Card>
+  <Card title="Partnership Inquiries" icon="handshake">
+    Contact [partnerships@kash.bot](mailto:partnerships@kash.bot) for revenue sharing details
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Quickstart Guide" icon="rocket" href="/developer-docs/partner-api/quickstart">
+    Get your first embed running in 5 minutes
+  </Card>
+  <Card title="API Reference" icon="book" href="/developer-docs/partner-api/endpoints/threads">
+    Browse all available API endpoints
+  </Card>
+  <Card title="Code Examples" icon="code" href="/developer-docs/partner-api/examples/html">
+    View complete integration examples
+  </Card>
+</CardGroup>
