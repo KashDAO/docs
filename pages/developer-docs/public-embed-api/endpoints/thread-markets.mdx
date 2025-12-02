@@ -1,0 +1,371 @@
+---
+title: 'GET /api/threads/:id/markets'
+description: 'Get all prediction markets within a specific thread'
+---
+
+# GET /api/threads/:id/markets
+
+Fetches all prediction markets that belong to a specific thread, with filtering, sorting, and pagination.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/threads/:id/markets
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique thread identifier (UUID format)
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="status" type="string">
+  Filter by market status. Options: `active`, `resolved`, `cancelled`, `paused`
+</ParamField>
+
+<ParamField query="limit" type="number" default="20">
+  Maximum number of results per page (max: 100)
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Pagination offset for fetching subsequent pages
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="created_at">
+  Field to sort by. Options: `created_at`, `total_volume`, `current_probability`, `title`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort direction. Options: `asc`, `desc`
+</ParamField>
+
+## Response
+
+<ResponseField name="markets" type="array">
+  Array of market objects in this thread
+
+  <Expandable title="Market Object">
+    <ResponseField name="id" type="string">
+      Unique market identifier
+    </ResponseField>
+
+    <ResponseField name="question" type="string">
+      The prediction market question
+    </ResponseField>
+
+    <ResponseField name="description" type="string">
+      Market description with resolution criteria
+    </ResponseField>
+
+    <ResponseField name="currentProbability" type="number">
+      Current market probability (0-1, e.g., 0.72 = 72%)
+    </ResponseField>
+
+    <ResponseField name="yesPrice" type="number">
+      Current price for YES shares (0-1)
+    </ResponseField>
+
+    <ResponseField name="noPrice" type="number">
+      Current price for NO shares (0-1)
+    </ResponseField>
+
+    <ResponseField name="totalVolume" type="number">
+      Total trading volume for this market (in cents)
+    </ResponseField>
+
+    <ResponseField name="tradeCount" type="number">
+      Number of trades executed
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      Market status: `active`, `resolved`, `cancelled`, `paused`
+    </ResponseField>
+
+    <ResponseField name="endTime" type="number">
+      Market end time (Unix timestamp in milliseconds)
+    </ResponseField>
+
+    <ResponseField name="category" type="string">
+      Market category
+    </ResponseField>
+
+    <ResponseField name="tags" type="array">
+      Array of tag strings
+    </ResponseField>
+
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of market creation
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+
+  <Expandable title="Pagination Properties">
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+
+    <ResponseField name="total" type="number">
+      Total number of matching markets
+    </ResponseField>
+
+    <ResponseField name="hasMore" type="boolean">
+      Whether more results are available
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**100 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/threads/abc123/markets?status=active&limit=10&sortBy=current_probability&sortOrder=desc"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.kash.bot/api/threads/abc123/markets?' +
+  new URLSearchParams({
+    status: 'active',
+    limit: 10,
+    sortBy: 'current_probability',
+    sortOrder: 'desc'
+  })
+);
+const data = await response.json();
+console.log(`Found ${data.markets.length} markets`);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.kash.bot/api/threads/abc123/markets',
+    params={
+        'status': 'active',
+        'limit': 10,
+        'sortBy': 'current_probability',
+        'sortOrder': 'desc'
+    }
+)
+data = response.json()
+print(f"Found {len(data['markets'])} markets")
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "markets": [
+    {
+      "id": "market-1",
+      "question": "Will Biden win the Democratic nomination?",
+      "description": "This market resolves YES if Joe Biden is officially nominated as the Democratic Party candidate for the 2024 Presidential Election.",
+      "currentProbability": 0.72,
+      "yesPrice": 0.72,
+      "noPrice": 0.28,
+      "totalVolume": 125000,
+      "tradeCount": 450,
+      "status": "active",
+      "endTime": 1735689600000,
+      "category": "politics",
+      "tags": ["biden", "nomination", "2024"],
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "market-2",
+      "question": "Will Trump run as independent candidate?",
+      "description": "Resolves YES if Donald Trump announces an independent presidential campaign for 2024.",
+      "currentProbability": 0.15,
+      "yesPrice": 0.15,
+      "noPrice": 0.85,
+      "totalVolume": 89000,
+      "tradeCount": 320,
+      "status": "active",
+      "endTime": 1735689600000,
+      "category": "politics",
+      "tags": ["trump", "independent", "2024"],
+      "createdAt": "2024-01-02T00:00:00Z"
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "limit": 10,
+    "total": 12,
+    "hasMore": true
+  },
+  "_meta": {
+    "authenticated": false,
+    "requestedAt": "2024-01-16T12:00:00Z"
+  }
+}
+```
+
+```json 404 - Thread Not Found
+{
+  "error": "Thread not found",
+  "message": "No thread exists with ID: abc123",
+  "code": "THREAD_NOT_FOUND"
+}
+```
+
+```json 429 - Rate Limit Exceeded
+{
+  "error": "Too many requests",
+  "message": "Rate limit of 100 requests per minute exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "retryAfter": 45
+}
+```
+
+## Common Use Cases
+
+### Build a custom thread page
+
+Fetch all markets to build a custom thread display:
+
+```javascript
+async function buildThreadPage(threadId) {
+  // Fetch thread details
+  const threadResponse = await fetch(
+    `https://app.kash.bot/api/threads/${threadId}`
+  );
+  const { thread } = await threadResponse.json();
+
+  // Fetch all markets in thread
+  const marketsResponse = await fetch(
+    `https://app.kash.bot/api/threads/${threadId}/markets?limit=100`
+  );
+  const { markets } = await marketsResponse.json();
+
+  return { thread, markets };
+}
+```
+
+### Show top markets by volume
+
+Display the most actively traded markets in a thread:
+
+```javascript
+const response = await fetch(
+  `https://app.kash.bot/api/threads/${threadId}/markets?` +
+  new URLSearchParams({
+    status: 'active',
+    sortBy: 'total_volume',
+    sortOrder: 'desc',
+    limit: 5
+  })
+);
+
+const { markets } = await response.json();
+console.log('Top 5 markets by volume:', markets);
+```
+
+### Paginate through all markets
+
+Fetch all markets in batches:
+
+```javascript
+async function* fetchAllMarkets(threadId) {
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await fetch(
+      `https://app.kash.bot/api/threads/${threadId}/markets?` +
+      new URLSearchParams({ limit: 100, offset })
+    );
+    const data = await response.json();
+
+    for (const market of data.markets) {
+      yield market;
+    }
+
+    hasMore = data.pagination.hasMore;
+    offset += 100;
+  }
+}
+
+// Usage
+for await (const market of fetchAllMarkets('abc123')) {
+  console.log(market.question);
+}
+```
+
+### Filter active markets only
+
+Show only currently active markets for trading:
+
+```javascript
+const response = await fetch(
+  `https://app.kash.bot/api/threads/${threadId}/markets?status=active`
+);
+const { markets } = await response.json();
+
+// All markets are active and ready for trading
+const activeMarkets = markets.filter(m => m.status === 'active');
+```
+
+### Build a probability leaderboard
+
+Show markets ranked by probability:
+
+```jsx React Component
+function MarketLeaderboard({ threadId }) {
+  const [markets, setMarkets] = useState([]);
+
+  useEffect(() => {
+    fetch(
+      `https://app.kash.bot/api/threads/${threadId}/markets?` +
+      new URLSearchParams({
+        status: 'active',
+        sortBy: 'current_probability',
+        sortOrder: 'desc',
+        limit: 10
+      })
+    )
+      .then(r => r.json())
+      .then(data => setMarkets(data.markets));
+  }, [threadId]);
+
+  return (
+    <div className="leaderboard">
+      <h3>Most Likely Outcomes</h3>
+      {markets.map(market => (
+        <div key={market.id} className="market-row">
+          <span className="question">{market.question}</span>
+          <span className="probability">
+            {(market.currentProbability * 100).toFixed(0)}%
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="GET /api/threads" href="/developer-docs/public-embed-api/endpoints/threads">
+    List all available threads
+  </Card>
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
+    Get thread details
+  </Card>
+</CardGroup>

@@ -79,9 +79,41 @@
         "tab": "Developer Docs",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
               "pages/developer-docs/introduction"
+            ]
+          },
+          {
+            "group": "Public Embed API",
+            "pages": [
+              "pages/developer-docs/public-embed-api/overview",
+              "pages/developer-docs/public-embed-api/quickstart"
+            ]
+          },
+          {
+            "group": "API Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/threads",
+              "pages/developer-docs/public-embed-api/endpoints/thread-detail",
+              "pages/developer-docs/public-embed-api/endpoints/thread-markets",
+              "pages/developer-docs/public-embed-api/endpoints/embed-tracking"
+            ]
+          },
+          {
+            "group": "Embed Guides",
+            "pages": [
+              "pages/developer-docs/public-embed-api/guides/thread-iframe",
+              "pages/developer-docs/public-embed-api/guides/customization",
+              "pages/developer-docs/public-embed-api/guides/postmessage-api"
+            ]
+          },
+          {
+            "group": "Code Examples",
+            "pages": [
+              "pages/developer-docs/public-embed-api/examples/html",
+              "pages/developer-docs/public-embed-api/examples/react",
+              "pages/developer-docs/public-embed-api/examples/javascript"
             ]
           }
         ]

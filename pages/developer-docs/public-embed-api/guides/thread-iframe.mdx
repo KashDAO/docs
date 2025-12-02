@@ -1,0 +1,410 @@
+---
+title: 'Embedding Thread Iframes'
+description: 'Learn how to embed Kash prediction market threads on your website'
+---
+
+# Embedding Thread Iframes
+
+Embed Kash prediction market threads on your website using HTML iframes. This guide covers the basics of thread embeds, iframe parameters, and best practices.
+
+---
+
+## Quick Start
+
+The simplest way to embed a thread is using an iframe with the thread URL:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  width="100%"
+  height="600"
+  frameborder="0"
+  allowfullscreen
+></iframe>
+```
+
+Replace `abc123` with your thread ID (obtained from the [GET /api/threads](/developer-docs/public-embed-api/endpoints/threads) endpoint).
+
+---
+
+## Iframe Attributes
+
+### Required Attributes
+
+<ParamField path="src" type="string" required>
+  The thread URL with `?embed=true` query parameter
+</ParamField>
+
+### Recommended Attributes
+
+<ParamField path="width" type="string" default="100%">
+  Iframe width - use `100%` for responsive design
+</ParamField>
+
+<ParamField path="height" type="string" default="600">
+  Iframe height in pixels (minimum 400px recommended)
+</ParamField>
+
+<ParamField path="frameborder" type="string" default="0">
+  Border width (set to `0` for seamless embed)
+</ParamField>
+
+<ParamField path="allowfullscreen" type="boolean">
+  Allow fullscreen mode for market charts
+</ParamField>
+
+<ParamField path="loading" type="string" default="lazy">
+  Use `eager` for above-fold embeds, `lazy` for below-fold
+</ParamField>
+
+<ParamField path="title" type="string">
+  Accessibility: describe the iframe content for screen readers
+</ParamField>
+
+---
+
+## Query Parameters
+
+Customize embed behavior using URL query parameters:
+
+### Core Parameters
+
+<ParamField query="embed" type="boolean" required>
+  **Required** - Enable embed mode (hides header/footer)
+</ParamField>
+
+<ParamField query="partner_org_id" type="string">
+  Your partner organization ID for revenue attribution
+</ParamField>
+
+<ParamField query="source" type="string">
+  Source identifier (e.g., your domain name)
+</ParamField>
+
+### Display Parameters
+
+<ParamField query="theme" type="string" default="light">
+  Color theme: `light` or `dark`
+</ParamField>
+
+<ParamField query="hideHeader" type="boolean" default="false">
+  Hide thread title and description
+</ParamField>
+
+<ParamField query="compact" type="boolean" default="false">
+  Compact mode for smaller embeds (min height: 300px)
+</ParamField>
+
+<ParamField query="primaryColor" type="string">
+  Custom primary color (hex format, e.g., `3B82F6`)
+</ParamField>
+
+### Filtering Parameters
+
+<ParamField query="status" type="string">
+  Show only markets with status: `active`, `resolved`, `cancelled`
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="created_at">
+  Sort markets by: `created_at`, `total_volume`, `current_probability`
+</ParamField>
+
+<ParamField query="limit" type="number" default="20">
+  Maximum markets to display (1-100)
+</ParamField>
+
+---
+
+## Complete Example
+
+Here's a fully configured iframe embed:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&partner_org_id=partner-xyz&source=example.com&theme=dark&compact=true&status=active&sortBy=total_volume&limit=10"
+  width="100%"
+  height="500"
+  frameborder="0"
+  allowfullscreen
+  loading="lazy"
+  title="2024 Presidential Election Prediction Markets"
+  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+></iframe>
+```
+
+**What this does:**
+- Embeds thread `abc123` in dark theme
+- Compact mode for smaller display
+- Shows only active markets
+- Sorts by trading volume
+- Limits to 10 markets
+- Attributes trades to `partner-xyz` organization
+- Tracks source as `example.com`
+
+---
+
+## Responsive Design
+
+### Using CSS for Responsiveness
+
+Wrap the iframe in a responsive container:
+
+```html
+<div class="kash-embed-container">
+  <iframe
+    src="https://app.kash.bot/threads/abc123?embed=true"
+    frameborder="0"
+    allowfullscreen
+  ></iframe>
+</div>
+
+<style>
+  .kash-embed-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 75%; /* 4:3 aspect ratio */
+    overflow: hidden;
+  }
+
+  .kash-embed-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>
+```
+
+### Dynamic Height Adjustment
+
+Use JavaScript to adjust iframe height based on content:
+
+```html
+<iframe
+  id="kash-embed"
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  width="100%"
+  frameborder="0"
+></iframe>
+
+<script>
+  window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://app.kash.bot') return;
+
+    if (event.data.type === 'resize') {
+      const iframe = document.getElementById('kash-embed');
+      iframe.style.height = event.data.height + 'px';
+    }
+  });
+</script>
+```
+
+### Mobile-Optimized Embeds
+
+Adjust embed settings for mobile devices:
+
+```html
+<iframe
+  id="kash-mobile-embed"
+  src="https://app.kash.bot/threads/abc123?embed=true&compact=true"
+  width="100%"
+  height="400"
+  frameborder="0"
+></iframe>
+
+<script>
+  const iframe = document.getElementById('kash-mobile-embed');
+  const isMobile = window.innerWidth < 768;
+
+  if (isMobile) {
+    // Update URL for mobile
+    const url = new URL(iframe.src);
+    url.searchParams.set('compact', 'true');
+    url.searchParams.set('limit', '5');
+    iframe.src = url.toString();
+    iframe.height = '350';
+  }
+</script>
+```
+
+---
+
+## Security Considerations
+
+### Sandbox Attribute
+
+Use the `sandbox` attribute to restrict iframe capabilities:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+></iframe>
+```
+
+**Sandbox permissions explained:**
+- `allow-scripts` - Required for embed functionality
+- `allow-same-origin` - Allows API calls to Kash backend
+- `allow-popups` - Enables market detail modals
+- `allow-forms` - Allows trading form submissions
+
+<Warning>
+**Do not use `allow-top-navigation`** - This prevents the iframe from redirecting your parent page.
+</Warning>
+
+### Content Security Policy (CSP)
+
+If your site uses CSP headers, add Kash to allowed sources:
+
+```
+Content-Security-Policy: frame-src https://app.kash.bot; script-src 'self' https://app.kash.bot;
+```
+
+---
+
+## Finding Thread IDs
+
+Use the [GET /api/threads](/developer-docs/public-embed-api/endpoints/threads) endpoint to discover thread IDs:
+
+```javascript
+async function findThreads() {
+  const response = await fetch(
+    'https://app.kash.bot/api/threads?category=politics&limit=10'
+  );
+  const data = await response.json();
+
+  data.threads.forEach((thread) => {
+    console.log(`Thread: ${thread.title}`);
+    console.log(`ID: ${thread.id}`);
+    console.log(`Embed URL: https://app.kash.bot/threads/${thread.id}?embed=true\n`);
+  });
+}
+
+findThreads();
+```
+
+---
+
+## Performance Best Practices
+
+### 1. Lazy Loading
+
+Load below-fold iframes only when visible:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  loading="lazy"
+></iframe>
+```
+
+### 2. Preconnect to Kash Domain
+
+Speed up iframe loading with DNS preconnect:
+
+```html
+<head>
+  <link rel="preconnect" href="https://app.kash.bot" />
+  <link rel="dns-prefetch" href="https://app.kash.bot" />
+</head>
+```
+
+### 3. Limit Markets Displayed
+
+Reduce initial load time by limiting markets:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&limit=5"
+></iframe>
+```
+
+### 4. Use Compact Mode
+
+Compact mode loads fewer assets and renders faster:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&compact=true"
+  height="350"
+></iframe>
+```
+
+---
+
+## Accessibility
+
+### Provide Descriptive Title
+
+Help screen reader users understand iframe content:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  title="2024 Presidential Election prediction markets - Current betting odds and probabilities"
+></iframe>
+```
+
+### Keyboard Navigation
+
+Kash embeds support full keyboard navigation:
+- **Tab** - Navigate between markets
+- **Enter** - Open market details
+- **Escape** - Close modals
+
+### ARIA Labels
+
+The iframe automatically includes ARIA labels for interactive elements within the embed.
+
+---
+
+## Common Issues
+
+### Iframe Not Displaying
+
+**Problem:** Blank iframe or "Refused to display" error
+
+**Solutions:**
+1. Verify thread ID is correct
+2. Ensure `?embed=true` parameter is present
+3. Check browser console for CSP errors
+4. Confirm parent page is served over HTTPS (required)
+
+### Height Not Correct
+
+**Problem:** Iframe shows scrollbars or cuts off content
+
+**Solutions:**
+1. Set minimum height: `height="600"`
+2. Implement dynamic height adjustment (see Responsive Design section)
+3. Use `compact=true` for smaller spaces
+
+### Markets Not Loading
+
+**Problem:** Embed loads but shows no markets
+
+**Solutions:**
+1. Check thread has active markets using [GET /api/threads/:id/markets](/developer-docs/public-embed-api/endpoints/thread-markets)
+2. Verify `status` filter isn't excluding all markets
+3. Check `limit` parameter isn't set too low
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization Guide" href="/developer-docs/public-embed-api/guides/customization">
+    Learn advanced styling and configuration options
+  </Card>
+  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
+    Communicate between your page and the embed
+  </Card>
+  <Card title="Code Examples" href="/developer-docs/public-embed-api/examples/html">
+    View complete implementation examples
+  </Card>
+  <Card title="API Reference" href="/developer-docs/public-embed-api/endpoints/threads">
+    Explore REST API endpoints
+  </Card>
+</CardGroup>
