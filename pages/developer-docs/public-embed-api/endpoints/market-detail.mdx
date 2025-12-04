@@ -234,7 +234,7 @@ async function displayMarket(marketId) {
   
   return {
     title: market.question,
-    odds: `${(market.probability * 100).toFixed(0)}% YES`,
+    probability: `${(market.probability * 100).toFixed(0)}% YES`,
     volume: `$${(market.totalVolume / 100).toLocaleString()}`,
     status: market.status
   };
