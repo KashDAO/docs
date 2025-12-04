@@ -108,7 +108,9 @@
           {
             "group": "Twitter Deep Link Endpoints",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/twitter-links"
+              "pages/developer-docs/public-embed-api/endpoints/market-twitter-link",
+              "pages/developer-docs/public-embed-api/endpoints/thread-twitter-links",
+              "pages/developer-docs/public-embed-api/endpoints/twitter-links-batch"
             ]
           },
           {

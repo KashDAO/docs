@@ -1,0 +1,189 @@
+---
+title: 'POST /api/twitter-links'
+description: 'Generate Twitter prediction URLs for multiple markets in batch'
+---
+
+# POST /api/twitter-links
+
+Generate Twitter intent URLs for multiple markets in a single request. Useful for building custom UIs with multiple prediction buttons.
+
+---
+
+## Endpoint
+
+```
+POST https://app.kash.bot/api/twitter-links
+```
+
+## Request Body
+
+```json
+{
+  "markets": [
+    { "marketId": "abc123", "side": "yes", "amount": 25 },
+    { "marketId": "def456", "side": "no", "amount": 50 }
+  ]
+}
+```
+
+<ParamField body="markets" type="array" required>
+  Array of market prediction requests (max 50)
+  
+  <Expandable title="Market Request Object">
+    <ParamField body="marketId" type="string" required>
+      Market ID
+    </ParamField>
+    <ParamField body="side" type="string" required>
+      Prediction side: `yes` or `no`
+    </ParamField>
+    <ParamField body="amount" type="number" required>
+      Prediction amount in USD (1-10000)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="links" type="array">
+  Successfully generated links
+  
+  <Expandable title="Link Object">
+    <ResponseField name="marketId" type="string">
+      Market ID
+    </ResponseField>
+    <ResponseField name="question" type="string">
+      Market question
+    </ResponseField>
+    <ResponseField name="sourceTweetUrl" type="string">
+      Original market tweet URL
+    </ResponseField>
+    <ResponseField name="twitterUrl" type="string">
+      Twitter intent URL
+    </ResponseField>
+    <ResponseField name="tweetContent" type="string">
+      Tweet content
+    </ResponseField>
+    <ResponseField name="side" type="string">
+      Prediction side
+    </ResponseField>
+    <ResponseField name="amount" type="number">
+      Prediction amount
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  Failed requests with error messages
+  
+  <Expandable title="Error Object">
+    <ResponseField name="marketId" type="string">
+      Market ID that failed
+    </ResponseField>
+    <ResponseField name="error" type="string">
+      Error message
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**50 requests per minute** per IP address (max 50 markets per request)
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://app.kash.bot/api/twitter-links" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "markets": [
+      { "marketId": "abc123", "side": "yes", "amount": 25 },
+      { "marketId": "def456", "side": "no", "amount": 50 }
+    ]
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://app.kash.bot/api/twitter-links', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    markets: [
+      { marketId: 'abc123', side: 'yes', amount: 25 },
+      { marketId: 'def456', side: 'no', amount: 50 }
+    ]
+  })
+});
+const data = await response.json();
+console.log(`Generated ${data.links.length} links, ${data.errors.length} errors`);
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "links": [
+    {
+      "marketId": "abc123",
+      "question": "Will BTC hit $100k?",
+      "sourceTweetUrl": "https://twitter.com/...",
+      "twitterUrl": "https://twitter.com/intent/tweet?text=...",
+      "tweetContent": "@kash_bot $25 on Yes https://twitter.com/...",
+      "side": "yes",
+      "amount": 25
+    }
+  ],
+  "errors": [
+    {
+      "marketId": "def456",
+      "error": "Market not found"
+    }
+  ],
+  "_meta": {
+    "requestedAt": "2025-01-15T12:00:00Z",
+    "totalRequested": 2,
+    "totalGenerated": 1,
+    "totalErrors": 1
+  }
+}
+```
+
+---
+
+## Dynamic Market Discovery
+
+Since markets can expire after 24 hours, use discovery endpoints to always show active markets:
+
+```javascript
+async function loadTrendingPredictions() {
+  // 1. Get trending markets
+  const marketsRes = await fetch('https://app.kash.bot/api/markets/trending?limit=5');
+  const { markets } = await marketsRes.json();
+
+  // 2. Generate Twitter links for each market
+  const linksRes = await fetch('https://app.kash.bot/api/twitter-links', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      markets: markets.map(m => ({
+        marketId: m.id,
+        side: 'yes',
+        amount: 25
+      }))
+    })
+  });
+
+  const { links } = await linksRes.json();
+  
+  // 3. Render your custom UI with the links
+  renderMarkets(markets, links);
+}
+
+// Refresh every hour to get fresh markets
+setInterval(loadTrendingPredictions, 60 * 60 * 1000);
+loadTrendingPredictions();
+```
+

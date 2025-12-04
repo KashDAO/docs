@@ -5,24 +5,48 @@ description: 'Embed prediction markets on your website with the Kash Public Embe
 
 # Public Embed API Overview
 
-The Kash Public Embed API enables anyone to embed prediction markets and threads on their website. All embeds are read-only and anonymous - users are directed to Kash for transactions. We automatically track all embeds for revenue sharing purposes.
+The Kash Public Embed API enables anyone to embed prediction markets and threads on their website. All embeds are read-only and anonymous - users are directed to Kash for transactions.
 
 ## Key Features
 
 <CardGroup cols={2}>
   <Card title="Iframe Embeds" icon="window">
-    Embed complete threads with a 20-tile market heatmap grid or single market cards on your website
+    Embed complete threads with a 20-tile market heatmap grid or single market cards
+  </Card>
+  <Card title="Twitter Deep Links" icon="x-twitter">
+    Generate Twitter URLs that let users place predictions directly via tweet
   </Card>
   <Card title="REST API" icon="code">
-    Public API endpoints to fetch threads, markets, and real-time data programmatically
-  </Card>
-  <Card title="Revenue Sharing" icon="dollar-sign">
-    Automatic tracking of all embed activity for fair revenue distribution
+    Public API endpoints to fetch threads, markets, and real-time data
   </Card>
   <Card title="Zero Setup" icon="bolt">
-    No authentication required - just copy the iframe code and start embedding
+    No authentication required - just copy the code and start embedding
   </Card>
 </CardGroup>
+
+---
+
+## API Endpoint Groups
+
+### Thread Endpoints
+Fetch and display prediction market threads (collections of related markets):
+- **GET /api/threads** - List all available threads
+- **GET /api/threads/:id** - Get details for a specific thread
+- **GET /api/threads/:id/markets** - Get all markets within a thread
+
+### Market Endpoints
+Discover and filter individual prediction markets:
+- **GET /api/markets** - List markets with filtering and pagination
+- **GET /api/markets/trending** - Get trending markets by recent activity
+- **GET /api/markets/featured** - Get curated high-volume markets
+
+### Twitter Deep Link Endpoints
+Generate Twitter intent URLs for predictions (no iframe needed):
+- **GET /api/markets/:id/twitter-link** - Generate link for a single market
+- **GET /api/threads/:id/twitter-links** - Generate links for all markets in a thread
+- **POST /api/twitter-links** - Batch generate links for multiple markets
+
+---
 
 ## Quick Start
 
