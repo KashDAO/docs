@@ -112,12 +112,6 @@
             ]
           },
           {
-            "group": "Tracking Endpoints",
-            "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/embed-tracking"
-            ]
-          },
-          {
             "group": "Embed Guides",
             "pages": [
               "pages/developer-docs/public-embed-api/guides/thread-iframe",
