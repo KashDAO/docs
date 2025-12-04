@@ -1,0 +1,352 @@
+---
+title: 'GET /api/markets'
+description: 'List all available prediction markets with filtering and pagination'
+---
+
+# GET /api/markets
+
+Fetches a paginated list of all available prediction markets with optional filtering.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets
+```
+
+## Query Parameters
+
+<ParamField query="status" type="string" default="active">
+  Filter by market status: `active`, `resolved`, `cancelled`, `paused`
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter by category (e.g., `politics`, `crypto`, `sports`)
+</ParamField>
+
+<ParamField query="thread_id" type="string">
+  Filter to only markets in a specific thread
+</ParamField>
+
+<ParamField query="limit" type="number" default="50">
+  Maximum number of results per page (max: 100)
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Pagination offset for fetching subsequent pages
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Field to sort by: `created_at`, `total_volume`, `current_probability`, `title`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort direction: `asc`, `desc`
+</ParamField>
+
+## Response
+
+<ResponseField name="markets" type="array">
+  Array of market objects
+  
+  <Expandable title="Market Object">
+    <ResponseField name="id" type="string">
+      Unique market identifier
+    </ResponseField>
+    <ResponseField name="question" type="string">
+      Market question
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Market description (optional)
+    </ResponseField>
+    <ResponseField name="probability" type="number">
+      Current YES probability (0-1)
+    </ResponseField>
+    <ResponseField name="yesPrice" type="number">
+      Current YES share price
+    </ResponseField>
+    <ResponseField name="noPrice" type="number">
+      Current NO share price
+    </ResponseField>
+    <ResponseField name="totalVolume" type="number">
+      Total trading volume in cents
+    </ResponseField>
+    <ResponseField name="tradeCount" type="number">
+      Number of trades
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Market status: `OPEN`, `FROZEN`, `RESOLVED`, `CANCELLED`
+    </ResponseField>
+    <ResponseField name="endTime" type="number">
+      Market end time (Unix timestamp in milliseconds)
+    </ResponseField>
+    <ResponseField name="category" type="string">
+      Market category
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of market creation
+    </ResponseField>
+    <ResponseField name="sourceTweetUrl" type="string">
+      URL of the original market tweet (for quote tweets)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  
+  <Expandable title="Pagination Object">
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+    <ResponseField name="total" type="number">
+      Total number of matching markets
+    </ResponseField>
+    <ResponseField name="hasMore" type="boolean">
+      Whether more results are available
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**50 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/markets?status=active&limit=10&sort=total_volume&order=desc"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.kash.bot/api/markets?status=active&limit=10'
+);
+const data = await response.json();
+console.log(`Found ${data.markets.length} active markets`);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.kash.bot/api/markets',
+    params={'status': 'active', 'limit': 10}
+)
+data = response.json()
+print(f"Found {len(data['markets'])} active markets")
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "markets": [
+    {
+      "id": "market-abc123",
+      "question": "Will BTC hit $100k by end of 2025?",
+      "description": "Resolves YES if Bitcoin reaches $100,000 USD on any major exchange",
+      "probability": 0.72,
+      "yesPrice": 0.72,
+      "noPrice": 0.28,
+      "totalVolume": 1250000,
+      "tradeCount": 450,
+      "status": "OPEN",
+      "endTime": 1735689600000,
+      "category": "crypto",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "sourceTweetUrl": "https://twitter.com/kash_bot/status/123..."
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "limit": 10,
+    "total": 156,
+    "hasMore": true
+  }
+}
+```
+
+---
+
+# GET /api/markets/trending
+
+Get trending markets based on recent activity and momentum.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/trending
+```
+
+## Query Parameters
+
+<ParamField query="timeframe" type="string" default="7d">
+  Trending timeframe: `1d`, `7d`, `30d`
+</ParamField>
+
+<ParamField query="limit" type="number" default="10">
+  Maximum results (max: 50)
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter by category
+</ParamField>
+
+<ParamField query="minVolume" type="number">
+  Minimum volume threshold
+</ParamField>
+
+## Rate Limit
+
+<Info>
+**30 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+```bash cURL
+curl "https://app.kash.bot/api/markets/trending?timeframe=1d&limit=5"
+```
+
+## Example Response
+
+```json 200 - Success
+{
+  "markets": [
+    {
+      "id": "market-xyz789",
+      "question": "Will ETH flip BTC this year?",
+      "probability": 0.15,
+      "totalVolume": 890000,
+      "tradeCount": 234,
+      "trendingScore": 95.4,
+      "trendingRank": 1,
+      "recentMetrics": {
+        "tradeCount": 45,
+        "volume": 125000,
+        "uniqueTraders": 28
+      }
+    }
+  ],
+  "timeframe": {
+    "trending": "1d"
+  }
+}
+```
+
+---
+
+# GET /api/markets/featured
+
+Get featured high-volume markets curated by Kash.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/featured
+```
+
+## Rate Limit
+
+<Info>
+**30 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+```bash cURL
+curl "https://app.kash.bot/api/markets/featured"
+```
+
+## Example Response
+
+```json 200 - Success
+{
+  "markets": [
+    {
+      "id": "market-featured-1",
+      "question": "Who will win the 2024 Presidential Election?",
+      "probability": 0.52,
+      "totalVolume": 5600000,
+      "tradeCount": 1250,
+      "featured": true
+    }
+  ],
+  "_meta": {
+    "count": 6
+  }
+}
+```
+
+---
+
+## Common Use Cases
+
+### Fetch high-volume markets
+
+```bash
+curl "https://app.kash.bot/api/markets?sort=total_volume&order=desc&limit=10"
+```
+
+### Filter by category
+
+```bash
+curl "https://app.kash.bot/api/markets?category=crypto&status=active"
+```
+
+### Get markets from a specific thread
+
+```bash
+curl "https://app.kash.bot/api/markets?thread_id=thread123"
+```
+
+### Build a dynamic market feed
+
+```javascript
+async function fetchMarketFeed() {
+  // Get trending markets
+  const trendingRes = await fetch('https://app.kash.bot/api/markets/trending?limit=5');
+  const trending = await trendingRes.json();
+  
+  // Get featured markets
+  const featuredRes = await fetch('https://app.kash.bot/api/markets/featured');
+  const featured = await featuredRes.json();
+  
+  // Combine and dedupe
+  const allMarkets = [...featured.markets, ...trending.markets];
+  const uniqueMarkets = allMarkets.filter((m, i, arr) => 
+    arr.findIndex(x => x.id === m.id) === i
+  );
+  
+  return uniqueMarkets;
+}
+```
+
+---
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Twitter Deep Links" href="/developer-docs/public-embed-api/endpoints/twitter-links">
+    Generate prediction URLs for markets
+  </Card>
+  <Card title="GET /api/threads" href="/developer-docs/public-embed-api/endpoints/threads">
+    List all threads
+  </Card>
+  <Card title="Thread Markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
+    Get markets in a specific thread
+  </Card>
+  <Card title="Market Embeds" href="/developer-docs/public-embed-api/guides/thread-iframe">
+    Embed markets with iframes
+  </Card>
+</CardGroup>
+
+
+

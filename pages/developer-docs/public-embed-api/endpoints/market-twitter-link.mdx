@@ -1,0 +1,154 @@
+---
+title: 'GET /api/markets/:id/twitter-link'
+description: 'Generate a Twitter prediction URL for a single market'
+---
+
+# GET /api/markets/:id/twitter-link
+
+Generate a Twitter intent URL for a single market prediction. This enables you to build custom UIs that open Twitter with pre-filled prediction tweets.
+
+## How It Works
+
+When users click your custom prediction buttons:
+1. Twitter opens with a pre-composed prediction tweet
+2. User posts the tweet
+3. Our Twitter bot (@kash_bot) detects and processes the prediction
+4. User is automatically onboarded if they don't have an account
+
+**No wallet connection or login required!** Everything happens via Twitter.
+
+---
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/{id}/twitter-link
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The market ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="side" type="string" required>
+  Prediction side: `yes` or `no`
+</ParamField>
+
+<ParamField query="amount" type="number" required>
+  Prediction amount in USD (1-10000)
+</ParamField>
+
+## Response
+
+<ResponseField name="twitterUrl" type="string">
+  Full Twitter intent URL ready to open
+</ResponseField>
+
+<ResponseField name="tweetContent" type="string">
+  The pre-filled tweet content
+</ResponseField>
+
+<ResponseField name="market" type="object">
+  Market information
+  
+  <Expandable title="Market Object">
+    <ResponseField name="id" type="string">
+      Market ID
+    </ResponseField>
+    <ResponseField name="question" type="string">
+      Market question
+    </ResponseField>
+    <ResponseField name="sourceTweetUrl" type="string">
+      Original market tweet URL (for quote tweets)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**100 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/markets/abc123/twitter-link?side=yes&amount=25"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.kash.bot/api/markets/abc123/twitter-link?side=yes&amount=25'
+);
+const data = await response.json();
+
+// Open Twitter with the prediction
+window.open(data.twitterUrl, '_blank');
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "twitterUrl": "https://twitter.com/intent/tweet?text=%40kash_bot%20%2425%20on%20Yes%20https%3A%2F%2Ftwitter.com%2Fkash_bot%2Fstatus%2F123...",
+  "tweetContent": "@kash_bot $25 on Yes https://twitter.com/kash_bot/status/123...",
+  "market": {
+    "id": "abc123",
+    "question": "Will BTC hit $100k by end of 2025?",
+    "sourceTweetUrl": "https://twitter.com/kash_bot/status/123..."
+  }
+}
+```
+
+```json 400 - Invalid Parameters
+{
+  "error": "Invalid or missing side parameter",
+  "message": "side must be 'yes' or 'no'",
+  "code": "INVALID_SIDE"
+}
+```
+
+```json 404 - Market Not Found
+{
+  "error": "Market not found",
+  "message": "No market found with id: xyz789",
+  "code": "MARKET_NOT_FOUND"
+}
+```
+
+---
+
+## Custom UI Example
+
+Build your own prediction buttons:
+
+```html
+<button id="yes-btn">Predict Yes ($25)</button>
+<button id="no-btn">Predict No ($25)</button>
+
+<script>
+  const MARKET_ID = 'your-market-id';
+  const AMOUNT = 25;
+
+  async function loadMarketLinks() {
+    const [yesRes, noRes] = await Promise.all([
+      fetch(`https://app.kash.bot/api/markets/${MARKET_ID}/twitter-link?side=yes&amount=${AMOUNT}`),
+      fetch(`https://app.kash.bot/api/markets/${MARKET_ID}/twitter-link?side=no&amount=${AMOUNT}`)
+    ]);
+
+    const yesData = await yesRes.json();
+    const noData = await noRes.json();
+    
+    document.getElementById('yes-btn').onclick = () => window.open(yesData.twitterUrl, '_blank');
+    document.getElementById('no-btn').onclick = () => window.open(noData.twitterUrl, '_blank');
+  }
+
+  loadMarketLinks();
+</script>
+```
+

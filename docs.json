@@ -79,9 +79,55 @@
         "tab": "Developer Docs",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
               "pages/developer-docs/introduction"
+            ]
+          },
+          {
+            "group": "Public Embed API",
+            "pages": [
+              "pages/developer-docs/public-embed-api/overview",
+              "pages/developer-docs/public-embed-api/quickstart"
+            ]
+          },
+          {
+            "group": "Thread Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/threads",
+              "pages/developer-docs/public-embed-api/endpoints/thread-detail",
+              "pages/developer-docs/public-embed-api/endpoints/thread-markets"
+            ]
+          },
+          {
+            "group": "Market Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/markets",
+              "pages/developer-docs/public-embed-api/endpoints/market-detail"
+            ]
+          },
+          {
+            "group": "Twitter Deep Link Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/market-twitter-link",
+              "pages/developer-docs/public-embed-api/endpoints/thread-twitter-links",
+              "pages/developer-docs/public-embed-api/endpoints/twitter-links-batch"
+            ]
+          },
+          {
+            "group": "Embed Guides",
+            "pages": [
+              "pages/developer-docs/public-embed-api/guides/thread-iframe",
+              "pages/developer-docs/public-embed-api/guides/customization",
+              "pages/developer-docs/public-embed-api/guides/postmessage-api"
+            ]
+          },
+          {
+            "group": "Code Examples",
+            "pages": [
+              "pages/developer-docs/public-embed-api/examples/html",
+              "pages/developer-docs/public-embed-api/examples/react",
+              "pages/developer-docs/public-embed-api/examples/javascript"
             ]
           }
         ]

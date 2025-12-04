@@ -1,0 +1,859 @@
+---
+title: 'JavaScript Advanced Patterns'
+description: 'Advanced JavaScript patterns, utilities, and best practices for Kash embeds'
+---
+
+# JavaScript Advanced Patterns
+
+Production-ready JavaScript patterns, utilities, and advanced techniques for building robust Kash embed integrations.
+
+---
+
+## Embed Manager Class
+
+Reusable class for managing embed lifecycle:
+
+```javascript
+// EmbedManager.js
+class KashEmbedManager {
+  constructor(config) {
+    this.config = {
+      threadId: config.threadId,
+      containerId: config.containerId,
+      theme: config.theme || 'light',
+      compact: config.compact || false,
+      limit: config.limit || 20,
+      partnerOrgId: config.partnerOrgId || null,
+      onReady: config.onReady || null,
+      onMarketClick: config.onMarketClick || null,
+      onTradeExecuted: config.onTradeExecuted || null,
+      onError: config.onError || null,
+    };
+
+    this.iframe = null;
+    this.embedId = null;
+    this.isReady = false;
+    this.messageHandler = this.handleMessage.bind(this);
+  }
+
+  // Initialize embed
+  init() {
+    const container = document.getElementById(this.config.containerId);
+    if (!container) {
+      console.error(`Container ${this.config.containerId} not found`);
+      return;
+    }
+
+    // Create iframe
+    this.iframe = document.createElement('iframe');
+    this.iframe.src = this.buildEmbedUrl();
+    this.iframe.width = '100%';
+    this.iframe.height = '600';
+    this.iframe.frameBorder = '0';
+    this.iframe.setAttribute('loading', 'lazy');
+
+    container.appendChild(this.iframe);
+
+    // Listen for messages
+    window.addEventListener('message', this.messageHandler);
+
+    // Track embed load
+    this.trackEmbedLoad();
+  }
+
+  // Build embed URL
+  buildEmbedUrl() {
+    const url = new URL(
+      `https://app.kash.bot/threads/${this.config.threadId}`
+    );
+    url.searchParams.set('embed', 'true');
+    url.searchParams.set('theme', this.config.theme);
+    url.searchParams.set('compact', String(this.config.compact));
+    url.searchParams.set('limit', String(this.config.limit));
+
+    if (this.config.partnerOrgId) {
+      url.searchParams.set('partner_org_id', this.config.partnerOrgId);
+    }
+
+    return url.toString();
+  }
+
+  // Handle messages from iframe
+  handleMessage(event) {
+    if (event.origin !== 'https://app.kash.bot') return;
+
+    const { type, ...data } = event.data;
+
+    switch (type) {
+      case 'embed_ready':
+        this.isReady = true;
+        this.embedId = data.embedId;
+        this.config.onReady?.(data);
+        break;
+
+      case 'resize':
+        if (this.iframe) {
+          this.iframe.style.height = `${data.height}px`;
+        }
+        break;
+
+      case 'market_click':
+        this.config.onMarketClick?.(data);
+        this.trackInteraction(data.marketId, 'click');
+        break;
+
+      case 'trade_executed':
+        this.config.onTradeExecuted?.(data);
+        this.trackInteraction(data.marketId, 'trade', {
+          amount: data.amount,
+          outcome: data.outcome,
+        });
+        break;
+
+      case 'error':
+        this.config.onError?.(data);
+        break;
+    }
+  }
+
+  // Send command to iframe
+  sendCommand(command) {
+    if (!this.iframe || !this.iframe.contentWindow) {
+      console.warn('Iframe not ready');
+      return;
+    }
+
+    this.iframe.contentWindow.postMessage(command, 'https://app.kash.bot');
+  }
+
+  // Convenience methods
+  setTheme(theme) {
+    this.config.theme = theme;
+    this.sendCommand({ type: 'set_theme', theme });
+  }
+
+  applyFilters(filters) {
+    this.sendCommand({ type: 'apply_filters', filters });
+  }
+
+  refresh() {
+    this.sendCommand({ type: 'refresh' });
+  }
+
+  // Track embed load
+  async trackEmbedLoad() {
+    if (!this.config.partnerOrgId) return;
+
+    try {
+      const response = await fetch('https://app.kash.bot/api/embeds/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thread_id: this.config.threadId,
+          partner_org_id: this.config.partnerOrgId,
+          source: window.location.hostname,
+          referrer: document.referrer,
+          user_agent: navigator.userAgent,
+        }),
+      });
+
+      const data = await response.json();
+      this.embedId = data.embed_id;
+    } catch (error) {
+      console.error('Tracking failed:', error);
+    }
+  }
+
+  // Track interaction
+  async trackInteraction(marketId, interactionType, metadata = {}) {
+    if (!this.embedId) return;
+
+    try {
+      await fetch('https://app.kash.bot/api/embeds/interactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embed_id: this.embedId,
+          thread_id: this.config.threadId,
+          market_id: marketId,
+          interaction_type: interactionType,
+          metadata,
+        }),
+      });
+    } catch (error) {
+      console.error('Interaction tracking failed:', error);
+    }
+  }
+
+  // Clean up
+  destroy() {
+    window.removeEventListener('message', this.messageHandler);
+    if (this.iframe && this.iframe.parentNode) {
+      this.iframe.parentNode.removeChild(this.iframe);
+    }
+    this.iframe = null;
+    this.isReady = false;
+  }
+}
+
+// Export for module usage
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = KashEmbedManager;
+}
+```
+
+**Usage:**
+
+```javascript
+const embed = new KashEmbedManager({
+  threadId: 'abc123',
+  containerId: 'kash-embed-container',
+  theme: 'light',
+  partnerOrgId: 'my-org',
+  onReady: (data) => {
+    console.log(`Loaded ${data.marketCount} markets`);
+  },
+  onMarketClick: (data) => {
+    console.log(`Market clicked: ${data.marketTitle}`);
+  },
+  onTradeExecuted: (data) => {
+    alert(`Trade executed: ${data.shares} shares`);
+  },
+});
+
+embed.init();
+
+// Later...
+embed.setTheme('dark');
+embed.applyFilters({ status: 'active' });
+
+// Clean up when done
+embed.destroy();
+```
+
+---
+
+## Batch Interaction Tracker
+
+Efficiently batch API calls:
+
+```javascript
+// BatchTracker.js
+class BatchInteractionTracker {
+  constructor(config = {}) {
+    this.embedId = config.embedId;
+    this.threadId = config.threadId;
+    this.batchSize = config.batchSize || 10;
+    this.flushInterval = config.flushInterval || 5000; // 5 seconds
+    this.queue = [];
+    this.timer = null;
+
+    // Start auto-flush
+    this.startAutoFlush();
+  }
+
+  // Track interaction
+  track(marketId, interactionType, metadata = {}) {
+    this.queue.push({
+      market_id: marketId,
+      interaction_type: interactionType,
+      metadata,
+      timestamp: Date.now(),
+    });
+
+    // Flush if batch size reached
+    if (this.queue.length >= this.batchSize) {
+      this.flush();
+    }
+  }
+
+  // Flush queue
+  async flush() {
+    if (this.queue.length === 0) return;
+
+    const interactions = [...this.queue];
+    this.queue = [];
+
+    // Send all interactions
+    const promises = interactions.map((interaction) =>
+      fetch('https://app.kash.bot/api/embeds/interactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embed_id: this.embedId,
+          thread_id: this.threadId,
+          ...interaction,
+        }),
+      }).catch((error) => {
+        console.error('Failed to track interaction:', error);
+        // Re-queue failed interactions
+        this.queue.push(interaction);
+      })
+    );
+
+    await Promise.allSettled(promises);
+  }
+
+  // Auto-flush on interval
+  startAutoFlush() {
+    this.timer = setInterval(() => {
+      this.flush();
+    }, this.flushInterval);
+  }
+
+  // Stop auto-flush
+  stopAutoFlush() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  // Destroy and flush remaining
+  async destroy() {
+    this.stopAutoFlush();
+    await this.flush();
+  }
+}
+```
+
+**Usage:**
+
+```javascript
+const tracker = new BatchInteractionTracker({
+  embedId: 'embed_123',
+  threadId: 'abc123',
+  batchSize: 10,
+  flushInterval: 5000,
+});
+
+// Track interactions
+tracker.track('market-1', 'click');
+tracker.track('market-2', 'view');
+tracker.track('market-3', 'trade', { amount: 1000, outcome: 'yes' });
+
+// Clean up
+window.addEventListener('beforeunload', () => {
+  tracker.destroy();
+});
+```
+
+---
+
+## Retry Logic Utility
+
+Robust retry mechanism with exponential backoff:
+
+```javascript
+// RetryUtil.js
+async function fetchWithRetry(url, options = {}, retryConfig = {}) {
+  const {
+    maxRetries = 3,
+    baseDelay = 1000,
+    maxDelay = 10000,
+    backoffFactor = 2,
+    retryableStatuses = [408, 429, 500, 502, 503, 504],
+  } = retryConfig;
+
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      // Success
+      if (response.ok) {
+        return response;
+      }
+
+      // Don't retry non-retryable status codes
+      if (!retryableStatuses.includes(response.status)) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Rate limit - use Retry-After header
+      if (response.status === 429) {
+        const retryAfter =
+          parseInt(response.headers.get('Retry-After'), 10) || baseDelay / 1000;
+        const delay = Math.min(retryAfter * 1000, maxDelay);
+
+        console.warn(`Rate limited. Retrying after ${delay}ms`);
+        await sleep(delay);
+        continue;
+      }
+
+      // For other errors, use exponential backoff
+      lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+    } catch (error) {
+      lastError = error;
+    }
+
+    // Don't delay after last attempt
+    if (attempt < maxRetries) {
+      const delay = Math.min(baseDelay * Math.pow(backoffFactor, attempt), maxDelay);
+      console.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying after ${delay}ms`);
+      await sleep(delay);
+    }
+  }
+
+  throw new Error(`Failed after ${maxRetries} retries: ${lastError.message}`);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+```
+
+**Usage:**
+
+```javascript
+try {
+  const response = await fetchWithRetry(
+    'https://app.kash.bot/api/threads',
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    },
+    {
+      maxRetries: 3,
+      baseDelay: 1000,
+      backoffFactor: 2,
+    }
+  );
+
+  const data = await response.json();
+  console.log('Threads:', data.threads);
+} catch (error) {
+  console.error('Failed to fetch threads:', error);
+}
+```
+
+---
+
+## Lazy Load Utility
+
+Load embeds only when visible:
+
+```javascript
+// LazyLoadEmbeds.js
+class LazyEmbedLoader {
+  constructor(config = {}) {
+    this.config = {
+      root: config.root || null,
+      rootMargin: config.rootMargin || '50px',
+      threshold: config.threshold || 0.1,
+    };
+
+    this.observer = new IntersectionObserver(
+      this.handleIntersection.bind(this),
+      this.config
+    );
+
+    this.embeds = new Map();
+  }
+
+  // Register embed for lazy loading
+  register(element, embedConfig) {
+    this.embeds.set(element, embedConfig);
+    this.observer.observe(element);
+  }
+
+  // Handle intersection
+  handleIntersection(entries) {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const element = entry.target;
+        const config = this.embeds.get(element);
+
+        if (config) {
+          this.loadEmbed(element, config);
+          this.observer.unobserve(element);
+          this.embeds.delete(element);
+        }
+      }
+    });
+  }
+
+  // Load embed
+  loadEmbed(container, config) {
+    const iframe = document.createElement('iframe');
+    const url = new URL(`https://app.kash.bot/threads/${config.threadId}`);
+
+    url.searchParams.set('embed', 'true');
+    if (config.theme) url.searchParams.set('theme', config.theme);
+    if (config.compact) url.searchParams.set('compact', 'true');
+    if (config.limit) url.searchParams.set('limit', String(config.limit));
+
+    iframe.src = url.toString();
+    iframe.width = '100%';
+    iframe.height = config.height || '600';
+    iframe.frameBorder = '0';
+
+    container.innerHTML = '';
+    container.appendChild(iframe);
+
+    console.log(`Lazy loaded embed: ${config.threadId}`);
+  }
+
+  // Destroy observer
+  destroy() {
+    this.observer.disconnect();
+    this.embeds.clear();
+  }
+}
+```
+
+**Usage:**
+
+```html
+<div class="lazy-embed-container" data-thread-id="abc123"></div>
+<div class="lazy-embed-container" data-thread-id="def456"></div>
+<div class="lazy-embed-container" data-thread-id="ghi789"></div>
+
+<script>
+  const loader = new LazyEmbedLoader({
+    rootMargin: '100px', // Load 100px before entering viewport
+    threshold: 0.1,
+  });
+
+  document.querySelectorAll('.lazy-embed-container').forEach((container) => {
+    loader.register(container, {
+      threadId: container.dataset.threadId,
+      theme: 'light',
+      compact: false,
+      height: 600,
+    });
+  });
+</script>
+```
+
+---
+
+## Event Aggregator
+
+Centralized event handling for multiple embeds:
+
+```javascript
+// EventAggregator.js
+class EmbedEventAggregator {
+  constructor() {
+    this.handlers = new Map();
+    this.embedMap = new Map(); // iframe -> embedId mapping
+
+    window.addEventListener('message', this.handleMessage.bind(this));
+  }
+
+  // Register embed
+  registerEmbed(iframe, embedId) {
+    this.embedMap.set(iframe, embedId);
+  }
+
+  // Register event handler
+  on(embedId, eventType, handler) {
+    const key = `${embedId}:${eventType}`;
+
+    if (!this.handlers.has(key)) {
+      this.handlers.set(key, []);
+    }
+
+    this.handlers.get(key).push(handler);
+  }
+
+  // Remove event handler
+  off(embedId, eventType, handler) {
+    const key = `${embedId}:${eventType}`;
+    const handlers = this.handlers.get(key);
+
+    if (handlers) {
+      const index = handlers.indexOf(handler);
+      if (index !== -1) {
+        handlers.splice(index, 1);
+      }
+    }
+  }
+
+  // Handle message
+  handleMessage(event) {
+    if (event.origin !== 'https://app.kash.bot') return;
+
+    const { type, ...data } = event.data;
+
+    // Find which embed sent this message
+    let embedId = null;
+    for (const [iframe, id] of this.embedMap.entries()) {
+      if (iframe.contentWindow === event.source) {
+        embedId = id;
+        break;
+      }
+    }
+
+    if (!embedId) return;
+
+    // Trigger handlers
+    const key = `${embedId}:${type}`;
+    const handlers = this.handlers.get(key);
+
+    if (handlers) {
+      handlers.forEach((handler) => {
+        try {
+          handler(data);
+        } catch (error) {
+          console.error('Handler error:', error);
+        }
+      });
+    }
+
+    // Trigger wildcard handlers
+    const wildcardKey = `${embedId}:*`;
+    const wildcardHandlers = this.handlers.get(wildcardKey);
+
+    if (wildcardHandlers) {
+      wildcardHandlers.forEach((handler) => {
+        try {
+          handler(type, data);
+        } catch (error) {
+          console.error('Wildcard handler error:', error);
+        }
+      });
+    }
+  }
+
+  // Unregister embed
+  unregisterEmbed(iframe) {
+    this.embedMap.delete(iframe);
+  }
+}
+```
+
+**Usage:**
+
+```javascript
+const aggregator = new EmbedEventAggregator();
+
+// Setup embeds
+const iframe1 = document.getElementById('embed-1');
+const iframe2 = document.getElementById('embed-2');
+
+aggregator.registerEmbed(iframe1, 'embed-1');
+aggregator.registerEmbed(iframe2, 'embed-2');
+
+// Listen to specific embed events
+aggregator.on('embed-1', 'market_click', (data) => {
+  console.log('Embed 1 market click:', data.marketTitle);
+});
+
+aggregator.on('embed-2', 'trade_executed', (data) => {
+  console.log('Embed 2 trade:', data);
+});
+
+// Listen to all events from embed
+aggregator.on('embed-1', '*', (eventType, data) => {
+  console.log(`Embed 1 event: ${eventType}`, data);
+});
+```
+
+---
+
+## Performance Monitor
+
+Track embed performance metrics:
+
+```javascript
+// PerformanceMonitor.js
+class EmbedPerformanceMonitor {
+  constructor(embedId) {
+    this.embedId = embedId;
+    this.metrics = {
+      loadTime: null,
+      firstPaint: null,
+      interactionCount: 0,
+      errors: [],
+    };
+
+    this.startTime = performance.now();
+  }
+
+  // Mark embed as loaded
+  markLoaded() {
+    this.metrics.loadTime = performance.now() - this.startTime;
+    console.log(`Embed ${this.embedId} loaded in ${this.metrics.loadTime.toFixed(2)}ms`);
+  }
+
+  // Track interaction
+  trackInteraction() {
+    this.metrics.interactionCount++;
+  }
+
+  // Track error
+  trackError(error) {
+    this.metrics.errors.push({
+      message: error.message,
+      timestamp: Date.now(),
+    });
+  }
+
+  // Get metrics summary
+  getSummary() {
+    return {
+      embedId: this.embedId,
+      loadTime: this.metrics.loadTime,
+      interactionCount: this.metrics.interactionCount,
+      errorCount: this.metrics.errors.length,
+      errors: this.metrics.errors,
+    };
+  }
+
+  // Send metrics to analytics
+  async sendToAnalytics() {
+    const summary = this.getSummary();
+
+    // Send to your analytics service
+    try {
+      await fetch('https://your-analytics.com/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(summary),
+      });
+    } catch (error) {
+      console.error('Failed to send analytics:', error);
+    }
+  }
+}
+```
+
+**Usage:**
+
+```javascript
+const monitor = new EmbedPerformanceMonitor('embed-123');
+
+window.addEventListener('message', (event) => {
+  if (event.origin !== 'https://app.kash.bot') return;
+
+  switch (event.data.type) {
+    case 'embed_ready':
+      monitor.markLoaded();
+      break;
+
+    case 'market_click':
+    case 'trade_executed':
+      monitor.trackInteraction();
+      break;
+
+    case 'error':
+      monitor.trackError(event.data);
+      break;
+  }
+});
+
+// Send metrics on page unload
+window.addEventListener('beforeunload', () => {
+  monitor.sendToAnalytics();
+});
+```
+
+---
+
+## State Manager
+
+Manage embed state across page lifecycle:
+
+```javascript
+// StateManager.js
+class EmbedStateManager {
+  constructor(storageKey = 'kash_embed_state') {
+    this.storageKey = storageKey;
+    this.state = this.loadState();
+  }
+
+  // Load state from localStorage
+  loadState() {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.error('Failed to load state:', error);
+      return {};
+    }
+  }
+
+  // Save state to localStorage
+  saveState() {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.state));
+    } catch (error) {
+      console.error('Failed to save state:', error);
+    }
+  }
+
+  // Set embed state
+  setEmbedState(embedId, key, value) {
+    if (!this.state[embedId]) {
+      this.state[embedId] = {};
+    }
+
+    this.state[embedId][key] = value;
+    this.saveState();
+  }
+
+  // Get embed state
+  getEmbedState(embedId, key, defaultValue = null) {
+    return this.state[embedId]?.[key] ?? defaultValue;
+  }
+
+  // Clear embed state
+  clearEmbedState(embedId) {
+    delete this.state[embedId];
+    this.saveState();
+  }
+
+  // Clear all state
+  clearAllState() {
+    this.state = {};
+    this.saveState();
+  }
+}
+```
+
+**Usage:**
+
+```javascript
+const stateManager = new EmbedStateManager();
+
+// Save user preferences
+stateManager.setEmbedState('embed-1', 'theme', 'dark');
+stateManager.setEmbedState('embed-1', 'filter', 'active');
+
+// Restore preferences on load
+const embed = new KashEmbedManager({
+  threadId: 'abc123',
+  containerId: 'embed-container',
+  theme: stateManager.getEmbedState('embed-1', 'theme', 'light'),
+});
+
+embed.init();
+
+// Apply saved filter
+const savedFilter = stateManager.getEmbedState('embed-1', 'filter');
+if (savedFilter) {
+  embed.applyFilters({ status: savedFilter });
+}
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="HTML Examples" href="/developer-docs/public-embed-api/examples/html">
+    Vanilla JavaScript implementations
+  </Card>
+  <Card title="React Examples" href="/developer-docs/public-embed-api/examples/react">
+    React components and hooks
+  </Card>
+  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
+    Communication protocol
+  </Card>
+  <Card title="API Reference" href="/developer-docs/public-embed-api/endpoints/threads">
+    REST API endpoints
+  </Card>
+</CardGroup>

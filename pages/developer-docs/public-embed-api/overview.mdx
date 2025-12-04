@@ -1,0 +1,146 @@
+---
+title: 'Public Embed API Overview'
+description: 'Embed prediction markets on your website with the Kash Public Embed API'
+---
+
+# Public Embed API Overview
+
+The Kash Public Embed API enables anyone to embed prediction markets and threads on their website. All embeds are read-only and anonymous - users are directed to Kash for transactions.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Iframe Embeds" icon="window">
+    Embed complete threads with a 20-tile market heatmap grid or single market cards
+  </Card>
+  <Card title="Twitter Deep Links" icon="x-twitter">
+    Generate Twitter URLs that let users place predictions directly via tweet
+  </Card>
+  <Card title="REST API" icon="code">
+    Public API endpoints to fetch threads, markets, and real-time data
+  </Card>
+  <Card title="Zero Setup" icon="bolt">
+    No authentication required - just copy the code and start embedding
+  </Card>
+</CardGroup>
+
+---
+
+## API Endpoint Groups
+
+### Thread Endpoints
+Fetch and display prediction market threads (collections of related markets):
+- **GET /api/threads** - List all available threads
+- **GET /api/threads/:id** - Get details for a specific thread
+- **GET /api/threads/:id/markets** - Get all markets within a thread
+
+### Market Endpoints
+Discover and filter individual prediction markets:
+- **GET /api/markets** - List markets with filtering and pagination
+- **GET /api/markets/:id** - Get detailed info for a specific market
+- **GET /api/markets/trending** - Get trending markets by recent activity
+- **GET /api/markets/featured** - Get curated high-volume markets
+
+### Twitter Deep Link Endpoints
+Generate Twitter intent URLs for predictions (no iframe needed):
+- **GET /api/markets/:id/twitter-link** - Generate link for a single market
+- **GET /api/threads/:id/twitter-links** - Generate links for all markets in a thread
+- **POST /api/twitter-links** - Batch generate links for multiple markets
+
+---
+
+## Quick Start
+
+Get started in under 5 minutes:
+
+```html HTML
+<iframe
+  src="https://app.kash.bot/threads/{threadId}/iframe?source=your-site"
+  width="100%"
+  height="900"
+  frameborder="0"
+  allow="clipboard-write"
+  title="Kash Prediction Markets"
+></iframe>
+```
+
+Replace `{threadId}` with an actual thread ID from our [thread list API](/developer-docs/public-embed-api/endpoints/threads).
+
+## Use Cases
+
+### News & Media Sites
+Embed live prediction markets alongside news articles to drive engagement and provide readers with real-time sentiment data.
+
+### Financial Platforms
+Integrate market probabilities into your financial dashboards and analysis tools.
+
+### Community Forums
+Add prediction markets to discussion threads for interactive forecasting.
+
+### Educational Platforms
+Use markets as teaching tools for economics, statistics, and decision-making courses.
+
+## Authentication
+
+The Public Embed API is **completely public** and requires **no authentication**. All endpoints are rate-limited by IP address to ensure fair usage.
+
+## Rate Limits
+
+| Endpoint Type | Limit |
+|--------------|-------|
+| GET /api/threads | 50 req/min per IP |
+| GET /api/threads/{id} | 100 req/min per IP |
+| GET /api/threads/{id}/markets | 100 req/min per IP |
+| GET /api/threads/{id}/twitter-links | 100 req/min per IP |
+| GET /api/markets | 50 req/min per IP |
+| GET /api/markets/{id} | 100 req/min per IP |
+| GET /api/markets/{id}/twitter-link | 100 req/min per IP |
+| GET /api/markets/trending | 30 req/min per IP |
+| GET /api/markets/featured | 30 req/min per IP |
+| POST /api/twitter-links | 50 req/min per IP |
+| POST /api/embeds/* | 200 req/min per IP |
+
+Rate limit information is included in response headers:
+```
+X-RateLimit-Limit: 50
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1704067260000
+```
+
+## Base URL
+
+All API requests should be made to:
+```
+https://app.kash.bot/api
+```
+
+Iframe embeds use these URL patterns:
+```
+Thread embed: https://app.kash.bot/threads/{threadId}/iframe
+Market embed: https://app.kash.bot/markets/{marketId}/iframe
+```
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="Technical Support" icon="headset">
+    Email us at [dev@kash.bot](mailto:dev@kash.bot) for technical questions
+  </Card>
+  <Card title="Partnership Inquiries" icon="handshake">
+    Contact [partnerships@kash.bot](mailto:partnerships@kash.bot) for revenue sharing details
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Quickstart Guide" icon="rocket" href="/developer-docs/public-embed-api/quickstart">
+    Get your first embed running in 5 minutes
+  </Card>
+  <Card title="API Reference" icon="book" href="/developer-docs/public-embed-api/endpoints/threads">
+    Browse all available API endpoints
+  </Card>
+  <Card title="Code Examples" icon="code" href="/developer-docs/public-embed-api/examples/html">
+    View complete integration examples
+  </Card>
+</CardGroup>

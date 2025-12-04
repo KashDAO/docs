@@ -1,0 +1,888 @@
+---
+title: 'React Examples'
+description: 'Production-ready React components for embedding Kash prediction markets'
+---
+
+# React Examples
+
+Complete React component examples for embedding Kash prediction markets with TypeScript support, hooks, and modern patterns.
+
+---
+
+## Basic Embed Component
+
+Simple reusable thread embed component:
+
+```typescript
+// components/KashEmbed.tsx
+import { useEffect, useRef, useState } from 'react';
+
+interface KashEmbedProps {
+  threadId: string;
+  theme?: 'light' | 'dark';
+  compact?: boolean;
+  limit?: number;
+  height?: number;
+  className?: string;
+}
+
+export function KashEmbed({
+  threadId,
+  theme = 'light',
+  compact = false,
+  limit = 20,
+  height = 600,
+  className = '',
+}: KashEmbedProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [currentHeight, setCurrentHeight] = useState(height);
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== 'https://app.kash.bot') return;
+
+      if (event.data.type === 'resize') {
+        setCurrentHeight(event.data.height);
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const embedUrl = new URL(`https://app.kash.bot/threads/${threadId}`);
+  embedUrl.searchParams.set('embed', 'true');
+  embedUrl.searchParams.set('theme', theme);
+  embedUrl.searchParams.set('compact', String(compact));
+  embedUrl.searchParams.set('limit', String(limit));
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={embedUrl.toString()}
+      width="100%"
+      height={currentHeight}
+      frameBorder="0"
+      className={className}
+      title="Kash prediction markets"
+      loading="lazy"
+    />
+  );
+}
+```
+
+**Usage:**
+
+```tsx
+import { KashEmbed } from '@/components/KashEmbed';
+
+export default function MarketsPage() {
+  return (
+    <div className="container">
+      <h1>2024 Election Markets</h1>
+      <KashEmbed
+        threadId="abc123"
+        theme="light"
+        compact={false}
+        limit={10}
+        height={600}
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## Advanced Hook with Event Handlers
+
+Custom hook for full embed control:
+
+```typescript
+// hooks/useKashEmbed.ts
+import { useEffect, useState, useCallback, useRef } from 'react';
+
+interface EmbedConfig {
+  threadId: string;
+  theme?: 'light' | 'dark';
+  compact?: boolean;
+  limit?: number;
+  partnerOrgId?: string;
+  onReady?: (data: { marketCount: number; embedId: string }) => void;
+  onMarketClick?: (data: { marketId: string; marketTitle: string }) => void;
+  onTradeExecuted?: (data: {
+    marketId: string;
+    outcome: string;
+    amount: number;
+    shares: number;
+  }) => void;
+  onResize?: (height: number) => void;
+}
+
+interface EmbedCommand {
+  type: string;
+  [key: string]: any;
+}
+
+export function useKashEmbed(config: EmbedConfig) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [height, setHeight] = useState(600);
+  const [embedId, setEmbedId] = useState<string | null>(null);
+
+  // Listen for messages from embed
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== 'https://app.kash.bot') return;
+
+      const { type, ...data } = event.data;
+
+      switch (type) {
+        case 'embed_ready':
+          setIsReady(true);
+          setEmbedId(data.embedId);
+          config.onReady?.(data);
+          break;
+
+        case 'resize':
+          setHeight(data.height);
+          config.onResize?.(data.height);
+          break;
+
+        case 'market_click':
+          config.onMarketClick?.(data);
+          break;
+
+        case 'trade_executed':
+          config.onTradeExecuted?.(data);
+          break;
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [config]);
+
+  // Send command to embed
+  const sendCommand = useCallback((command: EmbedCommand) => {
+    if (!iframeRef.current?.contentWindow) {
+      console.warn('Iframe not ready');
+      return;
+    }
+
+    iframeRef.current.contentWindow.postMessage(
+      command,
+      'https://app.kash.bot'
+    );
+  }, []);
+
+  // Convenience methods
+  const setTheme = useCallback(
+    (theme: 'light' | 'dark') => {
+      sendCommand({ type: 'set_theme', theme });
+    },
+    [sendCommand]
+  );
+
+  const applyFilters = useCallback(
+    (filters: {
+      status?: string;
+      sortBy?: string;
+      sortOrder?: string;
+      limit?: number;
+    }) => {
+      sendCommand({ type: 'apply_filters', filters });
+    },
+    [sendCommand]
+  );
+
+  const refresh = useCallback(() => {
+    sendCommand({ type: 'refresh' });
+  }, [sendCommand]);
+
+  // Build embed URL
+  const embedUrl = new URL(`https://app.kash.bot/threads/${config.threadId}`);
+  embedUrl.searchParams.set('embed', 'true');
+  if (config.theme) embedUrl.searchParams.set('theme', config.theme);
+  if (config.compact) embedUrl.searchParams.set('compact', 'true');
+  if (config.limit) embedUrl.searchParams.set('limit', String(config.limit));
+  if (config.partnerOrgId)
+    embedUrl.searchParams.set('partner_org_id', config.partnerOrgId);
+
+  return {
+    iframeRef,
+    embedUrl: embedUrl.toString(),
+    isReady,
+    height,
+    embedId,
+    sendCommand,
+    setTheme,
+    applyFilters,
+    refresh,
+  };
+}
+```
+
+**Usage:**
+
+```tsx
+// components/AdvancedEmbed.tsx
+import { useKashEmbed } from '@/hooks/useKashEmbed';
+import { useState } from 'react';
+
+export function AdvancedEmbed({ threadId }: { threadId: string }) {
+  const [status, setStatus] = useState('Loading...');
+
+  const {
+    iframeRef,
+    embedUrl,
+    isReady,
+    height,
+    setTheme,
+    applyFilters,
+    refresh,
+  } = useKashEmbed({
+    threadId,
+    theme: 'light',
+    partnerOrgId: 'my-org',
+    onReady: (data) => {
+      setStatus(`Loaded ${data.marketCount} markets`);
+    },
+    onMarketClick: (data) => {
+      setStatus(`Clicked: ${data.marketTitle}`);
+    },
+    onTradeExecuted: (data) => {
+      setStatus(
+        `Trade: ${data.shares} ${data.outcome.toUpperCase()} shares for $${(data.amount / 100).toFixed(2)}`
+      );
+    },
+  });
+
+  return (
+    <div className="embed-container">
+      <div className="controls">
+        <button onClick={() => setTheme('dark')} disabled={!isReady}>
+          Dark Mode
+        </button>
+        <button onClick={() => setTheme('light')} disabled={!isReady}>
+          Light Mode
+        </button>
+        <button
+          onClick={() => applyFilters({ status: 'active' })}
+          disabled={!isReady}
+        >
+          Active Only
+        </button>
+        <button
+          onClick={() =>
+            applyFilters({ sortBy: 'total_volume', sortOrder: 'desc' })
+          }
+          disabled={!isReady}
+        >
+          Top Volume
+        </button>
+        <button onClick={refresh} disabled={!isReady}>
+          Refresh
+        </button>
+      </div>
+
+      <div className="status">{status}</div>
+
+      <iframe
+        ref={iframeRef}
+        src={embedUrl}
+        width="100%"
+        height={height}
+        frameBorder="0"
+        className="embed-iframe"
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## Embed with Tracking
+
+Automatically track embed loads and interactions:
+
+```typescript
+// components/TrackedEmbed.tsx
+import { useEffect, useState, useRef } from 'react';
+
+interface TrackedEmbedProps {
+  threadId: string;
+  partnerOrgId: string;
+}
+
+export function TrackedEmbed({ threadId, partnerOrgId }: TrackedEmbedProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [embedId, setEmbedId] = useState<string | null>(null);
+  const [height, setHeight] = useState(600);
+
+  // Track embed load
+  useEffect(() => {
+    async function trackLoad() {
+      try {
+        const response = await fetch(
+          'https://app.kash.bot/api/embeds/track',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              thread_id: threadId,
+              partner_org_id: partnerOrgId,
+              source: window.location.hostname,
+              referrer: document.referrer,
+              user_agent: navigator.userAgent,
+            }),
+          }
+        );
+        const data = await response.json();
+        setEmbedId(data.embed_id);
+      } catch (error) {
+        console.error('Tracking failed:', error);
+      }
+    }
+
+    trackLoad();
+  }, [threadId, partnerOrgId]);
+
+  // Track interactions
+  async function trackInteraction(
+    marketId: string,
+    interactionType: string,
+    metadata: Record<string, any> = {}
+  ) {
+    if (!embedId) return;
+
+    try {
+      await fetch('https://app.kash.bot/api/embeds/interactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embed_id: embedId,
+          thread_id: threadId,
+          market_id: marketId,
+          interaction_type: interactionType,
+          metadata,
+        }),
+      });
+    } catch (error) {
+      console.error('Interaction tracking failed:', error);
+    }
+  }
+
+  // Listen for embed events
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== 'https://app.kash.bot') return;
+
+      const { type, ...data } = event.data;
+
+      switch (type) {
+        case 'resize':
+          setHeight(data.height);
+          break;
+
+        case 'market_click':
+          trackInteraction(data.marketId, 'click');
+          break;
+
+        case 'trade_executed':
+          trackInteraction(data.marketId, 'trade', {
+            amount: data.amount,
+            outcome: data.outcome,
+          });
+          break;
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [embedId]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={`https://app.kash.bot/threads/${threadId}?embed=true&partner_org_id=${partnerOrgId}`}
+      width="100%"
+      height={height}
+      frameBorder="0"
+    />
+  );
+}
+```
+
+---
+
+## Responsive Sidebar Widget
+
+Compact widget component with responsive design:
+
+```typescript
+// components/MarketWidget.tsx
+import { useKashEmbed } from '@/hooks/useKashEmbed';
+import { useState } from 'react';
+
+interface MarketWidgetProps {
+  threadId: string;
+  title: string;
+}
+
+export function MarketWidget({ threadId, title }: MarketWidgetProps) {
+  const [marketCount, setMarketCount] = useState<number | null>(null);
+
+  const { iframeRef, embedUrl, height } = useKashEmbed({
+    threadId,
+    theme: 'light',
+    compact: true,
+    limit: 3,
+    onReady: (data) => {
+      setMarketCount(data.marketCount);
+    },
+  });
+
+  return (
+    <div className="market-widget">
+      <div className="widget-header">
+        <h3 className="widget-title">📊 {title}</h3>
+        {marketCount !== null && (
+          <span className="widget-badge">{marketCount} markets</span>
+        )}
+      </div>
+
+      <iframe
+        ref={iframeRef}
+        src={embedUrl}
+        width="100%"
+        height={height}
+        frameBorder="0"
+        className="widget-iframe"
+      />
+
+      <style jsx>{`
+        .market-widget {
+          background: white;
+          border-radius: 12px;
+          padding: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          max-width: 350px;
+        }
+
+        .widget-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+        }
+
+        .widget-title {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .widget-badge {
+          background: #dbeafe;
+          color: #1e40af;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .widget-iframe {
+          border-radius: 8px;
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+---
+
+## Multi-Thread Dashboard
+
+Display multiple threads with dynamic loading:
+
+```typescript
+// components/MarketDashboard.tsx
+import { useState, useEffect } from 'react';
+import { KashEmbed } from './KashEmbed';
+
+interface Thread {
+  id: string;
+  title: string;
+  category: string;
+  marketCount: number;
+}
+
+export function MarketDashboard() {
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchThreads() {
+      try {
+        const response = await fetch(
+          'https://app.kash.bot/api/threads?limit=10&sortBy=market_count'
+        );
+        const data = await response.json();
+        setThreads(data.threads);
+      } catch (error) {
+        console.error('Failed to fetch threads:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchThreads();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">Loading threads...</div>;
+  }
+
+  return (
+    <div className="dashboard">
+      <h1>Market Dashboard</h1>
+
+      <div className="thread-grid">
+        {threads.map((thread) => (
+          <div key={thread.id} className="thread-card">
+            <div className="thread-header">
+              <h2>{thread.title}</h2>
+              <span className="thread-category">{thread.category}</span>
+            </div>
+
+            <KashEmbed
+              threadId={thread.id}
+              theme="light"
+              compact
+              limit={5}
+              height={350}
+            />
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        .dashboard {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        .thread-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          gap: 20px;
+          margin-top: 20px;
+        }
+
+        .thread-card {
+          background: white;
+          border-radius: 8px;
+          padding: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .thread-header {
+          margin-bottom: 12px;
+        }
+
+        .thread-header h2 {
+          font-size: 18px;
+          margin: 0 0 4px 0;
+        }
+
+        .thread-category {
+          font-size: 13px;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      `}</style>
+    </div>
+  );
+}
+```
+
+---
+
+## Theme-Aware Embed
+
+Automatically sync with app theme:
+
+```typescript
+// components/ThemedEmbed.tsx
+import { useKashEmbed } from '@/hooks/useKashEmbed';
+import { useTheme } from 'next-themes';
+import { useEffect } from 'react';
+
+interface ThemedEmbedProps {
+  threadId: string;
+}
+
+export function ThemedEmbed({ threadId }: ThemedEmbedProps) {
+  const { theme, systemTheme } = useTheme();
+  const currentTheme = (theme === 'system' ? systemTheme : theme) as
+    | 'light'
+    | 'dark';
+
+  const { iframeRef, embedUrl, height, setTheme, isReady } = useKashEmbed({
+    threadId,
+    theme: currentTheme,
+  });
+
+  // Sync theme changes
+  useEffect(() => {
+    if (isReady && currentTheme) {
+      setTheme(currentTheme);
+    }
+  }, [currentTheme, isReady, setTheme]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={embedUrl}
+      width="100%"
+      height={height}
+      frameBorder="0"
+      className="rounded-lg border border-gray-200 dark:border-gray-700"
+    />
+  );
+}
+```
+
+---
+
+## Error Boundary Wrapper
+
+Graceful error handling:
+
+```typescript
+// components/EmbedErrorBoundary.tsx
+import React, { Component, ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class EmbedErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Embed error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className="error-container">
+            <h3>Failed to load markets</h3>
+            <p>Please try refreshing the page.</p>
+            <button onClick={() => this.setState({ hasError: false })}>
+              Retry
+            </button>
+          </div>
+        )
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+**Usage:**
+
+```tsx
+<EmbedErrorBoundary>
+  <KashEmbed threadId="abc123" />
+</EmbedErrorBoundary>
+```
+
+---
+
+## SSR-Safe Embed (Next.js)
+
+Server-side rendering compatible component:
+
+```typescript
+// components/SSRSafeEmbed.tsx
+import dynamic from 'next/dynamic';
+
+const KashEmbedClient = dynamic(
+  () => import('./KashEmbed').then((mod) => mod.KashEmbed),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="embed-skeleton">
+        <div className="skeleton-header" />
+        <div className="skeleton-card" />
+        <div className="skeleton-card" />
+        <div className="skeleton-card" />
+      </div>
+    ),
+  }
+);
+
+export function SSRSafeEmbed(props: any) {
+  return <KashEmbedClient {...props} />;
+}
+```
+
+---
+
+## Complete Page Example
+
+Full Next.js page with all features:
+
+```typescript
+// app/markets/page.tsx
+'use client';
+
+import { useState } from 'react';
+import { useKashEmbed } from '@/hooks/useKashEmbed';
+import { EmbedErrorBoundary } from '@/components/EmbedErrorBoundary';
+
+export default function MarketsPage() {
+  const [status, setStatus] = useState('Loading markets...');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+
+  const { iframeRef, embedUrl, isReady, height, setTheme, applyFilters } =
+    useKashEmbed({
+      threadId: 'abc123',
+      theme: 'light',
+      partnerOrgId: 'my-org',
+      onReady: (data) => {
+        setStatus(`✅ Loaded ${data.marketCount} markets`);
+      },
+      onMarketClick: (data) => {
+        setStatus(`👆 Clicked: ${data.marketTitle}`);
+      },
+      onTradeExecuted: (data) => {
+        setStatus(
+          `💰 Trade: ${data.shares} ${data.outcome.toUpperCase()} shares`
+        );
+      },
+    });
+
+  function handleFilter(filter: string) {
+    setActiveFilter(filter);
+
+    switch (filter) {
+      case 'active':
+        applyFilters({ status: 'active' });
+        break;
+      case 'resolved':
+        applyFilters({ status: 'resolved' });
+        break;
+      case 'volume':
+        applyFilters({ sortBy: 'total_volume', sortOrder: 'desc', limit: 10 });
+        break;
+      case 'all':
+      default:
+        applyFilters({});
+        break;
+    }
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Prediction Markets</h1>
+        <p className="text-gray-600">
+          Live probabilities on politics, sports, and current events
+        </p>
+      </header>
+
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <button
+          onClick={() => handleFilter('all')}
+          disabled={!isReady}
+          className={`btn ${activeFilter === 'all' ? 'btn-active' : ''}`}
+        >
+          All Markets
+        </button>
+        <button
+          onClick={() => handleFilter('active')}
+          disabled={!isReady}
+          className={`btn ${activeFilter === 'active' ? 'btn-active' : ''}`}
+        >
+          Active
+        </button>
+        <button
+          onClick={() => handleFilter('resolved')}
+          disabled={!isReady}
+          className={`btn ${activeFilter === 'resolved' ? 'btn-active' : ''}`}
+        >
+          Resolved
+        </button>
+        <button
+          onClick={() => handleFilter('volume')}
+          disabled={!isReady}
+          className={`btn ${activeFilter === 'volume' ? 'btn-active' : ''}`}
+        >
+          Top Volume
+        </button>
+        <button onClick={() => setTheme('dark')} disabled={!isReady} className="btn">
+          Dark Mode
+        </button>
+      </div>
+
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
+        {status}
+      </div>
+
+      <EmbedErrorBoundary>
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          width="100%"
+          height={height}
+          frameBorder="0"
+          className="rounded-lg border border-gray-200 shadow-sm"
+        />
+      </EmbedErrorBoundary>
+    </div>
+  );
+}
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="JavaScript Examples" href="/developer-docs/public-embed-api/examples/javascript">
+    Advanced patterns and utilities
+  </Card>
+  <Card title="HTML Examples" href="/developer-docs/public-embed-api/examples/html">
+    Vanilla JavaScript implementations
+  </Card>
+  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
+    Communication protocol
+  </Card>
+  <Card title="Customization" href="/developer-docs/public-embed-api/guides/customization">
+    Styling and theming
+  </Card>
+</CardGroup>

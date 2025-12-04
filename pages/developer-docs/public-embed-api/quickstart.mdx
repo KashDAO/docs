@@ -1,0 +1,226 @@
+---
+title: 'Quickstart Guide'
+description: 'Get your first Kash embed running in 5 minutes'
+---
+
+# Quickstart Guide
+
+Get prediction market embeds on your website in under 5 minutes.
+
+## Step 1: Choose a Thread
+
+First, fetch a list of available threads from our API:
+
+```bash cURL
+curl "https://app.kash.bot/api/threads?status=active&limit=5"
+```
+
+You'll get a response like this:
+
+```json Response
+{
+  "threads": [
+    {
+      "id": "abc123-def456",
+      "title": "2024 Election Predictions",
+      "marketCount": 12,
+      "totalVolume": 1250000,
+      "status": "active"
+    }
+  ],
+  "pagination": { ... }
+}
+```
+
+Copy the `id` field from the thread you want to embed.
+
+## Step 2: Add the Iframe
+
+Add this HTML to your website, replacing `{threadId}` with the ID from Step 1:
+
+```html HTML
+<iframe
+  src="https://app.kash.bot/threads/{threadId}/iframe?source=your-site-name"
+  width="100%"
+  height="900"
+  frameborder="0"
+  allow="clipboard-write"
+  title="Kash Prediction Markets"
+  style="border: none; border-radius: 12px;"
+></iframe>
+```
+
+<Tip>
+Replace `your-site-name` in the `source` parameter with your actual website name for proper revenue tracking.
+</Tip>
+
+## Step 3: Style the Container (Optional)
+
+Wrap your iframe in a container for better responsive design:
+
+```html HTML
+<div class="kash-embed-container">
+  <iframe
+    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
+    width="100%"
+    height="900"
+    frameborder="0"
+    allow="clipboard-write"
+    title="Kash Prediction Markets"
+  ></iframe>
+</div>
+
+<style>
+  .kash-embed-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .kash-embed-container iframe {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .kash-embed-container iframe {
+      height: 700px;
+    }
+  }
+</style>
+```
+
+## Step 4: Add Event Listeners (Optional)
+
+Track user interactions with the embed:
+
+```javascript JavaScript
+window.addEventListener('message', (event) => {
+  // Verify origin for security
+  if (event.origin !== 'https://app.kash.bot') return;
+
+  if (event.data.type === 'kash-iframe-ready') {
+    console.log('Embed loaded successfully');
+  }
+
+  if (event.data.type === 'kash-market-clicked') {
+    console.log('User clicked market:', event.data.data.marketId);
+    // Track in your analytics
+  }
+});
+```
+
+## Complete Example
+
+Here's a complete, production-ready example:
+
+```html HTML
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prediction Markets</title>
+  <style>
+    .kash-embed-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .kash-embed-container iframe {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 768px) {
+      .kash-embed-container iframe {
+        height: 700px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="kash-embed-container">
+    <h1>Live Prediction Markets</h1>
+    <iframe
+      src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
+      height="900"
+      frameborder="0"
+      allow="clipboard-write"
+      title="Kash Prediction Markets"
+    ></iframe>
+  </div>
+
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://app.kash.bot') return;
+
+      switch(event.data.type) {
+        case 'kash-iframe-ready':
+          console.log('Markets loaded:', event.data.data);
+          break;
+        case 'kash-market-clicked':
+          console.log('Market clicked:', event.data.data);
+          break;
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+## Recommended Dimensions
+
+Different embed types work best at specific dimensions:
+
+| Embed Type | Desktop | Tablet | Mobile |
+|-----------|---------|--------|--------|
+| Thread (20-tile grid) | 100% × 900px | 100% × 800px | 100% × 700px |
+| Single Market | 100% × 500px | 100% × 500px | 100% × 400px |
+
+<Note>
+Always use `width="100%"` for responsive design. Only the height needs to be fixed.
+</Note>
+
+## Troubleshooting
+
+### Iframe not loading?
+
+1. **Check the thread ID** - Make sure you're using a valid thread ID from the API
+2. **Verify the URL** - The format should be exact: `https://app.kash.bot/threads/{id}/iframe`
+3. **Check CORS policies** - Some Content Security Policies may block iframes
+4. **Test in incognito** - Ad blockers sometimes interfere with embed loading
+
+### Embed looks broken on mobile?
+
+Reduce the iframe `height` attribute for mobile devices using CSS media queries:
+
+```css CSS
+@media (max-width: 768px) {
+  iframe {
+    height: 700px !important;
+  }
+}
+```
+
+### Not seeing revenue sharing data?
+
+Make sure you:
+1. Added the `?source=your-site-name` parameter to your iframe URL
+2. Contacted [partnerships@kash.bot](mailto:partnerships@kash.bot) to set up your revenue share agreement
+3. Waited 24-48 hours for initial tracking data to appear
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="API Endpoints" icon="code" href="/developer-docs/public-embed-api/endpoints/threads">
+    Explore all available API endpoints
+  </Card>
+  <Card title="Customization" icon="palette" href="/developer-docs/public-embed-api/embeds/customization">
+    Learn about embed customization options
+  </Card>
+  <Card title="Examples" icon="github" href="/developer-docs/public-embed-api/examples/react">
+    View React, Vue, and vanilla JS examples
+  </Card>
+</CardGroup>

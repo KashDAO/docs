@@ -1,0 +1,257 @@
+---
+title: 'GET /api/markets/:id'
+description: 'Get detailed information for a specific prediction market'
+---
+
+# GET /api/markets/:id
+
+Fetch detailed information for a specific prediction market, including optional price history and recent trades.
+
+---
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/{id}
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique market identifier
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="history" type="boolean" default="false">
+  Include price history snapshots (up to 100 data points)
+</ParamField>
+
+<ParamField query="trades" type="boolean" default="false">
+  Include recent trades
+</ParamField>
+
+<ParamField query="trades_limit" type="number" default="20">
+  Number of recent trades to return (max: 100). Only applies when `trades=true`
+</ParamField>
+
+## Response
+
+<ResponseField name="market" type="object">
+  Complete market details
+  
+  <Expandable title="Market Object">
+    <ResponseField name="id" type="string">
+      Unique market identifier
+    </ResponseField>
+    <ResponseField name="question" type="string">
+      Market question
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Market description
+    </ResponseField>
+    <ResponseField name="probability" type="number">
+      Current YES probability (0-1)
+    </ResponseField>
+    <ResponseField name="yesPrice" type="number">
+      Current YES share price
+    </ResponseField>
+    <ResponseField name="noPrice" type="number">
+      Current NO share price
+    </ResponseField>
+    <ResponseField name="totalVolume" type="number">
+      Total trading volume in cents
+    </ResponseField>
+    <ResponseField name="tradeCount" type="number">
+      Number of trades
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Market status: `OPEN`, `FROZEN`, `RESOLVED`, `CANCELLED`
+    </ResponseField>
+    <ResponseField name="endTime" type="number">
+      Market end time (Unix timestamp in milliseconds)
+    </ResponseField>
+    <ResponseField name="category" type="string">
+      Market category
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of market creation
+    </ResponseField>
+    <ResponseField name="sourceTweetUrl" type="string">
+      URL of the original market tweet
+    </ResponseField>
+    <ResponseField name="priceHistory" type="array">
+      Price history data (only if `history=true`)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="priceHistory" type="array">
+  Price history snapshots (only included if `history=true`)
+  
+  <Expandable title="Price History Point">
+    <ResponseField name="timestamp" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    <ResponseField name="price" type="number">
+      Price at this timestamp (0-1)
+    </ResponseField>
+    <ResponseField name="probability" type="number">
+      Probability at this timestamp (0-1)
+    </ResponseField>
+    <ResponseField name="volume" type="number">
+      Cumulative volume at this timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="recentTrades" type="array">
+  Recent trades (only included if `trades=true`)
+  
+  <Expandable title="Trade Object">
+    <ResponseField name="id" type="string">
+      Trade ID
+    </ResponseField>
+    <ResponseField name="side" type="string">
+      Trade side: `YES` or `NO`
+    </ResponseField>
+    <ResponseField name="amount" type="number">
+      Trade amount
+    </ResponseField>
+    <ResponseField name="price" type="number">
+      Execution price
+    </ResponseField>
+    <ResponseField name="timestamp" type="string">
+      Trade timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**100 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/markets/abc123"
+```
+
+```bash cURL (with history)
+curl "https://app.kash.bot/api/markets/abc123?history=true&trades=true&trades_limit=10"
+```
+
+```javascript JavaScript
+const response = await fetch('https://app.kash.bot/api/markets/abc123');
+const data = await response.json();
+
+console.log(`Market: ${data.market.question}`);
+console.log(`Probability: ${(data.market.probability * 100).toFixed(1)}%`);
+console.log(`Volume: $${(data.market.totalVolume / 100).toLocaleString()}`);
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "market": {
+    "id": "abc123",
+    "question": "Will BTC hit $100k by end of 2025?",
+    "description": "Resolves YES if Bitcoin reaches $100,000 USD on any major exchange before December 31, 2025",
+    "probability": 0.72,
+    "yesPrice": 0.72,
+    "noPrice": 0.28,
+    "totalVolume": 1250000,
+    "tradeCount": 450,
+    "status": "OPEN",
+    "endTime": 1735689600000,
+    "category": "crypto",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "sourceTweetUrl": "https://x.com/kash_bot/status/123456789"
+  },
+  "_meta": {
+    "requestedAt": "2025-01-15T12:00:00Z",
+    "includes": {
+      "history": false,
+      "trades": false,
+      "tradesCount": 0
+    }
+  }
+}
+```
+
+```json 200 - With History & Trades
+{
+  "market": {
+    "id": "abc123",
+    "question": "Will BTC hit $100k by end of 2025?",
+    "probability": 0.72,
+    "priceHistory": [
+      { "timestamp": 1705320000000, "probability": 0.72 },
+      { "timestamp": 1705233600000, "probability": 0.68 },
+      { "timestamp": 1705147200000, "probability": 0.65 }
+    ]
+  },
+  "priceHistory": [
+    { "timestamp": "2025-01-15T12:00:00Z", "price": 0.72, "probability": 0.72, "volume": 1250000 },
+    { "timestamp": "2025-01-14T12:00:00Z", "price": 0.68, "probability": 0.68, "volume": 1100000 }
+  ],
+  "recentTrades": [
+    { "id": "trade-1", "side": "YES", "amount": 5000, "price": 0.72, "timestamp": "2025-01-15T11:30:00Z" },
+    { "id": "trade-2", "side": "NO", "amount": 2500, "price": 0.28, "timestamp": "2025-01-15T11:15:00Z" }
+  ],
+  "_meta": {
+    "requestedAt": "2025-01-15T12:00:00Z",
+    "includes": {
+      "history": true,
+      "trades": true,
+      "tradesCount": 2
+    }
+  }
+}
+```
+
+```json 404 - Market Not Found
+{
+  "error": "Market not found"
+}
+```
+
+---
+
+## Use Cases
+
+### Display Market Details
+
+```javascript
+async function displayMarket(marketId) {
+  const res = await fetch(`https://app.kash.bot/api/markets/${marketId}`);
+  const { market } = await res.json();
+  
+  return {
+    title: market.question,
+    probability: `${(market.probability * 100).toFixed(0)}% YES`,
+    volume: `$${(market.totalVolume / 100).toLocaleString()}`,
+    status: market.status
+  };
+}
+```
+
+### Build a Price Chart
+
+```javascript
+async function getChartData(marketId) {
+  const res = await fetch(`https://app.kash.bot/api/markets/${marketId}?history=true`);
+  const { priceHistory } = await res.json();
+  
+  return priceHistory.map(point => ({
+    x: new Date(point.timestamp),
+    y: point.probability * 100
+  }));
+}
+```
+

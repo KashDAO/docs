@@ -1,0 +1,629 @@
+---
+title: 'Customization Guide'
+description: 'Customize Kash embeds to match your brand and design system'
+---
+
+# Customization Guide
+
+Customize Kash prediction market embeds to seamlessly integrate with your website's design. This guide covers theming, styling, layout options, and advanced customization techniques.
+
+---
+
+## Theme Customization
+
+### Light and Dark Themes
+
+Switch between built-in themes using the `theme` parameter:
+
+```html
+<!-- Light theme (default) -->
+<iframe src="https://app.kash.bot/threads/abc123?embed=true&theme=light"></iframe>
+
+<!-- Dark theme -->
+<iframe src="https://app.kash.bot/threads/abc123?embed=true&theme=dark"></iframe>
+```
+
+### Custom Primary Color
+
+Override the default blue accent color with your brand color:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&primaryColor=FF6B35"
+></iframe>
+```
+
+<Note>
+**Color format:** Hex color without `#` prefix (e.g., `3B82F6`, not `#3B82F6`)
+</Note>
+
+**Affected elements:**
+- Market probability bars
+- Buy/sell buttons
+- Active tab indicators
+- Link hover states
+
+---
+
+## Layout Options
+
+### Compact Mode
+
+Reduce vertical space with compact layout:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&compact=true"
+  height="350"
+></iframe>
+```
+
+**Compact mode changes:**
+- Smaller market cards
+- Reduced padding and margins
+- Condensed typography
+- Hidden market descriptions (show on hover)
+- Minimum height: 300px
+
+### Hide Header
+
+Remove thread title and description:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&hideHeader=true"
+></iframe>
+```
+
+**Use cases:**
+- Custom thread title on parent page
+- Sidebar widgets
+- Mobile layouts with limited space
+
+### Column Layout
+
+Control market card columns (desktop only):
+
+```html
+<!-- Single column (default for narrow widths) -->
+<iframe src="https://app.kash.bot/threads/abc123?embed=true&columns=1"></iframe>
+
+<!-- Two columns (default for medium widths) -->
+<iframe src="https://app.kash.bot/threads/abc123?embed=true&columns=2"></iframe>
+
+<!-- Three columns (for wide embeds) -->
+<iframe src="https://app.kash.bot/threads/abc123?embed=true&columns=3"></iframe>
+```
+
+<Warning>
+Column settings are **ignored on mobile** devices - always renders as single column for optimal readability.
+</Warning>
+
+---
+
+## Typography
+
+### Font Family
+
+Kash embeds inherit font from parent page via CSS variable:
+
+```html
+<style>
+  .kash-embed-container {
+    --kash-font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+</style>
+
+<div class="kash-embed-container">
+  <iframe src="https://app.kash.bot/threads/abc123?embed=true"></iframe>
+</div>
+```
+
+<Note>
+Font inheritance requires **same-origin** or CORS-enabled font loading. Use web-safe fonts for maximum compatibility.
+</Note>
+
+### Font Size Scaling
+
+Scale all text proportionally:
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&fontSize=90"
+></iframe>
+```
+
+**Parameter:** `fontSize` (percentage, 70-150)
+- `80` - 20% smaller text
+- `100` - Default size
+- `120` - 20% larger text
+
+---
+
+## Filtering and Sorting
+
+### Filter by Market Status
+
+Show only markets with specific status:
+
+```html
+<!-- Active markets only -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&status=active"
+></iframe>
+
+<!-- Resolved markets only -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&status=resolved"
+></iframe>
+```
+
+**Status options:** `active`, `resolved`, `cancelled`, `paused`
+
+### Sort Markets
+
+Change default market sorting:
+
+```html
+<!-- Sort by trading volume -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&sortBy=total_volume&sortOrder=desc"
+></iframe>
+
+<!-- Sort by probability (highest first) -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&sortBy=current_probability&sortOrder=desc"
+></iframe>
+
+<!-- Sort by creation date (newest first) -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&sortBy=created_at&sortOrder=desc"
+></iframe>
+```
+
+**Sort fields:**
+- `created_at` - Market creation time
+- `total_volume` - Trading volume
+- `current_probability` - YES probability
+- `title` - Alphabetical
+
+**Sort order:**
+- `asc` - Ascending (low to high)
+- `desc` - Descending (high to low)
+
+### Limit Markets Displayed
+
+Show only top N markets:
+
+```html
+<!-- Show 5 markets -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&limit=5"
+></iframe>
+```
+
+**Range:** 1-100 markets
+
+---
+
+## Advanced Styling
+
+### CSS Variables
+
+Customize embed appearance using CSS variables (requires embedding domain whitelisting):
+
+```html
+<style>
+  .custom-kash-embed {
+    --kash-primary-color: #ff6b35;
+    --kash-background-color: #f8f9fa;
+    --kash-card-background: #ffffff;
+    --kash-text-color: #212529;
+    --kash-border-radius: 12px;
+    --kash-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<div class="custom-kash-embed">
+  <iframe src="https://app.kash.bot/threads/abc123?embed=true"></iframe>
+</div>
+```
+
+**Available CSS variables:**
+
+| Variable | Description | Default (Light) |
+|----------|-------------|-----------------|
+| `--kash-primary-color` | Brand accent color | `#3B82F6` |
+| `--kash-background-color` | Embed background | `#FFFFFF` |
+| `--kash-card-background` | Market card background | `#F9FAFB` |
+| `--kash-text-color` | Primary text color | `#111827` |
+| `--kash-text-muted` | Secondary text color | `#6B7280` |
+| `--kash-border-color` | Card borders | `#E5E7EB` |
+| `--kash-border-radius` | Corner radius | `8px` |
+| `--kash-box-shadow` | Card shadow | `0 1px 3px rgba(0,0,0,0.1)` |
+| `--kash-font-family` | Font family | `Inter, sans-serif` |
+
+### Custom Container Styling
+
+Style the iframe container for visual effects:
+
+```html
+<style>
+  .kash-embed-wrapper {
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4px;
+  }
+
+  .kash-embed-wrapper iframe {
+    width: 100%;
+    height: 600px;
+    border: 0;
+    display: block;
+    border-radius: 12px;
+  }
+</style>
+
+<div class="kash-embed-wrapper">
+  <iframe src="https://app.kash.bot/threads/abc123?embed=true&theme=dark"></iframe>
+</div>
+```
+
+---
+
+## Responsive Customization
+
+### Mobile-Specific Settings
+
+Apply different settings based on screen size:
+
+```html
+<iframe
+  id="responsive-kash-embed"
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  width="100%"
+></iframe>
+
+<script>
+  function updateEmbedForViewport() {
+    const iframe = document.getElementById('responsive-kash-embed');
+    const url = new URL(iframe.src);
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      url.searchParams.set('compact', 'true');
+      url.searchParams.set('limit', '5');
+      url.searchParams.set('hideHeader', 'true');
+      url.searchParams.set('fontSize', '90');
+      iframe.height = '400';
+    } else {
+      url.searchParams.set('compact', 'false');
+      url.searchParams.set('limit', '20');
+      url.searchParams.set('hideHeader', 'false');
+      url.searchParams.set('fontSize', '100');
+      iframe.height = '700';
+    }
+
+    iframe.src = url.toString();
+  }
+
+  // Update on load and resize
+  updateEmbedForViewport();
+  window.addEventListener('resize', debounce(updateEmbedForViewport, 300));
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }
+</script>
+```
+
+### Responsive Aspect Ratio
+
+Maintain aspect ratio across screen sizes:
+
+```html
+<style>
+  .responsive-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .responsive-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  @media (max-width: 768px) {
+    .responsive-embed {
+      padding-bottom: 75%; /* 4:3 aspect ratio on mobile */
+    }
+  }
+</style>
+
+<div class="responsive-embed">
+  <iframe src="https://app.kash.bot/threads/abc123?embed=true"></iframe>
+</div>
+```
+
+---
+
+## Multi-Theme Support
+
+### Automatic Dark Mode
+
+Match system dark mode preference:
+
+```html
+<iframe
+  id="theme-aware-embed"
+  src="https://app.kash.bot/threads/abc123?embed=true"
+></iframe>
+
+<script>
+  const iframe = document.getElementById('theme-aware-embed');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  const url = new URL(iframe.src);
+  url.searchParams.set('theme', prefersDark ? 'dark' : 'light');
+  iframe.src = url.toString();
+
+  // Listen for theme changes
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', (e) => {
+      const url = new URL(iframe.src);
+      url.searchParams.set('theme', e.matches ? 'dark' : 'light');
+      iframe.src = url.toString();
+    });
+</script>
+```
+
+### Manual Theme Toggle
+
+Let users switch themes:
+
+```html
+<button onclick="toggleTheme()">Toggle Theme</button>
+
+<iframe
+  id="togglable-embed"
+  src="https://app.kash.bot/threads/abc123?embed=true&theme=light"
+></iframe>
+
+<script>
+  let currentTheme = 'light';
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    const iframe = document.getElementById('togglable-embed');
+    const url = new URL(iframe.src);
+    url.searchParams.set('theme', currentTheme);
+    iframe.src = url.toString();
+  }
+</script>
+```
+
+---
+
+## Brand Integration Examples
+
+### News Website Style
+
+```html
+<style>
+  .news-embed {
+    font-family: 'Georgia', serif;
+    background: #fafafa;
+    padding: 24px;
+    border-left: 4px solid #c8102e;
+  }
+
+  .news-embed iframe {
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<div class="news-embed">
+  <h2>Live Election Probabilities</h2>
+  <iframe
+    src="https://app.kash.bot/threads/abc123?embed=true&theme=light&primaryColor=C8102E&hideHeader=true&sortBy=total_volume"
+    width="100%"
+    height="500"
+    frameborder="0"
+  ></iframe>
+</div>
+```
+
+### Tech Blog Style
+
+```html
+<style>
+  .tech-embed {
+    font-family: 'Monaco', 'Courier New', monospace;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .tech-embed iframe {
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+</style>
+
+<div class="tech-embed">
+  <iframe
+    src="https://app.kash.bot/threads/abc123?embed=true&theme=dark&primaryColor=00D9FF&fontSize=95"
+    width="100%"
+    height="600"
+    frameborder="0"
+  ></iframe>
+</div>
+```
+
+### Sidebar Widget Style
+
+```html
+<style>
+  .sidebar-widget {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 350px;
+  }
+
+  .sidebar-widget h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .sidebar-widget iframe {
+    border-radius: 4px;
+  }
+</style>
+
+<div class="sidebar-widget">
+  <h3>📊 Market Predictions</h3>
+  <iframe
+    src="https://app.kash.bot/threads/abc123?embed=true&compact=true&limit=3&hideHeader=true&fontSize=85"
+    width="100%"
+    height="300"
+    frameborder="0"
+  ></iframe>
+</div>
+```
+
+---
+
+## Performance Optimization
+
+### Preload Critical Resources
+
+```html
+<head>
+  <link rel="preconnect" href="https://app.kash.bot" />
+  <link rel="dns-prefetch" href="https://app.kash.bot" />
+</head>
+```
+
+### Lazy Load Below-Fold Embeds
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true"
+  loading="lazy"
+  width="100%"
+  height="600"
+></iframe>
+```
+
+### Reduce Initial Load
+
+```html
+<!-- Load fewer markets initially -->
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&limit=5&compact=true"
+></iframe>
+```
+
+---
+
+## Accessibility Customization
+
+### High Contrast Mode
+
+```html
+<iframe
+  src="https://app.kash.bot/threads/abc123?embed=true&highContrast=true"
+></iframe>
+```
+
+**High contrast changes:**
+- Increased text contrast (WCAG AAA compliance)
+- Thicker borders and outlines
+- Enhanced focus indicators
+- Larger clickable areas
+
+### Reduced Motion
+
+Respects `prefers-reduced-motion`:
+
+```html
+<script>
+  const iframe = document.getElementById('accessible-embed');
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+
+  if (prefersReducedMotion) {
+    const url = new URL(iframe.src);
+    url.searchParams.set('reducedMotion', 'true');
+    iframe.src = url.toString();
+  }
+</script>
+```
+
+---
+
+## Testing Your Customization
+
+### Visual Regression Testing
+
+Test embed appearance across themes and sizes:
+
+```javascript
+const testConfigs = [
+  { theme: 'light', width: 1200, height: 600 },
+  { theme: 'dark', width: 1200, height: 600 },
+  { theme: 'light', width: 375, height: 400 }, // Mobile
+  { theme: 'dark', width: 375, height: 400 }, // Mobile dark
+];
+
+testConfigs.forEach((config) => {
+  const url = `https://app.kash.bot/threads/abc123?embed=true&theme=${config.theme}`;
+  // Take screenshot with your testing tool
+  console.log(`Testing: ${url} at ${config.width}x${config.height}`);
+});
+```
+
+### Cross-Browser Testing
+
+Test on major browsers:
+- Chrome/Edge (Chromium)
+- Firefox
+- Safari (macOS and iOS)
+- Samsung Internet (Android)
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
+    Advanced parent-iframe communication
+  </Card>
+  <Card title="Code Examples" href="/developer-docs/public-embed-api/examples/react">
+    React component examples
+  </Card>
+  <Card title="Thread Iframe Guide" href="/developer-docs/public-embed-api/guides/thread-iframe">
+    Basic iframe embedding
+  </Card>
+  <Card title="API Reference" href="/developer-docs/public-embed-api/endpoints/threads">
+    REST API documentation
+  </Card>
+</CardGroup>

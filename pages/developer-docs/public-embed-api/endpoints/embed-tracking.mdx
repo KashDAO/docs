@@ -1,0 +1,492 @@
+---
+title: 'POST /api/embeds/*'
+description: 'Track embed loads and user interactions for analytics'
+---
+
+# Embed Tracking Endpoints
+
+The Kash Public Embed API provides two endpoints for tracking embed usage and user interactions. These endpoints enable analytics and attribution for embedded threads.
+
+---
+
+## POST /api/embeds/track
+
+Tracks when an embed is loaded on a partner website. Call this endpoint once when the iframe loads.
+
+### Endpoint
+
+```
+POST https://app.kash.bot/api/embeds/track
+```
+
+### Request Body
+
+<ParamField body="thread_id" type="string" required>
+  The unique thread identifier being embedded
+</ParamField>
+
+<ParamField body="partner_org_id" type="string">
+  Optional partner organization ID for revenue attribution
+</ParamField>
+
+<ParamField body="source" type="string">
+  Source identifier (e.g., website domain, app name)
+</ParamField>
+
+<ParamField body="referrer" type="string">
+  HTTP referrer URL of the embedding page
+</ParamField>
+
+<ParamField body="user_agent" type="string">
+  User agent string of the client
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Whether the tracking event was recorded
+</ResponseField>
+
+<ResponseField name="embed_id" type="string">
+  Unique identifier for this embed instance
+</ResponseField>
+
+### Rate Limit
+
+<Info>
+**1000 requests per minute** per IP address
+</Info>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://app.kash.bot/api/embeds/track" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "thread_id": "abc123",
+    "partner_org_id": "partner-xyz",
+    "source": "example.com",
+    "referrer": "https://example.com/markets",
+    "user_agent": "Mozilla/5.0..."
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://app.kash.bot/api/embeds/track', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    thread_id: 'abc123',
+    partner_org_id: 'partner-xyz',
+    source: 'example.com',
+    referrer: document.referrer,
+    user_agent: navigator.userAgent,
+  }),
+});
+
+const data = await response.json();
+console.log('Embed tracked:', data.embed_id);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://app.kash.bot/api/embeds/track',
+    json={
+        'thread_id': 'abc123',
+        'partner_org_id': 'partner-xyz',
+        'source': 'example.com',
+        'referrer': 'https://example.com/markets',
+        'user_agent': 'Mozilla/5.0...'
+    }
+)
+data = response.json()
+print(f"Embed tracked: {data['embed_id']}")
+```
+</CodeGroup>
+
+### Example Response
+
+```json 200 - Success
+{
+  "success": true,
+  "embed_id": "embed_9Kx2mP7nQ4"
+}
+```
+
+```json 429 - Rate Limit Exceeded
+{
+  "error": "Too many requests",
+  "message": "Rate limit of 1000 requests per minute exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "retryAfter": 12
+}
+```
+
+---
+
+## POST /api/embeds/interactions
+
+Tracks user interactions within embedded threads (clicks, trades, etc.). Call this endpoint when users interact with markets inside the iframe.
+
+### Endpoint
+
+```
+POST https://app.kash.bot/api/embeds/interactions
+```
+
+### Request Body
+
+<ParamField body="embed_id" type="string" required>
+  The embed instance ID returned from `/api/embeds/track`
+</ParamField>
+
+<ParamField body="thread_id" type="string" required>
+  The thread identifier being interacted with
+</ParamField>
+
+<ParamField body="market_id" type="string">
+  Optional market ID if interaction is specific to a market
+</ParamField>
+
+<ParamField body="interaction_type" type="string" required>
+  Type of interaction: `click`, `trade`, `view`, `share`
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Additional interaction metadata (e.g., trade amount, clicked element)
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Whether the interaction was recorded
+</ResponseField>
+
+<ResponseField name="interaction_id" type="string">
+  Unique identifier for this interaction event
+</ResponseField>
+
+### Rate Limit
+
+<Info>
+**500 requests per minute** per IP address
+</Info>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://app.kash.bot/api/embeds/interactions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "embed_id": "embed_9Kx2mP7nQ4",
+    "thread_id": "abc123",
+    "market_id": "market-456",
+    "interaction_type": "trade",
+    "metadata": {
+      "amount": 1000,
+      "outcome": "yes"
+    }
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://app.kash.bot/api/embeds/interactions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    embed_id: 'embed_9Kx2mP7nQ4',
+    thread_id: 'abc123',
+    market_id: 'market-456',
+    interaction_type: 'trade',
+    metadata: {
+      amount: 1000,
+      outcome: 'yes',
+    },
+  }),
+});
+
+const data = await response.json();
+console.log('Interaction tracked:', data.interaction_id);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://app.kash.bot/api/embeds/interactions',
+    json={
+        'embed_id': 'embed_9Kx2mP7nQ4',
+        'thread_id': 'abc123',
+        'market_id': 'market-456',
+        'interaction_type': 'trade',
+        'metadata': {
+            'amount': 1000,
+            'outcome': 'yes'
+        }
+    }
+)
+data = response.json()
+print(f"Interaction tracked: {data['interaction_id']}")
+```
+</CodeGroup>
+
+### Example Response
+
+```json 200 - Success
+{
+  "success": true,
+  "interaction_id": "int_7Hq4nR2mX9"
+}
+```
+
+```json 400 - Invalid Request
+{
+  "error": "Invalid interaction type",
+  "message": "interaction_type must be one of: click, trade, view, share",
+  "code": "INVALID_INTERACTION_TYPE"
+}
+```
+
+```json 429 - Rate Limit Exceeded
+{
+  "error": "Too many requests",
+  "message": "Rate limit of 500 requests per minute exceeded",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "retryAfter": 25
+}
+```
+
+---
+
+## Common Use Cases
+
+### Track embed load on page mount
+
+Record when your embed loads to track impressions:
+
+```javascript
+useEffect(() => {
+  async function trackEmbed() {
+    const response = await fetch('https://app.kash.bot/api/embeds/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        thread_id: threadId,
+        partner_org_id: 'partner-xyz',
+        source: window.location.hostname,
+        referrer: document.referrer,
+        user_agent: navigator.userAgent,
+      }),
+    });
+
+    const data = await response.json();
+    setEmbedId(data.embed_id); // Store for interaction tracking
+  }
+
+  trackEmbed();
+}, [threadId]);
+```
+
+### Track market clicks within iframe
+
+Use postMessage to communicate from iframe to parent:
+
+```javascript
+// Inside iframe
+function trackMarketClick(marketId) {
+  window.parent.postMessage(
+    {
+      type: 'market_click',
+      marketId,
+    },
+    '*'
+  );
+}
+
+// In parent page
+window.addEventListener('message', async (event) => {
+  if (event.data.type === 'market_click') {
+    await fetch('https://app.kash.bot/api/embeds/interactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embed_id: embedId,
+        thread_id: threadId,
+        market_id: event.data.marketId,
+        interaction_type: 'click',
+      }),
+    });
+  }
+});
+```
+
+### Track trades with metadata
+
+Record detailed trade information:
+
+```javascript
+async function trackTrade(marketId, amount, outcome) {
+  await fetch('https://app.kash.bot/api/embeds/interactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      embed_id: embedId,
+      thread_id: threadId,
+      market_id: marketId,
+      interaction_type: 'trade',
+      metadata: {
+        amount,
+        outcome, // 'yes' or 'no'
+        timestamp: Date.now(),
+      },
+    }),
+  });
+}
+```
+
+### Batch interaction tracking
+
+Reduce API calls by batching interactions (custom implementation):
+
+```javascript
+class InteractionBatcher {
+  constructor(embedId, threadId) {
+    this.embedId = embedId;
+    this.threadId = threadId;
+    this.queue = [];
+    this.flushInterval = setInterval(() => this.flush(), 5000);
+  }
+
+  track(marketId, interactionType, metadata = {}) {
+    this.queue.push({ marketId, interactionType, metadata });
+
+    if (this.queue.length >= 10) {
+      this.flush();
+    }
+  }
+
+  async flush() {
+    if (this.queue.length === 0) return;
+
+    const interactions = [...this.queue];
+    this.queue = [];
+
+    // Send interactions (note: API doesn't support batch, so send individually)
+    await Promise.all(
+      interactions.map((interaction) =>
+        fetch('https://app.kash.bot/api/embeds/interactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            embed_id: this.embedId,
+            thread_id: this.threadId,
+            ...interaction,
+          }),
+        })
+      )
+    );
+  }
+
+  destroy() {
+    clearInterval(this.flushInterval);
+    this.flush();
+  }
+}
+
+// Usage
+const batcher = new InteractionBatcher(embedId, threadId);
+batcher.track(marketId, 'click');
+batcher.track(marketId2, 'view');
+```
+
+### Error handling and retry logic
+
+Handle tracking failures gracefully:
+
+```javascript
+async function trackWithRetry(endpoint, body, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      if (response.status === 429) {
+        // Rate limited - wait and retry
+        const retryAfter = response.headers.get('Retry-After') || 5;
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+        continue;
+      }
+
+      // Other errors - don't retry
+      console.error('Tracking failed:', response.status);
+      return null;
+    } catch (error) {
+      console.error(`Tracking attempt ${attempt} failed:`, error);
+      if (attempt === maxRetries) return null;
+
+      // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+
+// Usage
+await trackWithRetry('https://app.kash.bot/api/embeds/track', {
+  thread_id: threadId,
+  source: 'example.com',
+});
+```
+
+---
+
+## Privacy Considerations
+
+<Warning>
+**User Privacy:** Tracking endpoints do not collect personally identifiable information (PII). Only aggregate analytics data is recorded.
+</Warning>
+
+**What is tracked:**
+- Thread ID and market ID
+- Interaction types (click, trade, view, share)
+- Referrer URL and source
+- User agent string (device/browser type)
+- IP address (for rate limiting only)
+
+**What is NOT tracked:**
+- User names or email addresses
+- Wallet addresses (unless explicitly provided in metadata)
+- Browsing history beyond referrer
+- Session cookies or cross-site tracking
+
+**GDPR Compliance:**
+- All tracking is anonymous and aggregated
+- No persistent identifiers beyond session-scoped embed_id
+- Users can opt out of analytics via Do Not Track (DNT) browser setting
+
+---
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="GET /api/threads" href="/developer-docs/public-embed-api/endpoints/threads">
+    List all available threads
+  </Card>
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
+    Get thread details
+  </Card>
+</CardGroup>
