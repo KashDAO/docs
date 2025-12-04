@@ -40,7 +40,7 @@ Add this HTML to your website, replacing `{threadId}` with the ID from Step 1:
 
 ```html HTML
 <iframe
-  src="https://app.kash.bot/embed/threads/{threadId}/iframe?source=your-site-name"
+  src="https://app.kash.bot/threads/{threadId}/iframe?source=your-site-name"
   width="100%"
   height="900"
   frameborder="0"
@@ -61,7 +61,7 @@ Wrap your iframe in a container for better responsive design:
 ```html HTML
 <div class="kash-embed-container">
   <iframe
-    src="https://app.kash.bot/embed/threads/abc123/iframe?source=my-site"
+    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
     width="100%"
     height="900"
     frameborder="0"
@@ -144,7 +144,7 @@ Here's a complete, production-ready example:
   <div class="kash-embed-container">
     <h1>Live Prediction Markets</h1>
     <iframe
-      src="https://app.kash.bot/embed/threads/abc123/iframe?source=my-website"
+      src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
       height="900"
       frameborder="0"
       allow="clipboard-write"
@@ -188,7 +188,7 @@ Always use `width="100%"` for responsive design. Only the height needs to be fix
 ### Iframe not loading?
 
 1. **Check the thread ID** - Make sure you're using a valid thread ID from the API
-2. **Verify the URL** - The format should be exact: `https://app.kash.bot/embed/threads/{id}/iframe`
+2. **Verify the URL** - The format should be exact: `https://app.kash.bot/threads/{id}/iframe`
 3. **Check CORS policies** - Some Content Security Policies may block iframes
 4. **Test in incognito** - Ad blockers sometimes interfere with embed loading
 

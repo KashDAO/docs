@@ -11,15 +11,16 @@ Embed Kash prediction market threads on your website using HTML iframes. This gu
 
 ## Quick Start
 
-The simplest way to embed a thread is using an iframe with the thread URL:
+The simplest way to embed a thread is using an iframe with the thread iframe URL:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   width="100%"
-  height="600"
+  height="900"
   frameborder="0"
-  allowfullscreen
+  allow="clipboard-write"
+  title="Kash Prediction Markets"
 ></iframe>
 ```
 
@@ -32,7 +33,7 @@ Replace `abc123` with your thread ID (obtained from the [GET /api/threads](/deve
 ### Required Attributes
 
 <ParamField path="src" type="string" required>
-  The thread URL with `?embed=true` query parameter
+  The thread iframe URL: `https://app.kash.bot/threads/{threadId}/iframe`
 </ParamField>
 
 ### Recommended Attributes
@@ -67,18 +68,10 @@ Replace `abc123` with your thread ID (obtained from the [GET /api/threads](/deve
 
 Customize embed behavior using URL query parameters:
 
-### Core Parameters
-
-<ParamField query="embed" type="boolean" required>
-  **Required** - Enable embed mode (hides header/footer)
-</ParamField>
-
-<ParamField query="partner_org_id" type="string">
-  Your partner organization ID for revenue attribution
-</ParamField>
+### Tracking Parameters
 
 <ParamField query="source" type="string">
-  Source identifier (e.g., your domain name)
+  Source identifier for revenue tracking (e.g., your domain name). **Recommended** for proper attribution.
 </ParamField>
 
 ### Display Parameters
@@ -121,25 +114,22 @@ Here's a fully configured iframe embed:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true&partner_org_id=partner-xyz&source=example.com&theme=dark&compact=true&status=active&sortBy=total_volume&limit=10"
+  src="https://app.kash.bot/threads/abc123/iframe?source=example.com"
   width="100%"
-  height="500"
+  height="900"
   frameborder="0"
-  allowfullscreen
+  allow="clipboard-write"
   loading="lazy"
   title="2024 Presidential Election Prediction Markets"
-  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
 ></iframe>
 ```
 
 **What this does:**
-- Embeds thread `abc123` in dark theme
-- Compact mode for smaller display
-- Shows only active markets
-- Sorts by trading volume
-- Limits to 10 markets
-- Attributes trades to `partner-xyz` organization
-- Tracks source as `example.com`
+- Embeds thread `abc123` with the 20-tile market heatmap
+- Tracks source as `example.com` for revenue sharing
+- Displays thread title, description, and stats
+- Users can click any tile to view market details in a new tab
+- Predictions are made via Twitter (no login required in the iframe)
 
 ---
 
@@ -152,7 +142,7 @@ Wrap the iframe in a responsive container:
 ```html
 <div class="kash-embed-container">
   <iframe
-    src="https://app.kash.bot/threads/abc123?embed=true"
+    src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
     frameborder="0"
     allowfullscreen
   ></iframe>
@@ -184,7 +174,7 @@ Use JavaScript to adjust iframe height based on content:
 ```html
 <iframe
   id="kash-embed"
-  src="https://app.kash.bot/threads/abc123?embed=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   width="100%"
   frameborder="0"
 ></iframe>
@@ -208,7 +198,7 @@ Adjust embed settings for mobile devices:
 ```html
 <iframe
   id="kash-mobile-embed"
-  src="https://app.kash.bot/threads/abc123?embed=true&compact=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   width="100%"
   height="400"
   frameborder="0"
@@ -239,7 +229,7 @@ Use the `sandbox` attribute to restrict iframe capabilities:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
 ></iframe>
 ```
@@ -278,7 +268,7 @@ async function findThreads() {
   data.threads.forEach((thread) => {
     console.log(`Thread: ${thread.title}`);
     console.log(`ID: ${thread.id}`);
-    console.log(`Embed URL: https://app.kash.bot/threads/${thread.id}?embed=true\n`);
+    console.log(`Embed URL: https://app.kash.bot/threads/${thread.id}/iframe?source=your-site\n`);
   });
 }
 
@@ -295,7 +285,7 @@ Load below-fold iframes only when visible:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   loading="lazy"
 ></iframe>
 ```
@@ -317,7 +307,7 @@ Reduce initial load time by limiting markets:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true&limit=5"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
 ></iframe>
 ```
 
@@ -327,7 +317,7 @@ Compact mode loads fewer assets and renders faster:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true&compact=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   height="350"
 ></iframe>
 ```
@@ -342,7 +332,7 @@ Help screen reader users understand iframe content:
 
 ```html
 <iframe
-  src="https://app.kash.bot/threads/abc123?embed=true"
+  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   title="2024 Presidential Election prediction markets - Current betting odds and probabilities"
 ></iframe>
 ```
@@ -368,7 +358,7 @@ The iframe automatically includes ARIA labels for interactive elements within th
 
 **Solutions:**
 1. Verify thread ID is correct
-2. Ensure `?embed=true` parameter is present
+2. Ensure URL uses the `/iframe` route: `https://app.kash.bot/threads/{id}/iframe`
 3. Check browser console for CSP errors
 4. Confirm parent page is served over HTTPS (required)
 
@@ -377,9 +367,9 @@ The iframe automatically includes ARIA labels for interactive elements within th
 **Problem:** Iframe shows scrollbars or cuts off content
 
 **Solutions:**
-1. Set minimum height: `height="600"`
+1. Set appropriate height: `height="900"` for threads, `height="500"` for markets
 2. Implement dynamic height adjustment (see Responsive Design section)
-3. Use `compact=true` for smaller spaces
+3. Use CSS to adjust height for different screen sizes
 
 ### Markets Not Loading
 

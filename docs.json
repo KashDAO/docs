@@ -97,6 +97,8 @@
               "pages/developer-docs/public-embed-api/endpoints/threads",
               "pages/developer-docs/public-embed-api/endpoints/thread-detail",
               "pages/developer-docs/public-embed-api/endpoints/thread-markets",
+              "pages/developer-docs/public-embed-api/endpoints/markets",
+              "pages/developer-docs/public-embed-api/endpoints/twitter-links",
               "pages/developer-docs/public-embed-api/endpoints/embed-tracking"
             ]
           },
