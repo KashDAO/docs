@@ -92,13 +92,28 @@
             ]
           },
           {
-            "group": "API Endpoints",
+            "group": "Thread Endpoints",
             "pages": [
               "pages/developer-docs/public-embed-api/endpoints/threads",
               "pages/developer-docs/public-embed-api/endpoints/thread-detail",
-              "pages/developer-docs/public-embed-api/endpoints/thread-markets",
-              "pages/developer-docs/public-embed-api/endpoints/markets",
-              "pages/developer-docs/public-embed-api/endpoints/twitter-links",
+              "pages/developer-docs/public-embed-api/endpoints/thread-markets"
+            ]
+          },
+          {
+            "group": "Market Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/markets"
+            ]
+          },
+          {
+            "group": "Twitter Deep Link Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/twitter-links"
+            ]
+          },
+          {
+            "group": "Tracking Endpoints",
+            "pages": [
               "pages/developer-docs/public-embed-api/endpoints/embed-tracking"
             ]
           },
