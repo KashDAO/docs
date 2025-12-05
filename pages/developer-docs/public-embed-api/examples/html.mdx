@@ -52,8 +52,8 @@ Simple thread embed with no JavaScript:
 
   <div class="embed-container">
     <iframe
-      src="https://app.kash.bot/threads/abc123?embed=true"
-      height="600"
+      src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
+      height="900"
       loading="lazy"
       title="2024 Presidential Election prediction markets"
     ></iframe>
@@ -64,9 +64,9 @@ Simple thread embed with no JavaScript:
 
 ---
 
-## Dynamic Height Adjustment
+## Embed with Event Listeners
 
-Automatically resize iframe based on content:
+Listen for events from the embed:
 
 ```html
 <!DOCTYPE html>
@@ -74,122 +74,13 @@ Automatically resize iframe based on content:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kash Markets - Auto Height</title>
+  <title>Kash Markets - With Events</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
       max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
-    }
-
-    #kash-embed {
-      width: 100%;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      transition: height 0.3s ease;
-    }
-  </style>
-</head>
-<body>
-  <h1>Live Prediction Markets</h1>
-
-  <iframe
-    id="kash-embed"
-    src="https://app.kash.bot/threads/abc123?embed=true"
-    height="400"
-  ></iframe>
-
-  <script>
-    // Listen for height changes from embed
-    window.addEventListener('message', function(event) {
-      // Security: Verify origin
-      if (event.origin !== 'https://app.kash.bot') {
-        return;
-      }
-
-      // Handle resize events
-      if (event.data.type === 'resize') {
-        const iframe = document.getElementById('kash-embed');
-        iframe.style.height = event.data.height + 'px';
-        console.log('Iframe resized to', event.data.height, 'px');
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
----
-
-## Full-Featured Embed with Controls
-
-Interactive embed with theme toggle, filters, and tracking:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kash Markets - Full Featured</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9fafb;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-
-    button {
-      padding: 8px 16px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background: white;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-
-    button:hover {
-      background: #f3f4f6;
-      border-color: #9ca3af;
-    }
-
-    button.active {
-      background: #3b82f6;
-      color: white;
-      border-color: #3b82f6;
     }
 
     .status {
@@ -201,228 +92,48 @@ Interactive embed with theme toggle, filters, and tracking:
       font-size: 14px;
     }
 
-    .embed-wrapper {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
     #kash-embed {
       width: 100%;
-      border: 0;
-      border-radius: 4px;
-      transition: height 0.3s ease;
-    }
-
-    @media (max-width: 768px) {
-      .controls {
-        flex-direction: column;
-      }
-
-      button {
-        width: 100%;
-      }
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🎲 Prediction Markets</h1>
-      <p>Live probabilities on politics, sports, and current events</p>
+  <h1>Live Prediction Markets</h1>
+  
+  <div class="status" id="status">Loading markets...</div>
 
-      <div class="controls">
-        <button onclick="toggleTheme()" id="theme-btn">🌙 Dark Mode</button>
-        <button onclick="showActive()" id="active-btn" class="active">Active Markets</button>
-        <button onclick="showResolved()" id="resolved-btn">Resolved</button>
-        <button onclick="sortByVolume()" id="volume-btn">Top Volume</button>
-        <button onclick="sortByProbability()" id="prob-btn">Highest Probability</button>
-        <button onclick="refreshEmbed()">🔄 Refresh</button>
-      </div>
-    </header>
-
-    <div class="status" id="status">Loading markets...</div>
-
-    <div class="embed-wrapper">
-      <iframe
-        id="kash-embed"
-        src="https://app.kash.bot/threads/abc123?embed=true&partner_org_id=demo-partner"
-        height="600"
-        title="Prediction markets"
-      ></iframe>
-    </div>
-  </div>
+  <iframe
+    id="kash-embed"
+    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
+    height="900"
+  ></iframe>
 
   <script>
-    // Configuration
-    const THREAD_ID = 'abc123';
-    const PARTNER_ORG_ID = 'demo-partner';
-    const iframe = document.getElementById('kash-embed');
     const status = document.getElementById('status');
-
-    let embedId = null;
-    let currentTheme = 'light';
-    let currentFilter = 'active';
-
-    // Send command to iframe
-    function sendToEmbed(message) {
-      iframe.contentWindow.postMessage(message, 'https://app.kash.bot');
-    }
-
-    // Listen for messages from iframe
+    
+    // Listen for embed events
     window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://app.kash.bot') return;
+      // Security: Verify origin
+      if (event.origin !== 'https://app.kash.bot') {
+        return;
+      }
 
       const { type, data } = event.data;
 
       switch (type) {
-        case 'embed_ready':
+        case 'kash-iframe-ready':
           status.textContent = `✅ Loaded ${data.marketCount} markets`;
-          embedId = data.embedId;
-          trackEmbedLoad();
+          console.log('Embed ready:', data);
           break;
 
-        case 'resize':
-          iframe.style.height = data.height + 'px';
-          break;
-
-        case 'market_click':
-          status.textContent = `👆 Clicked: ${data.marketTitle}`;
-          trackInteraction(data.marketId, 'click');
-          break;
-
-        case 'trade_executed':
-          const amount = (data.amount / 100).toFixed(2);
-          status.textContent = `💰 Trade: ${data.shares} ${data.outcome.toUpperCase()} shares for $${amount}`;
-          trackInteraction(data.marketId, 'trade', {
-            amount: data.amount,
-            outcome: data.outcome
-          });
-          break;
-
-        case 'filter_applied':
-          status.textContent = `🔍 Showing ${data.resultCount} markets`;
+        case 'kash-market-clicked':
+          status.textContent = `👆 Market clicked: ${data.marketId}`;
+          console.log('Market clicked:', data);
           break;
       }
     });
-
-    // Theme toggle
-    function toggleTheme() {
-      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-      sendToEmbed({ type: 'set_theme', theme: currentTheme });
-
-      const btn = document.getElementById('theme-btn');
-      btn.textContent = currentTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
-    }
-
-    // Filter: Active markets
-    function showActive() {
-      currentFilter = 'active';
-      sendToEmbed({
-        type: 'apply_filters',
-        filters: { status: 'active' }
-      });
-      setActiveButton('active-btn');
-    }
-
-    // Filter: Resolved markets
-    function showResolved() {
-      currentFilter = 'resolved';
-      sendToEmbed({
-        type: 'apply_filters',
-        filters: { status: 'resolved' }
-      });
-      setActiveButton('resolved-btn');
-    }
-
-    // Sort by volume
-    function sortByVolume() {
-      sendToEmbed({
-        type: 'apply_filters',
-        filters: {
-          status: currentFilter,
-          sortBy: 'total_volume',
-          sortOrder: 'desc',
-          limit: 10
-        }
-      });
-      setActiveButton('volume-btn');
-    }
-
-    // Sort by probability
-    function sortByProbability() {
-      sendToEmbed({
-        type: 'apply_filters',
-        filters: {
-          status: currentFilter,
-          sortBy: 'current_probability',
-          sortOrder: 'desc',
-          limit: 10
-        }
-      });
-      setActiveButton('prob-btn');
-    }
-
-    // Refresh embed
-    function refreshEmbed() {
-      sendToEmbed({ type: 'refresh' });
-      status.textContent = '🔄 Refreshing markets...';
-    }
-
-    // UI helper: Set active button
-    function setActiveButton(btnId) {
-      // Remove active class from filter buttons
-      ['active-btn', 'resolved-btn', 'volume-btn', 'prob-btn'].forEach(id => {
-        document.getElementById(id)?.classList.remove('active');
-      });
-      // Add to clicked button
-      document.getElementById(btnId)?.classList.add('active');
-    }
-
-    // Track embed load
-    async function trackEmbedLoad() {
-      try {
-        const response = await fetch('https://app.kash.bot/api/embeds/track', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            thread_id: THREAD_ID,
-            partner_org_id: PARTNER_ORG_ID,
-            source: window.location.hostname,
-            referrer: document.referrer,
-            user_agent: navigator.userAgent
-          })
-        });
-        const data = await response.json();
-        embedId = data.embed_id;
-        console.log('Embed tracked:', embedId);
-      } catch (error) {
-        console.error('Tracking failed:', error);
-      }
-    }
-
-    // Track interaction
-    async function trackInteraction(marketId, interactionType, metadata = {}) {
-      if (!embedId) return;
-
-      try {
-        await fetch('https://app.kash.bot/api/embeds/interactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            embed_id: embedId,
-            thread_id: THREAD_ID,
-            market_id: marketId,
-            interaction_type: interactionType,
-            metadata
-          })
-        });
-        console.log('Interaction tracked:', interactionType, marketId);
-      } catch (error) {
-        console.error('Interaction tracking failed:', error);
-      }
-    }
   </script>
 </body>
 </html>
@@ -504,8 +215,8 @@ Compact widget perfect for sidebars:
 
     <iframe
       id="widget-iframe"
-      src="https://app.kash.bot/threads/abc123?embed=true&compact=true&limit=3&hideHeader=true&fontSize=90"
-      height="280"
+      src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
+      height="400"
     ></iframe>
   </div>
 
@@ -513,14 +224,9 @@ Compact widget perfect for sidebars:
     window.addEventListener('message', function(event) {
       if (event.origin !== 'https://app.kash.bot') return;
 
-      if (event.data.type === 'embed_ready') {
+      if (event.data.type === 'kash-iframe-ready') {
         const badge = document.getElementById('market-count');
-        badge.textContent = `${event.data.marketCount} markets`;
-      }
-
-      if (event.data.type === 'resize') {
-        const iframe = document.getElementById('widget-iframe');
-        iframe.style.height = event.data.height + 'px';
+        badge.textContent = `${event.data.data.marketCount} markets`;
       }
     });
   </script>
@@ -645,8 +351,8 @@ Display multiple thread embeds on one page:
         <iframe
           id="iframe-${index}"
           class="thread-iframe"
-          src="https://app.kash.bot/threads/${thread.id}?embed=true&compact=true&limit=5"
-          height="350"
+          src="https://app.kash.bot/threads/${thread.id}/iframe?source=my-site"
+          height="500"
         ></iframe>
       `;
       grid.appendChild(card);
@@ -656,25 +362,15 @@ Display multiple thread embeds on one page:
     window.addEventListener('message', function(event) {
       if (event.origin !== 'https://app.kash.bot') return;
 
-      if (event.data.type === 'embed_ready') {
+      if (event.data.type === 'kash-iframe-ready') {
         // Find which iframe sent this
         const iframes = document.querySelectorAll('iframe');
         iframes.forEach((iframe, index) => {
           if (iframe.contentWindow === event.source) {
             const countEl = document.getElementById(`count-${index}`);
             if (countEl) {
-              countEl.textContent = `${event.data.marketCount} markets`;
+              countEl.textContent = `${event.data.data.marketCount} markets`;
             }
-          }
-        });
-      }
-
-      if (event.data.type === 'resize') {
-        // Resize the iframe that sent this message
-        const iframes = document.querySelectorAll('iframe');
-        iframes.forEach(iframe => {
-          if (iframe.contentWindow === event.source) {
-            iframe.style.height = event.data.height + 'px';
           }
         });
       }
@@ -686,79 +382,7 @@ Display multiple thread embeds on one page:
 
 ---
 
-## Dark Mode Auto-Detect
-
-Automatically match system dark mode preference:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto Dark Mode</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-    }
-
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-      background: light-dark(#ffffff, #1a1a1a);
-      color: light-dark(#000000, #ffffff);
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    #kash-embed {
-      width: 100%;
-      border: 1px solid light-dark(#e5e7eb, #374151);
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Markets (Auto Theme)</h1>
-
-  <iframe
-    id="kash-embed"
-    height="600"
-  ></iframe>
-
-  <script>
-    const iframe = document.getElementById('kash-embed');
-
-    // Detect system theme
-    function getSystemTheme() {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    }
-
-    // Set iframe source with correct theme
-    function updateIframeTheme() {
-      const theme = getSystemTheme();
-      iframe.src = `https://app.kash.bot/threads/abc123?embed=true&theme=${theme}`;
-      console.log('Theme updated to:', theme);
-    }
-
-    // Initial load
-    updateIframeTheme();
-
-    // Listen for system theme changes
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', updateIframeTheme);
-  </script>
-</body>
-</html>
-```
-
----
-
-## Error Handling
+## Loading States and Error Handling
 
 Robust error handling and fallbacks:
 
@@ -819,8 +443,8 @@ Robust error handling and fallbacks:
 
   <iframe
     id="kash-embed"
-    src="https://app.kash.bot/threads/abc123?embed=true"
-    height="600"
+    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
+    height="900"
   ></iframe>
 
   <script>
@@ -868,24 +492,19 @@ Robust error handling and fallbacks:
       loadTimeout = setTimeout(() => {
         console.error('Embed load timeout');
         retryLoad();
-      }, 10000); // 10 second timeout
+      }, 15000); // 15 second timeout
     }
 
     // Listen for messages
     window.addEventListener('message', function(event) {
       if (event.origin !== 'https://app.kash.bot') return;
 
-      if (event.data.type === 'embed_ready') {
+      if (event.data.type === 'kash-iframe-ready') {
         clearTimeout(loadTimeout);
         loading.style.display = 'none';
         iframe.classList.add('loaded');
         hideError();
         console.log('Embed loaded successfully');
-      }
-
-      if (event.data.type === 'error') {
-        clearTimeout(loadTimeout);
-        showError(`Error loading markets: ${event.data.message}`);
       }
     });
 
@@ -904,19 +523,136 @@ Robust error handling and fallbacks:
 
 ---
 
+## Complete Production Example
+
+Full production-ready example with all best practices:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Prediction Markets</title>
+  
+  <!-- Preconnect for faster loading -->
+  <link rel="preconnect" href="https://app.kash.bot">
+  <link rel="dns-prefetch" href="https://app.kash.bot">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9fafb;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      margin: 10px 0;
+      padding: 12px;
+      background: #f0f9ff;
+      border-left: 3px solid #3b82f6;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .embed-wrapper {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    #kash-embed {
+      width: 100%;
+      border: 0;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      #kash-embed {
+        height: 700px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎲 Prediction Markets</h1>
+      <p>Live probabilities on politics, sports, and current events</p>
+    </header>
+
+    <div class="status" id="status">Loading markets...</div>
+
+    <div class="embed-wrapper">
+      <iframe
+        id="kash-embed"
+        src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
+        height="900"
+        title="Prediction markets"
+        loading="lazy"
+        allow="clipboard-write"
+      ></iframe>
+    </div>
+  </div>
+
+  <script>
+    const status = document.getElementById('status');
+
+    // Listen for embed events
+    window.addEventListener('message', function(event) {
+      if (event.origin !== 'https://app.kash.bot') return;
+
+      const { type, data } = event.data;
+
+      switch (type) {
+        case 'kash-iframe-ready':
+          status.textContent = `✅ Loaded ${data.marketCount} markets • $${(data.totalVolume / 100).toLocaleString()} total volume`;
+          break;
+
+        case 'kash-market-clicked':
+          status.textContent = `👆 Viewing market: ${data.marketId}`;
+          break;
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+---
+
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="React Examples" href="/developer-docs/public-embed-api/examples/react">
     React component examples
   </Card>
-  <Card title="JavaScript Examples" href="/developer-docs/public-embed-api/examples/javascript">
-    Advanced patterns
-  </Card>
-  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
-    Parent-iframe communication
-  </Card>
-  <Card title="API Reference" href="/developer-docs/public-embed-api/endpoints/threads">
-    REST API endpoints
+  <Card title="Iframe Guide" href="/developer-docs/public-embed-api/guides/thread-iframe">
+    Complete iframe embedding guide
   </Card>
 </CardGroup>

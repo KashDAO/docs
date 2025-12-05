@@ -117,9 +117,7 @@
           {
             "group": "Embed Guides",
             "pages": [
-              "pages/developer-docs/public-embed-api/guides/thread-iframe",
-              "pages/developer-docs/public-embed-api/guides/customization",
-              "pages/developer-docs/public-embed-api/guides/postmessage-api"
+              "pages/developer-docs/public-embed-api/guides/thread-iframe"
             ]
           },
           {

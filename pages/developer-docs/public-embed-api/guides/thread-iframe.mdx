@@ -66,44 +66,8 @@ Replace `abc123` with your thread ID (obtained from the [GET /api/threads](/deve
 
 ## Query Parameters
 
-Customize embed behavior using URL query parameters:
-
-### Tracking Parameters
-
 <ParamField query="source" type="string">
   Source identifier for revenue tracking (e.g., your domain name). **Recommended** for proper attribution.
-</ParamField>
-
-### Display Parameters
-
-<ParamField query="theme" type="string" default="light">
-  Color theme: `light` or `dark`
-</ParamField>
-
-<ParamField query="hideHeader" type="boolean" default="false">
-  Hide thread title and description
-</ParamField>
-
-<ParamField query="compact" type="boolean" default="false">
-  Compact mode for smaller embeds (min height: 300px)
-</ParamField>
-
-<ParamField query="primaryColor" type="string">
-  Custom primary color (hex format, e.g., `3B82F6`)
-</ParamField>
-
-### Filtering Parameters
-
-<ParamField query="status" type="string">
-  Show only markets with status: `active`, `resolved`, `cancelled`
-</ParamField>
-
-<ParamField query="sortBy" type="string" default="created_at">
-  Sort markets by: `created_at`, `total_volume`, `current_probability`
-</ParamField>
-
-<ParamField query="limit" type="number" default="20">
-  Maximum markets to display (1-100)
 </ParamField>
 
 ---
@@ -167,56 +131,32 @@ Wrap the iframe in a responsive container:
 </style>
 ```
 
-### Dynamic Height Adjustment
+### Mobile-Responsive Height
 
-Use JavaScript to adjust iframe height based on content:
+Adjust iframe height for different screen sizes using CSS media queries:
 
 ```html
 <iframe
   id="kash-embed"
   src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
   width="100%"
+  height="900"
   frameborder="0"
 ></iframe>
 
-<script>
-  window.addEventListener('message', (event) => {
-    if (event.origin !== 'https://app.kash.bot') return;
-
-    if (event.data.type === 'resize') {
-      const iframe = document.getElementById('kash-embed');
-      iframe.style.height = event.data.height + 'px';
+<style>
+  @media (max-width: 768px) {
+    #kash-embed {
+      height: 700px;
     }
-  });
-</script>
-```
-
-### Mobile-Optimized Embeds
-
-Adjust embed settings for mobile devices:
-
-```html
-<iframe
-  id="kash-mobile-embed"
-  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
-  width="100%"
-  height="400"
-  frameborder="0"
-></iframe>
-
-<script>
-  const iframe = document.getElementById('kash-mobile-embed');
-  const isMobile = window.innerWidth < 768;
-
-  if (isMobile) {
-    // Update URL for mobile
-    const url = new URL(iframe.src);
-    url.searchParams.set('compact', 'true');
-    url.searchParams.set('limit', '5');
-    iframe.src = url.toString();
-    iframe.height = '350';
   }
-</script>
+  
+  @media (max-width: 480px) {
+    #kash-embed {
+      height: 600px;
+    }
+  }
+</style>
 ```
 
 ---
@@ -261,7 +201,7 @@ Use the [GET /api/threads](/developer-docs/public-embed-api/endpoints/threads) e
 ```javascript
 async function findThreads() {
   const response = await fetch(
-    'https://app.kash.bot/api/threads?category=politics&limit=10'
+    'https://app.kash.bot/api/threads?status=active&limit=10'
   );
   const data = await response.json();
 
@@ -299,27 +239,6 @@ Speed up iframe loading with DNS preconnect:
   <link rel="preconnect" href="https://app.kash.bot" />
   <link rel="dns-prefetch" href="https://app.kash.bot" />
 </head>
-```
-
-### 3. Limit Markets Displayed
-
-Reduce initial load time by limiting markets:
-
-```html
-<iframe
-  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
-></iframe>
-```
-
-### 4. Use Compact Mode
-
-Compact mode loads fewer assets and renders faster:
-
-```html
-<iframe
-  src="https://app.kash.bot/threads/abc123/iframe?source=your-site"
-  height="350"
-></iframe>
 ```
 
 ---
@@ -368,8 +287,8 @@ The iframe automatically includes ARIA labels for interactive elements within th
 
 **Solutions:**
 1. Set appropriate height: `height="900"` for threads, `height="500"` for markets
-2. Implement dynamic height adjustment (see Responsive Design section)
-3. Use CSS to adjust height for different screen sizes
+2. Use CSS media queries to adjust height for different screen sizes
+3. Test on multiple devices and screen sizes
 
 ### Markets Not Loading
 
@@ -377,20 +296,13 @@ The iframe automatically includes ARIA labels for interactive elements within th
 
 **Solutions:**
 1. Check thread has active markets using [GET /api/threads/:id/markets](/developer-docs/public-embed-api/endpoints/thread-markets)
-2. Verify `status` filter isn't excluding all markets
-3. Check `limit` parameter isn't set too low
+2. Verify the thread ID is correct and the thread is active
 
 ---
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Customization Guide" href="/developer-docs/public-embed-api/guides/customization">
-    Learn advanced styling and configuration options
-  </Card>
-  <Card title="PostMessage API" href="/developer-docs/public-embed-api/guides/postmessage-api">
-    Communicate between your page and the embed
-  </Card>
   <Card title="Code Examples" href="/developer-docs/public-embed-api/examples/html">
     View complete implementation examples
   </Card>
