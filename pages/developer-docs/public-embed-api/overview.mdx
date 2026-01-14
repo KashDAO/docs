@@ -90,12 +90,12 @@ The Public Embed API is **completely public** and requires **no authentication**
 | GET /api/threads/{id} | 100 req/min per IP |
 | GET /api/threads/{id}/markets | 100 req/min per IP |
 | GET /api/threads/{id}/twitter-links | 100 req/min per IP |
-| GET /api/markets | 50 req/min per IP |
+| GET /api/markets | 100 req/min per IP |
 | GET /api/markets/{id} | 100 req/min per IP |
 | GET /api/markets/{id}/twitter-link | 100 req/min per IP |
-| GET /api/markets/trending | 30 req/min per IP |
-| GET /api/markets/featured | 30 req/min per IP |
-| POST /api/twitter-links | 50 req/min per IP |
+| GET /api/markets/trending | 100 req/min per IP |
+| GET /api/markets/featured | 100 req/min per IP |
+| POST /api/twitter-links | 100 req/min per IP |
 | POST /api/embeds/* | 200 req/min per IP |
 
 Rate limit information is included in response headers:
