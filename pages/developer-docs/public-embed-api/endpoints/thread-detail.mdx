@@ -208,7 +208,7 @@ async function embedThread(threadId) {
 
   // Embed iframe
   const iframe = document.createElement('iframe');
-  iframe.src = `https://app.kash.bot/embed/threads/${threadId}/iframe`;
+  iframe.src = `https://app.kash.bot/threads/${threadId}/iframe`;
   iframe.width = '100%';
   iframe.height = '900';
   document.getElementById('embed-container').appendChild(iframe);
