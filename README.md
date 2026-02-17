@@ -1,6 +1,6 @@
 # Kash Documentation
 
-Official documentation for **Kash** - The AI-Powered Decentralized Prediction Markets Protocol on Base.
+Official documentation for **Kash** - The AI-Powered Decentralized Prediction Markets Protocol.
 
 [![Website](https://img.shields.io/badge/Website-kash.bot-FBD109)](https://kash.bot)
 [![Twitter](https://img.shields.io/badge/Twitter-@kash_bot-1DA1F2)](https://x.com/kash_bot)
@@ -18,7 +18,7 @@ Kash is a revolutionary prediction markets platform that brings predictions dire
 - 🔓 **Permissionless**: Anyone can create markets instantly - no approval required
 - ⚡ **Gasless**: Platform-sponsored transactions via ERC-4337 account abstraction
 - 🔐 **Non-Custodial**: Your funds, your control - MPC wallets via Privy technology
-- 🌐 **Global**: Available worldwide with minimal restrictions
+- 🌐 **Global**: Available worldwide (subject to compliance restrictions)
 
 ### What Makes Kash Different
 

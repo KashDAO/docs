@@ -59,7 +59,7 @@ Understanding how Kash's automated market mechanics work helps you make better p
     
     **What Gets Approved:**
     - Clear binary outcomes with verifiable sources
-    - Timely events resolving within 30 days
+    - Timely events resolving in no more than 30 days
     - Public interest and engagement potential
     - Objective resolution criteria
   </Tab>
@@ -91,8 +91,8 @@ Understanding how Kash's automated market mechanics work helps you make better p
   <Accordion title="Share-Based Trading">
     **Outcome Tokens as Tradeable Assets**
     
-    - **Share Pricing:** Ranges from $0.01 to $0.99 per share
-    - **Market Completeness:** YES + NO prices always equal $1.00
+    - **Share Pricing:** Ranges from \$0.01 to \$0.99 per share
+    - **Market Completeness:** YES + NO prices should always equal $1.00
     - **Probability Reflection:** Share price directly represents market consensus
     - **Continuous Trading:** Prices update with every transaction
     
@@ -118,7 +118,7 @@ Understanding how Kash's automated market mechanics work helps you make better p
     - Advanced memory functions for intelligent price discovery
     
     <Tip>
-    Learn more about our [Custom AMM Bonding Curve](/pages/getting-started/features/custom-amm) and its revolutionary advantages.
+    Learn more about the [Custom AMM Bonding Curve](/pages/getting-started/features/custom-amm) and its revolutionary advantages.
     </Tip>
   </Accordion>
 </AccordionGroup>
@@ -145,35 +145,19 @@ Understanding how Kash's automated market mechanics work helps you make better p
   <Tab title="Liquidity System">
     **Automated Liquidity Bootstrap**
     
-    **Passive LP Vault Solution:**
+    **Automated LP Vault Solution:**
     - **Instant Allocation:** Vault automatically deploys USDC to new markets
     - **Balanced Positioning:** Provides equal value liquidity to both YES and NO outcomes
     - **ERC-4626 Standard:** Industry-standard vault interface for deposits and withdrawals
     - **Principal Protection:** Delta-neutral strategy ensures original USDC preserved
     
     **Liquidity Sources:**
-    - **Primary:** Automated liquidity provision from Kash's Passive LP Vault
+    - **Primary:** Automated liquidity provision from Kash's Automated LP Vault
     - **Secondary:** Individual user manual liquidity provision
     - **Tertiary:** Market making from experienced traders
     - **Auxiliary:** Cross-market arbitrage flows
   </Tab>
   
-  <Tab title="Trade Impact">
-    **Understanding Price Movement**
-    
-    | Trade Size | Typical Price Impact | Liquidity Requirement |
-    |------------|---------------------|---------------------|
-    | $10 | ~0.1% | Low |
-    | $100 | ~1% | Medium |
-    | $1,000 | ~3-5% | High |
-    | $10,000+ | ~10-15% | Very High |
-    
-    **Impact Factors:**
-    - Current market liquidity depth
-    - Distance from 50/50 pricing
-    - Recent trading volume
-    - Market age and maturity
-  </Tab>
 </Tabs>
 
 ---
@@ -187,7 +171,7 @@ Understanding how Kash's automated market mechanics work helps you make better p
     - **Validation phase:** Mira Network ensures verifiable outcomes and clear criteria
     - **Content safety:** AI checks prevent prohibited topics
     - **Market parameters set:** Question, resolution criteria, trusted sources, 30-day maximum deadline
-    - **Instant Liquidity Bootstrap:** Passive LP Vault automatically deploys USDC
+    - **Instant Liquidity Bootstrap:** Automated LP Vault automatically deploys USDC
   </Step>
   
   <Step title="Active Trading Period">
@@ -271,12 +255,6 @@ Understanding how Kash's automated market mechanics work helps you make better p
     4. Refunds excess if better price achieved
     ```
     
-    **Protection Levels:**
-     - **Small Predictions (under $50):** 2% maximum slippage tolerance
-     - **Medium Predictions (over $50):** 5% maximum slippage tolerance
-     - **Large Predictions (over $100):** Automatic routing to RFQ system
-     - **Institutional Predictions (over $200):** MEV protection with batch execution
-    
     **User Benefits:**
     - **Predictable Costs:** Know maximum cost before trade execution
     - **Fair Pricing:** Protection against price manipulation
@@ -318,18 +296,18 @@ Understanding how Kash's automated market mechanics work helps you make better p
     - Export capabilities for tax reporting
   </Tab>
   
-  <Tab title="Passive LP Vault">
+  <Tab title="Automated LP Vault">
     **Automated Liquidity Provision**
     
     **How It Works:**
     - **Deposit USDC:** Lock funds for 30 days to earn yield while supporting the ecosystem
     - **Automatic Deployment:** Your funds automatically provide liquidity to new prediction markets
-    - **Principal Protection:** Mathematical guarantee you'll receive your original USDC back
+    - **Principal Protection:** Mathematical verification that your original USDC is returned
     - **Yield Generation:** Earn from trading fees, external yield (Aave), and $KASH rewards
     - **Smart Rebalancing:** AI automatically adjusts positions to maintain optimal liquidity
     
     **Why Principal is Protected:**
-    The vault uses concentrated liquidity that automatically rebalances around the current market price. This means you're always holding equal value of YES and NO shares, so regardless of which outcome wins, you receive the same amount back. It's like being a casino house - you profit from the action, not from picking sides.
+    The vault uses concentrated liquidity that automatically rebalances around the current market price. This means you're always holding equal value of YES and NO shares, so regardless of which outcome wins, you receive the same amount back.
     
     **Expected Returns:**
     - **Target 6% APY** from multiple sources:
