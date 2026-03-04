@@ -21,8 +21,20 @@ GET https://app.kash.bot/api/markets
   Filter by category (e.g., `politics`, `crypto`, `sports`)
 </ParamField>
 
-<ParamField query="thread_id" type="string">
-  Filter to only markets in a specific thread
+<ParamField query="threadId" type="string">
+  Filter to only markets in a specific thread (UUID). Also accepts `thread_id` for backward compatibility.
+</ParamField>
+
+<ParamField query="organizationId" type="string">
+  Filter to markets belonging to a specific organization (UUID)
+</ParamField>
+
+<ParamField query="partnerId" type="string">
+  Filter to markets belonging to a specific partner (UUID)
+</ParamField>
+
+<ParamField query="chapterId" type="string">
+  Filter to markets in a specific chapter
 </ParamField>
 
 <ParamField query="limit" type="number" default="50">
@@ -302,7 +314,25 @@ curl "https://app.kash.bot/api/markets?category=crypto&status=active"
 ### Get markets from a specific thread
 
 ```bash
-curl "https://app.kash.bot/api/markets?thread_id=thread123"
+curl "https://app.kash.bot/api/markets?threadId=abc123-def456"
+```
+
+### Get markets for an organization
+
+```bash
+curl "https://app.kash.bot/api/markets?organizationId=550e8400-e29b-41d4-a716-446655440000"
+```
+
+### Get markets for a partner
+
+```bash
+curl "https://app.kash.bot/api/markets?partnerId=6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+```
+
+### Get markets in a specific chapter
+
+```bash
+curl "https://app.kash.bot/api/markets?chapterId=ch-group-stage"
 ```
 
 ### Build a dynamic market feed
@@ -332,17 +362,17 @@ async function fetchMarketFeed() {
 ## Related Endpoints
 
 <CardGroup cols={2}>
-  <Card title="Twitter Deep Links" href="/developer-docs/public-embed-api/endpoints/twitter-links">
-    Generate prediction URLs for markets
+  <Card title="GET /api/organizations/:id" href="/developer-docs/public-embed-api/endpoints/organization-detail">
+    Get organization metadata for filtering
+  </Card>
+  <Card title="GET /api/partners/:id" href="/developer-docs/public-embed-api/endpoints/partner-detail">
+    Get partner metadata for filtering
+  </Card>
+  <Card title="GET /api/threads/:id/chapters" href="/developer-docs/public-embed-api/endpoints/thread-chapters">
+    List chapters to filter markets by
   </Card>
   <Card title="GET /api/threads" href="/developer-docs/public-embed-api/endpoints/threads">
     List all threads
-  </Card>
-  <Card title="Thread Markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
-    Get markets in a specific thread
-  </Card>
-  <Card title="Market Embeds" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Embed markets with iframes
   </Card>
 </CardGroup>
 

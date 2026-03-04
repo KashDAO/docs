@@ -1,0 +1,244 @@
+---
+title: 'GET /api/organizations/:id/threads'
+description: 'List threads under an organization with pagination, filtering, and sorting'
+---
+
+Fetches a paginated list of threads belonging to a specific organization. Supports status filtering and sorting.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/organizations/:id/threads
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique organization identifier (UUID format)
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="status" type="string" default="active">
+  Filter by thread status: `active`, `upcoming`, `closed`, `all`
+</ParamField>
+
+<ParamField query="limit" type="number" default="50">
+  Maximum number of results per page (max: 100)
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Pagination offset for fetching subsequent pages
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="created_at">
+  Field to sort by: `created_at`, `start_time`, `total_volume`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort direction: `asc`, `desc`
+</ParamField>
+
+## Response
+
+<ResponseField name="threads" type="array">
+  Array of thread objects
+
+  <Expandable title="Thread Object">
+    <ResponseField name="id" type="string">
+      Unique thread identifier
+    </ResponseField>
+
+    <ResponseField name="title" type="string">
+      Thread title (nullable)
+    </ResponseField>
+
+    <ResponseField name="description" type="string">
+      Thread description (nullable)
+    </ResponseField>
+
+    <ResponseField name="image" type="string">
+      Cover image URL (nullable)
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      Thread status (nullable)
+    </ResponseField>
+
+    <ResponseField name="startTime" type="string">
+      ISO 8601 start time (nullable)
+    </ResponseField>
+
+    <ResponseField name="endTime" type="string">
+      ISO 8601 end time (nullable)
+    </ResponseField>
+
+    <ResponseField name="marketCount" type="number">
+      Number of markets in this thread (nullable)
+    </ResponseField>
+
+    <ResponseField name="totalVolume" type="string">
+      Total trading volume as a numeric string (nullable)
+    </ResponseField>
+
+    <ResponseField name="participantCount" type="number">
+      Number of unique participants (nullable)
+    </ResponseField>
+
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of thread creation
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+
+  <Expandable title="Pagination Object">
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+
+    <ResponseField name="total" type="number">
+      Total number of matching threads
+    </ResponseField>
+
+    <ResponseField name="hasMore" type="boolean">
+      Whether more results are available
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="_meta" type="object">
+  Request metadata
+
+  <Expandable title="Metadata Properties">
+    <ResponseField name="organizationId" type="string">
+      The organization ID that was queried
+    </ResponseField>
+
+    <ResponseField name="requestedAt" type="string">
+      ISO 8601 timestamp of request processing
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**100 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/organizations/550e8400-e29b-41d4-a716-446655440000/threads?status=active&sortBy=total_volume&sortOrder=desc&limit=10"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.kash.bot/api/organizations/550e8400-e29b-41d4-a716-446655440000/threads?' +
+  new URLSearchParams({
+    status: 'active',
+    sortBy: 'total_volume',
+    sortOrder: 'desc',
+    limit: 10
+  })
+);
+const data = await response.json();
+console.log(`Found ${data.threads.length} threads`);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.kash.bot/api/organizations/550e8400-e29b-41d4-a716-446655440000/threads',
+    params={
+        'status': 'active',
+        'sortBy': 'total_volume',
+        'sortOrder': 'desc',
+        'limit': 10
+    }
+)
+data = response.json()
+print(f"Found {len(data['threads'])} threads")
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "threads": [
+    {
+      "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "title": "2026 World Cup Predictions",
+      "description": "Predict match outcomes for the 2026 FIFA World Cup",
+      "image": "https://cdn.kash.bot/threads/world-cup-2026.jpg",
+      "status": "active",
+      "startTime": "2026-06-11T00:00:00Z",
+      "endTime": "2026-07-19T00:00:00Z",
+      "marketCount": 48,
+      "totalVolume": "5600000",
+      "participantCount": 1250,
+      "createdAt": "2026-01-15T00:00:00Z"
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "limit": 10,
+    "total": 5,
+    "hasMore": false
+  },
+  "_meta": {
+    "organizationId": "550e8400-e29b-41d4-a716-446655440000",
+    "requestedAt": "2026-03-04T12:00:00Z"
+  }
+}
+```
+
+```json 404 - Organization Not Found
+{
+  "error": "Organization not found",
+  "message": "No organization exists with ID: 550e8400-e29b-41d4-a716-446655440000",
+  "code": "NOT_FOUND"
+}
+```
+
+## Common Use Cases
+
+### Build an organization landing page
+
+```javascript
+async function buildOrgPage(orgId) {
+  const [orgRes, threadsRes] = await Promise.all([
+    fetch(`https://app.kash.bot/api/organizations/${orgId}`),
+    fetch(`https://app.kash.bot/api/organizations/${orgId}/threads?status=active&sortBy=total_volume&sortOrder=desc`),
+  ]);
+
+  const { organization } = await orgRes.json();
+  const { threads } = await threadsRes.json();
+
+  return { organization, threads };
+}
+```
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="GET /api/organizations/:id" href="/developer-docs/public-embed-api/endpoints/organization-detail">
+    Get organization metadata
+  </Card>
+  <Card title="GET /api/organizations/:id/partners" href="/developer-docs/public-embed-api/endpoints/organization-partners">
+    List partners under this organization
+  </Card>
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
+    Get details for a specific thread
+  </Card>
+</CardGroup>

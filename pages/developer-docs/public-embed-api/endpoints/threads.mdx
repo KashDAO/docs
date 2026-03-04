@@ -273,10 +273,16 @@ async function fetchAllThreads() {
 ## Related Endpoints
 
 <CardGroup cols={2}>
-  <Card title="GET /api/threads/{id}" href="/developer-docs/public-embed-api/endpoints/thread-detail">
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
     Get details for a specific thread
   </Card>
-  <Card title="GET /api/threads/{id}/markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
+  <Card title="GET /api/threads/:id/markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
     Get all markets in a thread
+  </Card>
+  <Card title="GET /api/threads/:id/chapters" href="/developer-docs/public-embed-api/endpoints/thread-chapters">
+    List chapters within a thread
+  </Card>
+  <Card title="GET /api/organizations/:id/threads" href="/developer-docs/public-embed-api/endpoints/organization-threads">
+    List threads for an organization
   </Card>
 </CardGroup>

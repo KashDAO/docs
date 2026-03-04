@@ -92,11 +92,27 @@
             ]
           },
           {
+            "group": "Organization Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/organization-detail",
+              "pages/developer-docs/public-embed-api/endpoints/organization-partners",
+              "pages/developer-docs/public-embed-api/endpoints/organization-threads"
+            ]
+          },
+          {
+            "group": "Partner Endpoints",
+            "pages": [
+              "pages/developer-docs/public-embed-api/endpoints/partner-detail",
+              "pages/developer-docs/public-embed-api/endpoints/partner-threads"
+            ]
+          },
+          {
             "group": "Thread Endpoints",
             "pages": [
               "pages/developer-docs/public-embed-api/endpoints/threads",
               "pages/developer-docs/public-embed-api/endpoints/thread-detail",
-              "pages/developer-docs/public-embed-api/endpoints/thread-markets"
+              "pages/developer-docs/public-embed-api/endpoints/thread-markets",
+              "pages/developer-docs/public-embed-api/endpoints/thread-chapters"
             ]
           },
           {

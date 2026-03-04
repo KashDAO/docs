@@ -1,0 +1,245 @@
+---
+title: 'GET /api/partners/:id/threads'
+description: 'List threads under a partner with pagination, filtering, and sorting'
+---
+
+Fetches a paginated list of threads belonging to a specific partner. Supports status filtering and sorting.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/partners/:id/threads
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique partner identifier (UUID format)
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="status" type="string" default="active">
+  Filter by thread status: `active`, `upcoming`, `closed`, `all`
+</ParamField>
+
+<ParamField query="limit" type="number" default="50">
+  Maximum number of results per page (max: 100)
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Pagination offset for fetching subsequent pages
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="created_at">
+  Field to sort by: `created_at`, `start_time`, `total_volume`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort direction: `asc`, `desc`
+</ParamField>
+
+## Response
+
+<ResponseField name="threads" type="array">
+  Array of thread objects
+
+  <Expandable title="Thread Object">
+    <ResponseField name="id" type="string">
+      Unique thread identifier
+    </ResponseField>
+
+    <ResponseField name="title" type="string">
+      Thread title (nullable)
+    </ResponseField>
+
+    <ResponseField name="description" type="string">
+      Thread description (nullable)
+    </ResponseField>
+
+    <ResponseField name="image" type="string">
+      Cover image URL (nullable)
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      Thread status (nullable)
+    </ResponseField>
+
+    <ResponseField name="startTime" type="string">
+      ISO 8601 start time (nullable)
+    </ResponseField>
+
+    <ResponseField name="endTime" type="string">
+      ISO 8601 end time (nullable)
+    </ResponseField>
+
+    <ResponseField name="marketCount" type="number">
+      Number of markets in this thread (nullable)
+    </ResponseField>
+
+    <ResponseField name="totalVolume" type="string">
+      Total trading volume as a numeric string (nullable)
+    </ResponseField>
+
+    <ResponseField name="participantCount" type="number">
+      Number of unique participants (nullable)
+    </ResponseField>
+
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of thread creation
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+
+  <Expandable title="Pagination Object">
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+
+    <ResponseField name="total" type="number">
+      Total number of matching threads
+    </ResponseField>
+
+    <ResponseField name="hasMore" type="boolean">
+      Whether more results are available
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="_meta" type="object">
+  Request metadata
+
+  <Expandable title="Metadata Properties">
+    <ResponseField name="partnerId" type="string">
+      The partner ID that was queried
+    </ResponseField>
+
+    <ResponseField name="requestedAt" type="string">
+      ISO 8601 timestamp of request processing
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Rate Limit
+
+<Info>
+**100 requests per minute** per IP address
+</Info>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/partners/6ba7b810-9dad-11d1-80b4-00c04fd430c8/threads?status=active&limit=10"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://app.kash.bot/api/partners/6ba7b810-9dad-11d1-80b4-00c04fd430c8/threads?' +
+  new URLSearchParams({ status: 'active', limit: 10 })
+);
+const data = await response.json();
+console.log(`Found ${data.threads.length} threads`);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://app.kash.bot/api/partners/6ba7b810-9dad-11d1-80b4-00c04fd430c8/threads',
+    params={'status': 'active', 'limit': 10}
+)
+data = response.json()
+print(f"Found {len(data['threads'])} threads")
+```
+</CodeGroup>
+
+## Example Response
+
+```json 200 - Success
+{
+  "threads": [
+    {
+      "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "title": "NBA Playoffs 2026",
+      "description": "Predict the outcomes of every NBA playoff series",
+      "image": "https://cdn.kash.bot/threads/nba-playoffs.jpg",
+      "status": "active",
+      "startTime": "2026-04-15T00:00:00Z",
+      "endTime": "2026-06-20T00:00:00Z",
+      "marketCount": 30,
+      "totalVolume": "3200000",
+      "participantCount": 890,
+      "createdAt": "2026-03-01T00:00:00Z"
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "limit": 10,
+    "total": 2,
+    "hasMore": false
+  },
+  "_meta": {
+    "partnerId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+    "requestedAt": "2026-03-04T12:00:00Z"
+  }
+}
+```
+
+```json 404 - Partner Not Found
+{
+  "error": "Partner not found",
+  "message": "No partner exists with ID: 6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "code": "NOT_FOUND"
+}
+```
+
+## Common Use Cases
+
+### Build a partner page with threads and markets
+
+```javascript
+async function buildPartnerPage(partnerId) {
+  // Fetch partner branding + threads in parallel
+  const [partnerRes, threadsRes] = await Promise.all([
+    fetch(`https://app.kash.bot/api/partners/${partnerId}`),
+    fetch(`https://app.kash.bot/api/partners/${partnerId}/threads?status=active`),
+  ]);
+
+  const { partner } = await partnerRes.json();
+  const { threads } = await threadsRes.json();
+
+  // Fetch markets for each thread
+  const threadsWithMarkets = await Promise.all(
+    threads.map(async (thread) => {
+      const { markets } = await fetch(
+        `https://app.kash.bot/api/threads/${thread.id}/markets?limit=5`
+      ).then(r => r.json());
+      return { ...thread, markets };
+    })
+  );
+
+  return { partner, threads: threadsWithMarkets };
+}
+```
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="GET /api/partners/:id" href="/developer-docs/public-embed-api/endpoints/partner-detail">
+    Get partner metadata
+  </Card>
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
+    Get thread details
+  </Card>
+  <Card title="GET /api/threads/:id/markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
+    Get markets in a thread
+  </Card>
+</CardGroup>
