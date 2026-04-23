@@ -220,6 +220,99 @@ console.log(`Implied probability after trade: ${(quote.impliedProbability * 100)
 
 ---
 
+## Worked Examples
+
+Integrators rarely want the raw tuple — they want to answer real user questions. Here are the four most common ones, each mapped to one field.
+
+### "If I put in $100, how many YES tokens do I get?"
+
+```javascript
+// $100 in USDC atomic-6 = 100 * 1_000_000
+const res = await fetch(
+  'https://app.kash.bot/api/markets/abc123/quote' +
+    '?outcomeIndex=0&action=buy&amount=100000000'
+);
+const { quote } = await res.json();
+
+const tokens = Number(BigInt(quote.tokensOut)) / 1e18;
+console.log(`You receive ${tokens.toFixed(4)} YES tokens`);
+// → "You receive 177.6534 YES tokens"
+```
+
+### "What's the average price I'd pay per token?"
+
+```javascript
+// amountIn is in USDC atomic-6, tokensOut in WAD-18
+// To get $ / token: (amountIn / 1e6) / (tokensOut / 1e18)
+const usdcIn = Number(BigInt(quote.amountIn)) / 1e6;
+const tokens = Number(BigInt(quote.tokensOut)) / 1e18;
+const pricePerToken = usdcIn / tokens;
+console.log(`Average price: $${pricePerToken.toFixed(4)} / token`);
+// → "Average price: $0.5629 / token"
+```
+
+### "What's the market probability after my trade?"
+
+```javascript
+// impliedProbability is already a 0..1 decimal — just multiply by 100
+console.log(
+  `After your $100 buy, YES is priced at ${(quote.impliedProbability * 100).toFixed(1)}%`
+);
+// → "After your $100 buy, YES is priced at 56.3%"
+```
+
+For all outcomes at once, read `pAfter[]`:
+
+```javascript
+// pAfter values are WAD-18; divide by 1e18 to get probabilities
+quote.pAfter.forEach((p, i) => {
+  const prob = Number(BigInt(p)) / 1e18;
+  console.log(`  Outcome ${i}: ${(prob * 100).toFixed(1)}%`);
+});
+```
+
+### "How much USDC do I get if I sell 1 YES token?"
+
+```javascript
+// 1 token in WAD-18 = 1_000000000000000000
+const res = await fetch(
+  'https://app.kash.bot/api/markets/abc123/quote' +
+    '?outcomeIndex=0&action=sell&amount=1000000000000000000'
+);
+const { quote } = await res.json();
+
+const usdc = Number(BigInt(quote.usdcOut)) / 1e6;      // post-fee
+const gross = Number(BigInt(quote.grossRelease)) / 1e18; // pre-fee in USDC
+const fee = gross - usdc;
+
+console.log(`You receive $${usdc.toFixed(2)} (fee: $${fee.toFixed(4)})`);
+// → "You receive $0.28 (fee: $0.0035)"
+```
+
+### Advanced: "How much would it cost to move the market to 70%?"
+
+There's no single-call answer — walk `amount` up and watch `pAfter[outcomeIndex]` move. Quotes are cached 10s server-side, so a client-side binary search is cheap:
+
+```javascript
+async function costToReach(marketId, outcomeIndex, targetProb) {
+  let lo = 1_000_000n;            // $1
+  let hi = 1_000_000_000_000n;    // $1M
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2n;
+    const r = await fetch(
+      `https://app.kash.bot/api/markets/${marketId}/quote` +
+        `?outcomeIndex=${outcomeIndex}&action=buy&amount=${mid}`
+    );
+    const { quote } = await r.json();
+    if (quote.impliedProbability < targetProb) lo = mid;
+    else hi = mid;
+  }
+  return Number(lo) / 1e6; // USDC
+}
+```
+
+---
+
 ## Notes & Gotchas
 
 - **Quotes are view calls — nothing on-chain changes.** You can poll at will within the rate limit.
