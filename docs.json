@@ -119,7 +119,8 @@
             "group": "Market Endpoints",
             "pages": [
               "pages/developer-docs/public-embed-api/endpoints/markets",
-              "pages/developer-docs/public-embed-api/endpoints/market-detail"
+              "pages/developer-docs/public-embed-api/endpoints/market-detail",
+              "pages/developer-docs/public-embed-api/endpoints/market-quote"
             ]
           },
           {
