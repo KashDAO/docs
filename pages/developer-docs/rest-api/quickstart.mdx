@@ -3,7 +3,7 @@ title: 'Quickstart'
 description: 'Get a key, place your first trade, and receive your first webhook in under 5 minutes.'
 ---
 
-This guide walks you end-to-end against the **staging** environment (`api.staging.kash.bot`, Base Sepolia). Going live afterwards is the same flow against `api.kash.bot`.
+This guide walks you end-to-end against the **staging** environment (`api-staging.kash.bot`, Base Sepolia). Going live afterwards is the same flow against `api.kash.bot`.
 
 ## 1. Create a Kash account
 
@@ -40,7 +40,7 @@ Prefer the CLI for issuance? You can also issue keys via the `@kashdao/cli` (`ka
 ## 3. Make your first request
 
 ```bash
-curl https://api.staging.kash.bot/v1/markets?limit=5 \
+curl https://api-staging.kash.bot/v1/markets?limit=5 \
   -H "X-API-Key: $KASH_API_KEY"
 ```
 
@@ -53,7 +53,7 @@ If you get `401 INSUFFICIENT_SCOPE`, your key is missing `markets:read`. If you 
 ```bash
 MARKET_ID="<paste a market id from step 3>"
 
-curl "https://api.staging.kash.bot/v1/markets/${MARKET_ID}/quote?outcomeIndex=0&action=buy&amount=10000000" \
+curl "https://api-staging.kash.bot/v1/markets/${MARKET_ID}/quote?outcomeIndex=0&action=buy&amount=10000000" \
   -H "X-API-Key: $KASH_API_KEY"
 ```
 
@@ -62,7 +62,7 @@ The `amount` here is in **atomic USDC** (`10000000` = 10 USDC). The response car
 ## 5. Place your first trade
 
 ```bash
-curl -X POST https://api.staging.kash.bot/v1/trades \
+curl -X POST https://api-staging.kash.bot/v1/trades \
   -H "X-API-Key: $KASH_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $(uuidgen)" \
@@ -96,7 +96,7 @@ The simplest way is to poll:
 ```bash
 TRADE_ID="<the id from step 5>"
 
-curl https://api.staging.kash.bot/v1/trades/$TRADE_ID \
+curl https://api-staging.kash.bot/v1/trades/$TRADE_ID \
   -H "X-API-Key: $KASH_API_KEY"
 ```
 
@@ -151,7 +151,7 @@ import { KashClient } from '@kashdao/sdk';
 
 const kash = new KashClient({
   apiKey: process.env.KASH_API_KEY!,
-  baseUrl: 'https://api.staging.kash.bot/v1',
+  baseUrl: 'https://api-staging.kash.bot/v1',
 });
 
 const trade = await kash.trades.create({

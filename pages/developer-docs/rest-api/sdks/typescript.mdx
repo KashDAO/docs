@@ -19,7 +19,7 @@ import { KashClient } from '@kashdao/sdk';
 
 const kash = new KashClient({
   apiKey:  process.env.KASH_API_KEY!,                        // 'kash_live_...' or 'kash_test_...'
-  baseUrl: 'https://api.kash.bot/v1',                        // staging: https://api.staging.kash.bot/v1
+  baseUrl: 'https://api.kash.bot/v1',                        // staging: https://api-staging.kash.bot/v1
   timeoutMs: 10_000,                                         // optional, default 30s
   maxRetries: 3,                                             // optional, default 3 (with exp backoff + jitter)
   webhookSecret: process.env.KASH_WEBHOOK_SECRET,            // optional, only needed for constructEvent
