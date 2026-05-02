@@ -1,0 +1,186 @@
+---
+title: 'CLI'
+description: 'kash — the command-line interface. Same primitives as the SDK, designed for scripting.'
+---
+
+The `@kashdao/cli` package ships the `kash` binary — a scripting-friendly command-line client over the REST API. Use it for one-off queries, shell scripts, CI jobs, agent integrations, and exploratory debugging.
+
+```bash
+npm install -g @kashdao/cli
+# or: pnpm add -g @kashdao/cli
+# or: brew install kashdao/tap/kash       # (Homebrew tap, coming soon)
+```
+
+Verify install:
+
+```bash
+kash --version
+kash --help
+```
+
+## Configure
+
+```bash
+# Interactive setup — walks you through API key, base URL, default chain
+kash setup
+
+# Or set explicitly
+kash config set apiKey kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+kash config set baseUrl https://api.kash.bot/v1
+
+# Read it back
+kash config get
+```
+
+Config lives at `~/.config/kash/config.json` (XDG-compliant). For CI use the env vars instead:
+
+```bash
+export KASH_API_KEY="kash_live_..."
+export KASH_BASE_URL="https://api.kash.bot/v1"
+```
+
+Env vars override on-disk config.
+
+## Common commands
+
+```bash
+# Markets
+kash markets list --status active --limit 10
+kash markets get <market-id>
+kash markets quote <market-id> --outcome 0 --side buy --amount 100
+
+# Trades
+kash trades create --market <market-id> --outcome 0 --amount 100 --side buy --metadata strategy=momentum-v2
+kash trades confirm <trade-id> --token <token-from-202>
+kash trades list --status completed --limit 25
+kash trades get <trade-id>
+kash trades wait <trade-id> --timeout 60s
+
+# Portfolio
+kash portfolio get
+kash portfolio positions --limit 50
+
+# Account telemetry
+kash account usage
+
+# Webhooks
+kash webhooks list --status failed --limit 20
+kash webhooks redeliver <event-id>
+kash webhooks rotate-secret
+kash webhooks trace --event-id <event-id>
+kash webhooks simulate --type trade.completed --secret $SECRET --url http://localhost:3000/webhooks/kash
+kash webhooks verify --secret $SECRET   # reads stdin, prints whether signature checks out
+
+# Errors
+kash explain INSUFFICIENT_SCOPE         # local lookup; works offline
+kash explain RATE_LIMITED --json
+```
+
+Every command supports `--help` for full usage.
+
+## Output modes
+
+Two output shapes:
+
+- **Human (default)** — coloured, tabular, designed for interactive reading.
+- **JSON (`--json`)** — stable envelope, designed for piping into `jq`, scripts, or agent contexts.
+
+```bash
+kash account usage --json | jq '.trades["24h"].successRate'
+# 0.9166666666666667
+```
+
+The JSON envelope is SemVer-stable. Schema:
+
+```json
+{
+  "ok": true,
+  "data": { ... }
+}
+```
+
+On error:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code":         "INSUFFICIENT_SCOPE",
+    "message":      "...",
+    "recoverable":  false,
+    "suggestion":   "Re-issue the key with the trades:write scope.",
+    "docsUrl":      "https://github.com/KashDAO/kash/blob/main/docs/api-errors/INSUFFICIENT_SCOPE.md",
+    "requestId":    "req_...",
+    "actions":      [
+      { "type": "open_url", "url": "https://kash.bot/settings/api-keys", "description": "..." }
+    ]
+  }
+}
+```
+
+`actions` is the agent-friendly recovery path. Each `type` is a stable enum (`run_command`, `set_env`, `wait_and_retry`, `open_url`, `check_input`) — agents branch on it without parsing prose.
+
+## Exit codes
+
+| Code | Meaning                                                |
+| ---- | ------------------------------------------------------ |
+| `0`  | Success.                                               |
+| `1`  | Generic error (validation, server, network, etc.).     |
+| `2`  | Auth failure (missing/invalid key, missing scope).     |
+
+Rate-limit errors exit `1` (recoverable, but the script should fail loudly). The `recoverable` boolean and `retryAfterMs` field tell agents how to handle it.
+
+## Quiet mode
+
+Suppress the human-readable preamble when scripting:
+
+```bash
+kash account usage --json --quiet | jq '...'
+```
+
+Without `--quiet`, the JSON output is preceded by a one-line summary suitable for terminal output. With `--quiet`, you get only the JSON envelope.
+
+## Tab completion
+
+```bash
+kash completion bash > /etc/bash_completion.d/kash
+kash completion zsh  > /usr/local/share/zsh/site-functions/_kash
+kash completion fish > ~/.config/fish/completions/kash.fish
+```
+
+## Config import / export
+
+Useful for moving between machines or sharing CI templates:
+
+```bash
+# Export current config (omits the API key by default — opt in with --include-secrets)
+kash config export > ~/kash-config.json
+
+# Import on another machine
+kash config import ~/kash-config.json
+```
+
+## Retry behaviour
+
+The CLI retries transient failures (network errors, 429, 5xx) with exponential backoff and jitter — same as the SDK. Use `--no-retry` to disable for a single command, or `--max-retries N` to override.
+
+## Direct (non-custodial) mode
+
+Some commands have a direct mode that bypasses the REST API and signs transactions directly with a local key. This is for advanced users who want non-custodial execution. See `kash protocol --help`.
+
+## Source & changelog
+
+- npm: [`@kashdao/cli`](https://www.npmjs.com/package/@kashdao/cli)
+- GitHub: [`KashDAO/kash`](https://github.com/KashDAO/kash/tree/main/packages/cli)
+- Changelog: [`packages/cli/CHANGELOG.md`](https://github.com/KashDAO/kash/blob/main/packages/cli/CHANGELOG.md)
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="TypeScript SDK" icon="js" href="/developer-docs/rest-api/sdks/typescript">
+    The library version of the same primitives, for in-process integration.
+  </Card>
+  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    The full live spec at `/v1/docs`.
+  </Card>
+</CardGroup>

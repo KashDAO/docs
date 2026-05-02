@@ -1,0 +1,132 @@
+---
+title: 'Pagination'
+description: 'Cursor-based pagination on every list endpoint.'
+---
+
+Every list endpoint (`GET /v1/markets`, `GET /v1/trades`, `GET /v1/markets/{id}/predictions`, `GET /v1/portfolio/positions`, `GET /v1/webhooks/events`) returns a paginated response with an opaque cursor.
+
+We deliberately do **not** support offset-based pagination — offsets are inconsistent under concurrent writes and degrade with table size.
+
+## Wire shape
+
+```json
+{
+  "data": [ /* page items */ ],
+  "pagination": {
+    "cursor":  "eyJpZCI6IjEyMy4uLiIsInRzIjoxNzMwfQ==",
+    "hasMore": true,
+    "limit":   25
+  },
+  "_meta": { "requestId": "...", "timestamp": "..." }
+}
+```
+
+| Field      | Use                                                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| `data`     | The page items (in resource-natural order — usually newest first, see per-endpoint docs).      |
+| `cursor`   | Opaque base64url string. Pass on the next request as `?cursor=<value>`. `null` on the last page. |
+| `hasMore`  | `true` if more pages exist after this one.                                                     |
+| `limit`    | The page size that was actually applied.                                                       |
+
+## Walking pages
+
+```bash
+# First page
+curl "https://api.kash.bot/v1/trades?limit=50" \
+  -H "X-API-Key: $KASH_API_KEY"
+
+# → { "data": [...], "pagination": { "cursor": "abc...", "hasMore": true, "limit": 50 } }
+
+# Next page
+curl "https://api.kash.bot/v1/trades?limit=50&cursor=abc..." \
+  -H "X-API-Key: $KASH_API_KEY"
+
+# → { "data": [...], "pagination": { "cursor": null, "hasMore": false, "limit": 50 } }
+```
+
+When `pagination.cursor` is `null` (or `hasMore: false`), you've reached the end.
+
+### TypeScript SDK
+
+The SDK's `list()` methods return a `Page` that's both the first page (with `data` and `pagination`) and an `AsyncIterable<Item>` for walking every page lazily:
+
+```ts
+const page = await kash.trades.list({ limit: 25 });
+
+// Just the first page
+console.log(page.data);
+
+// Or iterate every trade across every page
+for await (const trade of page) {
+  console.log(trade.id, trade.status);
+}
+
+// Or call .getNextPage() manually
+const next = await page.getNextPage();
+```
+
+`page.getNextPage()` is memoised — calling it twice returns the same Promise.
+
+## Limits
+
+| Endpoint                       | Default limit | Max limit |
+| ------------------------------ | ------------- | --------- |
+| `GET /v1/markets`              | 20            | 100       |
+| `GET /v1/markets/{id}/predictions` | 50         | 100       |
+| `GET /v1/trades`               | 20            | 100       |
+| `GET /v1/portfolio/positions`  | 20            | 100       |
+| `GET /v1/webhooks/events`      | 25            | 100       |
+
+Override with `?limit=N`. Requests with `limit > 100` get clamped to `100` silently.
+
+## Filtering
+
+Most list endpoints accept filters that compose with pagination:
+
+```bash
+# Trades filtered by status
+curl "https://api.kash.bot/v1/trades?status=pending,executing&limit=10" \
+  -H "X-API-Key: $KASH_API_KEY"
+
+# Trades for a specific market
+curl "https://api.kash.bot/v1/trades?marketId=11111111-1111-4111-8111-111111111111" \
+  -H "X-API-Key: $KASH_API_KEY"
+
+# Predictions filtered to one outcome and side
+curl "https://api.kash.bot/v1/markets/$MARKET_ID/predictions?outcomeIndex=0&side=buy&limit=20" \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+The cursor encodes the filter context. Don't change filters mid-walk — generate a new cursor by re-requesting the first page.
+
+## Cursor stability
+
+Cursors are stable for **at least 7 days**. If you persist a cursor (e.g. for a daily incremental fetch) and use it later, it'll continue to work as long as the underlying row hasn't been deleted. After 7 days we make no guarantees — restart the walk from the first page.
+
+Cursors are tied to the page they came from. Don't try to construct your own — they're opaque on purpose, and the encoding may change.
+
+## Insertion behaviour during a walk
+
+Because cursors are anchored to row ids (not offsets), new rows inserted *after* you started a walk don't shift your cursor. You'll never see the same item twice, and you'll never skip an item that existed when you started.
+
+Items inserted *during* the walk that fall before your cursor on the natural sort order won't appear in the current walk. Re-fetch from the first page to pick them up.
+
+## Total counts
+
+We don't return a total count — counting all rows on every page is expensive at scale. If you need a count for UX:
+
+- For trades: `GET /v1/account/usage` returns 24h/7d/30d aggregates.
+- For markets: walk the full list (cheap with `?limit=100` and ETags).
+
+If you really need exact totals for a custom dashboard, the [account telemetry endpoint](/developer-docs/rest-api/endpoint-reference) is your friend.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="ETags" icon="bolt" href="/developer-docs/rest-api/etags">
+    Combine pagination with `If-None-Match` to skip unchanged pages.
+  </Card>
+  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    The interactive spec with full pagination examples.
+  </Card>
+</CardGroup>

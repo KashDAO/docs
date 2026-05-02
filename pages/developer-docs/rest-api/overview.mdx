@@ -1,0 +1,84 @@
+---
+title: 'REST API Overview'
+description: 'Programmatic access to Kash markets, trades, portfolios, and webhooks at api.kash.bot'
+---
+
+The Kash REST API is the programmatic interface to the prediction-marketplace protocol. It's built for developers, automated agents, and market makers — anything that talks to Kash without a human in the loop.
+
+<Note>
+**The two surfaces, and when to use which:**
+
+- **`api.kash.bot`** (this API) — for **machines**. Authenticated with API keys. Per-key rate limits, telemetry, attribution. Trade execution, webhooks, portfolio access.
+- **`app.kash.bot/api`** (the [Public Embed API](/developer-docs/public-embed-api/overview)) — for **humans / UIs**. Anonymous reads, designed for embedding markets in websites and apps. No trading.
+
+If you're building a trading bot, an analytics dashboard against your own positions, an MM strategy, a portfolio tool, or a connector for a third-party platform, you want the REST API. If you're embedding markets in an article or website, you want the Embed API.
+</Note>
+
+## What's in v1
+
+<CardGroup cols={2}>
+  <Card title="Markets & Quotes" icon="chart-line" href="/developer-docs/rest-api/endpoint-reference">
+    Browse markets, fetch detail, get on-chain quotes, list recent trades against a market.
+  </Card>
+  <Card title="Trades" icon="bolt" href="/developer-docs/rest-api/endpoint-reference">
+    Place buy/sell orders, list and inspect your own trades, confirm high-value trades.
+  </Card>
+  <Card title="Portfolio" icon="wallet" href="/developer-docs/rest-api/endpoint-reference">
+    Smart-account address, position summary, per-market position detail.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
+    Receive trade lifecycle events at your endpoint. Stripe-style HMAC-signed, retried, replayable.
+  </Card>
+  <Card title="Account" icon="gauge" href="/developer-docs/rest-api/endpoint-reference">
+    Per-key telemetry: trade volume, latency p50/p99, webhook success rate, auth failures.
+  </Card>
+  <Card title="Traces" icon="route" href="/developer-docs/rest-api/endpoint-reference">
+    Walk a trade's event timeline by correlation id — for debugging and observability.
+  </Card>
+</CardGroup>
+
+## Design principles
+
+- **Stripe-shaped wire protocol.** RFC 7807 errors, `Idempotency-Key` header, cursor pagination, dual-key envelopes (`{ trade, data }` on every single-resource response), Stripe-style HMAC webhook signatures. If you've integrated with Stripe, this will feel familiar.
+- **OpenAPI 3.1 is the contract of record.** The live spec at [`https://api.kash.bot/v1/openapi.json`](https://api.kash.bot/v1/openapi.json) is the source of truth. Interactive docs at [`https://api.kash.bot/v1/docs`](https://api.kash.bot/v1/docs).
+- **Versioning by URL.** Currently `/v1/`. Sunset and Deprecation headers (RFC 8594) announce changes 12 months ahead.
+- **Always-on auth.** Every data route requires a key — no anonymous fallback. This unlocks per-key rate limits, telemetry, kill switches, and abuse mitigation.
+- **Decimal strings for big numbers.** USDC and outcome-token amounts are returned as decimal strings (atomic-6 for USDC, WAD-18 for tokens). Never lose precision parsing JSON.
+
+## Base URL
+
+```
+Production: https://api.kash.bot/v1
+Staging:    https://api.staging.kash.bot/v1
+```
+
+The staging environment is wired to Base Sepolia and is the right place to integrate before going live.
+
+## API version
+
+The current API version is `2026-04-29`. Every response carries `X-Kash-Api-Version: 2026-04-29`; every webhook envelope includes `apiVersion`. We surface this date so consumers can detect a server upgrade and pin against it.
+
+## Next steps
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="rocket" href="/developer-docs/rest-api/quickstart">
+    Generate a key, place your first trade, receive your first webhook — under 5 minutes.
+  </Card>
+  <Card title="Authentication" icon="key" href="/developer-docs/rest-api/authentication">
+    `X-API-Key`, scopes, IP allowlists, and key rotation.
+  </Card>
+  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    The full live spec, rendered interactively at `/v1/docs`.
+  </Card>
+</CardGroup>
+
+## Need help?
+
+<CardGroup cols={2}>
+  <Card title="Developer Support" icon="headset">
+    Email [dev@kash.bot](mailto:dev@kash.bot) for technical questions.
+  </Card>
+  <Card title="Discord" icon="discord" href="https://discord.com/invite/n9eumqjMPb">
+    Join the `#developers` channel for real-time help and to share what you're building.
+  </Card>
+</CardGroup>

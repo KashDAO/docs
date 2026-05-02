@@ -1,0 +1,183 @@
+---
+title: 'Quickstart'
+description: 'Get a key, place your first trade, and receive your first webhook in under 5 minutes.'
+---
+
+This guide walks you end-to-end against the **staging** environment (`api.staging.kash.bot`, Base Sepolia). Going live afterwards is the same flow against `api.kash.bot`.
+
+## 1. Create a Kash account
+
+If you don't have one already, sign up at [staging.kash.bot](https://staging.kash.bot). The staging webapp is the human-facing front door; you'll use it to create the account that owns your API keys.
+
+## 2. Generate an API key
+
+In the webapp:
+
+1. Go to **Settings → API Keys**.
+2. Click **Create key**.
+3. Give it a name (e.g. `local dev`) and select the scopes you need:
+   - `markets:read` — read market detail & list (granted by default on every tier)
+   - `markets:quote` — fetch on-chain price quotes
+   - `portfolio:read` — read your own positions
+   - `trades:read` — list and inspect your trades
+   - `trades:write` — place trades and confirm high-value ones
+   - `webhooks:manage` — list events, redeliver, rotate the webhook secret
+4. (Optional) Set an IP allowlist if you'll always call from a known set of addresses.
+5. (Optional) Set a `webhook_url` if you want trade-lifecycle events POSTed to your endpoint.
+
+The plaintext key is shown **once**. Capture it immediately:
+
+```bash
+export KASH_API_KEY="kash_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+The `kash_test_` prefix marks staging keys; production keys use `kash_live_`.
+
+<Tip>
+Prefer the CLI for issuance? You can also issue keys via the `@kashdao/cli` (`kash` command) once you've authenticated it with a Privy session. See the [CLI guide](/developer-docs/rest-api/sdks/cli).
+</Tip>
+
+## 3. Make your first request
+
+```bash
+curl https://api.staging.kash.bot/v1/markets?limit=5 \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+You should get back a `200 OK` with a page of markets.
+
+If you get `401 INSUFFICIENT_SCOPE`, your key is missing `markets:read`. If you get `429`, you've hit your tier's rate limit — the response includes `X-RateLimit-Reset` and `Retry-After`.
+
+## 4. Get a quote
+
+```bash
+MARKET_ID="<paste a market id from step 3>"
+
+curl "https://api.staging.kash.bot/v1/markets/${MARKET_ID}/quote?outcomeIndex=0&action=buy&amount=10000000" \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+The `amount` here is in **atomic USDC** (`10000000` = 10 USDC). The response carries the expected `tokensOut`, the post-trade pool state, and an `effectivePrice` convenience number.
+
+## 5. Place your first trade
+
+```bash
+curl -X POST https://api.staging.kash.bot/v1/trades \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "marketId": "'"$MARKET_ID"'",
+    "outcomeIndex": 0,
+    "amount": "10",
+    "side": "buy",
+    "metadata": { "strategy": "first-trade", "source": "quickstart" }
+  }'
+```
+
+Note: `amount` in the trade body is a **decimal string** of USDC (`"10"` = 10 USDC), distinct from the atomic-units amount used by the quote endpoint.
+
+You'll get back a `201 Created`:
+
+```json
+{
+  "trade": { "id": "...", "status": "pending", ... },
+  "data": { "id": "...", "status": "pending", ... },
+  "_meta": { "requestId": "...", "timestamp": "...", "idempotent": false }
+}
+```
+
+The trade's `status` field tracks the lifecycle: `pending → validating → executing → completed` (or `failed`/`rejected`).
+
+## 6. Watch the trade complete
+
+The simplest way is to poll:
+
+```bash
+TRADE_ID="<the id from step 5>"
+
+curl https://api.staging.kash.bot/v1/trades/$TRADE_ID \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+You'll see the status transition to `completed` with a `txHash` and `tokensOut` populated.
+
+The better way is to receive a webhook — see step 7.
+
+## 7. Receive a webhook
+
+If you set a `webhook_url` on the key in step 2, the **trade.completed** event was already POSTed to your endpoint. The body looks like:
+
+```json
+{
+  "id": "evt_uuid",
+  "type": "trade.completed",
+  "apiVersion": "2026-04-29",
+  "createdAt": "2026-05-02T12:34:56.789Z",
+  "data": {
+    "tradeId": "trade_uuid",
+    "marketId": "market_uuid",
+    "outcomeIndex": 0,
+    "amount": "10",
+    "side": "buy",
+    "status": "completed",
+    "txHash": "0x...",
+    "tokensOut": "23734012471176000000",
+    "metadata": { "strategy": "first-trade", "source": "quickstart" }
+  }
+}
+```
+
+The headers carry the signature so you can verify the request:
+
+```
+X-Kash-Signature: t=1730000000000,v1=<hex-hmac-sha256>
+X-Kash-Event-Id:  evt_uuid
+X-Kash-Api-Version: 2026-04-29
+```
+
+See **[Verifying webhook signatures](/developer-docs/rest-api/webhooks/verifying)** for the verification recipe (one-line constant change from any Stripe library).
+
+## 8. (Optional) Use the SDK
+
+The TypeScript SDK gives you typed everything — including a one-line `constructEvent` for webhook verification:
+
+```bash
+pnpm add @kashdao/sdk
+```
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+
+const kash = new KashClient({
+  apiKey: process.env.KASH_API_KEY!,
+  baseUrl: 'https://api.staging.kash.bot/v1',
+});
+
+const trade = await kash.trades.create({
+  marketId,
+  outcomeIndex: 0,
+  amount: '10',
+  side: 'buy',
+  metadata: { strategy: 'first-trade' },
+}, { idempotencyKey: crypto.randomUUID() });
+
+const final = await kash.trades.waitForCompletion(trade.id);
+console.log(final.status, final.txHash);
+```
+
+Full SDK reference: **[TypeScript SDK](/developer-docs/rest-api/sdks/typescript)**.
+
+## What next?
+
+<CardGroup cols={3}>
+  <Card title="Authentication" icon="key" href="/developer-docs/rest-api/authentication">
+    Scopes, IP allowlists, and key rotation.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
+    Set up a verified, retried webhook endpoint.
+  </Card>
+  <Card title="Idempotency" icon="rotate" href="/developer-docs/rest-api/idempotency">
+    Safely retry trade creation without duplicates.
+  </Card>
+</CardGroup>

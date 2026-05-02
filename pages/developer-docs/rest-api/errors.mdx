@@ -1,0 +1,144 @@
+---
+title: 'Errors'
+description: 'RFC 7807 Problem Details, the X-Kash-Error-Code header, and the full error code catalog.'
+---
+
+Every error response from `api.kash.bot` follows [RFC 7807 Problem Details](https://datatracker.ietf.org/doc/html/rfc7807) with `Content-Type: application/problem+json`.
+
+## Wire shape
+
+```json
+{
+  "type":     "https://github.com/KashDAO/kash/blob/main/docs/api-errors/INSUFFICIENT_SCOPE.md",
+  "title":    "Insufficient scope",
+  "status":   403,
+  "code":     "INSUFFICIENT_SCOPE",
+  "detail":   "This route requires the 'trades:write' scope. The supplied API key does not include it.",
+  "instance": "/v1/trades",
+  "requestId": "req_01HZ..."
+}
+```
+
+| Field       | Use                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| `type`      | URI of the per-code documentation page (RFC 7807 §3.1). Stable; safe to fetch.                 |
+| `title`     | Short human-readable summary.                                                                  |
+| `status`    | The HTTP status (echoed for clients that lose it).                                             |
+| `code`      | **Stable machine-readable string.** Branch on this; never on `title` or `detail`.              |
+| `detail`    | Sanitised human-readable explanation. May reference the specific bad input.                    |
+| `instance`  | URI of the request that produced this error.                                                   |
+| `requestId` | Trace handle. Include in support tickets — gets you straight to the right span in our backend. |
+
+## How to handle errors
+
+Branch on `code`, not on `status` or message text. Status codes are coarse (a `400` could mean any of a dozen specific failures); `code` is the unambiguous identifier.
+
+```ts
+try {
+  await kash.trades.create(body);
+} catch (err) {
+  if (err instanceof KashError) {
+    switch (err.code) {
+      case 'INSUFFICIENT_SCOPE':
+        // Re-issue the key with `trades:write`.
+        break;
+      case 'RATE_LIMITED':
+        await sleep(err.retryAfterMs ?? 1000);
+        // retry
+        break;
+      case 'IDEMPOTENCY_KEY_CONFLICT':
+        // Same key was used with a different body. Either replay the
+        // original body or generate a new key.
+        break;
+      // ...
+    }
+  }
+  throw err;
+}
+```
+
+The TypeScript SDK throws typed subclasses (`KashRateLimitError`, `KashAuthorizationError`, etc.) so you can catch by error type as well.
+
+## Status code conventions
+
+| Status | When                                                                            |
+| ------ | ------------------------------------------------------------------------------- |
+| `200`  | Successful read.                                                                |
+| `201`  | Successful resource creation (immediate).                                       |
+| `202`  | Accepted, work in progress (high-value trade pending confirmation; redelivery). |
+| `304`  | `If-None-Match` cache hit — no body. See [ETags](/developer-docs/rest-api/etags). |
+| `400`  | Validation failure on the request itself (`VALIDATION_FAILED`, malformed JSON). |
+| `401`  | Auth failure (`API_KEY_MISSING`, `API_KEY_INVALID`, `API_KEY_REVOKED`).         |
+| `402`  | Spending cap exceeded (rare; typed as `SPEND_LIMIT_EXCEEDED`).                  |
+| `403`  | Authenticated but not authorised (`INSUFFICIENT_SCOPE`, `IP_NOT_ALLOWED`).      |
+| `404`  | Resource doesn't exist (or doesn't exist *to you* — ownership-checked routes return 404 not 403 to prevent enumeration). |
+| `409`  | Conflict (`IDEMPOTENCY_KEY_CONFLICT`, `TRADE_NOT_AWAITING_CONFIRMATION`, etc.). |
+| `410`  | Gone (a previously valid resource is permanently removed).                      |
+| `422`  | Semantically valid but rejected by domain rules (e.g. `MARKET_NOT_TRADEABLE`).  |
+| `429`  | Rate limit exceeded. Honour `Retry-After`.                                      |
+| `500`  | Server bug. Include `requestId` when reporting.                                 |
+| `502`  | Upstream dependency error (RPC, DB).                                            |
+| `503`  | Route temporarily disabled (`ROUTE_DISABLED`) or dependency unavailable.        |
+| `504`  | Upstream timeout.                                                               |
+
+## Error code catalog
+
+Every `code` has a stable per-page documentation entry at `https://github.com/KashDAO/kash/blob/main/docs/api-errors/<CODE>.md`. The `type` field on every error is exactly that URL — copy-paste it into a browser to read the page, or fetch it programmatically.
+
+The CLI ships an offline copy of the full catalog. `kash explain <CODE>` works without a network round-trip:
+
+```bash
+kash explain INSUFFICIENT_SCOPE
+```
+
+Common codes to know:
+
+| Code                         | When it fires                                                          |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `API_KEY_MISSING`            | No `X-API-Key` header.                                                 |
+| `API_KEY_INVALID`            | Key not recognised or HMAC mismatch.                                   |
+| `API_KEY_REVOKED`            | Valid format, but the key has been revoked.                            |
+| `INSUFFICIENT_SCOPE`         | Key lacks the scope this route requires.                               |
+| `IP_NOT_ALLOWED`             | Source IP not in this key's allowlist.                                 |
+| `RATE_LIMITED`               | Per-key quota exceeded. Honour `Retry-After`.                          |
+| `VALIDATION_FAILED`          | Request body or query failed schema validation.                        |
+| `IDEMPOTENCY_KEY_CONFLICT`   | Same `Idempotency-Key` reused with a different body. See [Idempotency](/developer-docs/rest-api/idempotency). |
+| `MARKET_NOT_TRADEABLE`       | Market is FROZEN/RESOLVED, on an unsupported chain, or otherwise inactive. |
+| `INSUFFICIENT_BALANCE`       | Smart account doesn't have enough USDC for the trade.                  |
+| `TRADE_NOT_AWAITING_CONFIRMATION` | Confirm called on a trade that's not in `pending_confirmation`.   |
+| `CONFIRMATION_TOKEN_INVALID` | Confirmation token didn't match.                                       |
+| `CONFIRMATION_TOKEN_USED`    | Confirmation token already redeemed (or by a concurrent confirm).      |
+| `CONFIRMATION_EXPIRED`       | Confirmation window passed; the trade auto-failed.                     |
+| `RESOURCE_NOT_FOUND`         | Trade/market/event id doesn't exist (or doesn't belong to you).        |
+| `DEPENDENCY_UNAVAILABLE`     | Upstream (DB, chain RPC) is degraded. Treat like `Retry-After`.        |
+| `ROUTE_DISABLED`             | Ops kill switch is active for this route.                              |
+| `WEBHOOK_SECRET_NOT_SET`     | Tried to rotate a webhook secret on a key that doesn't have one.       |
+| `WEBHOOK_REPLAY_LIMIT`       | More than 5 manual redeliveries for the same event.                    |
+| `SIGNATURE_INVALID`          | Opt-in body-signing on `POST /v1/trades` failed verification.          |
+
+The full list lives in the [`docs/api-errors/`](https://github.com/KashDAO/kash/tree/main/docs/api-errors) directory. The CLI's bundled copy is generated from there at build time, so they stay in sync.
+
+## What's NOT in errors
+
+Defensive design choices to be aware of:
+
+- **No stack traces.** Internal stack frames are stripped before the response.
+- **No DB error strings.** Postgres / RPC errors are sanitised to user-safe messages.
+- **No URLs with credentials.** Defence-in-depth scrubbing in case anything slips into a log line.
+- **404 instead of 403 for ownership.** Trying to GET someone else's trade returns `RESOURCE_NOT_FOUND`, not `FORBIDDEN`. This prevents id-enumeration attacks (you can't tell whether a UUID exists if it's not yours).
+- **Generic `DEPENDENCY_UNAVAILABLE` when upstream fails.** We deliberately hide which upstream — DB vs RPC vs Redis — to avoid leaking architecture detail to attackers. Your `requestId` lets us correlate to the precise root cause server-side.
+
+## Reporting bugs
+
+Include the **`requestId`** when emailing [dev@kash.bot](mailto:dev@kash.bot) or filing on [GitHub](https://github.com/KashDAO/kash/issues). One id is enough — we can pull the full distributed trace, every event, and every retry attempt from it.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Idempotency" icon="rotate" href="/developer-docs/rest-api/idempotency">
+    Safely retry trade creation without producing duplicates.
+  </Card>
+  <Card title="Pagination" icon="list" href="/developer-docs/rest-api/pagination">
+    Cursor-based, never offset. How to walk a list endpoint.
+  </Card>
+</CardGroup>

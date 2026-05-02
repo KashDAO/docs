@@ -80,8 +80,37 @@
         "groups": [
           {
             "group": "Overview",
+            "pages": ["pages/developer-docs/introduction"]
+          },
+          {
+            "group": "REST API",
             "pages": [
-              "pages/developer-docs/introduction"
+              "pages/developer-docs/rest-api/overview",
+              "pages/developer-docs/rest-api/quickstart",
+              "pages/developer-docs/rest-api/authentication",
+              "pages/developer-docs/rest-api/rate-limits",
+              "pages/developer-docs/rest-api/errors",
+              "pages/developer-docs/rest-api/idempotency",
+              "pages/developer-docs/rest-api/pagination",
+              "pages/developer-docs/rest-api/etags",
+              "pages/developer-docs/rest-api/endpoint-reference",
+              "pages/developer-docs/rest-api/migration-from-webapp"
+            ]
+          },
+          {
+            "group": "REST API — Webhooks",
+            "pages": [
+              "pages/developer-docs/rest-api/webhooks/overview",
+              "pages/developer-docs/rest-api/webhooks/verifying",
+              "pages/developer-docs/rest-api/webhooks/retries",
+              "pages/developer-docs/rest-api/webhooks/secret-rotation"
+            ]
+          },
+          {
+            "group": "REST API — SDKs",
+            "pages": [
+              "pages/developer-docs/rest-api/sdks/typescript",
+              "pages/developer-docs/rest-api/sdks/cli"
             ]
           },
           {

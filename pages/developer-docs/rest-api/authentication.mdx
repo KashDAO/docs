@@ -1,0 +1,129 @@
+---
+title: 'Authentication'
+description: 'API keys, scopes, IP allowlists, and key rotation.'
+---
+
+Every data route on `api.kash.bot` requires an API key. The only unauthenticated endpoints are the infra-meta routes: `/v1/health`, `/v1/ready`, `/v1/openapi.json`, `/v1/docs`.
+
+## The `X-API-Key` header
+
+Pass your key on every request as the `X-API-Key` header:
+
+```bash
+curl https://api.kash.bot/v1/markets \
+  -H "X-API-Key: kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+Keys are issued via the webapp's **Settings → API Keys** page or the admin CLI.
+
+## Key format
+
+```
+kash_live_<32 base62 chars>   # production
+kash_test_<32 base62 chars>   # staging
+```
+
+The 32-character random suffix gives roughly 190 bits of entropy. The prefix is informational — the server validates the full key against a stored HMAC under a server-side pepper. **Never log or commit the plaintext.**
+
+## Scopes
+
+A scope is a coarse-grained permission. Every endpoint declares the scope(s) it requires. The `requireScope` middleware fails closed with `403 INSUFFICIENT_SCOPE` when a key lacks one.
+
+| Scope            | What it grants                                                           |
+| ---------------- | ------------------------------------------------------------------------ |
+| `markets:read`   | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` |
+| `markets:quote`  | `GET /v1/markets/{id}/quote`                                             |
+| `portfolio:read` | `GET /v1/portfolio`, `GET /v1/portfolio/positions`                       |
+| `trades:read`    | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{id}`           |
+| `trades:write`   | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`                        |
+| `webhooks:manage`| `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{id}/redeliver`     |
+| `auth:manage`    | `POST /v1/auth/api-keys/me/webhook-secret/rotate`, `GET /v1/account/usage` |
+
+<Tip>
+**Default scopes by tier.** Self-served `free` and `developer` keys default to `markets:read`, `markets:quote`, `portfolio:read`. Admin-issued `enterprise` and `mm` keys add `trades:read`, `trades:write`. You can override at issuance — request the scopes that match your use case, no more.
+</Tip>
+
+## Tiers
+
+Each key has a tier that governs default rate limits and spending caps. See **[Rate Limits](/developer-docs/rest-api/rate-limits)** for per-tier quotas.
+
+| Tier         | How issued                | Notes                                                              |
+| ------------ | ------------------------- | ------------------------------------------------------------------ |
+| `free`       | Self-serve via webapp     | Conservative caps. Default for new accounts.                       |
+| `developer`  | Self-serve, paid          | Higher rate limit and per-trade caps.                              |
+| `enterprise` | Admin-issued (contractual)| Custom rate limit. Required for governance-thresholded operations. |
+| `mm`         | Admin-issued only         | Market-maker tier. High caps. AD-8 / AD-10 review required.        |
+
+Reach out to [partnerships@kash.bot](mailto:partnerships@kash.bot) for `enterprise` or `mm` keys.
+
+## IP allowlists
+
+Optional per-key. When set, requests from any IP not in the list fail closed with `403 IP_NOT_ALLOWED` *before* the route handler runs.
+
+Format: comma-separated IPv4/IPv6 addresses or CIDR ranges. Set in the webapp UI or via the admin CLI at issuance time.
+
+```
+10.0.0.0/8,2001:db8::/32,203.0.113.45
+```
+
+We strongly recommend setting an allowlist for production keys. It collapses an entire class of "key was leaked from a logfile" incidents.
+
+## Key rotation
+
+API keys do not expire automatically. Rotate them when:
+
+- A team member with access leaves
+- A key may have been logged or committed to a repo
+- You're tightening security posture before a major release
+
+To rotate:
+
+1. Issue a new key in the webapp.
+2. Roll it out to your services.
+3. Verify the new key is in use (check `/v1/account/usage` — request counts on the old key should be zero).
+4. Revoke the old key in the webapp.
+
+There is no automated dual-validity overlap window for API keys; the rotation is sequential. (Webhook *secrets* do have a 7-day rotation overlap — see **[Secret Rotation](/developer-docs/rest-api/webhooks/secret-rotation)**.)
+
+## Body signing for `trades:write` (optional, hardened)
+
+For the `POST /v1/trades` route, you can opt into HMAC-signed request bodies as a defence-in-depth layer against in-flight tampering. Send the signature in `X-Kash-Signature` using the same Stripe-style format as our webhook signatures:
+
+```
+X-Kash-Signature: t=<unix-ms>,v1=<hex-hmac-sha256>
+```
+
+The HMAC is computed over `<unix-ms>.<raw-body-bytes>` under your key's `webhook_secret`. If the header is present, the server verifies it; if absent, the route still works (the API key is the canonical authentication). Use it when your threat model includes a compromised TLS-terminating proxy.
+
+## Auth failures
+
+| Status | `code`                | Meaning                                                       |
+| ------ | --------------------- | ------------------------------------------------------------- |
+| 401    | `API_KEY_MISSING`     | No `X-API-Key` header.                                        |
+| 401    | `API_KEY_INVALID`     | Key not recognised, or HMAC mismatch.                         |
+| 401    | `API_KEY_REVOKED`     | Key was found but has been revoked.                           |
+| 403    | `INSUFFICIENT_SCOPE`  | Key is valid but doesn't carry the scope this route requires. |
+| 403    | `IP_NOT_ALLOWED`      | Source IP not in this key's allowlist.                        |
+| 401    | `SIGNATURE_INVALID`   | Body-signing was opted into and failed verification.          |
+
+All auth failures return RFC 7807 [`application/problem+json`](/developer-docs/rest-api/errors) and are written to the per-key audit log. Repeated failures from the same source trigger the per-IP brute-force lockout.
+
+## Inspecting auth state
+
+The `GET /v1/account/usage` endpoint returns telemetry for the *calling* key — including 24h auth-failure and rate-limit-rejection counts. Useful for spotting key misuse early.
+
+```bash
+curl https://api.kash.bot/v1/account/usage \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Rate Limits" icon="gauge" href="/developer-docs/rest-api/rate-limits">
+    Per-tier quotas, the `X-RateLimit-*` headers, and 429 handling.
+  </Card>
+  <Card title="Errors" icon="circle-exclamation" href="/developer-docs/rest-api/errors">
+    RFC 7807 error format and the full error code catalog.
+  </Card>
+</CardGroup>

@@ -1,0 +1,122 @@
+---
+title: 'Endpoint Reference'
+description: 'The interactive OpenAPI 3.1 reference at /v1/docs and the live spec at /v1/openapi.json.'
+---
+
+The full endpoint reference is rendered live, in sync with the deployed API, by [Scalar](https://scalar.com) at:
+
+<CardGroup cols={2}>
+  <Card title="Production: /v1/docs" icon="play" href="https://api.kash.bot/v1/docs">
+    Interactive reference for production. Try requests directly from the browser.
+  </Card>
+  <Card title="Staging: /v1/docs" icon="flask" href="https://api.staging.kash.bot/v1/docs">
+    Same UI, against Base Sepolia. Safe to experiment.
+  </Card>
+</CardGroup>
+
+The raw OpenAPI 3.1 spec — for SDK generation, contract testing, or import into Postman / Bruno / Insomnia — is at:
+
+```
+Production: https://api.kash.bot/v1/openapi.json
+Staging:    https://api.staging.kash.bot/v1/openapi.json
+```
+
+## What's in the spec
+
+Every endpoint is documented with:
+
+- Path, method, summary, description
+- Required scope and auth scheme
+- Request parameters, query, body schemas (Zod-derived JSON Schema)
+- Response schemas for each status code (`200`, `201`, `202`, `304`, `4xx`, `5xx`)
+- The full `application/problem+json` envelope on every error response
+- Webhook payload schemas under the OpenAPI 3.1 `webhooks` section
+
+## Endpoint groups
+
+The full surface, grouped by domain:
+
+### Markets
+
+- `GET /v1/markets` — list markets (cursor-paginated, filterable)
+- `GET /v1/markets/{id}` — single market detail
+- `GET /v1/markets/{id}/quote` — on-chain price quote (buy or sell)
+- `GET /v1/markets/{id}/predictions` — recent trades against a market
+
+### Trades
+
+- `POST /v1/trades` — create a trade (`201` immediate, `202` for high-value)
+- `POST /v1/trades/{id}/confirm` — release a high-value trade with the one-time token
+- `GET /v1/trades` — list your trades
+- `GET /v1/trades/{id}` — single trade detail
+
+### Portfolio
+
+- `GET /v1/portfolio` — smart-account address + aggregate position summary
+- `GET /v1/portfolio/positions` — per-market position detail (cursor-paginated)
+
+### Webhooks
+
+- `GET /v1/webhooks/events` — list webhook deliveries (cursor-paginated, filterable by status)
+- `POST /v1/webhooks/events/{id}/redeliver` — replay a failed delivery
+- `POST /v1/auth/api-keys/me/webhook-secret/rotate` — rotate the webhook signing secret
+
+### Account
+
+- `GET /v1/account/usage` — per-key telemetry (trades, webhooks, auth failures, latency)
+
+### Traces
+
+- `GET /v1/traces/{correlationId}` — walk a trade's full event timeline
+
+### Infra meta (no auth)
+
+- `GET /v1/health` — liveness check
+- `GET /v1/ready` — readiness check
+- `GET /v1/openapi.json` — this spec
+- `GET /v1/docs` — Scalar interactive UI
+
+## Generating an SDK from the spec
+
+The OpenAPI 3.1 spec is the contract of record. You can use any standard generator:
+
+```bash
+# OpenAPI Generator (multi-language)
+openapi-generator-cli generate \
+  -i https://api.kash.bot/v1/openapi.json \
+  -g typescript-fetch \
+  -o ./generated-sdk
+
+# Speakeasy
+speakeasy generate sdk --schema https://api.kash.bot/v1/openapi.json --lang go
+
+# Stoplight Prism (mock server)
+prism mock https://api.kash.bot/v1/openapi.json
+```
+
+For TypeScript, prefer the hand-written `@kashdao/sdk` — it has typed errors, retry/backoff, idempotency helpers, webhook signature verification, async pagination iterators, and lifecycle hooks. See the [TypeScript SDK guide](/developer-docs/rest-api/sdks/typescript).
+
+Multi-language SDK roadmap: Python first, then Go, then Rust. Generated from the same spec.
+
+## Postman / Bruno / Insomnia
+
+A maintained Postman collection ships with the public-API repo and tracks the spec automatically:
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/?action=import&collection=https%3A%2F%2Fraw.githubusercontent.com%2FKashDAO%2Fkash%2Fmain%2Fapps%2Fpublic-api%2Fexamples%2Fpostman%2FKash-API.postman_collection.json)
+
+Or import the spec directly into your tool of choice — every modern API client supports OpenAPI 3.1 import.
+
+## cURL recipes
+
+The repo also ships a directory of one-line cURL examples per endpoint. Browse [`apps/public-api/examples/curl/`](https://github.com/KashDAO/kash/tree/main/apps/public-api/examples/curl) for copy-pasteable invocations.
+
+## Spec stability and versioning
+
+The spec is **the contract**. Breaking changes are signalled via:
+
+- `X-Kash-Api-Version` response header on every response (currently `2026-04-29`)
+- `Sunset` and `Deprecation` headers (RFC 8594) on routes scheduled for removal
+- `info.version` bump in the spec itself
+- A 12-month notice period for breaking changes; multiple versions run in parallel during transitions
+
+If a route returns `Deprecation: true` and `Sunset: <date>`, you have until that date to migrate.

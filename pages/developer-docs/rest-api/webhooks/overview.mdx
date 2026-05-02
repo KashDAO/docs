@@ -1,0 +1,235 @@
+---
+title: 'Webhooks Overview'
+description: 'Receive trade lifecycle events at your endpoint. HMAC-signed, retried, replayable.'
+---
+
+Webhooks are how the API tells your code that something happened — a high-value trade needs confirmation, a trade completed on-chain, a trade failed terminally. They're the push-based alternative to polling `GET /v1/trades/{id}`.
+
+## When you'll get webhooks
+
+Each API key can carry an optional `webhook_url`. When set, the API POSTs `trade.*` events to that URL throughout the trade lifecycle:
+
+| Event                          | When                                                                | Status code in payload    |
+| ------------------------------ | ------------------------------------------------------------------- | ------------------------- |
+| `trade.confirmation-required`  | A high-value trade hit the confirmation gate (returned `202`)       | `pending_confirmation`    |
+| `trade.completed`              | Trade executed on-chain successfully                                | `completed`               |
+| `trade.failed`                 | Trade failed terminally (validation, on-chain revert, timeout)      | `failed`                  |
+
+Set `webhook_url` in the webapp's **Settings → API Keys** page when issuing or editing a key, or programmatically via the admin CLI.
+
+## Wire shape
+
+The HTTP body is JSON:
+
+```json
+{
+  "id":         "evt_8f3c2a1b9d0e4f7a8c1b6e5d3f4a2c9b",
+  "type":       "trade.completed",
+  "apiVersion": "2026-04-29",
+  "createdAt":  "2026-05-02T12:34:56.789Z",
+  "data": {
+    "tradeId":      "11111111-1111-4111-8111-111111111111",
+    "marketId":     "22222222-2222-4222-8222-222222222222",
+    "outcomeIndex": 0,
+    "amount":       "100",
+    "side":         "buy",
+    "status":       "completed",
+    "txHash":       "0xa1b2c3d4...",
+    "tokensOut":    "237340124711760000000",
+    "metadata":     { "strategy": "momentum-v2", "cohort": "beta" }
+  }
+}
+```
+
+| Field        | Use                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------ |
+| `id`         | Stable event id. **Dedupe on this.** Mirrors the `X-Kash-Event-Id` header.           |
+| `type`       | Discriminator — branch on this in your handler.                                      |
+| `apiVersion` | Pinned at emission time. Stable across retries of the same event.                    |
+| `createdAt`  | Server timestamp at envelope build (NOT necessarily the underlying event's wall time). |
+| `data`       | Type-specific payload. See per-event sections below.                                 |
+
+### `data` for `trade.confirmation-required`
+
+```json
+{
+  "tradeId":               "...",
+  "marketId":              "...",
+  "outcomeIndex":          0,
+  "amount":                "5000",
+  "side":                  "buy",
+  "status":                "pending_confirmation",
+  "confirmationExpiresAt": "2026-05-02T12:39:56.789Z",
+  "metadata":              { ... }
+}
+```
+
+The token itself is **NOT** in the webhook — it's only returned in the synchronous `202` response from `POST /v1/trades`. This is intentional: a leaked webhook log can't be used to confirm a trade.
+
+### `data` for `trade.completed`
+
+```json
+{
+  "tradeId":      "...",
+  "marketId":     "...",
+  "outcomeIndex": 0,
+  "amount":       "100",
+  "side":         "buy",
+  "status":       "completed",
+  "txHash":       "0x...",
+  "tokensOut":    "237340124711760000000",
+  "metadata":     { ... }
+}
+```
+
+`tokensOut` is in WAD (18 decimals) as a decimal string.
+
+### `data` for `trade.failed`
+
+```json
+{
+  "tradeId":      "...",
+  "marketId":     "...",
+  "outcomeIndex": 0,
+  "amount":       "100",
+  "side":         "buy",
+  "status":       "failed",
+  "errorCode":    "INSUFFICIENT_BALANCE",
+  "errorMessage": "Smart account had insufficient USDC to cover the trade.",
+  "metadata":     { ... }
+}
+```
+
+`errorCode` is the same machine-readable code surface as the [REST API error codes](/developer-docs/rest-api/errors). `errorMessage` is sanitised — no stack traces, no internal URLs.
+
+## The `metadata` field
+
+Every `trade.*` payload carries the `metadata` bag from the trade's create call. Use it to route handlers without an extra `GET /v1/trades/{id}` round-trip:
+
+```ts
+function onWebhook(event: WebhookEvent) {
+  if (event.type === 'trade.completed' && event.data.metadata.strategy === 'momentum-v2') {
+    momentumStrategyHandler.onTradeCompleted(event.data);
+  }
+}
+```
+
+Constraints (set at trade-create time): max 10 keys, key chars `[a-zA-Z0-9_\-.]` (1-64), value max 500 chars, strings only.
+
+## Headers
+
+```
+Content-Type:        application/json; charset=utf-8
+X-Kash-Signature:    t=1730000000000,v1=<hex-hmac-sha256>
+X-Kash-Event-Id:     evt_8f3c2a1b9d0e4f7a8c1b6e5d3f4a2c9b
+X-Kash-Api-Version:  2026-04-29
+User-Agent:          KashDAO-Webhook-Delivery/1.0
+```
+
+- `X-Kash-Signature` — HMAC of the body. **Always verify.** See [Verifying signatures](/developer-docs/rest-api/webhooks/verifying).
+- `X-Kash-Event-Id` — same as the body's `id`. Dedupe on this.
+- `X-Kash-Api-Version` — same as the body's `apiVersion`.
+
+## Delivery semantics
+
+- **At-least-once.** Network failures and `5xx` responses trigger automatic retries with exponential backoff over ~24 hours. Your handler MUST be idempotent — dedupe on `X-Kash-Event-Id`.
+- **FIFO per key.** Events for the same API key are delivered in order, never overlapping. Cross-key concurrency is unlimited.
+- **Distributed circuit breaker.** If your endpoint is consistently failing, our breaker opens and pauses delivery for that endpoint specifically — other customers' webhooks are unaffected.
+- **Terminal failure after 24h.** If retries can't get through (your endpoint is permanently broken), the event is marked terminally failed. You can manually replay via [`POST /v1/webhooks/events/{id}/redeliver`](/developer-docs/rest-api/webhooks/retries) once you've fixed the receiver.
+
+Customer endpoint requirements:
+
+- **Respond fast.** Aim for sub-2s response times. We hard-timeout at 10s.
+- **Respond `2xx` to acknowledge.** Anything else is a failure that triggers retry.
+- **Drain the request body.** Even if you decide not to process it; otherwise the connection may not close cleanly.
+
+## Discovery & inspection
+
+Use `GET /v1/webhooks/events` to list deliveries and inspect their state — handy for debugging "did the webhook fire?" without instrumenting your receiver:
+
+```bash
+curl 'https://api.kash.bot/v1/webhooks/events?status=failed&limit=10' \
+  -H "X-API-Key: $KASH_API_KEY"
+```
+
+The response carries the per-event delivery state: `attempts`, `lastAttemptedAt`, `lastStatusCode`, `lastFailureCode`, `terminalFailureAt`, `lastErrorMessage`.
+
+The webapp's **Settings → Webhook Inspector** page renders the same data graphically.
+
+## Building a webhook receiver
+
+Minimal Node.js example (Express):
+
+```ts
+import express from 'express';
+import { createHmac, timingSafeEqual } from 'crypto';
+
+const app = express();
+const SECRET = process.env.KASH_WEBHOOK_SECRET!;
+
+app.post('/webhooks/kash',
+  // CRITICAL: get the RAW body. Most JSON middleware mutates it before signature verification.
+  express.raw({ type: 'application/json' }),
+  (req, res) => {
+    const sig = req.header('x-kash-signature');
+    if (!sig || !verifyKashSignature(req.body.toString('utf8'), sig, SECRET)) {
+      return res.status(401).send('signature invalid');
+    }
+
+    const event = JSON.parse(req.body.toString('utf8'));
+
+    // Dedupe on event.id (or the X-Kash-Event-Id header — same value)
+    if (alreadyProcessed(event.id)) return res.status(200).send('ok');
+    markProcessed(event.id);
+
+    switch (event.type) {
+      case 'trade.confirmation-required': /* ... */ break;
+      case 'trade.completed':             /* ... */ break;
+      case 'trade.failed':                /* ... */ break;
+    }
+
+    res.status(200).send('ok');
+  }
+);
+```
+
+The TypeScript SDK provides a one-line verifier and parser:
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+
+const kash = new KashClient({ apiKey, webhookSecret: SECRET });
+
+app.post('/webhooks/kash',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    try {
+      const event = await kash.webhooks.constructEvent(
+        req.body.toString('utf8'),
+        req.header('x-kash-signature')!,
+        SECRET
+      );
+      // event is fully typed and parsed
+      handleEvent(event);
+      res.status(200).send('ok');
+    } catch (err) {
+      // KashWebhookSignatureError on bad signature
+      res.status(401).send('invalid');
+    }
+  }
+);
+```
+
+## Next
+
+<CardGroup cols={3}>
+  <Card title="Verifying Signatures" icon="shield" href="/developer-docs/rest-api/webhooks/verifying">
+    Stripe-compatible verification recipe. One-line constant change from any Stripe library.
+  </Card>
+  <Card title="Retries & Redelivery" icon="rotate" href="/developer-docs/rest-api/webhooks/retries">
+    Backoff schedule, terminal failure, manual replay.
+  </Card>
+  <Card title="Secret Rotation" icon="key" href="/developer-docs/rest-api/webhooks/secret-rotation">
+    Rotate without dropping deliveries — the 7-day overlap window.
+  </Card>
+</CardGroup>

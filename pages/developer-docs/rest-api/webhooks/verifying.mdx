@@ -1,0 +1,247 @@
+---
+title: 'Verifying Webhook Signatures'
+description: 'Stripe-compatible HMAC-SHA256 verification — one-line constant change from any Stripe library.'
+---
+
+The signature format matches Stripe's exactly so any Stripe-compatible verification library works with one constant changed (header name → `X-Kash-Signature`).
+
+<Warning>
+**Always** verify signatures on incoming webhook requests. An unsigned or invalid request must be rejected — the only way to know an event truly came from Kash is to verify its HMAC.
+</Warning>
+
+## The signature format
+
+```
+X-Kash-Signature: t=1730000000000,v1=<hex-hmac-sha256>
+```
+
+| Part   | Meaning                                                                          |
+| ------ | -------------------------------------------------------------------------------- |
+| `t=`   | Unix epoch milliseconds at signing time. Used for replay protection.             |
+| `v1=`  | Hex-encoded HMAC-SHA256 of `<t>.<raw-body>` under your `webhook_secret`.         |
+
+During the [secret rotation overlap window](/developer-docs/rest-api/webhooks/secret-rotation) the header may carry **two** `v1=` entries (current + previous secret). Accept the request if **any** matches.
+
+```
+X-Kash-Signature: t=1730000000000,v1=<current-hmac>,v1=<previous-hmac>
+```
+
+## The verification algorithm
+
+1. Read the raw request body as a string. **Don't reparse JSON** — the signature is over the exact bytes that were sent.
+2. Parse the header: split on `,`, then on `=`, into a map.
+3. Read `t` (the timestamp). If `|now - t| > 5 minutes`, reject — the signature is too old (replay attack).
+4. Compute `expected = HMAC_SHA256(secret, "${t}.${rawBody}")` and hex-encode it.
+5. For each `v1=` entry in the header, compare with `expected` using a **constant-time** comparator. If any matches, accept.
+
+That's it. A 20-line function in any language with a crypto stdlib.
+
+## Reference implementations
+
+### TypeScript / Node.js (the SDK does this for you)
+
+The simplest path — let `@kashdao/sdk` verify and parse in one line:
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+
+const kash = new KashClient({ apiKey, webhookSecret: process.env.KASH_WEBHOOK_SECRET! });
+
+app.post('/webhooks/kash',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    try {
+      const event = await kash.webhooks.constructEvent(
+        req.body.toString('utf8'),
+        req.header('x-kash-signature')!,
+        process.env.KASH_WEBHOOK_SECRET!
+      );
+      // event is fully typed (TradeCompletedEvent | TradeFailedEvent | ...)
+      handleEvent(event);
+      res.sendStatus(200);
+    } catch (err) {
+      // KashWebhookSignatureError on bad signature, expired, or missing
+      res.sendStatus(401);
+    }
+  }
+);
+```
+
+### TypeScript / Node.js (no SDK)
+
+```ts
+import { createHmac, timingSafeEqual } from 'crypto';
+
+function verifyKashSignature(
+  payload: string,
+  signature: string,
+  secret: string,
+  toleranceMs = 5 * 60 * 1000
+): boolean {
+  const parts = Object.fromEntries(
+    signature.split(',').map(p => {
+      const i = p.indexOf('=');
+      return [p.slice(0, i), p.slice(i + 1)];
+    })
+  );
+  const ts = Number(parts.t);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() - ts) > toleranceMs) return false;
+
+  const expected = createHmac('sha256', secret).update(`${ts}.${payload}`).digest('hex');
+
+  // Accept any v1= entry — supports the rotation overlap window.
+  for (const [k, v] of signature.split(',').map(p => {
+    const i = p.indexOf('=');
+    return [p.slice(0, i), p.slice(i + 1)];
+  })) {
+    if (k !== 'v1') continue;
+    if (v.length !== expected.length) continue;
+    if (timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(v, 'hex'))) return true;
+  }
+  return false;
+}
+```
+
+### Python
+
+```python
+import hmac, hashlib, time
+
+def verify_kash_signature(payload: bytes, signature: str, secret: str,
+                          tolerance_ms: int = 5 * 60 * 1000) -> bool:
+    parts = dict(p.split('=', 1) for p in signature.split(','))
+    ts = int(parts.get('t', '0'))
+    if abs(int(time.time() * 1000) - ts) > tolerance_ms:
+        return False
+
+    expected = hmac.new(
+        secret.encode('utf-8'),
+        f'{ts}.{payload.decode("utf-8")}'.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+    for entry in signature.split(','):
+        k, _, v = entry.partition('=')
+        if k != 'v1':
+            continue
+        if hmac.compare_digest(v, expected):
+            return True
+    return False
+```
+
+### Go
+
+```go
+import (
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/hex"
+    "fmt"
+    "strconv"
+    "strings"
+    "time"
+)
+
+func VerifyKashSignature(payload []byte, signature, secret string, toleranceMs int64) bool {
+    parts := map[string][]string{}
+    for _, p := range strings.Split(signature, ",") {
+        kv := strings.SplitN(p, "=", 2)
+        if len(kv) != 2 { continue }
+        parts[kv[0]] = append(parts[kv[0]], kv[1])
+    }
+    tsStrs := parts["t"]
+    if len(tsStrs) == 0 { return false }
+    ts, err := strconv.ParseInt(tsStrs[0], 10, 64)
+    if err != nil { return false }
+    if absInt64(time.Now().UnixMilli() - ts) > toleranceMs { return false }
+
+    mac := hmac.New(sha256.New, []byte(secret))
+    fmt.Fprintf(mac, "%d.%s", ts, payload)
+    expected := hex.EncodeToString(mac.Sum(nil))
+
+    for _, v := range parts["v1"] {
+        if hmac.Equal([]byte(v), []byte(expected)) { return true }
+    }
+    return false
+}
+
+func absInt64(x int64) int64 { if x < 0 { return -x }; return x }
+```
+
+### Rust
+
+```rust
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
+use subtle::ConstantTimeEq;
+
+type HmacSha256 = Hmac<Sha256>;
+
+pub fn verify_kash_signature(payload: &[u8], signature: &str, secret: &str, tolerance_ms: i64) -> bool {
+    let mut t: Option<i64> = None;
+    let mut v1s = Vec::new();
+    for part in signature.split(',') {
+        if let Some((k, v)) = part.split_once('=') {
+            match k {
+                "t" => t = v.parse().ok(),
+                "v1" => v1s.push(v),
+                _ => {}
+            }
+        }
+    }
+    let ts = t.unwrap_or(0);
+    let now = chrono::Utc::now().timestamp_millis();
+    if (now - ts).abs() > tolerance_ms { return false; }
+
+    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
+    mac.update(format!("{}.", ts).as_bytes());
+    mac.update(payload);
+    let expected = mac.finalize().into_bytes();
+    let expected_hex = hex::encode(expected);
+
+    v1s.iter().any(|v| v.as_bytes().ct_eq(expected_hex.as_bytes()).unwrap_u8() == 1)
+}
+```
+
+## Common mistakes
+
+- **Re-serialising the JSON body before verifying.** The signature is over the *exact bytes* we POSTed. If you parse + re-stringify, whitespace differs and the signature fails. Always verify against the raw body, then parse JSON.
+- **Using `==` instead of constant-time comparison.** `==` short-circuits on the first differing byte and leaks signature bytes via timing. Use `crypto.timingSafeEqual` (Node), `hmac.compare_digest` (Python), `hmac.Equal` (Go), `ct_eq` (Rust).
+- **Skipping the timestamp freshness check.** Without `t` validation, an attacker who captures one signed payload can replay it forever. The 5-minute tolerance handles legitimate clock skew.
+- **Ignoring multiple `v1=` entries.** During the rotation overlap window we send two — accept either. A picky verifier rejects valid traffic mid-rotation.
+
+## Testing your verifier locally
+
+The CLI has a webhook simulator that signs payloads exactly like the production worker:
+
+```bash
+kash webhooks simulate \
+  --type trade.completed \
+  --secret $KASH_WEBHOOK_SECRET \
+  --url http://localhost:3000/webhooks/kash \
+  --market-id $MARKET_ID
+```
+
+This POSTs a synthetic, properly-signed event to your endpoint so you can verify your handler's signature path before going live.
+
+## Reporting verification bugs
+
+If the production worker is sending signatures your code can't verify, please open a GitHub issue with:
+
+- The raw `X-Kash-Signature` header value
+- The raw body bytes (or a hash of them)
+- Your `webhook_secret`'s `rotatedAt` timestamp (don't share the secret itself)
+- Your verification code
+
+We've cross-tested against Stripe's verifier with a header-name swap and it accepts our signatures, so most "doesn't verify" bugs are receiver-side body re-serialisation issues.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Retries & Redelivery" icon="rotate" href="/developer-docs/rest-api/webhooks/retries">
+    What happens when your endpoint fails — and how to manually replay.
+  </Card>
+  <Card title="Secret Rotation" icon="key" href="/developer-docs/rest-api/webhooks/secret-rotation">
+    Rotate without losing a single delivery.
+  </Card>
+</CardGroup>

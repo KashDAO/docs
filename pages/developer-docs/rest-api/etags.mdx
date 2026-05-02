@@ -1,0 +1,124 @@
+---
+title: 'ETags & Caching'
+description: 'If-None-Match short-circuits — skip unchanged data without spending quota.'
+---
+
+Every response from `api.kash.bot` carries an `ETag` header — a content-derived hash of the response body. Send it back on the next request as `If-None-Match` and the server short-circuits with `304 Not Modified` (and an empty body) when nothing changed.
+
+## Why this matters
+
+A `304` response:
+
+- Is **fast** — the server doesn't reserialize the body or hit the database for the result.
+- Is **small** — empty body, just the headers.
+- **Counts toward your rate limit** for accounting, but the cost is much lower per request.
+
+For polling workloads (portfolio, trade status, market list), this is the difference between paying for new data and paying for "is there new data?".
+
+## How to use it
+
+### 1. Capture the ETag from your first response
+
+```bash
+curl -i https://api.kash.bot/v1/portfolio \
+  -H "X-API-Key: $KASH_API_KEY"
+
+# HTTP/1.1 200 OK
+# ETag: "W/\"a1b2c3d4...\""
+# Content-Type: application/json
+# ...
+# { "portfolio": {...}, "data": {...}, "_meta": {...} }
+```
+
+### 2. Send it back on the next request
+
+```bash
+curl -i https://api.kash.bot/v1/portfolio \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H 'If-None-Match: W/"a1b2c3d4..."'
+
+# If unchanged:
+# HTTP/1.1 304 Not Modified
+# ETag: "W/\"a1b2c3d4...\""
+# (empty body)
+
+# If changed:
+# HTTP/1.1 200 OK
+# ETag: "W/\"e5f6g7h8...\""   ← new ETag
+# { "portfolio": { /* updated */ }, ... }
+```
+
+When you get `304`, **reuse your last response body**. When you get `200`, replace it (and capture the new ETag).
+
+## TypeScript SDK
+
+The SDK does this transparently — pass `--ifNoneMatch` (or set the per-call header) and it handles the 304 path:
+
+```ts
+let etag: string | undefined;
+let portfolio: PortfolioSummary;
+
+// Initial fetch
+const first = await kash.portfolio.get();
+portfolio = first;
+etag = first._meta?.etag; // pulled from response headers
+
+// Subsequent poll
+try {
+  const next = await kash.portfolio.get({ ifNoneMatch: etag });
+  portfolio = next;
+  etag = next._meta?.etag;
+} catch (err) {
+  if (err instanceof KashNotModifiedError) {
+    // Nothing changed; keep using `portfolio`.
+  } else {
+    throw err;
+  }
+}
+```
+
+## Where ETags help most
+
+| Endpoint                        | Polling pattern                                    | ETag value                                                |
+| ------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| `GET /v1/portfolio`             | Refresh balance every N seconds                    | High — balance only moves on trades you initiated.        |
+| `GET /v1/trades/{id}`           | Wait for completion                                | High — trade is mostly idle until status flips.           |
+| `GET /v1/markets/{id}`          | Watch a single market                              | Medium — moves on every trade against it.                 |
+| `GET /v1/markets`               | Refresh a market list                              | Medium — depends on filter and traffic.                   |
+| `GET /v1/markets/{id}/quote`    | Live price ticker                                  | Low — every quote re-runs RPC. Cache client-side instead. |
+| `GET /v1/markets/{id}/predictions` | Recent-trades feed                              | Low — append-only, almost always changes.                 |
+
+For high-cardinality append-only feeds (predictions, webhook events), pagination + a stable cursor is a better strategy than ETag.
+
+## ETag format
+
+We use **weak ETags** (the `W/` prefix). Weak ETags compare equal even if byte-level encoding differs (e.g. JSON whitespace). The server may serve different exact bytes for the same logical state — what matters is whether the *resource* changed.
+
+```
+ETag: W/"a1b2c3d4e5f6"
+```
+
+Don't try to parse the inner string. Treat it as opaque.
+
+## Caching with ETags + `Cache-Control`
+
+The `GET /v1/markets/{id}/quote` endpoint also sets a small public `Cache-Control: public, max-age=10`. This lets a CDN or local cache serve the quote for up to 10 seconds without hitting our backend at all. Combine with ETag for the post-cache revalidation path.
+
+For private routes (everything authenticated), responses use `Cache-Control: private, no-cache` — your CDN won't serve them to other tenants, but you can still cache client-side using ETags as the freshness key.
+
+## What ETags don't do
+
+- **They don't skip rate limit accounting entirely.** A `304` still costs one request from your quota, just dramatically less work for the server. (If you need to poll harder, see if a webhook-driven design works for you.)
+- **They don't survive across keys.** ETags are computed per (route, query, key). Don't share them between keys.
+- **They don't apply to write paths.** `POST` and `PATCH` requests don't benefit from ETags; use [Idempotency-Key](/developer-docs/rest-api/idempotency) instead.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
+    The push-based alternative to polling. Real-time delivery, no quota cost.
+  </Card>
+  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    The full interactive spec at `/v1/docs`.
+  </Card>
+</CardGroup>

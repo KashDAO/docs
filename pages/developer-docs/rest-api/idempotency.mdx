@@ -1,0 +1,158 @@
+---
+title: 'Idempotency'
+description: 'Safely retry trade creation with the Idempotency-Key header and clientRequestId body field.'
+---
+
+Network failures happen mid-flight. Idempotency lets you retry a write without risking a duplicate trade.
+
+The API supports **two** idempotency mechanisms — the Stripe-style `Idempotency-Key` header (HTTP-level) and the `clientRequestId` body field (domain-level). They serve slightly different purposes; you can use either or both.
+
+## `Idempotency-Key` header (recommended)
+
+```http
+POST /v1/trades HTTP/1.1
+X-API-Key: kash_live_...
+Content-Type: application/json
+Idempotency-Key: c2b9a1f8-7e6d-4b3a-9c1e-5f0d8a3b7c2e
+
+{ "marketId": "...", "outcomeIndex": 0, "amount": "100", "side": "buy" }
+```
+
+Generate the key client-side as a random UUID per logical operation:
+
+```ts
+const idempotencyKey = crypto.randomUUID();
+await kash.trades.create(body, { idempotencyKey });
+```
+
+Behavior:
+
+- **First request:** processed normally. The response is cached server-side under the key.
+- **Same key, same body:** the cached response is returned with `_meta.idempotent = true`. No new trade is created.
+- **Same key, different body:** `409 IDEMPOTENCY_KEY_CONFLICT`. The first request "owns" the key for 24 hours.
+- **TTL:** 24 hours. After that, the key can be reused (but you should generate fresh ones).
+
+The body comparison is exact (after canonical JSON normalisation), and includes the `metadata` field — see [Body comparison rules](#body-comparison-rules) below.
+
+### When to use it
+
+- Network timeouts on `POST /v1/trades` — retry with the same key, get the same trade back.
+- Distributed retry layers (queues, schedulers) — pin the key to the logical job id.
+- "Was this trade already sent?" — replay returns the same response, regardless of how many times you ask.
+
+## `clientRequestId` body field
+
+```http
+POST /v1/trades HTTP/1.1
+Content-Type: application/json
+
+{
+  "marketId": "...",
+  "outcomeIndex": 0,
+  "amount": "100",
+  "side": "buy",
+  "clientRequestId": "trade-job-2026-05-02-abc123"
+}
+```
+
+The `clientRequestId` is stored alongside the trade and used for **trade-level** idempotency:
+
+- **First request with a given `clientRequestId`:** trade is created.
+- **Second request, same `clientRequestId`, same trade body:** the existing trade row is returned. No new trade.
+- **Second request, same `clientRequestId`, different trade body:** `409 IDEMPOTENCY_KEY_CONFLICT`.
+
+Constraints:
+- 1 to 128 characters
+- Allowed: `A-Z a-z 0-9 _ - : .`
+
+### When to use `clientRequestId` over `Idempotency-Key`?
+
+Pick `clientRequestId` when:
+
+- Your idempotency key is meaningful and not random — e.g. `trade-{userId}-{marketId}-{tradeBatchId}`. The key persists with the trade row, so you can look it up later.
+- You want the idempotency to survive longer than 24 hours (e.g. nightly batch jobs that must never double-create).
+- You're not in HTTP-retry land — you're at the domain layer, deciding whether to send a trade in the first place.
+
+Pick `Idempotency-Key` (or both) when:
+- You want the protection of "if this exact request was just made, give me the cached response" without thinking about it.
+- You have transient HTTP retries between a client and the API (proxies, retry middleware, etc.).
+
+You can use **both** at the same time; they layer cleanly. Most production systems do.
+
+## Body comparison rules
+
+For both mechanisms, the body comparison treats these fields as identity-defining:
+
+- `marketId`
+- `outcomeIndex`
+- `amount`
+- `side`
+- `metadata` (compared as a sorted, shallow-equality `Record<string, string>`)
+
+Differences in any of those → `409 IDEMPOTENCY_KEY_CONFLICT`.
+
+These fields are NOT part of identity:
+- `clientRequestId` (it IS the identity for the second mechanism, not part of the body comparison)
+- Server-derived fields (the response always reflects the *original* trade, including its server-assigned `id`, `correlationId`, `createdAt`, etc.)
+
+## Detecting an idempotent replay
+
+Every response from `POST /v1/trades` includes `_meta.idempotent`:
+
+```json
+{
+  "trade": { ... },
+  "data":  { ... },
+  "_meta": {
+    "requestId": "req_...",
+    "timestamp": "2026-05-02T12:34:56.789Z",
+    "idempotent": true
+  }
+}
+```
+
+If `idempotent: true`, the trade was created on a previous request — your retry simply rediscovered it.
+
+## High-value confirmation interaction
+
+If your trade hits the high-value threshold:
+
+- **First request:** `202 Accepted` with a one-time confirmation token.
+- **Same `Idempotency-Key`, same body, before confirm:** `202` again with the **same** trade and the **same** token.
+- **Same `Idempotency-Key`, same body, after confirm:** `200` with `idempotent: true`. The trade is already past the gate.
+
+The token itself is single-use. If you've already confirmed and lost the success response, just look up the trade by id (`GET /v1/trades/{id}`) — its `status` will be `pending` (or further along).
+
+## Error envelope on conflict
+
+```json
+{
+  "type":   "https://github.com/KashDAO/kash/blob/main/docs/api-errors/IDEMPOTENCY_KEY_CONFLICT.md",
+  "title":  "Idempotency key conflict",
+  "status": 409,
+  "code":   "IDEMPOTENCY_KEY_CONFLICT",
+  "detail": "This Idempotency-Key was used previously with a different request body. Either use the same body to retrieve the cached response, or generate a fresh Idempotency-Key for the new request."
+}
+```
+
+When you see this, do NOT retry with the same key. Either:
+
+1. Replay the original body — you'll get the original response back.
+2. Generate a new key — you'll create a new trade.
+
+## What's not idempotent
+
+- **`POST /v1/trades/{id}/confirm`** — the confirmation token is single-use by design. A second confirm with the same token returns `409 CONFIRMATION_TOKEN_USED`. (The server-side flip from `pending_confirmation → pending` is itself atomic — a race between two concurrent confirms can't both succeed.)
+- **`POST /v1/webhooks/events/{id}/redeliver`** — explicitly *not* idempotent at the HTTP layer. Each call enqueues another delivery attempt (capped at 5 per event to prevent amplification). The customer's webhook endpoint dedupes on `X-Kash-Event-Id`.
+- **`POST /v1/auth/api-keys/me/webhook-secret/rotate`** — each call rotates the secret. Don't retry blindly; check the rotated-at timestamp first.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Pagination" icon="list" href="/developer-docs/rest-api/pagination">
+    Cursor-based pagination on every list endpoint.
+  </Card>
+  <Card title="ETags" icon="bolt" href="/developer-docs/rest-api/etags">
+    `If-None-Match` short-circuits — don't pay quota for unchanged data.
+  </Card>
+</CardGroup>

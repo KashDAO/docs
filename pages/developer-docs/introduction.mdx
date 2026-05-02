@@ -3,44 +3,50 @@ title: 'Developer Documentation'
 description: 'Build with Kash prediction markets'
 ---
 
-Welcome to the Kash developer documentation. Build prediction market integrations, embed markets on your website, and access real-time market data.
+Welcome to the Kash developer documentation. Build trading bots and agents against the protocol, embed markets in your website, and access real-time market data.
 
 ## Available APIs
 
 <CardGroup cols={2}>
-  <Card title="Public Embed API" icon="window" href="/developer-docs/public-embed-api/overview">
-    Embed prediction markets on your website with iframe embeds and REST API access. No authentication required.
+  <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
+    Programmatic access at `api.kash.bot`. Place trades, manage portfolios, receive HMAC-signed webhooks. API-key authenticated. The right surface for bots, agents, and market makers.
   </Card>
-  <Card title="Partner API" icon="handshake">
-    Whitelabel prediction markets for your platform. Contact partnerships@kash.bot for access.
-    <Note>Coming Soon</Note>
+  <Card title="Public Embed API" icon="window" href="/developer-docs/public-embed-api/overview">
+    Embed read-only markets in your website with iframes and a public REST surface at `app.kash.bot/api`. No authentication required. Designed for human/UI traffic.
   </Card>
 </CardGroup>
+
+<Note>
+**Which one do I want?** If your code will be talking to Kash without a human in the loop — automated trading, portfolio analytics, market-making — you want the **REST API**. If you're embedding markets in a website or article for humans to look at, you want the **Public Embed API**.
+</Note>
 
 ## Quick Links
 
 <CardGroup cols={3}>
-  <Card title="Get Started" icon="rocket" href="/developer-docs/public-embed-api/quickstart">
-    Embed your first prediction market in 5 minutes
+  <Card title="REST API Quickstart" icon="rocket" href="/developer-docs/rest-api/quickstart">
+    Generate a key, place your first trade, receive your first webhook — under 5 minutes.
   </Card>
-  <Card title="API Reference" icon="code" href="/developer-docs/public-embed-api/endpoints/threads">
-    Browse all available API endpoints
+  <Card title="TypeScript SDK" icon="js" href="/developer-docs/rest-api/sdks/typescript">
+    Typed everything. Trades, markets, portfolios, webhooks, retries.
   </Card>
-  <Card title="Examples" icon="github" href="/developer-docs/public-embed-api/examples/html">
-    View complete integration examples
+  <Card title="Embed API Quickstart" icon="window" href="/developer-docs/public-embed-api/quickstart">
+    Embed your first prediction market in 5 minutes.
   </Card>
 </CardGroup>
 
 ## What Can You Build?
 
+### Trading Bots & Agents
+Use the [REST API](/developer-docs/rest-api/overview) to place trades, monitor portfolios, and react to market events via webhooks. Supports idempotent retries, high-value confirmation gates, and per-key rate limiting.
+
+### Market-Making Strategies
+Combine the REST API for execution with the on-chain quote endpoint for live pricing. Per-key telemetry surfaces latency p50/p99 so you can monitor your own SLOs against ours.
+
 ### Embed Prediction Markets
-Integrate live prediction markets into news sites, financial platforms, or community forums. Markets are read-only — users are directed to X to make predictions.
+Use the [Public Embed API](/developer-docs/public-embed-api/overview) to drop iframes and read-only market data into news sites, financial platforms, or community forums. Markets are read-only — users are directed to X to make predictions.
 
 ### Custom Dashboards
-Fetch real-time market data programmatically to build custom analytics dashboards, trading interfaces, or data visualization tools.
-
-### Content Enrichment
-Enhance articles and posts with relevant prediction market probabilities to provide readers with real-time sentiment and forecasting data.
+Pull real-time market data via either API depending on whether the dashboard is for humans (Embed API) or for an automated agent (REST API).
 
 ## Support
 
