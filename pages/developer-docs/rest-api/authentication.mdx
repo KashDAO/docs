@@ -104,7 +104,7 @@ The HMAC is computed over `<unix-ms>.<raw-body-bytes>` under your key's `webhook
 | 401    | `API_KEY_REVOKED`     | Key was found but has been revoked.                           |
 | 403    | `INSUFFICIENT_SCOPE`  | Key is valid but doesn't carry the scope this route requires. |
 | 403    | `IP_NOT_ALLOWED`      | Source IP not in this key's allowlist.                        |
-| 401    | `SIGNATURE_INVALID`   | Body-signing was opted into and failed verification.          |
+| 401    | `REQUEST_SIGNATURE_INVALID` | Body-signing was opted into and failed verification.   |
 
 All auth failures return RFC 7807 [`application/problem+json`](/developer-docs/rest-api/errors) and are written to the per-key audit log. Repeated failures from the same source trigger the per-IP brute-force lockout.
 

@@ -109,7 +109,7 @@ The replayed delivery uses the **same** `X-Kash-Event-Id` as the original, so a 
 
 ### Replay amplification cap
 
-Each event can be manually replayed at most **5 times** in total. Beyond that, `POST .../redeliver` returns `429 WEBHOOK_REPLAY_LIMIT`. This bounds the cost of a runaway replay loop.
+Each event can be manually replayed at most **5 times** in total. Beyond that, `POST .../redeliver` returns `429 WEBHOOK_REPLAY_LIMIT_REACHED`. This bounds the cost of a runaway replay loop.
 
 If you genuinely need more, contact support — we can lift the cap on a per-event basis after auditing.
 

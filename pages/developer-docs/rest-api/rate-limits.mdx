@@ -3,20 +3,39 @@ title: 'Rate Limits'
 description: 'Per-key quotas, X-RateLimit-* response headers, and how to handle 429s.'
 ---
 
-The REST API enforces a per-key sliding-window quota. When a key exceeds it, the next request returns `429 RATE_LIMITED` with `Retry-After` and `X-RateLimit-*` headers so you can back off cleanly.
+The REST API enforces a per-key sliding-window quota. When a key exceeds it, the next request returns `429 RATE_LIMIT_EXCEEDED` with `Retry-After` and `X-RateLimit-*` headers so you can back off cleanly.
 
 ## Per-tier defaults
 
-| Tier         | Rate limit (requests/min) | Daily spend cap | Per-trade cap |
-| ------------ | ------------------------- | --------------- | ------------- |
-| `free`       | 60                        | 1,000 USDC      | 500 USDC      |
-| `developer`  | 300                       | 10,000 USDC     | 2,500 USDC    |
-| `enterprise` | Custom (admin-set)        | 100,000 USDC    | 25,000 USDC   |
-| `mm`         | Custom (admin-set)        | 1,000,000 USDC  | 50,000 USDC   |
+| Tier         | Rate limit (req/min) | Daily spend cap | Per-trade cap | High-value confirm gate |
+| ------------ | -------------------- | --------------- | ------------- | ----------------------- |
+| `free`       | 60                   | 1,000 USDC      | 500 USDC      | none                    |
+| `developer`  | 300                  | 10,000 USDC     | 2,500 USDC    | none                    |
+| `enterprise` | Custom (admin-set)   | 100,000 USDC    | 25,000 USDC   | 25,000 USDC             |
+| `mm`         | Custom (admin-set)   | 1,000,000 USDC  | 50,000 USDC   | 50,000 USDC             |
 
-The rate-limit window is **per `user_id`**, not per individual key. If a single user holds two keys, requests across both share the quota — so issuing extra keys doesn't multiply your throughput.
+A tier sets four independent limits:
+
+- **Rate limit** — HTTP requests per minute, sliding window. Hit this and you get `429 RATE_LIMIT_EXCEEDED`.
+- **Daily spend cap** — rolling 24h aggregate USDC volume per key. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "daily_volume"`. Sells and close-position intents do NOT draw against this cap.
+- **Per-trade cap** — single-trade USDC amount. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "per_trade"`.
+- **High-value confirm gate** — for tiers that have one, any trade ≥ this amount returns `202 Accepted` with a `confirmationToken`; you then `POST /v1/trades/{id}/confirm` to actually execute. Two-step flow lets you catch a runaway bot before it commits a six-figure trade.
+
+The rate-limit window is **per `user_id`**, not per individual key. If a single user holds two keys, HTTP requests across both share the quota — so issuing extra keys doesn't multiply your throughput. The **spending caps**, however, are **per key** — each key gets its own daily allotment.
 
 Each user can hold at most **5 active keys** at a time (revoked keys don't count). This guards against quota-pooling abuse patterns.
+
+## Why these caps exist
+
+The caps are not punitive. Five concrete reasons:
+
+1. **Blast radius on key compromise.** API keys leak — committed to git, dumped in error reports, laptop stolen. The cap bounds the loss between leak-time and revoke-time.
+2. **Runaway-bot circuit breaker.** A trading loop misfires (off-by-one in your sizing, retry storm on a timeout, missing dedup on a webhook). The cap is a hard stop you cannot disable from inside your own code.
+3. **AMM stability.** Kash markets use a Pythagorean AMM with thin per-outcome liquidity. A trade consuming more than ~5% of available liquidity moves the price substantially. Per-trade caps protect the AMM curve for everyone.
+4. **Compliance ladder.** Higher daily volumes implicitly require enhanced KYC, ToS attestation, and sanctions screening. The tier names map to that ladder.
+5. **Custodial fiduciary duty.** This API trades from your Privy smart account — Kash is custodian for the funds during the trade lifecycle. A custodial venue that lets a bot drain a customer in 30 seconds is not acting in the customer's interest.
+
+If you want a venue with no caps, the non-custodial track (`@kashdao/protocol-sdk`) is the right product — you sign every transaction yourself and bear the full risk.
 
 ## Response headers (every response)
 
@@ -47,10 +66,10 @@ X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1730000098
 
 {
-  "type": "https://github.com/KashDAO/kash/blob/main/docs/api-errors/RATE_LIMITED.md",
+  "type": "https://github.com/KashDAO/kash/blob/main/docs/api-errors/RATE_LIMIT_EXCEEDED.md",
   "title": "Rate limit exceeded",
   "status": 429,
-  "code": "RATE_LIMITED",
+  "code": "RATE_LIMIT_EXCEEDED",
   "detail": "API key has exceeded its 300 req/min quota.",
   "requestId": "req_..."
 }
@@ -83,7 +102,7 @@ Most endpoints share the per-key tier quota. A few are tighter:
 - **Read your headers.** Cheaper than retry-after-rejection. Aim to keep `X-RateLimit-Remaining` above 10% of `X-RateLimit-Limit` under steady-state load.
 - **Use ETags on read paths.** A `304 Not Modified` doesn't count toward your quota — see **[ETags](/developer-docs/rest-api/etags)**.
 - **Use the SDK.** It handles `Retry-After`, exponential backoff, jitter, and idempotency-safe retries automatically.
-- **Distribute across keys carefully.** Quota is per-`user_id`, so multiple keys for the same user don't help. If you need higher throughput, ask about `enterprise` or `mm` tiers.
+- **Distribute across keys carefully.** Rate-limit quota is per-`user_id`, so multiple keys for the same user don't help with HTTP throughput. (Spending caps ARE per-key.) If you need higher throughput, the upgrade path is below.
 - **Don't hammer the quote endpoint.** Quotes are RPC-heavy. Cache results client-side for the freshness window your strategy can tolerate (typically 5–15s).
 
 ## Kill switches
@@ -102,6 +121,16 @@ Content-Type: application/problem+json
 ```
 
 Treat `503 ROUTE_DISABLED` like `Retry-After` — back off and retry. Most kill switches are toggled off within minutes.
+
+## How to upgrade your tier
+
+Hitting `RATE_LIMIT_EXCEEDED` or `SPENDING_LIMIT_EXCEEDED` repeatedly during normal operation means you've outgrown your tier — that's the signal to upgrade. Today, every tier above `free` is provisioned manually:
+
+- **`free` → `developer`** (5× rate limit, 10× spending caps): email **[support@kash.bot](mailto:support@kash.bot)** with your account email and a one-line description of your use case. Self-serve via Stripe is on the roadmap; until it ships we provision developer-tier keys on a case-by-case basis.
+- **Anywhere → `enterprise`** ($100k/day, $25k/trade, custom rate limit): **[contact sales](mailto:sales@kash.bot)**. Custom pricing based on volume commitment.
+- **Anywhere → `mm`** ($1M/day, $50k/trade, full counterparty terms): **[contact partnerships](mailto:partnerships@kash.bot)**. KYB, ToS attestation, and possibly escrow arrangements — this is a relationship, not a pricing tier.
+
+`enterprise` and `mm` tiers can override any of the four axes per-key as part of the contract — a key can have a different `daily_spend_limit_usdc`, `per_trade_limit_usdc`, or `high_value_trade_threshold_usdc` than the tier default.
 
 ## Telemetry
 

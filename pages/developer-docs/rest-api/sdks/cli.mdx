@@ -73,7 +73,7 @@ kash webhooks verify --secret $SECRET   # reads stdin, prints whether signature 
 
 # Errors
 kash explain INSUFFICIENT_SCOPE         # local lookup; works offline
-kash explain RATE_LIMITED --json
+kash explain RATE_LIMIT_EXCEEDED --json
 ```
 
 Every command supports `--help` for full usage.

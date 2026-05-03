@@ -42,7 +42,7 @@ try {
       case 'INSUFFICIENT_SCOPE':
         // Re-issue the key with `trades:write`.
         break;
-      case 'RATE_LIMITED':
+      case 'RATE_LIMIT_EXCEEDED':
         await sleep(err.retryAfterMs ?? 1000);
         // retry
         break;
@@ -68,11 +68,10 @@ The TypeScript SDK throws typed subclasses (`KashRateLimitError`, `KashAuthoriza
 | `202`  | Accepted, work in progress (high-value trade pending confirmation; redelivery). |
 | `304`  | `If-None-Match` cache hit — no body. See [ETags](/developer-docs/rest-api/etags). |
 | `400`  | Validation failure on the request itself (`VALIDATION_FAILED`, malformed JSON). |
-| `401`  | Auth failure (`API_KEY_MISSING`, `API_KEY_INVALID`, `API_KEY_REVOKED`).         |
-| `402`  | Spending cap exceeded (rare; typed as `SPEND_LIMIT_EXCEEDED`).                  |
+| `401`  | Auth failure (`API_KEY_MISSING`, `API_KEY_INVALID`, `API_KEY_REVOKED`, `REQUEST_SIGNATURE_INVALID`). |
 | `403`  | Authenticated but not authorised (`INSUFFICIENT_SCOPE`, `IP_NOT_ALLOWED`).      |
 | `404`  | Resource doesn't exist (or doesn't exist *to you* — ownership-checked routes return 404 not 403 to prevent enumeration). |
-| `409`  | Conflict (`IDEMPOTENCY_KEY_CONFLICT`, `TRADE_NOT_AWAITING_CONFIRMATION`, etc.). |
+| `409`  | Conflict (`IDEMPOTENCY_KEY_CONFLICT`, `SPENDING_LIMIT_EXCEEDED`, `TRADE_NOT_AWAITING_CONFIRMATION`, `INSUFFICIENT_BALANCE`, etc.). |
 | `410`  | Gone (a previously valid resource is permanently removed).                      |
 | `422`  | Semantically valid but rejected by domain rules (e.g. `MARKET_NOT_TRADEABLE`).  |
 | `429`  | Rate limit exceeded. Honour `Retry-After`.                                      |
@@ -98,9 +97,11 @@ Common codes to know:
 | `API_KEY_MISSING`            | No `X-API-Key` header.                                                 |
 | `API_KEY_INVALID`            | Key not recognised or HMAC mismatch.                                   |
 | `API_KEY_REVOKED`            | Valid format, but the key has been revoked.                            |
+| `API_KEY_EXPIRED`            | Key is past its `expires_at` timestamp.                                |
 | `INSUFFICIENT_SCOPE`         | Key lacks the scope this route requires.                               |
 | `IP_NOT_ALLOWED`             | Source IP not in this key's allowlist.                                 |
-| `RATE_LIMITED`               | Per-key quota exceeded. Honour `Retry-After`.                          |
+| `RATE_LIMIT_EXCEEDED`        | Per-key quota exceeded. Honour `Retry-After`. The cap is tier-differentiated — see [Rate Limits](/developer-docs/rest-api/rate-limits). |
+| `SPENDING_LIMIT_EXCEEDED`    | Trade would exceed the key's per-trade or daily cap. The `extensions.cap` field is `per_trade` or `daily_volume`. Caps are tier-differentiated — see [Rate Limits](/developer-docs/rest-api/rate-limits) for the matrix and upgrade path. |
 | `VALIDATION_FAILED`          | Request body or query failed schema validation.                        |
 | `IDEMPOTENCY_KEY_CONFLICT`   | Same `Idempotency-Key` reused with a different body. See [Idempotency](/developer-docs/rest-api/idempotency). |
 | `MARKET_NOT_TRADEABLE`       | Market is FROZEN/RESOLVED, on an unsupported chain, or otherwise inactive. |
@@ -112,9 +113,9 @@ Common codes to know:
 | `RESOURCE_NOT_FOUND`         | Trade/market/event id doesn't exist (or doesn't belong to you).        |
 | `DEPENDENCY_UNAVAILABLE`     | Upstream (DB, chain RPC) is degraded. Treat like `Retry-After`.        |
 | `ROUTE_DISABLED`             | Ops kill switch is active for this route.                              |
-| `WEBHOOK_SECRET_NOT_SET`     | Tried to rotate a webhook secret on a key that doesn't have one.       |
-| `WEBHOOK_REPLAY_LIMIT`       | More than 5 manual redeliveries for the same event.                    |
-| `SIGNATURE_INVALID`          | Opt-in body-signing on `POST /v1/trades` failed verification.          |
+| `WEBHOOK_REPLAY_LIMIT_REACHED` | More than 5 manual redeliveries for the same event.                  |
+| `WEBHOOK_SECRET_ROTATION_COOLDOWN` | Webhook-secret rotation called within 60s of a prior successful rotation. Protects the rollback slot — see [Secret Rotation](/developer-docs/rest-api/webhooks/secret-rotation). |
+| `REQUEST_SIGNATURE_INVALID`  | Opt-in body-signing on `POST /v1/trades` failed verification.          |
 
 The full list lives in the [`docs/api-errors/`](https://github.com/KashDAO/kash/tree/main/docs/api-errors) directory. The CLI's bundled copy is generated from there at build time, so they stay in sync.
 
