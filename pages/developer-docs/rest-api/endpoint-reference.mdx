@@ -106,9 +106,20 @@ A maintained Postman collection ships with the public-API repo and tracks the sp
 
 Or import the spec directly into your tool of choice — every modern API client supports OpenAPI 3.1 import.
 
-## cURL recipes
+## Other client formats
 
-The repo also ships a directory of one-line cURL examples per endpoint. Browse [`apps/public-api/examples/curl/`](https://github.com/KashDAO/kash/tree/main/apps/public-api/examples/curl) for copy-pasteable invocations.
+Each endpoint reference page on this site renders an interactive cURL
+example — change parameters in place, copy the result. For
+collection-style usage, two formats are produced from the same
+OpenAPI spec at every release:
+
+- **Postman collection** — `Kash-API.postman_collection.json` —
+  generated via `openapi-to-postmanv2`. Import directly into Postman
+  / Insomnia / Thunder Client. Sourced and shipped alongside each
+  versioned `openapi/v<date>.json` snapshot.
+- **Bruno collection** — `.bru` files, one per endpoint, ship with
+  the public-api artifact bundle. Bruno is a git-friendly alternative
+  to Postman; collections live as plain text in version control.
 
 ## Spec stability and versioning
 

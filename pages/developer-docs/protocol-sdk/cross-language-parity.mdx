@@ -1,0 +1,138 @@
+---
+title: 'Cross-language parity'
+description: 'How @kashdao/protocol-sdk and kashdao-protocol-sdk (Python) stay byte-equal. A position opened via either can be closed via the other.'
+---
+
+Kash ships **two** non-custodial protocol SDKs:
+
+- `@kashdao/protocol-sdk` — TypeScript, the canonical implementation.
+- `kashdao-protocol-sdk` — Python, a peer mirror.
+
+Both are first-class. Both have full coverage of EOA mode and
+smart-account mode. Both target the same on-chain protocol. **Most
+importantly, both encode bytes identically** — so a UserOp signed
+in TypeScript and submitted via Python's bundler client validates
+correctly under the same EntryPoint, and vice versa.
+
+This page documents how that guarantee is enforced.
+
+## What "parity" means
+
+Two encoding/hashing functions matter for cross-language safety:
+
+1. **EIP-1559 transaction serialization + hash** —
+   `keccak256(serializeTransaction(tx))` produces the digest the
+   chain's signature recovery validates against. If TypeScript and
+   Python disagree on the serialized bytes for the same logical
+   `UnsignedTransaction`, an EOA trade prepared in one language
+   can't be signed and submitted via the other.
+
+2. **EIP-4337 v0.7 UserOp hash** — `getUserOperationHash(...)`
+   produces the digest the EntryPoint contract validates during
+   `validateUserOp`. If the two SDKs disagree, a SmartAccount UserOp
+   prepared in Python can't be validated under a TypeScript-derived
+   signature (or vice versa) — surfacing as `AA24 signature error`
+   at submit time.
+
+These functions are deceptively simple. Both delegate to widely-used
+primitives (`viem` in TS, `eth_abi` + `keccak` in Python). But the
+interfaces differ in subtle ways: optional fields default
+differently, RLP-encoding edge cases for empty calldata, packed-uint128
+encoding for v0.7's `gasFees` field. A real correctness bug **was**
+caught by this test infrastructure — see the
+[`@kashdao/protocol-sdk` 0.1.x changelog](https://github.com/KashDAO/protocol-sdk-typescript/blob/main/CHANGELOG.md).
+
+## How the parity tests work
+
+The TypeScript SDK is the source of truth. A generation script
+(`scripts/generate-parity-fixtures.ts`) constructs deterministic,
+hand-crafted shapes covering edge cases:
+
+- Canonical buy / zero-data / high-nonce / non-zero-value EOA txs.
+- Minimal SA UserOp / first-trade-with-deployment (factory +
+  factoryData) / paymaster-sponsored / Base mainnet high nonce.
+
+For each fixture, the script computes the canonical hash and the
+serialized bytes, and writes both as recorded `expected` values to
+`tests/parity/fixtures/{eoa,smart-account}.json`.
+
+```
+packages/protocol-sdk/scripts/generate-parity-fixtures.ts
+       │
+       │  pnpm parity:fixtures
+       ▼
+packages/protocol-sdk/tests/parity/fixtures/eoa.json
+packages/protocol-sdk/tests/parity/fixtures/smart-account.json
+       │
+       │  scripts/sync-parity.py  (Python side)
+       ▼
+packages/protocol-sdk-python/tests/parity/fixtures/eoa.json
+packages/protocol-sdk-python/tests/parity/fixtures/smart-account.json
+```
+
+Both SDKs run a parity test that consumes the same JSON fixtures
+and asserts the local re-encoding produces identical bytes:
+
+- TypeScript: `pnpm test:parity` →
+  `tests/parity/eoa-parity.test.ts` + `userop-parity.test.ts`
+- Python: `pytest -m parity` →
+  `tests/parity/test_eoa_parity.py` + `test_userop_parity.py`
+
+Drift is rejected at PR time. The Python sync script's `--check`
+mode acts as a release gate.
+
+## Error class parity
+
+Beyond byte-level encoding, the public error hierarchies match
+class-for-class:
+
+| TypeScript                      | Python                            |
+| ------------------------------- | --------------------------------- |
+| `KashProtocolError`             | `KashProtocolError`               |
+| `KashConfigError`               | `KashConfigError`                 |
+| `KashChainError`                | `KashChainError`                  |
+| `KashBundlerError`              | `KashBundlerError`                |
+| `KashSignerError`               | `KashSignerError`                 |
+| `KashSimulationRevertedError`   | `KashSimulationRevertedError`     |
+| `KashAbortedError`              | `KashAbortedError`                |
+
+The string-valued `ErrorCode` constants are identical across
+languages. A cross-language log aggregator can correlate by
+`error.code` without translation.
+
+## Naming conventions
+
+| TypeScript                          | Python                                     |
+| ----------------------------------- | ------------------------------------------ |
+| `createSmartAccountClient(...)`     | `create_smart_account_client(...)`         |
+| `client.trades.send.buy(...)`       | `client.trades.send.buy(...)`              |
+| `client.markets.quote(...)`         | `client.markets.quote(...)`                |
+| `BuildBuyParams { amountUsdc, ... }`| `BuildBuyParams(amount_usdc=..., ...)`     |
+| `usdc(10)` → bigint                 | `usdc(10)` → int                           |
+| `MAX_UINT256` (bigint)              | `MAX_UINT256` (int)                        |
+
+The shape and behaviour are the same. Snake_case is the only
+syntactic delta.
+
+## What's deliberately NOT in parity
+
+- **Bundler presets.** The TS SDK ships dedicated subpath imports
+  for Pimlico/Alchemy/Flashbots; the Python SDK accepts the same
+  vendors but exposes them as `BundlerOptions(provider="pimlico", ...)`
+  data classes. Functionally equivalent.
+- **Sync transports.** The TS SDK uses viem's HTTP/WebSocket
+  transports; the Python SDK uses `httpx` (sync HTTP) + `websockets`.
+  This is a low-level transport choice — the bytes the SDK sends out
+  are the same.
+- **Type system idioms.** TS uses Zod for runtime config validation
+  + viem's `0x${string}` template-literal types; Python uses
+  Pydantic v2. Both reject malformed inputs at construction time
+  with `KashConfigError`. The error shape is the same.
+
+## See also
+
+- [**Python SDK overview**](/developer-docs/protocol-sdk-python/overview)
+- The TS-side parity test suite is open source at
+  [`KashDAO/protocol-sdk-typescript/tests/parity/`](https://github.com/KashDAO/protocol-sdk-typescript/tree/main/tests/parity).
+- The Python-side parity test suite is open source at
+  [`KashDAO/protocol-sdk-python/tests/parity/`](https://github.com/KashDAO/protocol-sdk-python/tree/main/tests/parity).

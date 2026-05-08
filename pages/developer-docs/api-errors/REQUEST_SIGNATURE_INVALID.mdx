@@ -1,0 +1,33 @@
+---
+title: 'REQUEST_SIGNATURE_INVALID'
+description: 'HTTP 401 — Request signature invalid'
+---
+
+**HTTP status:** 401 · **Title:** "Request signature invalid"
+
+## When it fires
+
+`X-Kash-Signature` was present but did not verify against the API key plaintext over the canonical signing input `${ts}.${method}.${path}.${body}`.
+
+Signing is **opt-in**: requests without `X-Kash-Signature` skip this check entirely. Once present, it MUST verify.
+
+## Why it happens
+
+- The body was modified in transit (a transparent proxy that re-encoded JSON, an HTTP client that renormalised whitespace).
+- The timestamp is outside the ±5 min tolerance (clock skew).
+- The signature was computed over the wrong input — common mistake: signing the URL instead of the path-only, or omitting the leading slash on `path`.
+- The wrong secret was used (e.g., the `webhook_secret` instead of the API key plaintext).
+
+## How to fix
+
+- Canonical input format: `${unixMillis}.${UPPERCASE_METHOD}.${pathWithLeadingSlash}.${rawBody}` (raw body bytes, not re-serialised JSON).
+- Key the HMAC with the API key plaintext (the same value as `X-API-Key`).
+- Header format: `X-Kash-Signature: t=<unixMillis>,v1=<hexHmacSha256>`.
+- Sync your clock — NTP. If you're consistently 6+ minutes off, fix the host clock.
+- Check the `signatureReason` extension field on the problem response — it pinpoints which check failed (`stale`, `mismatch`, `malformed`).
+
+See `apps/public-api/README.md` § Optional request body signing for the full reference.
+
+## Related codes
+
+- [`API_KEY_MISSING`](./API_KEY_MISSING.md) / [`API_KEY_INVALID`](./API_KEY_INVALID.md) — earlier failure points

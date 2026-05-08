@@ -1,0 +1,28 @@
+---
+title: 'RESOURCE_NOT_FOUND'
+description: 'HTTP 404 — Not Found'
+---
+
+**HTTP status:** 404 · **Title:** "Not Found"
+
+## When it fires
+
+A request for a specific resource (trade, key, webhook event, etc.) didn't find a matching row that the caller is authorised to see.
+
+This is the generic catch-all 404. Specific resource types may have their own dedicated codes (e.g., [`MARKET_NOT_FOUND`](./MARKET_NOT_FOUND.md)) where there's value in distinguishing the resource type to the caller.
+
+## Why it happens
+
+- The id is wrong (typo, cross-environment confusion).
+- The resource exists but belongs to a different user — we return 404 (not 403) deliberately, so attackers can't probe for the existence of resources they don't own.
+- The resource was deleted.
+
+## How to fix
+
+- Re-check the id (capitalisation, hyphens, environment).
+- If the resource should exist but you can't see it, confirm you're authenticated as the owner.
+- For webhook events: events are retained for 90 days; older events return 404.
+
+## Related codes
+
+- [`MARKET_NOT_FOUND`](./MARKET_NOT_FOUND.md) — specific case for markets

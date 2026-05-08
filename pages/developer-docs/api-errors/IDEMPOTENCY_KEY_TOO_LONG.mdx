@@ -1,0 +1,26 @@
+---
+title: 'IDEMPOTENCY_KEY_TOO_LONG'
+description: 'HTTP 400 — Idempotency key too long'
+---
+
+**HTTP status:** 400 · **Title:** "Idempotency key too long"
+
+## When it fires
+
+`Idempotency-Key` header value exceeds the 128-character cap.
+
+## Why it happens
+
+- You concatenated several identifiers into the key (user id + market id + timestamp + nonce) and the result blew past 128 chars.
+- A library generated an unusually long token (e.g., a JWT instead of a UUID).
+
+## How to fix
+
+- Use a UUID v4 (`uuidgen`, `crypto.randomUUID()`) or a ULID — both are 26–36 chars and unique enough.
+- If you need to embed semantic information, hash it: `sha256(your-blob).slice(0, 32)` instead of the raw concatenation.
+- Acceptable character set: `[A-Za-z0-9_\-:.]` — see [`IDEMPOTENCY_KEY_FORMAT_INVALID`](./IDEMPOTENCY_KEY_FORMAT_INVALID.md).
+
+## Related codes
+
+- [`IDEMPOTENCY_KEY_FORMAT_INVALID`](./IDEMPOTENCY_KEY_FORMAT_INVALID.md) — disallowed characters
+- [`IDEMPOTENCY_KEY_CONFLICT`](./IDEMPOTENCY_KEY_CONFLICT.md) — same key, different body

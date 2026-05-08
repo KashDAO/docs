@@ -1,0 +1,28 @@
+---
+title: 'WALLET_DELEGATION_NOT_ENABLED'
+description: 'HTTP 409 — Wallet delegation not enabled'
+---
+
+**HTTP status:** 409 · **Title:** "Wallet delegation not enabled"
+
+## When it fires
+
+A smart account exists for the actor, but Privy server-side delegation is disabled. The platform can't sign user-operations on behalf of the user, so trades can't execute.
+
+We surface this at the API layer as a preflight check rather than failing at execution — better UX for the consumer.
+
+## Why it happens
+
+- The user revoked delegation in Privy after onboarding.
+- A Privy app config change disabled delegation for a class of users.
+- An incomplete onboarding flow that skipped the delegation grant step.
+
+## How to fix
+
+- The user must re-grant delegation via the webapp (Settings → Wallet → Re-enable). One-click; uses the existing Privy session.
+- For orgs, the org admin re-grants on behalf of the org wallet.
+- If the issue is platform-wide (multiple users), check the Privy app config or the status page.
+
+## Related codes
+
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](./SMART_ACCOUNT_NOT_PROVISIONED.md) — earlier failure point

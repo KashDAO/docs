@@ -1,0 +1,27 @@
+---
+title: 'IP_NOT_ALLOWED'
+description: 'HTTP 403 — IP not allowed'
+---
+
+**HTTP status:** 403 · **Title:** "IP not allowed"
+
+## When it fires
+
+The key has a non-empty `ip_allowlist` configured AND the request's source IP isn't in it.
+
+Empty allowlist (the default) means any IP is allowed — this code only fires when an allowlist is configured AND the caller's IP doesn't match.
+
+## Why it happens
+
+- The key is locked to a specific egress IP (common for MM and enterprise tier keys) and the call originated from elsewhere — your laptop, a CI runner, a proxy with a different egress.
+- The egress IP changed (cloud provider rotated NAT gateway, your home ISP's dynamic IP rolled).
+
+## How to fix
+
+- Find the request's IP in the `requestId`'s Loki logs — search `requestId="<value>"`, the structured log carries the source IP.
+- If the new IP is legitimate, add it to the key's allowlist via Settings → API Keys → Edit (or `kash-admin api-keys` ops command).
+- If it's not, this code is a successful detection of an exfiltration attempt — investigate.
+
+## Related codes
+
+- [`INSUFFICIENT_SCOPE`](./INSUFFICIENT_SCOPE.md) — also 403, scope rather than IP

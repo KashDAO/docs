@@ -1,0 +1,97 @@
+---
+title: 'Quickstart — Smart-account mode (Python)'
+description: 'ERC-4337 v0.7 trading via SimpleAccount + bundler from Python. Same surface as the TS SDK.'
+---
+
+Smart-account mode in Python mirrors the TypeScript surface
+exactly. Use it for Python AA-stack integrations, paymaster
+sponsorship, batched approve+trade flows, or any case where the
+trading address should be a SimpleAccount derived from an external
+signer.
+
+## Construct the client
+
+```python
+import asyncio
+import os
+
+from eth_account import Account
+from kashdao_protocol_sdk import (
+    BundlerOptions,
+    create_smart_account_client,
+    viem_account_signer,
+)
+
+
+async def main() -> None:
+    account = Account.from_key(os.environ["KASH_PRIVATE_KEY"])
+
+    async with create_smart_account_client(
+        chain_id=84532,
+        rpc=os.environ["BASE_SEPOLIA_RPC"],
+        signer=viem_account_signer(account),
+        bundler=BundlerOptions(
+            provider="pimlico",
+            url=os.environ["KASH_BUNDLER_URL"],
+        ),
+    ) as client:
+        sa = await client.account.compute_address(client.signer.owner_address)
+        print(f"SmartAccount: {sa}")
+        health = await client.bundler.health()
+        print(f"bundler health: {health}")
+
+
+asyncio.run(main())
+```
+
+`BundlerOptions(provider=..., url=..., api_key=...)` accepts
+`alchemy`, `pimlico`, `flashbots`, or `generic`. The provider value
+is informational; the actual vendor preset is chosen by the consumer
+when wiring the client.
+
+## Place a trade
+
+```python
+from kashdao_protocol_sdk import BuildBuyParams, usdc
+
+sa = await client.account.compute_address(client.signer.owner_address)
+
+result = await client.trades.send.buy(
+    os.environ["KASH_MARKET"],
+    BuildBuyParams(
+        smart_account=sa,
+        outcome=0,
+        amount_usdc=usdc(10),
+        max_slippage_bps=50,
+    ),
+)
+print(result.user_op_hash, result.transaction_hash, result.success)
+```
+
+The `userOpHash` is what the signer signed — useful for log
+correlation across the bundler RPC and the EntryPoint contract.
+The `transactionHash` is the bundler-reported on-chain tx that
+contains the UserOp. Both are surfaced because external monitoring
+typically wants both views.
+
+## First-trade-with-deployment
+
+Same auto-deploy story as the TypeScript SDK: the first UserOp
+from a fresh SmartAccount carries `factory` + `factory_data` so
+the EntryPoint deploys the account in the same op. The Python SDK
+auto-detects the undeployed state and populates these fields; you
+don't pass anything special. Verification gas is ~5x higher on
+the deployment op, and the bundler's gas estimate accounts for
+this automatically.
+
+## Run the bundled examples
+
+```bash
+python examples/smart-account/01_quickstart.py        # read-side
+python examples/smart-account/02_one_line_trade.py --confirm  # broadcasts a real UserOp
+```
+
+## What's next
+
+- [**EOA quickstart**](/developer-docs/protocol-sdk-python/quickstart-eoa) — vanilla EIP-1559, no bundler.
+- [**Hummingbot integration**](/developer-docs/protocol-sdk-python/hummingbot) — full strategy walkthrough.

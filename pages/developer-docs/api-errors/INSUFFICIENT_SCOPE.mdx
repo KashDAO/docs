@@ -1,0 +1,35 @@
+---
+title: 'INSUFFICIENT_SCOPE'
+description: 'HTTP 403 — Insufficient scope'
+---
+
+**HTTP status:** 403 · **Title:** "Insufficient scope"
+
+## When it fires
+
+The key authenticated successfully but lacks one of the scopes the route requires.
+
+## Why it happens
+
+- The key was issued with a narrower scope set than the route needs (e.g., a `markets:read` key calling `POST /v1/trades` which requires `trades:write`).
+- A new endpoint was added that requires a scope your existing key doesn't carry.
+
+## How to fix
+
+- Look up the route's required scopes in `apps/public-api/README.md` → Authentication → Scopes table.
+- Issue a new key with the needed scopes (or revoke + re-issue with a broader scope set).
+- Principle of least privilege: don't add scopes you don't actually need — narrow keys reduce blast radius if leaked.
+
+| Scope             | Routes                                                |
+| ----------------- | ----------------------------------------------------- |
+| `markets:read`    | `GET /v1/markets*`, `GET /v1/markets/:id/predictions` |
+| `markets:quote`   | `GET /v1/markets/:id/quote`                           |
+| `trades:read`     | `GET /v1/trades(/:id)`                                |
+| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/:id/confirm`      |
+| `portfolio:read`  | `GET /v1/portfolio*`                                  |
+| `webhooks:manage` | webhook URL/secret rotation, replay endpoint          |
+| `auth:manage`     | self-service key CRUD                                 |
+
+## Related codes
+
+- [`IP_NOT_ALLOWED`](./IP_NOT_ALLOWED.md) — also 403, but driven by IP allowlist rather than scope

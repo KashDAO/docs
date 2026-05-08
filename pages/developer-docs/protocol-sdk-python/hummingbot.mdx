@@ -1,0 +1,216 @@
+---
+title: 'Hummingbot integration'
+description: 'Build a Hummingbot strategy that trades on Kash. Reference cross-venue arbitrage strategy included.'
+---
+
+[Hummingbot](https://hummingbot.org) is the canonical open-source
+market-making framework for Python. The Python protocol SDK is the
+intended integration path — you import it inside a
+`ScriptStrategyBase` subclass and drive trades through it on every
+tick. Kash never sees a private key; the strategy holds the signer.
+
+## Architectural shape
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ Hummingbot process                                         │
+│                                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ KashAmmArbStrategy (ScriptStrategyBase)             │   │
+│  │                                                     │   │
+│  │  on_tick() → safe_ensure_future(_tick_async())      │   │
+│  │                                                     │   │
+│  │  _tick_async():                                     │   │
+│  │    1. Read Kash quote (kashdao-protocol-sdk)        │   │
+│  │    2. Read other-venue price (your code)            │   │
+│  │    3. Decide: profitable spread?                    │   │
+│  │    4. Trade Kash leg (kashdao-protocol-sdk)         │   │
+│  │    5. (optionally) hedge on the other venue         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ EoaClient (created once at strategy init)           │   │
+│  │  • httpx.AsyncClient (HTTP RPC)                     │   │
+│  │  • web3.AsyncWeb3 (read primitives)                 │   │
+│  │  • LocalEoaSigner (eth_account.Account)             │   │
+│  └─────────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────────┘
+                          ▲
+                          │ HTTPS (Base Sepolia / mainnet)
+                          ▼
+                ┌──────────────────────┐
+                │ Your RPC endpoint    │
+                └──────────────────────┘
+                          ▲
+                          │ chain consensus
+                          ▼
+                ┌──────────────────────┐
+                │ Kash protocol on-chain│
+                │ (Market.sol, etc.)    │
+                └──────────────────────┘
+```
+
+Kash is on neither side of the wire. Your strategy holds the EOA
+signer; your RPC sees the read traffic and the signed transaction.
+
+## Reference strategy
+
+The package ships
+`examples/hummingbot/amm_arb_kash_uniswap.py` — a working
+`ScriptStrategyBase` that demonstrates the canonical SDK
+integration pattern. Skeleton runs against Base Sepolia in EOA
+mode; the Uniswap leg + sizing model are stubbed for you to wire to
+your real venue.
+
+```python
+from kashdao_protocol_sdk import (
+    BuildApproveParams,
+    BuildBuyParams,
+    MAX_UINT256,
+    QuoteParams,
+    create_eoa_client,
+    usdc,
+    viem_account_eoa_signer,
+)
+from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
+
+
+class KashAmmArbStrategy(ScriptStrategyBase):
+    markets: ClassVar[dict[str, set[str]]] = {}  # no Hummingbot connectors
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        account = Account.from_key(os.environ["KASH_TRADER_PK"])
+        self._kash = create_eoa_client(
+            chain_id=84532,
+            rpc=os.environ["KASH_BASE_SEPOLIA_RPC"],
+            signer=viem_account_eoa_signer(account),
+        )
+        self._owner = account.address
+        self._approved = False
+
+    def on_tick(self) -> None:
+        from hummingbot.core.utils.async_utils import safe_ensure_future
+        safe_ensure_future(self._tick_async())
+
+    async def on_stop(self) -> None:
+        await self._kash.aclose()
+
+    async def _tick_async(self) -> None:
+        await self._ensure_approval()
+
+        kash_quote = await self._kash.markets.quote(
+            os.environ["KASH_MARKET_ADDRESS"],
+            QuoteParams(side="BUY", outcome=0, amount=usdc(10)),
+        )
+        uni_quote = await self._get_uniswap_price()
+
+        if self._is_profitable(kash_quote, uni_quote):
+            await self._kash.trades.send.buy(
+                os.environ["KASH_MARKET_ADDRESS"],
+                BuildBuyParams(
+                    # `smart_account` is the shared param-shape field
+                    # name in both modes; in EOA mode pass the EOA.
+                    smart_account=self._owner,
+                    outcome=0,
+                    amount_usdc=usdc(10),
+                    max_slippage_bps=50,
+                ),
+            )
+```
+
+The full file is at
+[`examples/hummingbot/amm_arb_kash_uniswap.py`](https://github.com/KashDAO/protocol-sdk-python/blob/main/examples/hummingbot/amm_arb_kash_uniswap.py)
+on the public mirror.
+
+## Running the strategy in Hummingbot
+
+```bash
+# 1. Install Hummingbot per their docs.
+# 2. Drop the Kash strategy into your Hummingbot scripts/ folder.
+# 3. From a Hummingbot REPL:
+hummingbot start
+> import_script_file kash_amm_arb examples/hummingbot/amm_arb_kash_uniswap.py
+> start --script kash_amm_arb
+```
+
+## Resource requirements
+
+Per active strategy:
+
+| Resource          | Footprint                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| RAM               | ~20 MB resident for the SDK + httpx pool + web3.py + the WS subscription if used     |
+| Sockets           | 1 HTTP keep-alive pool to the chain RPC; 1 WSS connection per `markets.watch`        |
+| Concurrency       | All async; no thread pools (unless your signer's CPU-bound — then `LocalSigner` runs sign in `run_in_executor`) |
+| Network egress    | One `eth_call` per tick (quote) + one `eth_sendRawTransaction` per executed trade    |
+
+A typical 1-second tick interval generates ~2 RPS to the chain RPC
+and ~0.05 RPS of trade submits (assuming 5% of ticks find a
+profitable spread). Both well under any commercial RPC's free tier.
+
+## Latency profile
+
+| Stage                                  | p50    | p99     |
+| -------------------------------------- | ------ | ------- |
+| `markets.quote(...)` → return          | 30 ms  | 250 ms  |
+| `trades.build_buy(...)` → return       | <1 ms  | 5 ms    |
+| `trades.prepare_buy(...)` → return     | 50 ms  | 400 ms  |
+| `trades.signer.sign_transaction(...)`  | <1 ms  | 5 ms    |
+| `trades.submit(...)` → tx hash         | 100 ms | 800 ms  |
+| Mempool inclusion (chain-side)         | 2 s    | 10 s    |
+
+Numbers are anecdotal — they depend on your RPC, your signer
+(local vs remote), and the chain's mempool state. Use them as
+order-of-magnitude estimates, not SLA targets.
+
+## Observability
+
+Every public method accepts an optional `signal: asyncio.Event` for
+cancellation. Long-running strategies should propagate Hummingbot's
+shutdown signal into every SDK call so a `ctrl-c` cleanly aborts
+in-flight ops.
+
+Lifecycle hooks (`KashProtocolHooks`) are five fire-and-forget
+callbacks for telemetry / structured logging:
+
+- `on_request_start(name, attempt)`
+- `on_request_finish(name, durationMs, status)`
+- `on_simulate_revert(name, decoded)`
+- `on_signer_call(adapter)`
+- `on_bundler_call(method, durationMs, status)`
+
+Wire these into your existing logging stack (Hummingbot's structured
+log, OpenTelemetry, or whatever) without polluting the trade-path
+code with logging side effects.
+
+## Cancellation + clean shutdown
+
+Always close the client. Hummingbot's `on_stop` is the hook:
+
+```python
+async def on_stop(self) -> None:
+    await self._kash.aclose()
+```
+
+This drains the httpx pool, closes the WebSocket subscription if
+any, and is idempotent — calling it twice is a no-op. The
+`async with` form does this for you in standalone scripts.
+
+## Troubleshooting
+
+- **`KashSimulationRevertedError(SLIPPAGE_EXCEEDED)`** — your
+  `max_slippage_bps` was tighter than the market could meet. The
+  pre-flight `eth_call` caught the revert before you paid for any
+  signing-infra round-trips.
+- **`KashSignerError(STALE_SIGNED_TX)`** — you signed a tx and
+  then mutated its gas/fees/nonce before submit. The submit-side
+  staleness guard recovered the signing address from the bytes,
+  saw a mismatch, and refused to broadcast.
+- **`KashChainError(RPC_UNHEALTHY)`** — your RPC is down or
+  rate-limiting. Retryable; back off and retry.
+
+## See also
+
+- [**Smart-account mode**](/developer-docs/protocol-sdk-python/quickstart-smart-account) — for AA-stack Python integrations.
+- [**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity) — same encoding bytes as the TypeScript SDK.

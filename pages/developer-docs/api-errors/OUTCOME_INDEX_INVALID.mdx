@@ -1,0 +1,25 @@
+---
+title: 'OUTCOME_INDEX_INVALID'
+description: 'HTTP 400 — Outcome index invalid'
+---
+
+**HTTP status:** 400 · **Title:** "Outcome index invalid"
+
+## When it fires
+
+`outcomeIndex` is greater than or equal to the market's outcome count, or negative.
+
+## Why it happens
+
+- You hard-coded `outcomeIndex: 1` (assuming a binary market) and pointed at a multi-outcome market.
+- Off-by-one: the field is **zero-indexed** — first outcome is `0`, not `1`.
+- A bug computed the index from a label without bounds-checking.
+
+## How to fix
+
+- Look up the market via `GET /v1/markets/:id` and check `outcomes.length` — valid range is `[0, length - 1]`.
+- Map outcome labels to indices once when you fetch the market, then use the index throughout your code.
+
+## Related codes
+
+- [`MARKET_NOT_FOUND`](./MARKET_NOT_FOUND.md), [`MARKET_NOT_TRADEABLE`](./MARKET_NOT_TRADEABLE.md), [`VALIDATION_FAILED`](./VALIDATION_FAILED.md)

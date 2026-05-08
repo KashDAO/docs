@@ -1,0 +1,26 @@
+---
+title: 'REQUEST_TIMEOUT'
+description: 'HTTP 504 — Gateway timeout'
+---
+
+**HTTP status:** 504 · **Title:** "Gateway timeout" · **Retry-After:** 5s
+
+## When it fires
+
+The per-request server timeout fired (default 30 s). Bounded by `bodyLimit` + Fastify timeout config to keep slow upstreams from blocking healthy traffic.
+
+## Why it happens
+
+- An unusually slow downstream call (Postgres lock contention, RPC latency spike, etc.).
+- A request that does too much work in one call — most reads complete in <100 ms.
+- Network path degradation between you and our edge (rare but possible).
+
+## How to fix
+
+- Retry once with backoff. Most timeouts are transient.
+- If you're consistently timing out on the same endpoint, narrow the request — pass `limit` parameters, fetch one resource at a time.
+- For long-running operations, use webhooks instead of waiting on the response.
+
+## Related codes
+
+- [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md), [`INTERNAL_ERROR`](./INTERNAL_ERROR.md)

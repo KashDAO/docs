@@ -1,0 +1,25 @@
+---
+title: 'ACTIVE_KEY_LIMIT_REACHED'
+description: 'HTTP 409 — Active key limit reached'
+---
+
+**HTTP status:** 409 · **Title:** "Active key limit reached"
+
+## When it fires
+
+The user has hit `MAX_ACTIVE_KEYS_PER_USER` (5) and `POST /api/account/api-keys` in the webapp (or `kash-admin api-keys issue`) was called to issue another. The cap is enforced both at the application layer and via the `trg_api_keys_enforce_max_active_per_user` BEFORE INSERT trigger (which closes a TOCTOU window that the app-level check alone leaves open).
+
+## Why it happens
+
+- A genuine ceiling — most users only need 2-3 keys (one per environment, maybe a CI key). The cap exists to prevent runaway issuance from compromising audit hygiene.
+- A bot that issues a fresh key per run instead of reusing one (anti-pattern).
+
+## How to fix
+
+- Revoke an existing key first — Settings → API Keys → Revoke (or `kash-admin api-keys revoke <id>`).
+- Reuse keys across environments where appropriate: one `kash_live_…` for production code, one `kash_test_…` for everything else.
+- For mm/enterprise tiers, the cap is higher — contact support if your usage genuinely needs more.
+
+## Related codes
+
+- [`API_KEY_REVOKED`](./API_KEY_REVOKED.md) — what happens after revocation if you keep using the old key

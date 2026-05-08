@@ -1,0 +1,25 @@
+---
+title: 'CONFIRMATION_EXPIRED'
+description: 'HTTP 409 — Confirmation expired'
+---
+
+**HTTP status:** 409 · **Title:** "Confirmation expired"
+
+## When it fires
+
+The confirmation token is past its `confirmation_expires_at`. High-value trades have a short confirmation window (60 seconds by default; configurable per-tier).
+
+## Why it happens
+
+- A human-in-the-loop confirmation flow took longer than the window allows.
+- A queue/worker latency between `POST /v1/trades` returning the token and the consumer calling confirm.
+
+## How to fix
+
+- Tighten the consumer's confirm call — ideally fire it immediately after receiving the token.
+- For human-in-the-loop flows that need longer, request a per-key window extension (mm tier customers who pipeline trades through human review get longer windows).
+- The trade is automatically cancelled when the window expires — re-create it to retry.
+
+## Related codes
+
+- [`TRADE_NOT_AWAITING_CONFIRMATION`](./TRADE_NOT_AWAITING_CONFIRMATION.md), [`CONFIRMATION_TOKEN_INVALID`](./CONFIRMATION_TOKEN_INVALID.md)

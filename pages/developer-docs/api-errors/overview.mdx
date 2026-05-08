@@ -1,0 +1,92 @@
+---
+title: 'Error catalogue'
+description: 'Stable, RFC 7807-shaped problem responses. Every code has its own page; the `type` URL on every response points back here.'
+---
+
+The Kash REST API returns errors as
+[RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) Problem Details
+JSON. Every response carries a stable `code` and a `type` URL that
+resolves to the error's documentation page on this site:
+
+```json
+{
+  "type":      "https://docs.kash.bot/developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+  "title":     "Market not tradeable",
+  "status":    409,
+  "code":      "MARKET_NOT_TRADEABLE",
+  "detail":    "Market 0xabc... is FROZEN; trades are rejected until the resolution period closes.",
+  "instance":  "/v1/trades",
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
+}
+```
+
+The `code` field is **the** stable identifier — branch on it from
+your client. The `type` URL is for humans (and AI agents) following
+the link. The `detail` string is a human-readable explanation that
+may evolve over time; **don't** parse it.
+
+## How to read this catalogue
+
+Each per-code page is the canonical reference for what triggers the
+error, why it happens, and how to recover. Pages are short by
+design — when something fires, you should be able to read the
+relevant page in under a minute and know your next move.
+
+The catalogue is **single-sourced** from the public-API service's
+markdown at `apps/public-api/docs/api-errors/<CODE>.md` in the Kash
+monorepo. Mintlify pages here are auto-generated from those source
+files at every release; the contract test
+`tests/unit/errors/documentation-url.test.ts` enforces that every
+runtime `ErrorCode` has a corresponding source-of-truth page.
+
+## Stability promise
+
+The `code` field is part of the public-API contract. We follow these
+rules:
+
+- **Adding a new `code`** is non-breaking — your client should fall
+  through to a generic error handler for any code it doesn't
+  recognize.
+- **Renaming a `code`** is breaking and requires a version bump.
+- **Repurposing a `code`** (changing what conditions cause it to
+  fire) is breaking and requires a version bump.
+- **Changing the HTTP status** for an existing `code` is breaking.
+
+The `title` field is also stable — it appears in customer-facing
+logs and dashboards. The `detail` string is **not** stable; it may
+be reworded for clarity in any release. The `requestId` and
+`instance` fields are present on every error response and are the
+fastest path to support — quote them when filing an issue.
+
+## Branching on errors
+
+```ts
+import {
+  KashAuthenticationError,
+  KashRateLimitError,
+  KashConflictError,
+  KashError,
+} from '@kashdao/sdk';
+
+try {
+  await kash.trades.create({ ... });
+} catch (err) {
+  if (err instanceof KashAuthenticationError) {
+    // Auth-tier failures: API_KEY_MISSING, API_KEY_INVALID, API_KEY_EXPIRED, ...
+    return refreshKey();
+  }
+  if (err instanceof KashRateLimitError) {
+    // RATE_LIMIT_EXCEEDED — back off until err.retryAfterSeconds
+    return scheduleRetry(err.retryAfterSeconds);
+  }
+  if (err instanceof KashConflictError && err.code === 'CONFIRMATION_EXPIRED') {
+    // Specific conflict; recreate the trade
+    return retryTradeCreation();
+  }
+  throw err; // pass through everything else
+}
+```
+
+The TS SDK maps each catalogue code to a typed error class; the
+Python SDK does the same with the protocol-level error hierarchy.
+See the per-SDK pages for the exact mapping.

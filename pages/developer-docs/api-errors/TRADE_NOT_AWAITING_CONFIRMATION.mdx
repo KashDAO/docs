@@ -1,0 +1,27 @@
+---
+title: 'TRADE_NOT_AWAITING_CONFIRMATION'
+description: 'HTTP 409 — Trade not awaiting confirmation'
+---
+
+**HTTP status:** 409 · **Title:** "Trade not awaiting confirmation"
+
+## When it fires
+
+`POST /v1/trades/:id/confirm` was called for a trade that's not in `pending_confirmation` status.
+
+## Why it happens
+
+- The trade was already confirmed (you'll see this if you accidentally call confirm twice) — see also [`CONFIRMATION_TOKEN_USED`](./CONFIRMATION_TOKEN_USED.md).
+- The trade was below your tier's high-value threshold and never required confirmation in the first place.
+- The trade has progressed past confirmation into `pending` / `executing` / a terminal state.
+- The confirmation window expired and the trade was auto-cancelled — see [`CONFIRMATION_EXPIRED`](./CONFIRMATION_EXPIRED.md).
+
+## How to fix
+
+- Check the trade's current `status` via `GET /v1/trades/:id`. The lifecycle is: `pending_confirmation` → `pending` → `executing` → `completed`/`failed`.
+- If the trade is `completed`, there's nothing more to do.
+- If the trade is `cancelled`, re-create it and confirm within the new window.
+
+## Related codes
+
+- [`CONFIRMATION_EXPIRED`](./CONFIRMATION_EXPIRED.md), [`CONFIRMATION_TOKEN_INVALID`](./CONFIRMATION_TOKEN_INVALID.md), [`CONFIRMATION_TOKEN_USED`](./CONFIRMATION_TOKEN_USED.md)

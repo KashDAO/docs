@@ -1,0 +1,28 @@
+---
+title: 'IDEMPOTENCY_KEY_CONFLICT'
+description: 'HTTP 409 — Idempotency key conflict'
+---
+
+**HTTP status:** 409 · **Title:** "Idempotency key conflict"
+
+## When it fires
+
+The same `Idempotency-Key` was used for two requests with **different bodies**. The server refuses to either re-execute (would violate idempotency) or replay the cached response (would mislead the caller about which request "won").
+
+## Why it happens
+
+- Most common: a retry layer regenerated the body on each attempt instead of capturing it once and replaying.
+- A bug in the caller that mutates the body in-place between the request being prepared and the request being sent.
+- Two distinct logical operations accidentally sharing a key (e.g., a global key generator that didn't account for concurrency).
+
+## How to fix
+
+- Pin the request body before generating the idempotency key. Either:
+  - Capture body + key together in your retry wrapper and re-send the exact pair on each attempt.
+  - Generate a fresh key per logical operation (one trade = one key).
+- For genuinely retryable bodies that legitimately change between attempts (e.g., updated timestamps), generate a fresh key per attempt — that's the contract.
+
+## Related codes
+
+- [`CLIENT_REQUEST_ID_CONFLICT`](./CLIENT_REQUEST_ID_CONFLICT.md) — analogous conflict, but on the body-level `clientRequestId` field rather than the HTTP header
+- [`IDEMPOTENCY_KEY_EXPIRED`](./IDEMPOTENCY_KEY_EXPIRED.md) — key valid earlier, now past TTL

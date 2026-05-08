@@ -1,0 +1,112 @@
+---
+title: 'Error handling'
+description: 'Typed error hierarchy, retry semantics, decoded revert hints. Same shape across both modes and the Python SDK.'
+---
+
+Every error in `@kashdao/protocol-sdk` inherits from
+`KashProtocolError` and carries a stable `code`, structured
+`context`, plus `isRetryable` / `isOperational` flags. The hierarchy
+mirrors the Python SDK exactly — same class names, same
+string-valued `ErrorCode` constants — so a cross-language deployment
+can branch on the error class without parsing strings.
+
+## The 6 named subclasses
+
+| Class                          | When it fires                                                                                                | Retryable?                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| `KashConfigError`              | Construction-time validation failure (invalid chain id, bad RPC URL, malformed signer)                       | **No** — never retry config errors    |
+| `KashChainError`               | Chain or RPC-side failure (RPC unreachable, reorg-suspected receipt loss, gas estimate failed)               | Sometimes — check `isRetryable`       |
+| `KashBundlerError`             | Bundler RPC-side failure (Pimlico/Alchemy/Flashbots returned an error)                                       | Sometimes — check `isRetryable`       |
+| `KashSignerError`              | Signer-side failure (signature rejected, MFA timeout, hardware-wallet disconnect, stale tx/UserOp)           | **Always no** — re-prompting MFA is a footgun |
+| `KashSimulationRevertedError`  | Pre-flight `eth_call` would revert (slippage exceeded, insufficient allowance, market state changed)         | **No** — input issue, not retryable   |
+| `KashAbortedError`             | Caller's `AbortSignal` fired                                                                                  | **No** — abort was deliberate         |
+
+## Canonical exception-handling shape
+
+```ts
+import {
+  KashConfigError,
+  KashChainError,
+  KashBundlerError,
+  KashSignerError,
+  KashSimulationRevertedError,
+  KashAbortedError,
+} from '@kashdao/protocol-sdk';
+
+try {
+  await client.trades.send.buy(MARKET, params);
+} catch (err) {
+  if (err instanceof KashSimulationRevertedError) {
+    // `revertHint` decodes the on-chain custom error name when known.
+    console.error('would revert:', err.revertHint ?? err.message);
+    // Update slippage / amount / market and try again.
+    return;
+  }
+  if (err instanceof KashSignerError) {
+    // ALWAYS non-retryable. Surface to the user as a sign-required UI step.
+    console.error('signer failed:', err.code, err.message);
+    return;
+  }
+  if (err instanceof KashChainError && err.isRetryable) {
+    // Retry with backoff; cap attempts.
+    return retryWithBackoff(() => client.trades.send.buy(MARKET, params));
+  }
+  if (err instanceof KashConfigError) {
+    // Never retryable. Fix the code.
+    throw err;
+  }
+  if (err instanceof KashAbortedError) {
+    // Caller's AbortSignal fired. Don't auto-retry.
+    return;
+  }
+  throw err;
+}
+```
+
+## Decoded revert hints
+
+`KashSimulationRevertedError.revertHint` decodes Market/EntryPoint
+custom errors into readable strings. Today's catalogue includes:
+
+- `SlippageExceeded(actualOut, minOut)` — your `maxSlippageBps`
+  was tighter than the market could meet.
+- `InsufficientAllowance(spender, owner, current, required)` — you
+  haven't approved enough USDC for the spender; call
+  `client.trades.send.approve` first.
+- `MarketFrozen` — the market is frozen pending resolution; trades
+  rejected.
+- `OutcomeOutOfRange(supplied, max)` — your `outcome` index is
+  ≥ the market's outcome count.
+
+Unknown custom errors fall through to `.message` with the raw
+4-byte selector for debugging.
+
+## `isOperational` vs `isRetryable`
+
+`isOperational: true` means the error is a known, expected failure
+mode — the consumer's input or the chain's state is the cause, and
+the SDK is not internally broken. `isOperational: false` would
+indicate an SDK bug; you should never see this — file an issue.
+
+`isRetryable: true` means a fresh attempt MIGHT succeed without
+fixing inputs (e.g., the RPC was overloaded). `isRetryable: false`
+means a retry will deterministically fail.
+
+These flags are independent. A `KashSimulationRevertedError` is
+operational (input issue) but not retryable (slippage won't
+spontaneously recover).
+
+## Cross-realm identification
+
+Every Kash error carries a cross-realm brand
+(`Symbol.for('@kashdao/protocol-sdk/error')`). When you have an
+SDK loaded in two realms (e.g., a Web Worker + main thread) the
+`instanceof` check still works because it falls back to brand
+detection. This is how the SDK survives bundler de-duplication
+across module graphs.
+
+## See also
+
+- [**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity) — error class names and codes match the Python SDK exactly.
+- The full `ErrorCode` enum lives in
+  [`packages/protocol-sdk/src/shared/error-codes.ts`](https://github.com/KashDAO/protocol-sdk-typescript/blob/main/src/shared/error-codes.ts).

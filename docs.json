@@ -80,7 +80,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["pages/developer-docs/introduction"]
+            "pages": [
+              "pages/developer-docs/introduction"
+            ]
           },
           {
             "group": "REST API",
@@ -111,6 +113,68 @@
             "pages": [
               "pages/developer-docs/rest-api/sdks/typescript",
               "pages/developer-docs/rest-api/sdks/cli"
+            ]
+          },
+          {
+            "group": "REST API — Error catalogue",
+            "pages": [
+              "pages/developer-docs/api-errors/overview",
+              "pages/developer-docs/api-errors/ACTIVE_KEY_LIMIT_REACHED",
+              "pages/developer-docs/api-errors/AMOUNT_TOO_LARGE",
+              "pages/developer-docs/api-errors/API_KEY_EXPIRED",
+              "pages/developer-docs/api-errors/API_KEY_INVALID",
+              "pages/developer-docs/api-errors/API_KEY_MALFORMED",
+              "pages/developer-docs/api-errors/API_KEY_MISSING",
+              "pages/developer-docs/api-errors/API_KEY_REVOKED",
+              "pages/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED",
+              "pages/developer-docs/api-errors/API_VERSION_UNSUPPORTED",
+              "pages/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT",
+              "pages/developer-docs/api-errors/CONFIRMATION_EXPIRED",
+              "pages/developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
+              "pages/developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
+              "pages/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE",
+              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT",
+              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED",
+              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID",
+              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG",
+              "pages/developer-docs/api-errors/INSUFFICIENT_BALANCE",
+              "pages/developer-docs/api-errors/INSUFFICIENT_SCOPE",
+              "pages/developer-docs/api-errors/INTERNAL_ERROR",
+              "pages/developer-docs/api-errors/IP_NOT_ALLOWED",
+              "pages/developer-docs/api-errors/MARKET_NOT_FOUND",
+              "pages/developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+              "pages/developer-docs/api-errors/OUTCOME_INDEX_INVALID",
+              "pages/developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
+              "pages/developer-docs/api-errors/REQUEST_SIGNATURE_INVALID",
+              "pages/developer-docs/api-errors/REQUEST_TIMEOUT",
+              "pages/developer-docs/api-errors/RESOURCE_NOT_FOUND",
+              "pages/developer-docs/api-errors/ROUTE_DISABLED",
+              "pages/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED",
+              "pages/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED",
+              "pages/developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION",
+              "pages/developer-docs/api-errors/VALIDATION_FAILED",
+              "pages/developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED",
+              "pages/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED",
+              "pages/developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN"
+            ]
+          },
+          {
+            "group": "Protocol SDK (TypeScript)",
+            "pages": [
+              "pages/developer-docs/protocol-sdk/overview",
+              "pages/developer-docs/protocol-sdk/quickstart-eoa",
+              "pages/developer-docs/protocol-sdk/quickstart-smart-account",
+              "pages/developer-docs/protocol-sdk/error-handling",
+              "pages/developer-docs/protocol-sdk/cross-language-parity"
+            ]
+          },
+          {
+            "group": "Protocol SDK (Python)",
+            "pages": [
+              "pages/developer-docs/protocol-sdk-python/overview",
+              "pages/developer-docs/protocol-sdk-python/quickstart-eoa",
+              "pages/developer-docs/protocol-sdk-python/quickstart-smart-account",
+              "pages/developer-docs/protocol-sdk-python/hummingbot"
             ]
           },
           {

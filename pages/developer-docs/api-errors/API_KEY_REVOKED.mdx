@@ -1,0 +1,27 @@
+---
+title: 'API_KEY_REVOKED'
+description: 'HTTP 401 — API key revoked'
+---
+
+**HTTP status:** 401 · **Title:** "API key revoked"
+
+## When it fires
+
+The key is well-formed and recognised, but its `revoked_at` column is set. The auth middleware fails closed.
+
+## Why it happens
+
+- A user (you or a teammate) explicitly revoked the key via Settings → API Keys → Revoke.
+- An operator revoked the key via `kash-admin api-keys revoke <id>` (e.g., suspected leak).
+- A security automation revoked it (e.g., per-key velocity anomaly tripped a kill switch).
+
+## How to fix
+
+- If revocation was unintentional, ask the operator who ran it (the audit log records who/when/why).
+- If revocation was intentional and you need to keep working, **issue a new key**. Revoked keys cannot be un-revoked — that's the security property.
+- Update every place the old key was stored (env vars, secret stores, CI configs) before the new key goes live.
+
+## Related codes
+
+- [`API_KEY_INVALID`](./API_KEY_INVALID.md) — key was deleted, not revoked
+- [`API_KEY_EXPIRED`](./API_KEY_EXPIRED.md) — key reached its `expires_at` (no operator action)

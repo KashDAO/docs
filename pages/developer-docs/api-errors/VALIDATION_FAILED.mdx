@@ -1,0 +1,42 @@
+---
+title: 'VALIDATION_FAILED'
+description: 'HTTP 400 — Validation failed'
+---
+
+**HTTP status:** 400 · **Title:** "Validation failed"
+
+## When it fires
+
+The request body failed Zod schema parse. One or more fields are missing, malformed, or out of range.
+
+## Why it happens
+
+- Required field is missing or `null`.
+- Field has the wrong type (e.g., `amount` sent as a number instead of a string — we use string for arbitrary-precision USDC amounts).
+- Field violates a constraint (UUID format, enum value, min/max length).
+- An unknown extra field was sent — we accept extras (`.passthrough()`) so this is rarely the cause; if it is, you'll see it called out in `detail`.
+
+## How to fix
+
+- The `detail` field carries the path of the first offending field (e.g., `body.outcomeIndex must be a non-negative integer`).
+- Cross-reference with the OpenAPI spec at `https://api.kash.bot/v1/openapi.json` — every endpoint's request body is fully typed there.
+- If you're using the TS SDK, you'd have caught this client-side via `KashValidationError` before the request went out.
+
+## Example
+
+```json
+{
+  "type": "https://docs.kash.bot/developer-docs/api-errors/VALIDATION_FAILED",
+  "title": "Validation failed",
+  "status": 400,
+  "code": "VALIDATION_FAILED",
+  "detail": "body.amount must be a string matching ^[0-9]+(\\.[0-9]+)?$",
+  "instance": "/v1/trades",
+  "requestId": "01HX-..."
+}
+```
+
+## Related codes
+
+- [`AMOUNT_TOO_LARGE`](./AMOUNT_TOO_LARGE.md) — specific case for `amount` exceeding the per-trade cap
+- [`OUTCOME_INDEX_INVALID`](./OUTCOME_INDEX_INVALID.md) — specific case for invalid `outcomeIndex`

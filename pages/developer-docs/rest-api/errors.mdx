@@ -9,7 +9,7 @@ Every error response from `api.kash.bot` follows [RFC 7807 Problem Details](http
 
 ```json
 {
-  "type":     "https://github.com/KashDAO/kash/blob/main/docs/api-errors/INSUFFICIENT_SCOPE.md",
+  "type":     "https://docs.kash.bot/developer-docs/api-errors/INSUFFICIENT_SCOPE",
   "title":    "Insufficient scope",
   "status":   403,
   "code":     "INSUFFICIENT_SCOPE",
@@ -82,7 +82,7 @@ The TypeScript SDK throws typed subclasses (`KashRateLimitError`, `KashAuthoriza
 
 ## Error code catalog
 
-Every `code` has a stable per-page documentation entry at `https://github.com/KashDAO/kash/blob/main/docs/api-errors/<CODE>.md`. The `type` field on every error is exactly that URL — copy-paste it into a browser to read the page, or fetch it programmatically.
+Every `code` has a stable per-page documentation entry at `https://docs.kash.bot/developer-docs/api-errors/<CODE>` — see the [Error catalogue](/developer-docs/api-errors/overview) for the full index. The `type` field on every error is exactly that URL — copy-paste it into a browser to read the page, or fetch it programmatically.
 
 The CLI ships an offline copy of the full catalog. `kash explain <CODE>` works without a network round-trip:
 
@@ -117,7 +117,7 @@ Common codes to know:
 | `WEBHOOK_SECRET_ROTATION_COOLDOWN` | Webhook-secret rotation called within 60s of a prior successful rotation. Protects the rollback slot — see [Secret Rotation](/developer-docs/rest-api/webhooks/secret-rotation). |
 | `REQUEST_SIGNATURE_INVALID`  | Opt-in body-signing on `POST /v1/trades` failed verification.          |
 
-The full list lives in the [`docs/api-errors/`](https://github.com/KashDAO/kash/tree/main/docs/api-errors) directory. The CLI's bundled copy is generated from there at build time, so they stay in sync.
+The full list lives at the [Error catalogue](/developer-docs/api-errors/overview). The CLI's offline copy and these docs pages are both generated from the same source-of-truth markdown at release time, so they stay in sync.
 
 ## What's NOT in errors
 
@@ -131,7 +131,7 @@ Defensive design choices to be aware of:
 
 ## Reporting bugs
 
-Include the **`requestId`** when emailing [dev@kash.bot](mailto:dev@kash.bot) or filing on [GitHub](https://github.com/KashDAO/kash/issues). One id is enough — we can pull the full distributed trace, every event, and every retry attempt from it.
+Include the **`requestId`** when emailing [dev@kash.bot](mailto:dev@kash.bot) or filing an issue on the relevant public mirror ([SDK](https://github.com/KashDAO/sdk-typescript/issues) · [CLI](https://github.com/KashDAO/cli/issues) · [Protocol SDK (TS)](https://github.com/KashDAO/protocol-sdk-typescript/issues) · [Protocol SDK (Python)](https://github.com/KashDAO/protocol-sdk-python/issues)). One id is enough — we can pull the full distributed trace, every event, and every retry attempt from it.
 
 ## Next
 

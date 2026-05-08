@@ -1,0 +1,28 @@
+---
+title: 'INTERNAL_ERROR'
+description: 'HTTP 500 — Internal Server Error'
+---
+
+**HTTP status:** 500 · **Title:** "Internal Server Error"
+
+## When it fires
+
+The error handler caught something it didn't recognise. The actual cause is logged + Sentry-captured server-side; nothing leaks to the caller.
+
+This is the catch-all — any other code in this catalogue is a structured, anticipated failure. `INTERNAL_ERROR` means we hit something we hadn't categorised.
+
+## Why it happens
+
+- A genuinely unexpected condition (the most common reason this fires).
+- A new code path that hasn't been instrumented with a typed error yet — please report it so we can add a proper code.
+
+## How to fix
+
+- **Always include `requestId` in any support ticket.** It's our handle into the trace, the logs, and the Sentry capture.
+- Retry once — if it was a transient bug, you may get past it.
+- If it's reproducible from a specific request, tell us the exact request shape (with secrets redacted) and we'll trace it.
+- The TS SDK exposes `requestId` on `KashServerError`; raw HTTP callers should pull it from the `requestId` field on the problem response.
+
+## Related codes
+
+Every other code in this catalogue is preferable — if you see `INTERNAL_ERROR` consistently for one operation, the right fix is for us to add a new typed code, not for you to work around it.

@@ -1,0 +1,27 @@
+---
+title: 'API_KEY_MALFORMED'
+description: 'HTTP 401 — Authentication required'
+---
+
+**HTTP status:** 401 · **Title:** "Authentication required"
+
+## When it fires
+
+The `X-API-Key` header is present but does not match the expected `kash_(live|test)_<base64url>` shape.
+
+## Why it happens
+
+- A leading or trailing whitespace character (e.g., from a copy-paste with a trailing newline).
+- The wrong env var was substituted (e.g., a Privy token or a bare UUID instead of a Kash API key).
+- Truncation by a logging or proxy layer that capped header values.
+
+## How to fix
+
+- The format is `kash_<env>_<43-char base64url>`. The `<env>` segment is `live` or `test`.
+- `live` keys hit production; `test` keys hit staging. Don't mix.
+- If you stored the key in an env var, double-check the substitution: `echo $KASH_API_KEY | head -c 16` should print `kash_live_…` or `kash_test_…`.
+
+## Related codes
+
+- [`API_KEY_MISSING`](./API_KEY_MISSING.md) — no header at all
+- [`API_KEY_INVALID`](./API_KEY_INVALID.md) — well-formed but unknown

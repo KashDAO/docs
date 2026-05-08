@@ -1,0 +1,26 @@
+---
+title: 'MARKET_NOT_TRADEABLE'
+description: 'HTTP 409 — Market not tradeable'
+---
+
+**HTTP status:** 409 · **Title:** "Market not tradeable"
+
+## When it fires
+
+The market exists but is in a state that doesn't accept trades — typically `FROZEN` (admin paused trading) or `RESOLVED` (outcome decided, only redemptions allowed).
+
+## Why it happens
+
+- Market reached its `resolve_time` and froze automatically.
+- An admin froze the market manually (e.g., pending an oracle dispute).
+- The market was resolved between your quote call and your trade call.
+
+## How to fix
+
+- Check the market's current `status` via `GET /v1/markets/:id` before retrying.
+- If the market was just resolved, your existing positions are still redeemable (handled automatically by the payout pipeline) — you don't need to do anything.
+- For freeze-then-resume scenarios, retry once the market reopens; subscribe to the `market.resumed` webhook (when streaming lands) to know exactly when.
+
+## Related codes
+
+- [`MARKET_NOT_FOUND`](./MARKET_NOT_FOUND.md), [`OUTCOME_INDEX_INVALID`](./OUTCOME_INDEX_INVALID.md)

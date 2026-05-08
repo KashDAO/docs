@@ -1,0 +1,29 @@
+---
+title: 'ROUTE_DISABLED'
+description: 'HTTP 503 — Route disabled'
+---
+
+**HTTP status:** 503 · **Title:** "Route disabled" · **Retry-After:** 60s
+
+## When it fires
+
+A single route is disabled by ops via a per-route kill switch. Distinct from the coarse [`API_TRADE_PROCESSING_HALTED`](./API_TRADE_PROCESSING_HALTED.md) so SDK consumers can branch on "my entire trading capability is offline" vs "just one endpoint."
+
+The Problem detail's `extensions.flag` field carries the kill-switch name (e.g., `"api-quotes-read"`) so you can tell exactly which route is gated.
+
+## Why it happens
+
+- Targeted rollback after a route-specific bug shipped.
+- Pre-deploy lockdown of one endpoint while the rest of the API stays live.
+- Capacity-driven shedding (rare — usually we'd raise rate limits first).
+
+## How to fix
+
+- Honour `Retry-After`. The flag is binary; polling won't help.
+- Read the `extensions.flag` field — if it's an endpoint you don't actually need, ignore it; other endpoints are fine.
+- For mission-critical endpoints, contact support to understand the ETA.
+
+## Related codes
+
+- [`API_TRADE_PROCESSING_HALTED`](./API_TRADE_PROCESSING_HALTED.md) — coarser kill switch covering all trade writes
+- [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md) — distinct: this is "ops chose to disable", that's "infra is broken"

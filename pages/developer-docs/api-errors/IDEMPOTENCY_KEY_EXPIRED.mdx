@@ -1,0 +1,27 @@
+---
+title: 'IDEMPOTENCY_KEY_EXPIRED'
+description: 'HTTP 410 — Idempotency key expired'
+---
+
+**HTTP status:** 410 · **Title:** "Idempotency key expired"
+
+## When it fires
+
+The `Idempotency-Key` you sent matches a row in the idempotency store but that row is past its 24-hour TTL.
+
+## Why it happens
+
+- A retry that took longer than 24 hours to fire (e.g., a job that stalled in a queue and retried days later).
+- An offline-first client that buffered the request locally and only got online after the TTL.
+
+The 410 (rather than re-executing or returning the cached response) is intentional: by 24 h, the original response is gone and the system gives you a clear "this key is no longer valid" signal so you can decide whether the operation is still desired.
+
+## How to fix
+
+- Generate a fresh `Idempotency-Key` for the retry.
+- Before retrying, check whether the original operation actually completed — query `GET /v1/trades/:id` (using a `clientRequestId` you stored, if applicable) so you don't double-execute.
+- For long-tail retries, prefer the body-level `clientRequestId` field over the header — it has the same conflict semantics but no TTL.
+
+## Related codes
+
+- [`IDEMPOTENCY_KEY_CONFLICT`](./IDEMPOTENCY_KEY_CONFLICT.md), [`CLIENT_REQUEST_ID_CONFLICT`](./CLIENT_REQUEST_ID_CONFLICT.md)

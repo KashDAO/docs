@@ -213,11 +213,35 @@ The SDK follows SemVer. The `KashError` shape, public method signatures, and exp
 
 The SDK auto-includes a `User-Agent` header identifying its version, so we can correlate API logs with SDK versions when investigating issues.
 
+### Pin against a specific API contract version
+
+Send the `X-Kash-Api-Version` request header to lock your integration against a specific contract date. The SDK can be configured to send it on every request:
+
+```ts
+const kash = new KashClient({
+  apiKey:    process.env.KASH_API_KEY!,
+  apiVersion: '2026-04-29', // optional; omits the header (server defaults) when not set
+});
+```
+
+Server response carries `X-API-Version` (the canonical version) plus `Sunset` / `Deprecation` headers when your pinned version is winding down (12-month deprecation window per RFC 8594). The SDK's `onResponse` hook surfaces both — wire it into your monitoring to flag deprecations early. Pinning to an unknown date returns `410 API_VERSION_UNSUPPORTED` with the supported list in `metadata.supported`.
+
+## Quality gates
+
+The SDK ships with strict quality gates that are part of the public contract:
+
+- **Bundle size budgets** — main entry ≤ 24 KB gzipped, `/testing` subpath ≤ 8 KB. Enforced at publish time via `size-limit`.
+- **Static type tests** — `pnpm test:types` runs vitest's typecheck mode against `tests/types/public-types.test-d.ts`. The public TypeScript surface is locked: any change to a public type's shape fails compilation, forcing a deliberate CHANGELOG + version bump.
+- **Public-barrel snapshot** — `tests/unit/barrel-snapshot.test.ts` pins the exact set of exported names. Accidental removals fail the build.
+- **Wire-shape contract** — `tests/contract/wire-shape.test.ts` asserts every resource schema matches canonical fixtures. Ships to the public mirror.
+
 ## Source & changelog
 
 - npm: [`@kashdao/sdk`](https://www.npmjs.com/package/@kashdao/sdk)
-- GitHub: [`KashDAO/kash`](https://github.com/KashDAO/kash/tree/main/packages/sdk)
-- Changelog: [`packages/sdk/CHANGELOG.md`](https://github.com/KashDAO/kash/blob/main/packages/sdk/CHANGELOG.md)
+- GitHub: [`KashDAO/sdk-typescript`](https://github.com/KashDAO/sdk-typescript) (public mirror)
+- Changelog: [`CHANGELOG.md`](https://github.com/KashDAO/sdk-typescript/blob/main/CHANGELOG.md)
+- Versioned OpenAPI snapshots: the live spec is served at [`api.kash.bot/v1/openapi.json`](https://api.kash.bot/v1/openapi.json); historical pinned versions are listed at [`api.kash.bot/v1/openapi/index.json`](https://api.kash.bot/v1/openapi/index.json) — pin against a specific date for reproducible code generation.
+- Issues / discussions: [github.com/KashDAO/sdk-typescript/issues](https://github.com/KashDAO/sdk-typescript/issues)
 
 ## Next
 

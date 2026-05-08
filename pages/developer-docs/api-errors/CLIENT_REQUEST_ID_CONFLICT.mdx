@@ -1,0 +1,25 @@
+---
+title: 'CLIENT_REQUEST_ID_CONFLICT'
+description: 'HTTP 409 — Client request id conflict'
+---
+
+**HTTP status:** 409 · **Title:** "Client request id conflict"
+
+## When it fires
+
+The same `(user_id, clientRequestId)` body pair was used for an earlier trade with a **different body**. The trade row is unique on `(user_id, clientRequestId)` once you opt in.
+
+## Why it happens
+
+- Power-user mistake: `clientRequestId` is a body field with stricter conflict semantics than the HTTP `Idempotency-Key` header. Most callers should use the header; opt into `clientRequestId` only if you specifically want trade-row-scoped dedup.
+- A bug regenerated the body but kept the `clientRequestId` constant.
+
+## How to fix
+
+- For most use cases, drop `clientRequestId` and use only `Idempotency-Key`. See `apps/public-api/README.md` § Idempotency.
+- If you need `clientRequestId`'s row-scoped dedup, generate a fresh value per logical operation.
+- The conflicting trade row is referenced in the `detail` field — fetch it via `GET /v1/trades/:id` to see what was previously submitted.
+
+## Related codes
+
+- [`IDEMPOTENCY_KEY_CONFLICT`](./IDEMPOTENCY_KEY_CONFLICT.md) — same idea, header-level

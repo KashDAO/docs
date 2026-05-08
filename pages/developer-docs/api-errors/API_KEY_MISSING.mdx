@@ -1,0 +1,32 @@
+---
+title: 'API_KEY_MISSING'
+description: 'HTTP 401 — Authentication required'
+---
+
+**HTTP status:** 401 · **Title:** "Authentication required"
+
+## When it fires
+
+A route that requires authentication received a request with no `X-API-Key` header.
+
+## Why it happens
+
+- The request was sent without the header (most common — first integration).
+- A reverse proxy or HTTP client stripped the header.
+- The wrong base URL — the documented endpoints live under `/v1/*`; some other route may not require auth.
+
+## How to fix
+
+```http
+GET /v1/portfolio HTTP/1.1
+Host: api.kash.bot
+X-API-Key: kash_live_<your-key-here>
+```
+
+- Pass the key on every authenticated request. Keys are issued via the webapp Settings → API Keys page or `kash-admin api-keys issue`.
+- The plaintext is shown once at issuance. If you've lost it, revoke and re-issue.
+
+## Related codes
+
+- [`API_KEY_MALFORMED`](./API_KEY_MALFORMED.md) — header present but doesn't match the `kash_(live|test)_*` shape
+- [`API_KEY_INVALID`](./API_KEY_INVALID.md) — header well-formed but no row matches

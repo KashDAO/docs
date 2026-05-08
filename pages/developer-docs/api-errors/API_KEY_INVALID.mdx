@@ -1,0 +1,29 @@
+---
+title: 'API_KEY_INVALID'
+description: 'HTTP 401 — Authentication required'
+---
+
+**HTTP status:** 401 · **Title:** "Authentication required"
+
+## When it fires
+
+The `X-API-Key` header is well-formed but no row in the API key store matches its prefix or HMAC.
+
+## Why it happens
+
+- The key was deleted (not just revoked — see [`API_KEY_REVOKED`](./API_KEY_REVOKED.md) for that distinct case).
+- A character was modified in transit or storage (e.g., copy-paste truncation that still happened to land on the right length).
+- Wrong environment — a `kash_test_…` key sent to production, or vice versa. Production never accepts test keys.
+- The HMAC pepper has been rotated and the rotation grace period has elapsed for an old issuance.
+
+## How to fix
+
+- Compare the stored value to what the webapp Settings → API Keys page shows for the prefix (`kash_live_xxxx…`).
+- If the prefix doesn't match anything in your account, the key was never yours or has been deleted — issue a new one.
+- If the prefix matches but auth still fails, contact support with the prefix and your `X-Request-ID` from a recent failed call.
+
+## Related codes
+
+- [`API_KEY_MISSING`](./API_KEY_MISSING.md), [`API_KEY_MALFORMED`](./API_KEY_MALFORMED.md) — earlier failure points
+- [`API_KEY_REVOKED`](./API_KEY_REVOKED.md) — key existed but was explicitly revoked
+- [`API_KEY_EXPIRED`](./API_KEY_EXPIRED.md) — key existed but is past `expires_at`

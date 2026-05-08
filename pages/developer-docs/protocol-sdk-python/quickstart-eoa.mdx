@@ -1,0 +1,114 @@
+---
+title: 'Quickstart — EOA mode (Python)'
+description: 'Vanilla EIP-1559 trading from a plain EOA. Canonical Hummingbot integration path.'
+---
+
+EOA mode is the recommended path for Hummingbot strategies, Python
+market makers, and any integration with its own EIP-1559 signer.
+The signer IS the trading address — no SimpleAccount indirection,
+no bundler relay, no ERC-4337 verification overhead.
+
+## Construct the client
+
+```python
+import asyncio
+import os
+
+from eth_account import Account
+from kashdao_protocol_sdk import (
+    BuildBuyParams,
+    create_eoa_client,
+    usdc,
+    viem_account_eoa_signer,
+)
+
+
+async def main() -> None:
+    account = Account.from_key(os.environ["KASH_PRIVATE_KEY"])
+    signer = viem_account_eoa_signer(account)
+
+    async with create_eoa_client(
+        chain_id=84532,                           # Base Sepolia
+        rpc=os.environ["BASE_SEPOLIA_RPC"],
+        signer=signer,
+    ) as client:
+        # Read minimal market state.
+        minimal = await client.markets.get(os.environ["KASH_MARKET"])
+        print(f"market has {minimal.num_outcomes} outcomes; status={minimal.status}")
+
+        # All-in-one trade.
+        # `BuildBuyParams.smart_account` is the shared field name
+        # used by both EOA and SA modes — in EOA mode pass the EOA
+        # address itself (the trader IS the signer).
+        result = await client.trades.send.buy(
+            os.environ["KASH_MARKET"],
+            BuildBuyParams(
+                smart_account=client.signer.owner_address,
+                outcome=0,
+                amount_usdc=usdc(10),               # 10 USDC
+                max_slippage_bps=50,                # 0.5%
+            ),
+        )
+        print(result.transaction_hash, result.success, result.gas_used)
+
+
+asyncio.run(main())
+```
+
+`async with` (or `await client.aclose()`) is mandatory for clean
+shutdown — the underlying `httpx.AsyncClient` and `web3.py`
+WebSocket sessions need explicit teardown to avoid socket leaks
+in long-running Hummingbot strategies.
+
+## First trade — approve USDC
+
+```python
+from kashdao_protocol_sdk import BuildApproveParams, MAX_UINT256
+
+await client.trades.send.approve(
+    BuildApproveParams(
+        account=client.signer.owner_address,
+        spender=KASH_MARKET,
+        amount=MAX_UINT256,
+    ),
+)
+```
+
+After the first approve, every subsequent `send.buy` / `send.sell`
+proceeds without an extra approve hop.
+
+## Power users — explicit lifecycle
+
+Same three-layer model as the TypeScript SDK:
+
+| Layer                                                  | When you'd use it                                                                  |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `client.trades.send.<action>(...)`                     | Default. Hummingbot, AI agents, dashboards.                                        |
+| `client.trades.prepare_<action>(...)` + manual submit  | Explicit control of signing — e.g. log + audit before signing.                     |
+| `client.trades.build_<action>(...)` + `hash_of(...)`   | Construct the unsigned tx, hash it, route to a remote signer.                      |
+
+Submit-time staleness guard (`KashSignerError(STALE_SIGNED_TX)`)
+matches the TS-SDK behaviour. Bypass via
+`EoaSubmitOptions(skip_staleness_check=True)` if intentional.
+
+## Run the bundled examples
+
+The `examples/eoa/` folder ships with three runnable scripts:
+
+```bash
+git clone https://github.com/KashDAO/protocol-sdk-python
+cd protocol-sdk-python
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Set required env first; see each file's header for the env var list.
+python examples/eoa/01_quickstart.py        # read-side only, safe to run
+python examples/eoa/02_one_line_trade.py --confirm  # broadcasts a real tx, gated
+python examples/eoa/03_error_handling.py    # exercises the typed error hierarchy
+```
+
+## What's next
+
+- [**Smart-account quickstart**](/developer-docs/protocol-sdk-python/quickstart-smart-account)
+- [**Hummingbot integration**](/developer-docs/protocol-sdk-python/hummingbot)
+- [**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity) — how this SDK stays byte-equal with the TS SDK.

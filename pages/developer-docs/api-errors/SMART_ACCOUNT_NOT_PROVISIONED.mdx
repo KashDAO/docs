@@ -1,0 +1,27 @@
+---
+title: 'SMART_ACCOUNT_NOT_PROVISIONED'
+description: 'HTTP 409 — Smart account not provisioned'
+---
+
+**HTTP status:** 409 · **Title:** "Smart account not provisioned"
+
+## When it fires
+
+The actor (user or organization) doesn't have a smart account row yet, so trades can't execute on-chain.
+
+## Why it happens
+
+- New account that hasn't completed the wallet-creation step in the webapp.
+- An organization that's enabled the API but hasn't provisioned its own org-level smart account.
+- The smart-account worker is backlogged — provisioning is async.
+
+## How to fix
+
+- For users: complete the wallet setup flow in the webapp (Settings → Wallet). Smart account provisioning is async — typically a few seconds.
+- For orgs: an admin needs to provision the org smart account via the org settings page.
+- If you provisioned recently and still see this error, retry after 30 s. If it persists past a minute, contact support with your `requestId`.
+
+## Related codes
+
+- [`WALLET_DELEGATION_NOT_ENABLED`](./WALLET_DELEGATION_NOT_ENABLED.md) — smart account exists but Privy delegation is off
+- [`INSUFFICIENT_BALANCE`](./INSUFFICIENT_BALANCE.md) — smart account provisioned but no USDC

@@ -1,0 +1,28 @@
+---
+title: 'INSUFFICIENT_BALANCE'
+description: 'HTTP 409 — Insufficient balance'
+---
+
+**HTTP status:** 409 · **Title:** "Insufficient balance"
+
+## When it fires
+
+The actor's smart-account USDC balance is below the requested `amount`.
+
+## Why it happens
+
+- You haven't funded the account yet.
+- A previous trade consumed more than expected (gas + slippage) and left a sub-threshold balance.
+- The auto-funding pipeline is backed up — common during very high-throughput windows.
+- Org account: trade is being charged to the user but the org policy expected the org to pay (or vice versa). Check `feePayerType`.
+
+## How to fix
+
+- Check the current balance via `GET /v1/portfolio` — `usdcBalance` field.
+- For users: fund via the webapp's onramp flow (or transfer USDC into the smart account directly).
+- For orgs: the org admin tops up the org wallet.
+- For staging/sandbox: use the testnet faucet flow.
+
+## Related codes
+
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](./SMART_ACCOUNT_NOT_PROVISIONED.md), [`SPENDING_LIMIT_EXCEEDED`](./SPENDING_LIMIT_EXCEEDED.md)

@@ -1,0 +1,96 @@
+---
+title: 'Python Protocol SDK — overview'
+description: 'kashdao-protocol-sdk — non-custodial Python SDK for the Kash on-chain protocol. The canonical Hummingbot integration path.'
+---
+
+`kashdao-protocol-sdk` is the **direct-to-chain** Python SDK for
+Kash. Same trust model, same on-chain protocol, same encoding bytes
+as the TypeScript [`@kashdao/protocol-sdk`](/developer-docs/protocol-sdk/overview)
+— a position opened via either SDK can be closed via the other.
+
+If you want a Python integration with Kash, this is the package.
+Hummingbot strategies, Python market makers, AI agents written in
+Python, Jupyter / data-science workflows — all sit on this SDK.
+
+## Trust model — zero custody, zero Kash dependency
+
+The package never holds keys, never signs UserOps or transactions,
+never sponsors gas, and never reaches Kash-hosted infrastructure.
+You bring:
+
+- your own RPC URL,
+- your own private key OR signer abstraction (`eth_account.Account`,
+  web3signer over RPC, hardware wallet, Fireblocks, AWS-KMS — anything
+  exposing the `EoaSignerAdapter` Protocol),
+- (SA mode only) ERC-4337 v0.7 bundler URL.
+
+Kash sees only what hits the public chain. The library's job is
+to construct calldata + the unsigned tx (or UserOp), then hand
+signed artifacts to your RPC or your bundler.
+
+## Two trading modes — pick one
+
+Same modes, same factory shapes as the TS SDK:
+
+| Mode                              | Factory                       | Best for                                                                                              |
+| --------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **EOA** (vanilla EIP-1559)        | `create_eoa_client`           | Hummingbot strategies, Python market makers, anyone with their own EIP-1559 signer                     |
+| **Smart Account** (ERC-4337 v0.7) | `create_smart_account_client` | Python AA-stack integrations, paymaster sponsorship, batched approve+trade flows                      |
+
+EOA mode is the recommended Hummingbot integration path — it's
+what `examples/hummingbot/amm_arb_kash_uniswap.py` demonstrates.
+
+## Supported chains
+
+| Chain        | Chain ID | Status                                                                |
+| ------------ | -------- | --------------------------------------------------------------------- |
+| Base mainnet | 8453     | ⏳ Pre-deploy — `KashChainError(CHAIN_NOT_DEPLOYED)` until launch     |
+| Base Sepolia | 84532    | ✅ Live                                                               |
+| Custom chain | any      | ✅ Via `custom_chain=CustomChain(...)` (Anvil / forks / dev)          |
+
+## Install
+
+```bash
+pip install kashdao-protocol-sdk
+```
+
+Requires Python ≥ 3.10. End-user installs touch only the public
+PyPI registry — no private repos, no auth tokens.
+
+## Differences vs the TypeScript SDK
+
+The packages are byte-equal at the encoding level (see
+[**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity)),
+but the Python ergonomics naturally differ:
+
+| Aspect              | TypeScript                        | Python                                      |
+| ------------------- | --------------------------------- | ------------------------------------------- |
+| Async runtime       | Native promises                   | `asyncio` — every public method is `async`  |
+| Config validation   | Zod                               | Pydantic v2                                 |
+| Naming              | `camelCase`                       | `snake_case`                                |
+| Numeric type        | `bigint`                          | `int`                                       |
+| Hex addresses       | viem's `0x${string}` literal type | `eth_typing.Hex` (string with hex prefix)    |
+| Lifecycle           | `await client.aclose()`           | `await client.aclose()` or `async with`     |
+
+Same protocol, same trust model, same trade lifecycle, same error
+hierarchy. Just Pythonic ergonomics on the surface.
+
+## Public surface (~210 exports)
+
+- **Factories**: `create_eoa_client`, `create_smart_account_client`
+- **Trade lifecycle**: `client.trades.{build_*, prepare_*, simulate, hash_of, submit, send.*}`
+- **Market reads**: `client.markets.{get, state, quote, watch}`
+- **Account reads**: `client.account.{usdc_balance, position, gas_balance, usdc_allowance, compute_address}`
+- **Signers**: `LocalEoaSigner`, `JsonRpcEoaSigner` (EOA); `LocalSigner`, `JsonRpcSigner` (SA)
+- **Bundlers** (SA): `create_generic_bundler_client` plus presets for Pimlico / Alchemy / Flashbots
+- **Unit conversion**: `usdc`, `tokens`, `format_usdc`, `format_tokens`, `MAX_UINT256`
+- **Fee estimation**: `estimate_chain_fees` with `EstimateFeesOptions`
+- **Custom-chain support**: `CustomChain`, `resolve_custom_chain`
+- **Error hierarchy**: `KashProtocolError` and 6 subclasses
+
+## Where to next
+
+- [**Quickstart — EOA mode**](/developer-docs/protocol-sdk-python/quickstart-eoa) — vanilla EIP-1559 from a plain wallet. Canonical Hummingbot path.
+- [**Quickstart — Smart-account mode**](/developer-docs/protocol-sdk-python/quickstart-smart-account) — ERC-4337 v0.7 with a bundler.
+- [**Hummingbot integration**](/developer-docs/protocol-sdk-python/hummingbot) — full strategy walkthrough.
+- [**TypeScript SDK**](/developer-docs/protocol-sdk/overview) — same protocol, TypeScript instead of Python.

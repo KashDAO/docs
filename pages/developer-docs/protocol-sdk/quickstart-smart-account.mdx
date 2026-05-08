@@ -1,0 +1,140 @@
+---
+title: 'Quickstart — Smart-account mode'
+description: 'ERC-4337 v0.7 trading via SimpleAccount + bundler. Gasless onboarding via paymaster, batched ops, session keys.'
+---
+
+Smart-account mode is the canonical path for AA stacks (Privy
+embedded wallets, Coinbase Smart Wallet, Pimlico, Alchemy AA),
+self-custody UIs, and any flow that benefits from gasless onboarding
+via paymaster, batched approve+trade, or session keys.
+
+The trader is the **SimpleAccount v0.7** address — derived
+deterministically from the signer's owner address + a salt. The
+signer signs UserOps; the bundler relays them to the EntryPoint;
+the EntryPoint validates and executes. Kash is on neither side of
+the wire.
+
+## Construct the client
+
+```ts
+import { createSmartAccountClient, viemAccountSigner } from '@kashdao/protocol-sdk';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+
+const client = createSmartAccountClient({
+  chainId: 84532, // Base Sepolia
+  rpc:     process.env.KASH_BASE_RPC_URL ?? 'https://sepolia.base.org',
+  signer:  viemAccountSigner(account),
+  bundler: process.env.KASH_BUNDLER_URL!, // e.g., https://api.pimlico.io/v2/84532/rpc?apikey=...
+});
+```
+
+The bundler is **optional at construction**. Read-only consumers
+(`markets.*`, `account.*`) can omit it. The first call into
+`trades.*` will throw `KashConfigError(BUNDLER_REQUIRED)` if the
+bundler wasn't provided — explicit failure rather than silent.
+
+## Bundler presets — pick yours
+
+Each preset is a vendor-tuned wrapper around the generic v0.7
+bundler client. Subpath imports let your bundler keep its
+vendor-specific bytes out of consumers using a different vendor.
+
+```ts
+// Pimlico
+import { createPimlicoBundlerClient } from '@kashdao/protocol-sdk/bundler/pimlico';
+
+// Alchemy
+import { createAlchemyBundlerClient } from '@kashdao/protocol-sdk/bundler/alchemy';
+
+// Flashbots Protect (private RPC; ETH mainnet patterns extended to Base)
+import { createFlashbotsBundlerClient } from '@kashdao/protocol-sdk/bundler/flashbots';
+
+// Generic — any bundler that speaks ERC-4337 v0.7 JSON-RPC
+import { createGenericBundlerClient } from '@kashdao/protocol-sdk/bundler/generic';
+```
+
+Pass the resulting client directly as `bundler`:
+
+```ts
+const bundler = createPimlicoBundlerClient({ rpcUrl: process.env.PIMLICO_URL! });
+const client  = createSmartAccountClient({ chainId: 84532, rpc, signer, bundler });
+```
+
+## Derive the SmartAccount address
+
+```ts
+const sa = await client.account.address();
+console.log('SmartAccount address:', sa);
+```
+
+The address is deterministic — same owner + same salt → same
+address. The account doesn't need to be deployed for this to work;
+it's pure CREATE2 derivation. You can hand the address to a
+faucet, fund it, and trade in the next call. The `factory` UserOp
+fields auto-populate on the first trade so the deployment goes in
+the same UserOp as the actual transaction. After that they stay
+empty.
+
+## Place a trade — all-in-one
+
+```ts
+import { BuildBuyParams, usdc } from '@kashdao/protocol-sdk';
+
+const result = await client.trades.send.buy(
+  '0xMARKET_ADDRESS',
+  {
+    // `account` is the shared `BuildBuyParams` field — in SA mode
+    // pass the SmartAccount address (derived deterministically from
+    // your signer's owner address).
+    account:        await client.account.address(),
+    outcome:        0,
+    amountUsdc:     usdc(10),
+    maxSlippageBps: 50,
+  },
+);
+
+console.log(
+  result.userOpHash,        // EntryPoint hash — what the signer signed
+  result.transactionHash,   // bundler-reported on-chain tx hash
+  result.success,
+  result.gasUsed,
+);
+```
+
+The bundler health check runs automatically before the first trade
+in a session — saves a confusing `eth_estimateUserOperationGas`
+failure when the bundler URL is wrong. You can also explicitly probe
+via `await client.bundler.health()`.
+
+## First-trade-with-deployment
+
+The first UserOp from a fresh SmartAccount carries `factory` +
+`factoryData` so the EntryPoint deploys the account in the same
+op. The SDK auto-detects this — you don't pass anything special.
+Subsequent UserOps elide the factory fields. Verification gas is
+~5x higher on the deployment op (~600k vs ~100k); the SDK's gas
+estimate accounts for this automatically via the bundler's
+`pm_estimateUserOperationGas` (or the generic equivalent).
+
+## Power users — explicit UserOp lifecycle
+
+```ts
+const built  = await client.trades.buildBuy(MARKET, params);     // unsigned UserOp
+const ready  = await client.trades.prepareBuy(MARKET, params);   // built + populated gas + fees
+const signed = await client.trades.signUserOp(ready);            // your signer signs the userOpHash
+const result = await client.trades.submit(signed);               // hands to bundler
+```
+
+`client.trades.hashOf(userOp)` is the canonical hash you sign over.
+Recompute it after populating gas + fees and BEFORE signing —
+otherwise the build-time hash is stale and the bundler will reject
+the UserOp with `AA24 signature error`. The auto-prepare path
+handles this; manual lifecycle users must remember the recompute.
+
+## What's next
+
+- [**EOA quickstart**](/developer-docs/protocol-sdk/quickstart-eoa) — vanilla EIP-1559, no bundler, lower per-trade overhead.
+- [**Error handling**](/developer-docs/protocol-sdk/error-handling) — typed error hierarchy.
+- [**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity) — UserOp v0.7 hashes are byte-equal across the TS and Python SDKs by construction.

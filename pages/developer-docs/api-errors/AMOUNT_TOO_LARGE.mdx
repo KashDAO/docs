@@ -1,0 +1,25 @@
+---
+title: 'AMOUNT_TOO_LARGE'
+description: 'HTTP 400 — Amount too large'
+---
+
+**HTTP status:** 400 · **Title:** "Amount too large"
+
+## When it fires
+
+`amount` exceeds `MAX_USDC_PER_TRADE`. This is a defence-in-depth check distinct from your key's per-trade and daily spending limits — it catches obvious mistakes regardless of your tier.
+
+## Why it happens
+
+The most common cause is a **decimal-place mistake**: passing `1000000000000000000` ("1 USDC in 18-decimal atomic units") instead of `1` ("1 USDC in human units"). The public API takes amounts in **human units** (the same string a person would type), not 18-decimal atomic units.
+
+## How to fix
+
+- Pass `amount` as a string of the human-unit USDC value: `"100"`, `"0.50"`, `"2500"`.
+- If you have an atomic value, divide by 10^6 (USDC is 6 decimals on-chain, but our API normalises to "USDC the user thinks about").
+- For sustained high-value flows above `MAX_USDC_PER_TRADE`, request a tier upgrade — your key's `per_trade_limit_usdc` can be raised, but the absolute cap is a platform-level safety net.
+
+## Related codes
+
+- [`SPENDING_LIMIT_EXCEEDED`](./SPENDING_LIMIT_EXCEEDED.md) — your key's per-trade or daily limit, separate from the platform cap
+- [`VALIDATION_FAILED`](./VALIDATION_FAILED.md) — generic validation failure

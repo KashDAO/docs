@@ -1,0 +1,117 @@
+---
+title: 'Quickstart — EOA mode'
+description: 'Vanilla EIP-1559 trading from a plain EOA. No bundler. No SimpleAccount. Lowest per-trade overhead.'
+---
+
+EOA mode is the canonical path for market makers, AI agents, and any
+consumer with their own EIP-1559 signing infrastructure. The signer
+IS the trading address — no SimpleAccount indirection, no bundler
+relay, no ERC-4337 verification overhead.
+
+## Construct the client
+
+```ts
+import { createEoaClient, viemAccountEoaSigner } from '@kashdao/protocol-sdk';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+
+const client = createEoaClient({
+  chainId: 84532, // Base Sepolia
+  rpc:     process.env.KASH_BASE_RPC_URL ?? 'https://sepolia.base.org',
+  signer:  viemAccountEoaSigner(account),
+});
+```
+
+`viemAccountEoaSigner` is one of several reference signer adapters.
+Others are documented under "Signers" — covers AWS KMS, Fireblocks,
+JSON-RPC remote signers (web3signer / clef), Privy embedded wallets,
+and Coinbase Smart Wallet. Or implement `EoaSignerAdapter` yourself;
+the protocol is two methods.
+
+## Read market state
+
+```ts
+const minimal = await client.markets.get('0xMARKET_ADDRESS');
+// → { marketAddress, numOutcomes, status: 'ACTIVE' | 'FROZEN' | 'RESOLVED' | 'UNSEEDED' }
+
+const quote = await client.markets.quote('0xMARKET_ADDRESS', {
+  side:    'BUY',
+  outcome: 0,
+  amount:  usdc(10), // 10 USDC
+});
+// → { tokensOut, impliedPriceWad, slippageBps }
+```
+
+The read surface is **mode-agnostic** — same shapes whether you
+constructed an EOA client or a smart-account client.
+
+## Place a trade — all-in-one
+
+`client.trades.send.buy(...)` is the highest-level entry. It builds,
+prepares (gas + fees + nonce), simulates, signs, submits, and (by
+default) waits for inclusion. Returns the on-chain receipt.
+
+```ts
+import { BuildBuyParams, usdc } from '@kashdao/protocol-sdk';
+
+const result = await client.trades.send.buy(
+  '0xMARKET_ADDRESS',
+  {
+    account:        client.signer.ownerAddress,
+    outcome:        0,
+    amountUsdc:     usdc(10),
+    maxSlippageBps: 50, // 0.5%
+  },
+);
+
+console.log(result.transactionHash, result.success, result.gasUsed);
+```
+
+The `account` field is checked at build time against
+`client.signer.ownerAddress` — passing a different address raises
+`KashSignerError(BUY_ACCOUNT_MISMATCH)` synchronously, before any
+RPC call. This catches the most common footgun (stale account from
+a profile switch) before it costs you a gas-paid revert.
+
+## First trade — approve USDC
+
+The market contract needs an allowance to pull USDC for trades.
+Once per market per signer:
+
+```ts
+import { BuildApproveParams, MAX_UINT256 } from '@kashdao/protocol-sdk';
+
+await client.trades.send.approve({
+  account: client.signer.ownerAddress,
+  spender: MARKET_ADDRESS,
+  amount:  MAX_UINT256, // approve max; refresh once and you're done
+});
+```
+
+After the first approve, every subsequent `send.buy` / `send.sell`
+proceeds without an extra approve hop.
+
+## Power users — explicit lifecycle
+
+The trade lifecycle has three layers; pick the highest one that
+fits your control needs:
+
+| Layer                                                  | When you'd use it                                                                  |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `client.trades.send.<action>(...)`                     | Default. Hummingbot, AI agents, dashboards.                                        |
+| `client.trades.prepare<Action>(...)` + manual submit   | You want explicit control over signing — log + audit before signing.               |
+| `client.trades.build<Action>(...)` + `hashOf(...)`     | Construct the unsigned tx, hash it, route to a remote signer yourself.             |
+
+The submit-side **staleness guard** kicks in automatically: if you
+hand-edit a built transaction's gas / nonce / chainId after signing,
+the SDK recovers the signing address from the signed bytes, sees a
+mismatch, and refuses to submit with `KashSignerError(STALE_SIGNED_TX)`.
+Bypass via `submit({ skipStalenessCheck: true })` only when you
+know the override is intentional.
+
+## What's next
+
+- [**Smart-account quickstart**](/developer-docs/protocol-sdk/quickstart-smart-account) — same surface, ERC-4337 v0.7 instead of EIP-1559.
+- [**Error handling**](/developer-docs/protocol-sdk/error-handling) — typed error hierarchy, retry policies.
+- [**Python SDK**](/developer-docs/protocol-sdk-python/overview) — Hummingbot strategies and Python market makers.

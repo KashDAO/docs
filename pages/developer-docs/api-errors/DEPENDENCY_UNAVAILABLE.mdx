@@ -1,0 +1,29 @@
+---
+title: 'DEPENDENCY_UNAVAILABLE'
+description: 'HTTP 503 — Service unavailable'
+---
+
+**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** 30s
+
+## When it fires
+
+A required external dependency (Postgres, Secrets Manager, Redis, blockchain RPC) is unreachable, and the route can't degrade further.
+
+Distinct from [`INTERNAL_ERROR`](./INTERNAL_ERROR.md) (which is "we don't know what happened") and [`ROUTE_DISABLED`](./ROUTE_DISABLED.md) (which is "ops disabled this on purpose").
+
+## Why it happens
+
+- Transient infrastructure blip (most common — clears in seconds).
+- Sustained dependency outage (visible on `status.kash.bot`).
+- A rare cascade where one dependency degraded and another can't compensate.
+
+## How to fix
+
+- Honour `Retry-After: 30` and back off with jitter. Most occurrences resolve within one retry.
+- If retries keep failing past 5 minutes, check the status page.
+- The TS SDK handles this automatically (`KashServerError`, retried with backoff up to its retry budget).
+
+## Related codes
+
+- [`API_TRADE_PROCESSING_HALTED`](./API_TRADE_PROCESSING_HALTED.md) — ops-driven, not infra-driven
+- [`REQUEST_TIMEOUT`](./REQUEST_TIMEOUT.md), [`INTERNAL_ERROR`](./INTERNAL_ERROR.md)

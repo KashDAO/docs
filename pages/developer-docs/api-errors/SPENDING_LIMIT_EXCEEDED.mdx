@@ -1,0 +1,43 @@
+---
+title: 'SPENDING_LIMIT_EXCEEDED'
+description: 'HTTP 409 — Spending limit exceeded'
+---
+
+**HTTP status:** 409 · **Title:** "Spending limit exceeded"
+
+## When it fires
+
+The trade would exceed one of the API key's spending caps:
+
+- `per_trade_limit_usdc` — single-trade maximum
+- `daily_spend_limit_usdc` — rolling 24-hour cumulative maximum across all trades
+
+The `detail` field specifies which cap fired and by how much.
+
+## Why it happens
+
+- A bot iteration that computed a larger order than expected (e.g., signal scaling factor was off).
+- Cumulative drift over a busy day finally pushed a moderate trade over the daily cap.
+- The cap was lowered (by you or an admin) since you last designed your sizing logic.
+
+## How to fix
+
+- Inspect your key's caps in Settings → API Keys → Edit.
+- For per-trade overruns: split the trade into smaller chunks under the cap.
+- For daily overruns: wait for the rolling window to clear, or upgrade your tier (see "How to raise the cap" below).
+- Programmatically: every key's caps are returned in the issuance response — cache them so your client knows the headroom.
+
+## How to raise the cap
+
+The cap is set by your API key's tier. See [`docs/api-tiers.md`](../api-tiers.md) for the full tier matrix and rationale, then:
+
+- **`free` → `developer`** (10× headroom — $1k → $10k daily, $500 → $2.5k per-trade): email [support@kash.bot](mailto:support@kash.bot) for early access. Self-serve via Stripe is planned ([`docs/todo/PUBLIC_API_TIER_BILLING.md`](../todo/PUBLIC_API_TIER_BILLING.md)).
+- **`developer` → `enterprise`** ($100k daily, $25k per-trade, custom rate limit): [contact sales](mailto:sales@kash.bot) — pricing is contractual.
+- **MM-tier counterparty terms** ($1M daily, $50k per-trade): [contact partnerships](mailto:partnerships@kash.bot) — KYB and ToS attestation required; this is a relationship, not a price tier.
+
+The caps are not punitive — they exist for blast-radius and AMM-stability reasons documented in [`docs/api-tiers.md`](../api-tiers.md). When you outgrow your tier, the cap is the signal to upgrade, not a problem to work around.
+
+## Related codes
+
+- [`AMOUNT_TOO_LARGE`](./AMOUNT_TOO_LARGE.md) — platform-wide cap, separate from your key's caps
+- [`INSUFFICIENT_BALANCE`](./INSUFFICIENT_BALANCE.md) — wallet balance too low (different failure surface)

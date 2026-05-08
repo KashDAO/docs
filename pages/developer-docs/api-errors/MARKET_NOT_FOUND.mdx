@@ -1,0 +1,26 @@
+---
+title: 'MARKET_NOT_FOUND'
+description: 'HTTP 404 — Market not found'
+---
+
+**HTTP status:** 404 · **Title:** "Market not found"
+
+## When it fires
+
+The `marketId` (UUID) you passed doesn't match any market.
+
+## Why it happens
+
+- Typo in the market id.
+- Cross-environment confusion: a staging market id sent to production, or vice versa. Markets do not exist across environments.
+- The market was never created — you may have a placeholder id from documentation rather than a real one.
+
+## How to fix
+
+- Look up real market ids via `GET /v1/markets?status=active` (filterable by status).
+- Cache the id once you've found it; markets are immutable in their identity.
+- If you suspect the market should exist (e.g., you saw it in the webapp), confirm you're hitting the same environment.
+
+## Related codes
+
+- [`MARKET_NOT_TRADEABLE`](./MARKET_NOT_TRADEABLE.md) — market exists but is FROZEN/RESOLVED

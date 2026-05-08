@@ -1,0 +1,73 @@
+---
+title: 'Protocol SDK — overview'
+description: '@kashdao/protocol-sdk — non-custodial TypeScript SDK for the on-chain Kash protocol. BYO RPC, signer, bundler.'
+---
+
+`@kashdao/protocol-sdk` is the **direct-to-chain** SDK for Kash. It
+talks to the Kash protocol contracts on Base — no Kash backend,
+no Kash REST API in the trade path, no Kash-controlled keys, no
+Kash-sponsored gas. Trade execution is end-to-end self-custodied.
+
+If you'd like a hosted, API-key-authed integration (typical retail
+flow, fastest time to first trade), use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript)
+instead. This page is for builders who run their own signing
+infrastructure (market makers, AI agents, on-chain UIs).
+
+## Trust model — zero custody, zero Kash dependency
+
+The package never holds keys, never signs transactions, never
+sponsors gas, and never reaches Kash-hosted infrastructure.
+Everything required to use it lives on the consumer's side: their
+RPC URL, their signer, (optionally) their bundler URL, their funded
+address. Kash sees only what hits the public chain.
+
+This is by design — the SDK is a strict library, not a service.
+Code review for an audit only needs to verify what `@kashdao/protocol-sdk`
+imports (today: `viem`, `zod`) and what it sends out
+(`eth_sendRawTransaction` to your RPC; `eth_sendUserOperation` to
+your bundler). No phone-home. No telemetry.
+
+## Two trading modes — pick one
+
+The SDK supports both wallet models the protocol allows.
+
+| Mode                              | Factory                    | Best for                                                                                                                                                  |
+| --------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **EOA** (vanilla EIP-1559)        | `createEoaClient`          | Market makers with existing tx-signing infra (web3signer, Fireblocks-direct, AWS-KMS, ethers/viem wallet). No bundler. Lowest per-trade overhead.         |
+| **Smart Account** (ERC-4337 v0.7) | `createSmartAccountClient` | Self-custody UIs, AI-agent runners, retail-adjacent integrators that benefit from gasless onboarding via paymaster, social recovery, or session keys.    |
+
+Both modes are first-class peers. Both share the same on-chain read
+surface. Both preserve the zero-custody trust story. You can use
+one or both side-by-side.
+
+## Supported chains
+
+| Chain        | Chain ID | Status                                                              |
+| ------------ | -------- | ------------------------------------------------------------------- |
+| Base mainnet | 8453     | ⏳ Pre-deploy — `KashChainError(CHAIN_NOT_DEPLOYED)` until launch   |
+| Base Sepolia | 84532    | ✅ Live                                                             |
+| Custom chain | any      | ✅ Via `customChain: CustomChain(...)` (Anvil / forks / dev)        |
+
+Custom chains are an explicit escape hatch — supply your own chain
+id, RPC URL, and contract address bundle. The static registry is
+bypassed; Anvil deployments with non-canonical EntryPoint addresses
+keep working.
+
+## Install
+
+```bash
+pnpm add @kashdao/protocol-sdk viem
+# or: npm install @kashdao/protocol-sdk viem
+```
+
+`viem` is a **peer dependency** — bring your own. The SDK accepts
+any `viem@^2.45.0` you have in your tree (so it doesn't drag a
+duplicate `viem` into your bundler).
+
+## Where to next
+
+- [**Quickstart — EOA mode**](/developer-docs/protocol-sdk/quickstart-eoa) — vanilla EIP-1559 from a plain wallet. The canonical path for market makers.
+- [**Quickstart — Smart-account mode**](/developer-docs/protocol-sdk/quickstart-smart-account) — ERC-4337 v0.7 with a bundler. The canonical path for AA stacks.
+- [**Error handling**](/developer-docs/protocol-sdk/error-handling) — typed error hierarchy, retry policies, decoded revert hints.
+- [**Cross-language parity**](/developer-docs/protocol-sdk/cross-language-parity) — how this SDK stays byte-equal with `kashdao-protocol-sdk` (Python). A position opened via either SDK can be closed via the other.
+- [**Python SDK**](/developer-docs/protocol-sdk-python/overview) — same protocol, same trust model, Python instead of TypeScript. The canonical Hummingbot integration path.

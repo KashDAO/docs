@@ -1,0 +1,28 @@
+---
+title: 'CONFIRMATION_TOKEN_INVALID'
+description: 'HTTP 409 — Confirmation token invalid'
+---
+
+**HTTP status:** 409 · **Title:** "Confirmation token invalid"
+
+## When it fires
+
+The token you sent in `POST /v1/trades/:id/confirm` doesn't match the stored hash for that trade.
+
+## Why it happens
+
+- Wrong trade id — the token is one-time and tied to a specific trade.
+- Token was truncated or modified in transit/storage.
+- Replay against a different trade than the one that issued the token.
+
+The token plaintext is **never persisted server-side** — only the HMAC. We compare your candidate via `timingSafeEqual` to prevent per-byte timing attacks.
+
+## How to fix
+
+- Re-confirm that the trade id in the URL matches the trade id from the create response.
+- Capture the token verbatim from `confirmation.token` in the create response — the SDK does this automatically; raw HTTP callers must preserve case and length (43 chars, base64url).
+- If you've lost the token (only shown once in the create response), the trade can't be confirmed — wait for it to auto-expire and re-create.
+
+## Related codes
+
+- [`CONFIRMATION_EXPIRED`](./CONFIRMATION_EXPIRED.md), [`CONFIRMATION_TOKEN_USED`](./CONFIRMATION_TOKEN_USED.md), [`TRADE_NOT_AWAITING_CONFIRMATION`](./TRADE_NOT_AWAITING_CONFIRMATION.md)

@@ -1,0 +1,29 @@
+---
+title: 'API_TRADE_PROCESSING_HALTED'
+description: 'HTTP 503 — Service unavailable'
+---
+
+**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** 300s
+
+## When it fires
+
+The coarse `API_TRADE_PROCESSING` kill switch is active. Ops uses this to halt all trade-write traffic platform-wide during incidents (e.g., RPC outage, oracle failure, security investigation).
+
+Read endpoints (markets, portfolio, trade lookup) stay available throughout — only the write path is blocked.
+
+## Why it happens
+
+- Active incident. Check the status page (`status.kash.bot`) for the current banner.
+- Pre-deploy lockdown for a high-risk migration.
+- A security-driven freeze in response to anomaly detection.
+
+## How to fix
+
+- Honour `Retry-After: 300` and back off. Do NOT poll faster — the kill switch is binary, polling won't unblock you sooner.
+- Subscribe to the status page or our incident webhook to know when service resumes.
+- In the meantime, your read paths still work — surface a "trading temporarily paused" banner in your UI rather than failing silently.
+
+## Related codes
+
+- [`ROUTE_DISABLED`](./ROUTE_DISABLED.md) — single-route kill switch (more granular than the coarse halt)
+- [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md) — specific dependency rather than platform-wide

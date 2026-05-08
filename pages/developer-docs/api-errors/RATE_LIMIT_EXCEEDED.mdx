@@ -1,0 +1,38 @@
+---
+title: 'RATE_LIMIT_EXCEEDED'
+description: 'HTTP 429 — Too Many Requests'
+---
+
+**HTTP status:** 429 · **Title:** "Too Many Requests"
+
+## When it fires
+
+Per-user (authenticated) or per-IP (anonymous reads) rate limit was exceeded. Limits are enforced as a sliding window in Redis.
+
+For authenticated requests, the limit is **tier-differentiated** — 60 req/min on `free`, 300 req/min on `developer`, custom (admin-set) on `enterprise` and `mm`. See [`docs/api-tiers.md`](../api-tiers.md) for the full matrix.
+
+## Response headers
+
+Every 429 response carries:
+
+- `Retry-After: <seconds>` — wait at least this long before the next request
+- `X-RateLimit-Limit: <n>` — the limit that applied
+- `X-RateLimit-Remaining: 0` — confirms you're capped
+- `X-RateLimit-Reset: <unix-timestamp>` — when the window resets
+
+## Why it happens
+
+- Burst traffic spike (e.g., a polling loop without backoff).
+- A retry storm — every consumer retried at the same instant after a transient failure.
+- Genuine sustained traffic above your tier's quota.
+
+## How to fix
+
+- Honour `Retry-After`. The TS SDK does this automatically (`KashRateLimitError.retryAfterSeconds`).
+- Add jitter to retry timing so multiple consumers don't synchronise.
+- For polling, switch to webhooks — every poll is a wasted request.
+- If you consistently bump against the limit during normal operation, upgrade your tier — see [`docs/api-tiers.md`](../api-tiers.md) for the upgrade paths. The 60 → 300 req/min jump from `free` → `developer` is 5×, and `enterprise`/`mm` have no application-level cap.
+
+## Related codes
+
+- [`WEBHOOK_REPLAY_LIMIT_REACHED`](./WEBHOOK_REPLAY_LIMIT_REACHED.md) — also 429, but specific to the webhook replay endpoint's amplification cap

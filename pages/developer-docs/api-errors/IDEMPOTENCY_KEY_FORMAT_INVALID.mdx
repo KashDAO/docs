@@ -1,0 +1,27 @@
+---
+title: 'IDEMPOTENCY_KEY_FORMAT_INVALID'
+description: 'HTTP 400 — Idempotency key format invalid'
+---
+
+**HTTP status:** 400 · **Title:** "Idempotency key format invalid"
+
+## When it fires
+
+`Idempotency-Key` header contains a character outside the allowed set: `[A-Za-z0-9_\-:.]`.
+
+## Why it happens
+
+- The key contained whitespace, a slash, or a non-ASCII character.
+- Control characters (newlines, NULs) sneaked in from a copy-paste.
+- An emoji or Unicode separator accidentally landed in the key.
+
+The strict allowlist exists because the value flows through structured logs, Redis keys, and PG rows — non-printable / control characters could poison log shippers or downstream systems that key on the value.
+
+## How to fix
+
+- Stick to UUIDs (`crypto.randomUUID()` in Node, `uuidgen` in shell) — they're always conforming.
+- If you must derive the key from external input, sanitise: `key.replace(/[^A-Za-z0-9_\-:.]/g, '')` then check it's still unique.
+
+## Related codes
+
+- [`IDEMPOTENCY_KEY_TOO_LONG`](./IDEMPOTENCY_KEY_TOO_LONG.md), [`IDEMPOTENCY_KEY_CONFLICT`](./IDEMPOTENCY_KEY_CONFLICT.md)
