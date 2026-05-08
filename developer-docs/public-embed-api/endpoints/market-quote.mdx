@@ -21,7 +21,7 @@ GET https://app.kash.bot/api/markets/{id}/quote
 ## Path Parameters
 
 <ParamField path="id" type="string" required>
-  The market's unique identifier (UUID). Use [`GET /api/markets`](/pages/developer-docs/public-embed-api/endpoints/markets) to discover market IDs.
+  The market's unique identifier (UUID). Use [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets) to discover market IDs.
 </ParamField>
 
 ## Query Parameters
@@ -320,4 +320,4 @@ async function costToReach(marketId, outcomeIndex, targetProb) {
 - **Buy fee is zero** on the current AMM; `tokensOut` reflects the full reserve increase.
 - **`pAfter` and `qAfter` always sum to `1e18`.** The last element may absorb up to 1 wei of rounding dust.
 - **`effectivePrice` is a JS-number convenience field** and can lose precision on tiny trades. For any authoritative display or accounting, derive values from the string bigint fields with `BigInt(...)`.
-- **Finding market IDs.** Use [`GET /api/markets`](/pages/developer-docs/public-embed-api/endpoints/markets) for pagination/filtering or [`GET /api/markets/:id`](/pages/developer-docs/public-embed-api/endpoints/market-detail) for a single market. Both are public and CORS-enabled.
+- **Finding market IDs.** Use [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets) for pagination/filtering or [`GET /api/markets/:id`](/developer-docs/public-embed-api/endpoints/market-detail) for a single market. Both are public and CORS-enabled.
