@@ -1,0 +1,81 @@
+---
+title: 'Developer Documentation'
+description: 'Build with Kash prediction markets'
+---
+
+Welcome to the Kash developer documentation. Build trading bots and agents against the protocol, sign transactions directly on-chain, embed markets in your website, and access real-time market data.
+
+## Pick your surface
+
+<CardGroup cols={2}>
+  <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
+    Custodial programmatic access at `api.kash.bot`. Place trades, manage portfolios, receive HMAC-signed webhooks. API-key authenticated. The right surface for bots, agents, and market makers who want Kash to handle wallets, gas, and bridging.
+  </Card>
+  <Card title="Protocol SDK" icon="cube" href="/developer-docs/protocol-sdk/overview">
+    Non-custodial access. Sign transactions directly with your own EOA or smart account against the on-chain AMM. TypeScript and Python implementations with cross-language parity.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/developer-docs/cli/overview">
+    `kash` — the same primitives as the SDK, packaged as a scripting-friendly command-line client. Ideal for one-offs, CI jobs, shell scripts, and agent integrations.
+  </Card>
+  <Card title="Public Embed API" icon="window" href="/developer-docs/public-embed-api/overview">
+    Read-only public REST surface at `app.kash.bot/api`. Drop iframes and market data into websites and articles. No authentication required.
+  </Card>
+</CardGroup>
+
+<Note>
+**Which one do I want?**
+- Want Kash to manage wallets and bridge funds for you? → **REST API** (custodial).
+- Want to sign transactions yourself with your own key? → **Protocol SDK** (non-custodial).
+- Want to script flows from a terminal or CI? → **CLI**.
+- Embedding markets in a website for humans? → **Public Embed API**.
+</Note>
+
+## Quick links
+
+<CardGroup cols={3}>
+  <Card title="REST API Quickstart" icon="rocket" href="/developer-docs/rest-api/quickstart">
+    Generate a key, place your first trade, receive your first webhook — under 5 minutes.
+  </Card>
+  <Card title="Protocol SDK Quickstart" icon="key" href="/developer-docs/protocol-sdk/quickstart-eoa">
+    Sign your first on-chain trade from an EOA in under 10 minutes.
+  </Card>
+  <Card title="Embed Quickstart" icon="window" href="/developer-docs/public-embed-api/quickstart">
+    Embed your first prediction market in 5 minutes.
+  </Card>
+  <Card title="TypeScript SDK" icon="js" href="/developer-docs/rest-api/sdks/typescript">
+    Typed REST client. Trades, markets, portfolios, webhooks, retries.
+  </Card>
+  <Card title="Python SDK" icon="python" href="/developer-docs/protocol-sdk-python/overview">
+    Native Python implementation of the Protocol SDK, plus a Hummingbot connector.
+  </Card>
+  <Card title="API Error Catalogue" icon="circle-exclamation" href="/developer-docs/api-errors/overview">
+    Every error code, what it means, and how to recover.
+  </Card>
+</CardGroup>
+
+## What can you build?
+
+### Trading bots & agents
+Use the [REST API](/developer-docs/rest-api/overview) to place trades, monitor portfolios, and react to market events via webhooks. Supports idempotent retries, high-value confirmation gates, and per-key rate limiting.
+
+### Non-custodial trading & market-making
+Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (TypeScript or [Python](/developer-docs/protocol-sdk-python/overview)) to sign transactions yourself against the on-chain AMM. Combine with the REST API's quote endpoint for live pricing, or quote on-chain directly.
+
+### Scripting & ops
+Use the [CLI](/developer-docs/cli/overview) for shell-driven workflows: list markets, place trades, rotate webhook secrets, redeliver events, decode error codes — all with a stable JSON envelope for piping into `jq` or agent contexts.
+
+### Embed prediction markets
+Use the [Public Embed API](/developer-docs/public-embed-api/overview) to drop iframes and read-only market data into news sites, financial platforms, or community forums. Markets are read-only — users are directed to X to make predictions.
+
+## Support
+
+Need help? We're here for you:
+
+<CardGroup cols={2}>
+  <Card title="Technical Support" icon="headset">
+    Email [dev@kash.bot](mailto:dev@kash.bot) for technical questions
+  </Card>
+  <Card title="Partnership Inquiries" icon="handshake">
+    Contact [partnerships@kash.bot](mailto:partnerships@kash.bot) for whitelabeling or revenue sharing
+  </Card>
+</CardGroup>

@@ -17,60 +17,60 @@
           {
             "group": "Quick Start",
             "pages": [
-              "pages/getting-started/quick-start/what-kash",
-              "pages/getting-started/quick-start/where-kash",
-              "pages/getting-started/quick-start/when-kash",
-              "pages/getting-started/quick-start/who-kash",
-              "pages/getting-started/quick-start/why-kash",
-              "pages/getting-started/quick-start/how-kash"
+              "getting-started/quick-start/what-kash",
+              "getting-started/quick-start/where-kash",
+              "getting-started/quick-start/when-kash",
+              "getting-started/quick-start/who-kash",
+              "getting-started/quick-start/why-kash",
+              "getting-started/quick-start/how-kash"
             ]
           },
           {
             "group": "Guides",
             "pages": [
-              "pages/getting-started/guides/creating-an-account",
-              "pages/getting-started/guides/depositing",
-              "pages/getting-started/guides/withdrawing",
-              "pages/getting-started/guides/predicting",
-              "pages/getting-started/guides/winning",
-              "pages/getting-started/guides/finding-opportunities",
-              "pages/getting-started/guides/creating-opportunities"
+              "getting-started/guides/creating-an-account",
+              "getting-started/guides/depositing",
+              "getting-started/guides/withdrawing",
+              "getting-started/guides/predicting",
+              "getting-started/guides/winning",
+              "getting-started/guides/finding-opportunities",
+              "getting-started/guides/creating-opportunities"
             ]
           },
           {
             "group": "Features",
             "pages": [
-              "pages/getting-started/features/custom-amm",
-              "pages/getting-started/features/market-mechanics",
-              "pages/getting-started/features/trading-options",
-              "pages/getting-started/features/natural-language",
-              "pages/getting-started/features/social",
-              "pages/getting-started/features/kustom"
+              "getting-started/features/custom-amm",
+              "getting-started/features/market-mechanics",
+              "getting-started/features/trading-options",
+              "getting-started/features/natural-language",
+              "getting-started/features/social",
+              "getting-started/features/kustom"
             ]
           },
           {
             "group": "Ecosystem",
             "pages": [
-              "pages/getting-started/ecosystem/socials",
-              "pages/getting-started/ecosystem/tokenomics",
-              "pages/getting-started/ecosystem/governance",
-              "pages/getting-started/ecosystem/incentives-and-rewards",
-              "pages/getting-started/ecosystem/competitions-and-tournaments",
-              "pages/getting-started/ecosystem/bug-bounty-program"
+              "getting-started/ecosystem/socials",
+              "getting-started/ecosystem/tokenomics",
+              "getting-started/ecosystem/governance",
+              "getting-started/ecosystem/incentives-and-rewards",
+              "getting-started/ecosystem/competitions-and-tournaments",
+              "getting-started/ecosystem/bug-bounty-program"
             ]
           },
           {
             "group": "FAQs",
             "pages": [
-              "pages/getting-started/faqs/account",
-              "pages/getting-started/faqs/notifications",
-              "pages/getting-started/faqs/security",
-              "pages/getting-started/faqs/settings",
-              "pages/getting-started/faqs/wallet-and-funds",
-              "pages/getting-started/faqs/transactions",
-              "pages/getting-started/faqs/troubleshooting",
-              "pages/getting-started/faqs/support",
-              "pages/getting-started/faqs/legal"
+              "getting-started/faqs/account",
+              "getting-started/faqs/notifications",
+              "getting-started/faqs/security",
+              "getting-started/faqs/settings",
+              "getting-started/faqs/wallet-and-funds",
+              "getting-started/faqs/transactions",
+              "getting-started/faqs/troubleshooting",
+              "getting-started/faqs/support",
+              "getting-started/faqs/legal"
             ]
           }
         ]
@@ -80,162 +80,159 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": [
-              "pages/developer-docs/introduction"
-            ]
+            "pages": ["developer-docs/introduction"]
           },
           {
             "group": "REST API",
             "pages": [
-              "pages/developer-docs/rest-api/overview",
-              "pages/developer-docs/rest-api/quickstart",
-              "pages/developer-docs/rest-api/authentication",
-              "pages/developer-docs/rest-api/rate-limits",
-              "pages/developer-docs/rest-api/errors",
-              "pages/developer-docs/rest-api/idempotency",
-              "pages/developer-docs/rest-api/pagination",
-              "pages/developer-docs/rest-api/etags",
-              "pages/developer-docs/rest-api/endpoint-reference",
-              "pages/developer-docs/rest-api/migration-from-webapp"
+              "developer-docs/rest-api/overview",
+              "developer-docs/rest-api/quickstart",
+              "developer-docs/rest-api/authentication",
+              "developer-docs/rest-api/rate-limits",
+              "developer-docs/rest-api/errors",
+              "developer-docs/rest-api/idempotency",
+              "developer-docs/rest-api/pagination",
+              "developer-docs/rest-api/etags",
+              "developer-docs/rest-api/endpoint-reference",
+              "developer-docs/rest-api/migration-from-webapp"
             ]
           },
           {
-            "group": "REST API — Webhooks",
+            "group": "Webhooks",
             "pages": [
-              "pages/developer-docs/rest-api/webhooks/overview",
-              "pages/developer-docs/rest-api/webhooks/verifying",
-              "pages/developer-docs/rest-api/webhooks/retries",
-              "pages/developer-docs/rest-api/webhooks/secret-rotation"
+              "developer-docs/rest-api/webhooks/overview",
+              "developer-docs/rest-api/webhooks/verifying",
+              "developer-docs/rest-api/webhooks/retries",
+              "developer-docs/rest-api/webhooks/secret-rotation"
             ]
           },
           {
-            "group": "REST API — SDKs",
-            "pages": [
-              "pages/developer-docs/rest-api/sdks/typescript",
-              "pages/developer-docs/rest-api/sdks/cli"
-            ]
+            "group": "TypeScript SDK",
+            "pages": ["developer-docs/rest-api/sdks/typescript"]
           },
           {
-            "group": "REST API — Error catalogue",
-            "pages": [
-              "pages/developer-docs/api-errors/overview",
-              "pages/developer-docs/api-errors/ACTIVE_KEY_LIMIT_REACHED",
-              "pages/developer-docs/api-errors/AMOUNT_TOO_LARGE",
-              "pages/developer-docs/api-errors/API_KEY_EXPIRED",
-              "pages/developer-docs/api-errors/API_KEY_INVALID",
-              "pages/developer-docs/api-errors/API_KEY_MALFORMED",
-              "pages/developer-docs/api-errors/API_KEY_MISSING",
-              "pages/developer-docs/api-errors/API_KEY_REVOKED",
-              "pages/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED",
-              "pages/developer-docs/api-errors/API_VERSION_UNSUPPORTED",
-              "pages/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT",
-              "pages/developer-docs/api-errors/CONFIRMATION_EXPIRED",
-              "pages/developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
-              "pages/developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
-              "pages/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE",
-              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT",
-              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED",
-              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID",
-              "pages/developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG",
-              "pages/developer-docs/api-errors/INSUFFICIENT_BALANCE",
-              "pages/developer-docs/api-errors/INSUFFICIENT_SCOPE",
-              "pages/developer-docs/api-errors/INTERNAL_ERROR",
-              "pages/developer-docs/api-errors/IP_NOT_ALLOWED",
-              "pages/developer-docs/api-errors/MARKET_NOT_FOUND",
-              "pages/developer-docs/api-errors/MARKET_NOT_TRADEABLE",
-              "pages/developer-docs/api-errors/OUTCOME_INDEX_INVALID",
-              "pages/developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
-              "pages/developer-docs/api-errors/REQUEST_SIGNATURE_INVALID",
-              "pages/developer-docs/api-errors/REQUEST_TIMEOUT",
-              "pages/developer-docs/api-errors/RESOURCE_NOT_FOUND",
-              "pages/developer-docs/api-errors/ROUTE_DISABLED",
-              "pages/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED",
-              "pages/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED",
-              "pages/developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION",
-              "pages/developer-docs/api-errors/VALIDATION_FAILED",
-              "pages/developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED",
-              "pages/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED",
-              "pages/developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN"
-            ]
+            "group": "CLI",
+            "pages": ["developer-docs/cli/overview"]
           },
           {
             "group": "Protocol SDK (TypeScript)",
             "pages": [
-              "pages/developer-docs/protocol-sdk/overview",
-              "pages/developer-docs/protocol-sdk/quickstart-eoa",
-              "pages/developer-docs/protocol-sdk/quickstart-smart-account",
-              "pages/developer-docs/protocol-sdk/error-handling",
-              "pages/developer-docs/protocol-sdk/cross-language-parity"
+              "developer-docs/protocol-sdk/overview",
+              "developer-docs/protocol-sdk/quickstart-eoa",
+              "developer-docs/protocol-sdk/quickstart-smart-account",
+              "developer-docs/protocol-sdk/error-handling",
+              "developer-docs/protocol-sdk/cross-language-parity"
             ]
           },
           {
             "group": "Protocol SDK (Python)",
             "pages": [
-              "pages/developer-docs/protocol-sdk-python/overview",
-              "pages/developer-docs/protocol-sdk-python/quickstart-eoa",
-              "pages/developer-docs/protocol-sdk-python/quickstart-smart-account",
-              "pages/developer-docs/protocol-sdk-python/hummingbot"
+              "developer-docs/protocol-sdk-python/overview",
+              "developer-docs/protocol-sdk-python/quickstart-eoa",
+              "developer-docs/protocol-sdk-python/quickstart-smart-account",
+              "developer-docs/protocol-sdk-python/hummingbot"
+            ]
+          },
+          {
+            "group": "API Error Catalogue",
+            "pages": [
+              "developer-docs/api-errors/overview",
+              "developer-docs/api-errors/ACTIVE_KEY_LIMIT_REACHED",
+              "developer-docs/api-errors/AMOUNT_TOO_LARGE",
+              "developer-docs/api-errors/API_KEY_EXPIRED",
+              "developer-docs/api-errors/API_KEY_INVALID",
+              "developer-docs/api-errors/API_KEY_MALFORMED",
+              "developer-docs/api-errors/API_KEY_MISSING",
+              "developer-docs/api-errors/API_KEY_REVOKED",
+              "developer-docs/api-errors/API_TRADE_PROCESSING_HALTED",
+              "developer-docs/api-errors/API_VERSION_UNSUPPORTED",
+              "developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT",
+              "developer-docs/api-errors/CONFIRMATION_EXPIRED",
+              "developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
+              "developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
+              "developer-docs/api-errors/DEPENDENCY_UNAVAILABLE",
+              "developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT",
+              "developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED",
+              "developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID",
+              "developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG",
+              "developer-docs/api-errors/INSUFFICIENT_BALANCE",
+              "developer-docs/api-errors/INSUFFICIENT_SCOPE",
+              "developer-docs/api-errors/INTERNAL_ERROR",
+              "developer-docs/api-errors/IP_NOT_ALLOWED",
+              "developer-docs/api-errors/MARKET_NOT_FOUND",
+              "developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+              "developer-docs/api-errors/OUTCOME_INDEX_INVALID",
+              "developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
+              "developer-docs/api-errors/REQUEST_SIGNATURE_INVALID",
+              "developer-docs/api-errors/REQUEST_TIMEOUT",
+              "developer-docs/api-errors/RESOURCE_NOT_FOUND",
+              "developer-docs/api-errors/ROUTE_DISABLED",
+              "developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED",
+              "developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED",
+              "developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION",
+              "developer-docs/api-errors/VALIDATION_FAILED",
+              "developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED",
+              "developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED",
+              "developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN"
             ]
           },
           {
             "group": "Public Embed API",
             "pages": [
-              "pages/developer-docs/public-embed-api/overview",
-              "pages/developer-docs/public-embed-api/quickstart"
+              "developer-docs/public-embed-api/overview",
+              "developer-docs/public-embed-api/quickstart"
             ]
           },
           {
-            "group": "Organization Endpoints",
+            "group": "Embed — Organization Endpoints",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/organization-detail",
-              "pages/developer-docs/public-embed-api/endpoints/organization-partners",
-              "pages/developer-docs/public-embed-api/endpoints/organization-threads"
+              "developer-docs/public-embed-api/endpoints/organization-detail",
+              "developer-docs/public-embed-api/endpoints/organization-partners",
+              "developer-docs/public-embed-api/endpoints/organization-threads"
             ]
           },
           {
-            "group": "Partner Endpoints",
+            "group": "Embed — Partner Endpoints",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/partner-detail",
-              "pages/developer-docs/public-embed-api/endpoints/partner-threads"
+              "developer-docs/public-embed-api/endpoints/partner-detail",
+              "developer-docs/public-embed-api/endpoints/partner-threads"
             ]
           },
           {
-            "group": "Thread Endpoints",
+            "group": "Embed — Thread Endpoints",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/threads",
-              "pages/developer-docs/public-embed-api/endpoints/thread-detail",
-              "pages/developer-docs/public-embed-api/endpoints/thread-markets",
-              "pages/developer-docs/public-embed-api/endpoints/thread-chapters"
+              "developer-docs/public-embed-api/endpoints/threads",
+              "developer-docs/public-embed-api/endpoints/thread-detail",
+              "developer-docs/public-embed-api/endpoints/thread-markets",
+              "developer-docs/public-embed-api/endpoints/thread-chapters"
             ]
           },
           {
-            "group": "Market Endpoints",
+            "group": "Embed — Market Endpoints",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/markets",
-              "pages/developer-docs/public-embed-api/endpoints/market-detail",
-              "pages/developer-docs/public-embed-api/endpoints/market-quote"
+              "developer-docs/public-embed-api/endpoints/markets",
+              "developer-docs/public-embed-api/endpoints/market-detail",
+              "developer-docs/public-embed-api/endpoints/market-quote"
             ]
           },
           {
-            "group": "Twitter Deep Link Endpoints",
+            "group": "Embed — Twitter Deep Links",
             "pages": [
-              "pages/developer-docs/public-embed-api/endpoints/market-twitter-link",
-              "pages/developer-docs/public-embed-api/endpoints/thread-twitter-links",
-              "pages/developer-docs/public-embed-api/endpoints/twitter-links-batch"
+              "developer-docs/public-embed-api/endpoints/market-twitter-link",
+              "developer-docs/public-embed-api/endpoints/thread-twitter-links",
+              "developer-docs/public-embed-api/endpoints/twitter-links-batch"
             ]
           },
           {
-            "group": "Embed Guides",
-            "pages": [
-              "pages/developer-docs/public-embed-api/guides/thread-iframe"
-            ]
+            "group": "Embed — Guides",
+            "pages": ["developer-docs/public-embed-api/guides/thread-iframe"]
           },
           {
-            "group": "Code Examples",
+            "group": "Embed — Code Examples",
             "pages": [
-              "pages/developer-docs/public-embed-api/examples/html",
-              "pages/developer-docs/public-embed-api/examples/react",
-              "pages/developer-docs/public-embed-api/examples/javascript"
+              "developer-docs/public-embed-api/examples/html",
+              "developer-docs/public-embed-api/examples/react",
+              "developer-docs/public-embed-api/examples/javascript"
             ]
           }
         ]
