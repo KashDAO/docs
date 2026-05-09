@@ -12,7 +12,7 @@ The per-request server timeout fired (default 30 s). Bounded by `bodyLimit` + Fa
 ## Why it happens
 
 - An unusually slow downstream call (Postgres lock contention, RPC latency spike, etc.).
-- A request that does too much work in one call — most reads complete in <100 ms.
+- A request that does too much work in one call — most reads complete in `<100 ms`.
 - Network path degradation between you and our edge (rare but possible).
 
 ## How to fix
