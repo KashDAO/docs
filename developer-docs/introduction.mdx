@@ -5,14 +5,18 @@ description: 'Build with Kash prediction markets'
 
 Welcome to the Kash developer documentation. Build trading bots and agents against the protocol, sign transactions directly on-chain, embed markets in your website, and access real-time market data.
 
+<Note>
+**Kash is non-custodial across every surface.** User funds always sit in Privy-managed MPC smart accounts that the user controls — Kash never holds keys or funds, on any path. The split below is about **who orchestrates execution**, not custody.
+</Note>
+
 ## Pick your surface
 
 <CardGroup cols={2}>
   <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
-    Custodial programmatic access at `api.kash.bot`. Place trades, manage portfolios, receive HMAC-signed webhooks. API-key authenticated. The right surface for bots, agents, and market makers who want Kash to handle wallets, gas, and bridging.
+    Kash-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios, receive HMAC-signed webhooks. API-key authenticated; trades are signed by the user's own Privy smart account via scoped delegation. Kash backend builds the userop, sponsors gas, and routes bridging. Right surface for bots, agents, and market makers who want managed execution without running infra.
   </Card>
   <Card title="Protocol SDK" icon="cube" href="/developer-docs/protocol-sdk/overview">
-    Non-custodial access. Sign transactions directly with your own EOA or smart account against the on-chain AMM. TypeScript and Python implementations with cross-language parity.
+    Self-orchestrated access. Plug in your own signer (EOA, smart account, HSM, Fireblocks), your own RPC, your own bundler — transactions never touch Kash servers. TypeScript and Python implementations with cross-language parity.
   </Card>
   <Card title="CLI" icon="terminal" href="/developer-docs/cli/overview">
     `kash` — the same primitives as the SDK, packaged as a scripting-friendly command-line client. Ideal for one-offs, CI jobs, shell scripts, and agent integrations.
@@ -24,8 +28,8 @@ Welcome to the Kash developer documentation. Build trading bots and agents again
 
 <Note>
 **Which one do I want?**
-- Want Kash to manage wallets and bridge funds for you? → **REST API** (custodial).
-- Want to sign transactions yourself with your own key? → **Protocol SDK** (non-custodial).
+- Want Kash to orchestrate execution (build trades, sponsor gas, bridge funds) on top of the user's Privy smart account? → **REST API**.
+- Want to sign and submit transactions entirely with your own infrastructure? → **Protocol SDK**.
 - Want to script flows from a terminal or CI? → **CLI**.
 - Embedding markets in a website for humans? → **Public Embed API**.
 </Note>
@@ -58,8 +62,8 @@ Welcome to the Kash developer documentation. Build trading bots and agents again
 ### Trading bots & agents
 Use the [REST API](/developer-docs/rest-api/overview) to place trades, monitor portfolios, and react to market events via webhooks. Supports idempotent retries, high-value confirmation gates, and per-key rate limiting.
 
-### Non-custodial trading & market-making
-Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (TypeScript or [Python](/developer-docs/protocol-sdk-python/overview)) to sign transactions yourself against the on-chain AMM. Combine with the REST API's quote endpoint for live pricing, or quote on-chain directly.
+### Self-orchestrated trading & market-making
+Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (TypeScript or [Python](/developer-docs/protocol-sdk-python/overview)) to sign and submit transactions yourself against the on-chain AMM with your own signer, RPC, and bundler. Combine with the REST API's quote endpoint for live pricing, or quote on-chain directly. (Both paths are non-custodial — this one just keeps the entire execution stack in your infra.)
 
 ### Scripting & ops
 Use the [CLI](/developer-docs/cli/overview) for shell-driven workflows: list markets, place trades, rotate webhook secrets, redeliver events, decode error codes — all with a stable JSON envelope for piping into `jq` or agent contexts.

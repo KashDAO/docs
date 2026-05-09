@@ -33,9 +33,9 @@ The caps are not punitive. Five concrete reasons:
 2. **Runaway-bot circuit breaker.** A trading loop misfires (off-by-one in your sizing, retry storm on a timeout, missing dedup on a webhook). The cap is a hard stop you cannot disable from inside your own code.
 3. **AMM stability.** Kash markets use a Pythagorean AMM with thin per-outcome liquidity. A trade consuming more than ~5% of available liquidity moves the price substantially. Per-trade caps protect the AMM curve for everyone.
 4. **Compliance ladder.** Higher daily volumes implicitly require enhanced KYC, ToS attestation, and sanctions screening. The tier names map to that ladder.
-5. **Custodial fiduciary duty.** This API trades from your Privy smart account — Kash is custodian for the funds during the trade lifecycle. A custodial venue that lets a bot drain a customer in 30 seconds is not acting in the customer's interest.
+5. **Delegation guardrails.** API keys are a scoped delegation against the user's Privy-managed smart account — Kash never holds the keys or the funds, but for the duration of the delegation a leaked key (or a runaway bot) can move balance up to whatever the smart account holds. Caps bound that blast radius. The user can revoke any key at any time; the cap is the runtime safety net while it's active.
 
-If you want a venue with no caps, the non-custodial track (`@kashdao/protocol-sdk`) is the right product — you sign every transaction yourself and bear the full risk.
+If you want a surface with no caps, the self-orchestrated track (`@kashdao/protocol-sdk`) is the right product — you sign and submit every transaction yourself with your own signer/RPC/bundler, and bear the full operational risk. Both paths are non-custodial; this one just removes the platform-side guardrails along with the platform-side orchestration.
 
 ## Response headers (every response)
 

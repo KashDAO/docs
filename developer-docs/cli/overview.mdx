@@ -164,9 +164,9 @@ kash config import ~/kash-config.json
 
 The CLI retries transient failures (network errors, 429, 5xx) with exponential backoff and jitter — same as the SDK. Use `--no-retry` to disable for a single command, or `--max-retries N` to override.
 
-## Direct (non-custodial) mode
+## Direct (self-orchestrated) mode
 
-Some commands have a direct mode that bypasses the REST API and signs transactions directly with a local key. This is for advanced users who want non-custodial execution. See `kash protocol --help`.
+Some commands have a direct mode that bypasses the REST API and signs transactions directly with a local key, your own RPC, and your own bundler. Both modes are non-custodial — Kash never holds keys or funds either way; this one just removes the platform-side orchestration so the entire execution stack runs on your infra. See `kash protocol --help`.
 
 ## Source & changelog
 

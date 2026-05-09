@@ -9,6 +9,9 @@
     "dark": "#FBD109"
   },
   "favicon": "/assets/favicon.svg",
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity"]
+  },
   "navigation": {
     "tabs": [
       {
