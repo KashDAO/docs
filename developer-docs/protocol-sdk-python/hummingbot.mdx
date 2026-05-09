@@ -154,9 +154,9 @@ profitable spread). Both well under any commercial RPC's free tier.
 | Stage                                  | p50    | p99     |
 | -------------------------------------- | ------ | ------- |
 | `markets.quote(...)` → return          | 30 ms  | 250 ms  |
-| `trades.build_buy(...)` → return       | <1 ms  | 5 ms    |
+| `trades.build_buy(...)` → return       | `<1 ms` | 5 ms |
 | `trades.prepare_buy(...)` → return     | 50 ms  | 400 ms  |
-| `trades.signer.sign_transaction(...)`  | <1 ms  | 5 ms    |
+| `trades.signer.sign_transaction(...)`  | `<1 ms` | 5 ms |
 | `trades.submit(...)` → tx hash         | 100 ms | 800 ms  |
 | Mempool inclusion (chain-side)         | 2 s    | 10 s    |
 
