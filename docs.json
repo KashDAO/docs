@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "willow",
+  "theme": "sequoia",
   "name": "Kash",
   "description": "Bringing prediction marketplaces to your feed.",
   "colors": {
