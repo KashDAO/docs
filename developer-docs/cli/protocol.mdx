@@ -1,9 +1,17 @@
 ---
 title: 'protocol'
-description: 'Non-custodial direct-to-chain operations.'
+description: 'Non-custodial direct-to-chain operations (uses the protocol SDK).'
 ---
 
-Non-custodial direct-to-chain operations.
+Non-custodial direct-to-chain operations (uses @kashdao/protocol-sdk).
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash protocol <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash protocol <subcommand> [options]
+```
 
 ## Subcommands
 
@@ -38,3 +46,315 @@ On-chain price quote for buying or selling an outcome.
 | `-s, --side <buy\|sell>` | trade side: buy or sell |
 | `-o, --outcome <index>` | outcome index (0-based) |
 | `-a, --amount <decimal>` | amount: USDC decimal for buy (e.g. "10"), outcome-token decimal for sell (e.g. "1.5") |
+
+### `kash protocol position`
+
+Read on-chain outcome-token holdings (ERC-1155) for a market.
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+- `account` (optional) — EOA or smart-account address whose holdings to read (default: profile's smartAccount)
+
+### `kash protocol allowance`
+
+Read the on-chain USDC allowance from `account` to `spender`.
+
+**Arguments**
+
+- `spender` — spender contract address (e.g. a market) — 0x-prefixed
+- `account` (optional) — owner address (default: profile's smartAccount)
+
+### `kash protocol smart-account`
+
+Smart-account address derivation and deployment-status checks.
+
+### `kash protocol smart-account compute`
+
+Derive the deterministic smart-account address for an EOA owner.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --owner <address>` | EOA owner address (0x-prefixed) |
+| `-s, --salt <n>` | optional salt as a non-negative integer (default 0) |
+
+### `kash protocol smart-account is-deployed`
+
+Check whether a smart account has bytecode (i.e. has been deployed on-chain).
+
+**Arguments**
+
+- `address` (optional) — smart account address (default: profile's smartAccount)
+
+### `kash protocol fees`
+
+EIP-1559 fee estimate for the configured chain (uses eth_feeHistory).
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--blocks <n>` | number of recent blocks to sample (default 4) |
+| `--percentile <n>` | priority-fee percentile to take from each sampled block (1-99, default 50) |
+| `--base-multiplier <n>` | multiplier applied to predicted next-block base fee (default 2.0; raise for congested chains) |
+| `--priority-floor-gwei <n>` | floor for maxPriorityFeePerGas in gwei (default 1) |
+
+### `kash protocol token-id`
+
+Compute the ERC-1155 token id for a (marketId, outcomeIndex) pair (offline; no RPC).
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-m, --market-id <bigint>` | on-chain numeric market id (decimal or 0x-prefixed hex) |
+| `-o, --outcome <index>` | outcome index (0-255) |
+
+### `kash protocol decode-revert`
+
+Decode raw revert data into (name, args) using the Market + EntryPoint ABIs.
+
+**Arguments**
+
+- `data` — raw revert data (0x-prefixed hex)
+
+### `kash protocol trade`
+
+Direct-mode trade execution (UserOp signed locally, submitted via bundler).
+
+### `kash protocol trade buy`
+
+One-shot BUY: prepare → simulate → sign → submit (and wait by default).
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | USDC to spend (decimal — e.g. "10" or "12.50") |
+| `--slippage-bps <n>` | slippage tolerance in basis points (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit; print the UserOp |
+| `--no-simulate` | skip the eth_call preflight (faster, riskier) |
+| `--no-wait` | fire-and-forget: return userOpHash without waiting for inclusion |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+| `--wait-interval-ms <n>` | receipt poll interval (default 1500) |
+
+### `kash protocol trade sell`
+
+One-shot SELL: prepare → simulate → sign → submit (and wait by default).
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-t, --tokens <amount>` | outcome tokens to sell (decimal — WAD precision) |
+| `--slippage-bps <n>` | slippage tolerance in basis points (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit; print the UserOp |
+| `--no-simulate` | skip the eth_call preflight (faster, riskier) |
+| `--no-wait` | fire-and-forget: return userOpHash without waiting for inclusion |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+| `--wait-interval-ms <n>` | receipt poll interval (default 1500) |
+
+### `kash protocol trade close`
+
+Sell the entire SA balance for an outcome (one-shot prepare → submit).
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `--slippage-bps <n>` | slippage tolerance in basis points (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit; print the UserOp |
+| `--no-simulate` | skip the eth_call preflight (faster, riskier) |
+| `--no-wait` | fire-and-forget: return userOpHash without waiting for inclusion |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+| `--wait-interval-ms <n>` | receipt poll interval (default 1500) |
+
+### `kash protocol trade approve`
+
+USDC approval — required once before the first BUY.
+
+**Arguments**
+
+- `spender` — spender contract address (typically a Market) — 0x-prefixed
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-a, --amount <usdc>` | atomic-USDC amount to approve (decimal); default is unlimited (MAX_UINT256) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit; print the UserOp |
+| `--no-simulate` | skip the eth_call preflight (faster, riskier) |
+| `--no-wait` | fire-and-forget: return userOpHash without waiting for inclusion |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+| `--wait-interval-ms <n>` | receipt poll interval (default 1500) |
+
+### `kash protocol userop`
+
+Granular UserOp lifecycle: build, simulate, submit, hash, receipt, wait.
+
+### `kash protocol userop build`
+
+Build (prepare) a fully-populated unsigned UserOp ready for offline signing.
+
+### `kash protocol userop build buy`
+
+Build a fully-populated unsigned BUY UserOp ready for offline signing.
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | USDC to spend (decimal) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--out <path>` | write the UserOp envelope to a file (default stdout) |
+| `--no-simulate` | skip eth_call preflight in `prepare` |
+
+### `kash protocol userop build sell`
+
+Build a fully-populated unsigned SELL UserOp ready for offline signing.
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-t, --tokens <amount>` | outcome tokens to sell (WAD decimal) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--out <path>` | write the UserOp envelope to a file (default stdout) |
+| `--no-simulate` | skip eth_call preflight in `prepare` |
+
+### `kash protocol userop build close`
+
+Build a fully-populated unsigned UserOp that closes a position (full balance).
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50 = 0.5%) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--out <path>` | write the UserOp envelope to a file (default stdout) |
+| `--no-simulate` | skip eth_call preflight in `prepare` |
+
+### `kash protocol userop build approve`
+
+Build a fully-populated unsigned approve UserOp ready for offline signing.
+
+**Arguments**
+
+- `spender` — spender contract address (typically a Market) — 0x-prefixed
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-a, --amount <usdc>` | atomic-USDC amount (decimal); default unlimited (MAX_UINT256) |
+| `--out <path>` | write the UserOp envelope to a file (default stdout) |
+| `--no-simulate` | skip eth_call preflight in `prepare` |
+
+### `kash protocol userop simulate`
+
+Simulate (eth_call) an UnsignedUserOp from a file or stdin.
+
+**Arguments**
+
+- `file` (optional) — path to a UserOp JSON file (omit or pass "-" for stdin)
+
+### `kash protocol userop submit`
+
+Submit a SignedUserOp from a file or stdin to the configured bundler.
+
+**Arguments**
+
+- `file` (optional) — path to a SignedUserOp JSON file (omit or pass "-" for stdin)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--skip-staleness-check` | bypass the EIP-191 staleness check (for typed-data signers) |
+| `--wait` | wait for receipt after submitting |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+| `--wait-interval-ms <n>` | receipt poll interval (default 1500) |
+
+### `kash protocol userop hash`
+
+Recompute the canonical EIP-4337 v0.7 hash for a UnsignedUserOp.
+
+**Arguments**
+
+- `file` (optional) — path to a UserOp JSON file (omit or pass "-" for stdin)
+
+### `kash protocol userop receipt`
+
+Fetch the bundler receipt for a UserOp hash (null if not yet included).
+
+**Arguments**
+
+- `hash` — UserOp hash (0x-prefixed, 32 bytes)
+
+### `kash protocol userop wait`
+
+Wait for a UserOp to be included; polls with exponential backoff.
+
+**Arguments**
+
+- `hash` — UserOp hash (0x-prefixed, 32 bytes)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--wait-timeout-ms, --timeout-ms <n>` | total time budget across polls (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--interval-ms <n>` | poll interval (default 1500) |
+
+### `kash protocol watch`
+
+Subscribe to on-chain trade events for a market (NDJSON stream).
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--max-events <n>` | exit cleanly after observing N events |
+| `--timeout-ms <n>` | exit cleanly after this wall-clock budget (ms) |
