@@ -35,4 +35,5 @@ Every 429 response carries:
 
 ## Related codes
 
+- [`RATE_LIMIT_UNAVAILABLE`](./RATE_LIMIT_UNAVAILABLE.md) — 503; the rate-limit subsystem itself is temporarily unavailable. Distinct from `EXCEEDED`: `UNAVAILABLE` means we couldn't check your quota; `EXCEEDED` means we checked and you're over.
 - [`WEBHOOK_REPLAY_LIMIT_REACHED`](./WEBHOOK_REPLAY_LIMIT_REACHED.md) — also 429, but specific to the webhook replay endpoint's amplification cap

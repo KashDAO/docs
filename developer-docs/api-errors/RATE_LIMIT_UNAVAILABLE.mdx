@@ -1,0 +1,39 @@
+---
+title: 'RATE_LIMIT_UNAVAILABLE'
+description: 'HTTP 503 — Rate limit subsystem unavailable'
+---
+
+**HTTP status:** 503 · **Title:** "Rate limit subsystem unavailable" · **Retry-After:** 1s
+
+## When it fires
+
+The rate-limit subsystem (Redis-backed token bucket / sliding window) is temporarily unavailable, and the per-task circuit breaker is still in its CLOSED state — i.e., this is a transient Redis blip, not a sustained outage.
+
+The API fails CLOSED here because your rate limit IS your per-tier quota (a paid product feature). Serving traffic without enforcing the cap during a blip would silently leak quota to free-tier callers. The safe-for-business default is to refuse the request, surface a typed retryable error, and let your client retry.
+
+This is the **transient blip** counterpart to the sustained-outage [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md) — same family, different policy: a transient blip in the limiter is fail-CLOSED (we know the limit must apply but can't check), while a sustained outage causes the circuit breaker to open and the API to fail-OPEN (serve traffic without quota enforcement, paged to ops).
+
+## Why it happens
+
+- A momentary ElastiCache Redis network blip — typically clears in <100ms.
+- Pool acquisition contention under burst — a Lua call queued for a free connection past the per-call timeout.
+- A momentary failover during a Redis cluster maintenance window.
+
+If Redis stays unhealthy past the circuit breaker's failure threshold (10 consecutive failures), the breaker OPENs and requests start passing through fail-OPEN instead of returning 503. Ops gets paged on `kash_public_api_rate_limit_redis_circuit_state == 2`.
+
+## How to fix
+
+- **Honour `Retry-After: 1`.** The TS SDK's default retry policy already does this — it auto-retries 5xx responses with exponential backoff, so most blips are invisible to your application code. If you've disabled SDK retries (`maxRetries: 0`), wire your own backoff loop.
+- **Don't treat this as quota exhaustion.** Distinct from [`RATE_LIMIT_EXCEEDED`](./RATE_LIMIT_EXCEEDED.md) (429): `EXCEEDED` is "you're over your tier's cap"; `UNAVAILABLE` is "we couldn't check, so we won't risk leaking your cap." Your dashboards / billing UI should NOT surface `RATE_LIMIT_UNAVAILABLE` as a quota event.
+- If you see a sustained rate of these in your client logs (>1/min over several minutes), check `status.kash.bot` — that's the threshold where ops should already be paged.
+
+## Response headers
+
+- `Retry-After: 1` — Stripe-style short retry; SDK respects it automatically.
+- `X-API-Version`, `X-Request-Id` — standard cross-cutting headers.
+- The `X-RateLimit-*` family is NOT emitted on a 503 (we don't have a quota answer to attach).
+
+## Related codes
+
+- [`RATE_LIMIT_EXCEEDED`](./RATE_LIMIT_EXCEEDED.md) — 429, you went over your quota.
+- [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md) — 503, infrastructure-level dependency outage outside the rate-limit path.

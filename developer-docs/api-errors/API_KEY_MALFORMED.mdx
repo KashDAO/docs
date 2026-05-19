@@ -7,7 +7,7 @@ description: 'HTTP 401 — Authentication required'
 
 ## When it fires
 
-The `X-API-Key` header is present but does not match the expected `kash_(live|test)_<base64url>` shape.
+The `X-API-Key` header is present but does not match the expected `kash_(live|test)_<32 alphanumeric>` shape.
 
 ## Why it happens
 
@@ -17,7 +17,7 @@ The `X-API-Key` header is present but does not match the expected `kash_(live|te
 
 ## How to fix
 
-- The format is `kash_<env>_<43-char base64url>`. The `<env>` segment is `live` or `test`.
+- The format is `kash_<env>_<32 alphanumeric>` (base62 — `A-Z`, `a-z`, `0-9`, no dashes or underscores after the prefix). The `<env>` segment is `live` or `test`.
 - `live` keys hit production; `test` keys hit staging. Don't mix.
 - If you stored the key in an env var, double-check the substitution: `echo $KASH_API_KEY | head -c 16` should print `kash_live_…` or `kash_test_…`.
 
