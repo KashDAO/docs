@@ -1,0 +1,24 @@
+---
+title: 'schema'
+description: 'Emit JSON Schema for the SDK request/response shapes.'
+---
+
+Emit JSON Schema for the SDK request/response shapes.
+
+> Generated from `kash docs --json`. Run `kash schema --help` for full usage and examples.
+
+## Usage
+
+```bash
+kash schema [name] [options]
+```
+
+**Arguments**
+
+- `name` (optional) — optional schema name; omit to list every available schema (one of: CliConfigEnvelope, CliErrorAction, CliErrorEnvelope, ConfirmTradeBody, ConfirmTradeResponse, CreateTradeAcceptedResponse, CreateTradeBody, GetMarketResponse, GetTraceResponse, GetTradeResponse, HealthResult, ListMarketsResponse, ListTradesResponse, ListWebhookEventsResponse, MarketResource, Pagination, PortfolioSummary, PositionResource, PositionsResponse, ProblemDetails, ProtocolBalanceEnvelope, ProtocolMarketEnvelope, ProtocolQuoteEnvelope, QuoteBuyDetail, QuoteMarketSummary, QuoteResponse, QuoteSellDetail, RedeliverWebhookEvent, RedeliverWebhookResponse, RotateWebhookSecretResponse, TraceEvent, TraceEventData, TraceResource, TradeDryRunEnvelope, TradeResource, VersionManifest, WebhookEventResource)
+
+## Options
+
+| Flag | Description |
+| --- | --- |
+| `--list` | emit only the schema names (cheap probe: skips the zod-to-json-schema conversion that the full --json catalog needs) |

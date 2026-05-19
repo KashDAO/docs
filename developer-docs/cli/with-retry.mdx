@@ -1,0 +1,27 @@
+---
+title: 'with-retry'
+description: 'Re-run a kash command on recoverable failures (rate limits, transient errors).'
+---
+
+Re-run a kash command on recoverable failures (rate limits, transient errors).
+
+> Generated from `kash docs --json`. Run `kash with-retry --help` for full usage and examples.
+
+## Usage
+
+```bash
+kash with-retry <command> [options]
+```
+
+**Arguments**
+
+- `command` (variadic) — kash command + args; pass after `--` to disambiguate
+
+## Options
+
+| Flag | Description |
+| --- | --- |
+| `--max-attempts <n>` | maximum total attempts including the first (default 5) |
+| `--initial-delay-ms <n>` | starting backoff when the envelope has no retryAfterMs (default 1000) |
+| `--max-delay-ms <n>` | cap on the per-attempt wait (default 30000) |
+| `--retry-without-json` | retry even when the inner command did not emit --json (no envelope to discriminate terminal from transient — opt in if you trust the inner command failed transiently) |

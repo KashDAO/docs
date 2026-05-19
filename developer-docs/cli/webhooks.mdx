@@ -1,0 +1,85 @@
+---
+title: 'webhooks'
+description: 'Manage webhook delivery, signing secrets, and signature verification.'
+---
+
+Manage webhook delivery, signing secrets, and signature verification.
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash webhooks <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash webhooks <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash webhooks list`
+
+List recent webhook delivery events for the calling key.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-l, --limit <n>` | page size (1-100) |
+| `-c, --cursor <cursor>` | opaque cursor from a previous response |
+| `-a, --all` | walk every page (subject to --limit per page) |
+| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies --all |
+| `--status <status...>` | filter by derived status (one of: none, pending, delivered, retrying, failed); repeat or comma-separate |
+
+### `kash webhooks rotate-secret`
+
+Rotate the webhook signing secret for the current API key.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-y, --yes` | skip the interactive confirmation (required for --json --quiet) |
+
+### `kash webhooks redeliver`
+
+Re-queue a webhook event for delivery.
+
+**Arguments**
+
+- `eventId` — webhook event UUID
+
+### `kash webhooks verify`
+
+Verify a captured X-Kash-Signature against the raw body and secret.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --signature <header>` | the X-Kash-Signature header value (e.g. "t=…,v1=…") |
+| `--body <string>` | raw request body as a string (use --body-file for binary-safe input) |
+| `--body-file <path>` | path to a file containing the raw request body |
+| `--secret <value>` | webhook signing secret (overrides KASH_WEBHOOK_SECRET) |
+| `--secret-file <path>` | read secret from a file (preferred over --secret on shared shells) |
+| `--tolerance-ms <n>` | replay-window tolerance in milliseconds (default 300000 = 5 minutes) |
+
+### `kash webhooks replay`
+
+Re-sign a captured webhook payload and POST it to a target URL.
+
+**Arguments**
+
+- `body` (optional) — path to a JSON body file (omit or pass "-" for stdin)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-t, --target <url>` | destination URL (e.g. ngrok tunnel or localhost endpoint) |
+| `-s, --secret <secret>` | webhook signing secret (overrides KASH_WEBHOOK_SECRET) |
+| `--secret-file <path>` | read the signing secret from a file (preferred — keeps the value out of argv and env) |
+| `--secret-env <name>` | read the signing secret from this environment variable (default: KASH_WEBHOOK_SECRET) |
+| `--timestamp-ms <ms>` | unix-ms timestamp for the signature header (default: current time) |
+| `--signature-header <name>` | override the signature header name (default: X-Kash-Signature) |
+| `--timeout-ms <ms>` | fetch timeout (default 10000) |
+| `--dry-run` | compute the signature header and inspect the would-be POST without sending it |
+| `--refuse-private-addresses` | hard-fail (instead of warning) when --target is a loopback / private / link-local address — recommended for CI |

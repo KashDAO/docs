@@ -126,7 +126,26 @@
           {
             "group": "CLI",
             "pages": [
-              "developer-docs/cli/overview"
+              "developer-docs/cli/overview",
+              "developer-docs/cli/account",
+              "developer-docs/cli/auth",
+              "developer-docs/cli/completion",
+              "developer-docs/cli/config",
+              "developer-docs/cli/docs",
+              "developer-docs/cli/eoa",
+              "developer-docs/cli/explain",
+              "developer-docs/cli/health",
+              "developer-docs/cli/markets",
+              "developer-docs/cli/portfolio",
+              "developer-docs/cli/protocol",
+              "developer-docs/cli/quote",
+              "developer-docs/cli/schema",
+              "developer-docs/cli/setup",
+              "developer-docs/cli/trace",
+              "developer-docs/cli/trade",
+              "developer-docs/cli/version",
+              "developer-docs/cli/webhooks",
+              "developer-docs/cli/with-retry"
             ]
           },
           {

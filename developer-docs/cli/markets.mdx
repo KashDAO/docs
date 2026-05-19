@@ -1,0 +1,57 @@
+---
+title: 'markets'
+description: 'List and inspect prediction markets.'
+---
+
+List and inspect prediction markets.
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash markets <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash markets <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash markets list`
+
+List markets.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --status <status>` | filter by status (UNSEEDED \| ACTIVE \| RESOLVED) |
+| `-l, --limit <n>` | page size (1-100) |
+| `-c, --cursor <cursor>` | pagination cursor returned by a previous call |
+| `-a, --all` | walk every page (use with --json for export) |
+| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies --all |
+
+### `kash markets get`
+
+Fetch a single market by id.
+
+**Arguments**
+
+- `id` — market UUID
+
+### `kash markets predictions`
+
+Recent trades against a market (cursor-paginated, newest first).
+
+**Arguments**
+
+- `marketId` — market UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --side <side>` | filter to a single side: buy \| sell |
+| `-o, --outcome <index>` | filter to a single outcome index (0-based) |
+| `-l, --limit <n>` | page size (1-100) |
+| `-c, --cursor <cursor>` | pagination cursor returned by a previous call |
+| `-a, --all` | walk every page (use with --json for export) |
+| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies --all |

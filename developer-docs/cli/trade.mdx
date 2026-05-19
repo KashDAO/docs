@@ -1,0 +1,106 @@
+---
+title: 'trade'
+description: 'Place trades and inspect their status.'
+---
+
+Place trades and inspect their status.
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash trade <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash trade <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash trade buy`
+
+Buy outcome tokens for a market.
+
+**Arguments**
+
+- `marketId` — market UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | USDC amount as a decimal (max 6 fractional digits) |
+| `--wait` | block until the trade reaches a terminal state |
+| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--poll-interval-ms, --poll-interval <ms>` | wait poll interval in milliseconds (default 2000) |
+| `--idempotency-key <key>` | sets the Idempotency-Key HTTP header |
+| `--auto-idempotency-key` | auto-generate an Idempotency-Key (UUID v4) and surface it in the response |
+| `--client-request-id <id>` | sets the body-level clientRequestId for replay safety |
+| `--dry-run` | preview the request without sending — emits the would-be body and resolved headers |
+
+### `kash trade sell`
+
+Sell outcome tokens back to the market (Kash-orchestrated / hosted-API flow).
+
+**Arguments**
+
+- `marketId` — market UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | target USDC to receive (decimal, max 6 fractional digits) — NOT tokens-in. Use `kash quote sell --tokens <n>` if you have a tokens-in figure and want a USDC quote first. |
+| `--wait` | block until the trade reaches a terminal state |
+| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--poll-interval-ms, --poll-interval <ms>` | wait poll interval in milliseconds (default 2000) |
+| `--idempotency-key <key>` | sets the Idempotency-Key HTTP header |
+| `--auto-idempotency-key` | auto-generate an Idempotency-Key (UUID v4) and surface it in the response |
+| `--client-request-id <id>` | sets the body-level clientRequestId for replay safety |
+| `--dry-run` | preview the request without sending — emits the would-be body and resolved headers |
+
+### `kash trade status`
+
+Show the status of a trade. Use --poll to block until terminal.
+
+**Arguments**
+
+- `id` — trade UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--poll` | poll until the trade reaches a terminal state |
+| `--wait-timeout-ms, --timeout <ms>` | poll timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--poll-interval-ms, --poll-interval <ms>` | poll interval in milliseconds (default 2000) |
+
+### `kash trade list`
+
+List your trades.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --status <status...>` | status filter; repeat or comma-separate (e.g. --status pending --status executing \| --status pending,executing) |
+| `-m, --market <id>` | filter by market id |
+| `-l, --limit <n>` | page size (1-100) |
+| `-c, --cursor <cursor>` | pagination cursor |
+| `-a, --all` | walk every page (use with --json for export) |
+| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies --all |
+
+### `kash trade confirm`
+
+Confirm a high-value trade using its one-time token.
+
+**Arguments**
+
+- `id` — trade UUID
+- `token` (optional) — confirmation token (omit to read from stdin or prompt)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--token-stdin` | read the confirmation token from stdin |

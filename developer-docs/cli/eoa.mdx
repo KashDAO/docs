@@ -1,0 +1,163 @@
+---
+title: 'eoa'
+description: 'Non-custodial direct-to-chain operations using a vanilla EOA (no smart account).'
+---
+
+Non-custodial direct-to-chain operations using a vanilla EOA (no smart account).
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash eoa <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash eoa <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash eoa balance`
+
+Read on-chain USDC + native gas balances for the EOA (defaults to signer's address).
+
+**Arguments**
+
+- `account` (optional) — address to read (default: signer's ownerAddress)
+
+### `kash eoa market`
+
+Read on-chain market state (reserves, supplies, weights, derived probabilities).
+
+**Arguments**
+
+- `address` — market contract address (0x-prefixed)
+
+### `kash eoa quote`
+
+On-chain price quote for buying or selling an outcome.
+
+**Arguments**
+
+- `address` — market contract address
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --side <side>` | buy \| sell |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <decimal>` | USDC for buy / outcome tokens for sell |
+
+### `kash eoa position`
+
+Read on-chain outcome-token holdings (ERC-1155) for a market.
+
+**Arguments**
+
+- `market` — market contract address (0x-prefixed)
+- `account` (optional) — address whose holdings to read (default: signer's)
+
+### `kash eoa allowance`
+
+Read the on-chain USDC allowance from `account` to `spender`.
+
+**Arguments**
+
+- `spender` — spender contract address
+- `account` (optional) — owner address (default: signer's)
+
+### `kash eoa fees`
+
+EIP-1559 fee estimate for the configured chain.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--blocks <n>` | number of recent blocks to sample (default 4) |
+| `--percentile <n>` | priority-fee percentile per block (1-99, default 50) |
+| `--base-multiplier <n>` | multiplier on predicted next-block base fee (default 2.0) |
+| `--priority-floor-gwei <n>` | floor for maxPriorityFeePerGas in gwei (default 1) |
+
+### `kash eoa trade`
+
+Direct-mode trade execution (vanilla EIP-1559 tx, signed locally).
+
+### `kash eoa trade buy`
+
+One-shot BUY (EIP-1559 tx, signed locally and submitted to chain).
+
+**Arguments**
+
+- `market` — market contract address
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | USDC to spend (decimal) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit |
+| `--no-simulate` | skip eth_call preflight |
+| `--no-wait` | fire-and-forget: return tx hash without waiting for inclusion |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+
+### `kash eoa trade sell`
+
+One-shot SELL.
+
+**Arguments**
+
+- `market` — market contract address
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-t, --tokens <amount>` | outcome tokens to sell (WAD decimal) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit |
+| `--no-simulate` | skip eth_call preflight |
+| `--no-wait` | fire-and-forget |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+
+### `kash eoa trade close`
+
+Sell the entire EOA balance for an outcome.
+
+**Arguments**
+
+- `market` — market contract address
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `--slippage-bps <n>` | slippage tolerance in bps (default 50) |
+| `--deadline-sec <n>` | unix-seconds deadline (default now + 5min) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit |
+| `--no-simulate` | skip eth_call preflight |
+| `--no-wait` | fire-and-forget |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |
+
+### `kash eoa trade approve`
+
+USDC approval — required once before the first BUY.
+
+**Arguments**
+
+- `spender` — spender contract address (typically a Market)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-a, --amount <usdc>` | atomic-USDC amount (default unlimited) |
+| `--dry-run` | prepare + simulate but DO NOT sign or submit |
+| `--no-simulate` | skip eth_call preflight |
+| `--no-wait` | fire-and-forget |
+| `--wait-timeout-ms <n>` | cap on the receipt wait (default 60000) |

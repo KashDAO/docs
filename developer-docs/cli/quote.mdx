@@ -1,0 +1,46 @@
+---
+title: 'quote'
+description: 'Get on-chain AMM price quotes (requires `markets:quote` scope).'
+---
+
+Get on-chain AMM price quotes (requires `markets:quote` scope).
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash quote <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash quote <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash quote buy`
+
+Quote a buy of USDC into an outcome.
+
+**Arguments**
+
+- `marketId` — market UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <usdc>` | USDC to spend (decimal, e.g. "10" or "12.50") |
+
+### `kash quote sell`
+
+Quote a sell of outcome tokens back into USDC.
+
+**Arguments**
+
+- `marketId` — market UUID
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-t, --tokens <amount>` | outcome tokens to surrender (decimal, e.g. "1.5") — quote-side input shape |

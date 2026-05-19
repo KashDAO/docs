@@ -1,0 +1,91 @@
+---
+title: 'config'
+description: 'Inspect and edit ~/.kash/config.json (multi-profile).'
+---
+
+Inspect and edit ~/.kash/config.json (multi-profile).
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash config <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash config <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash config show`
+
+Print the resolved CLI configuration.
+
+### `kash config set`
+
+Set a single config field.
+
+**Arguments**
+
+- `key` — top-level key OR `customChain.<leaf>` / `customChain.smartAccount.<leaf>` dot-path
+- `value` — value to set
+
+### `kash config profiles`
+
+List configured profiles in the config file.
+
+### `kash config use`
+
+Switch the active profile (writes currentProfile to the config file).
+
+**Arguments**
+
+- `profile` — profile name
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--allow-new` | permit switching to a profile that does not yet exist (you must populate it via `kash auth set-key --profile <name>` afterwards) |
+
+### `kash config remove`
+
+Delete a named profile from the config file.
+
+**Arguments**
+
+- `profile` — profile name to remove
+
+### `kash config reset`
+
+Delete ~/.kash/config.json.
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-y, --yes` | skip the interactive confirmation |
+
+### `kash config export`
+
+Dump the entire multi-profile config (API keys redacted by default).
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-o, --out <path>` | write to a file instead of stdout (mode 0600) |
+| `--include-secrets` | include raw API keys in the export (round-trippable) |
+
+### `kash config import`
+
+Merge a `kash config export` bundle into the local config (mode 0600).
+
+**Arguments**
+
+- `file` (optional) — path to a JSON bundle (omit to read from stdin)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--no-overwrite` | skip profiles whose name already exists locally |
+| `--dry-run` | preview the merge without writing to disk |

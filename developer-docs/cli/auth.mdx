@@ -1,0 +1,39 @@
+---
+title: 'auth'
+description: 'Manage local API credentials.'
+---
+
+Manage local API credentials.
+
+> Generated from `kash docs --json`. Each command's behaviour is documented in-binary via `kash auth <subcommand> --help` — this page is the structured reference.
+
+## Usage
+
+```bash
+kash auth <subcommand> [options]
+```
+
+## Subcommands
+
+### `kash auth set-key`
+
+Store an API key in ~/.kash/config.json (mode 0600).
+
+**Arguments**
+
+- `key` (optional) — API key starting with "kash_" (omit to read from stdin or prompt)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `--from-stdin` | read the key from stdin (preferred for secret-store integration) |
+| `--activate` | also switch the active profile to the one being written (default: leave the active profile unchanged — `kash auth set-key --profile staging` updates 'staging' but doesn't make it active; pass --activate or run `kash config use staging` separately) |
+
+### `kash auth status`
+
+Show locally-configured credentials. Does not call the API.
+
+### `kash auth logout`
+
+Remove the stored API key from ~/.kash/config.json.
