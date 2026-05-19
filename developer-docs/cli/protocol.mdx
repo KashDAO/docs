@@ -22,3 +22,19 @@ Read on-chain market state (reserves, supplies, weights, derived probabilities).
 **Arguments**
 
 - `address` — market contract address (0x-prefixed)
+
+### `kash protocol quote`
+
+On-chain price quote for buying or selling an outcome.
+
+**Arguments**
+
+- `address` — market contract address (0x-prefixed)
+
+**Options**
+
+| Flag | Description |
+| --- | --- |
+| `-s, --side <buy\|sell>` | trade side: buy or sell |
+| `-o, --outcome <index>` | outcome index (0-based) |
+| `-a, --amount <decimal>` | amount: USDC decimal for buy (e.g. "10"), outcome-token decimal for sell (e.g. "1.5") |
