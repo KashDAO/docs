@@ -56,37 +56,5 @@ Read on-chain outcome-token holdings (ERC-1155) for a market.
 - `market` — market contract address (0x-prefixed)
 - `account` (optional) — EOA or smart-account address whose holdings to read (default: profile's smartAccount)
 
-### `kash protocol allowance`
 
-Read the on-chain USDC allowance from `account` to `spender`.
-
-**Arguments**
-
-- `spender` — spender contract address (e.g. a market) — 0x-prefixed
-- `account` (optional) — owner address (default: profile's smartAccount)
-
-### `kash protocol smart-account`
-
-Smart-account address derivation and deployment-status checks.
-
-### `kash protocol smart-account compute`
-
-Derive the deterministic smart-account address for an EOA owner.
-
-**Options**
-
-| Flag | Description |
-| --- | --- |
-| `-o, --owner <address>` | EOA owner address (0x-prefixed) |
-| `-s, --salt <n>` | optional salt as a non-negative integer (default 0) |
-
-### `kash protocol smart-account is-deployed`
-
-Check whether a smart account has bytecode (i.e. has been deployed on-chain).
-
-**Arguments**
-
-- `address` (optional) — smart account address (default: profile's smartAccount)
-
-
-_Bisect commit — only the first 8 subcommand sections (through smart-account is-deployed) are shown. The remaining 20 sections are temporarily omitted while we isolate which content breaks the build._
+_Bisect — only the first 4 subcommand sections (balance, market, quote, position) are shown while we isolate the offender._
