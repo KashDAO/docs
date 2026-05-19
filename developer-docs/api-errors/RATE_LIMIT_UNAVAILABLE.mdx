@@ -15,7 +15,7 @@ This is the **transient blip** counterpart to the sustained-outage [`DEPENDENCY_
 
 ## Why it happens
 
-- A momentary ElastiCache Redis network blip — typically clears in <100ms.
+- A momentary ElastiCache Redis network blip — typically clears in `<100ms`.
 - Pool acquisition contention under burst — a Lua call queued for a free connection past the per-call timeout.
 - A momentary failover during a Redis cluster maintenance window.
 
