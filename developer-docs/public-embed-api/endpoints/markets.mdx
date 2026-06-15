@@ -14,7 +14,7 @@ GET https://app.kash.bot/api/markets
 ## Query Parameters
 
 <ParamField query="status" type="string" default="active">
-  Filter by market status: `active`, `resolved`, `cancelled`, `paused`
+  Filter by market status: `active`, `resolved`, `cancelled`, `paused`, `refunded`, `all`
 </ParamField>
 
 <ParamField query="category" type="string">
@@ -45,11 +45,11 @@ GET https://app.kash.bot/api/markets
   Pagination offset for fetching subsequent pages
 </ParamField>
 
-<ParamField query="sort" type="string" default="created_at">
-  Field to sort by: `created_at`, `total_volume`, `current_probability`, `title`
+<ParamField query="sortBy" type="string" default="created_at">
+  Field to sort by: `created_at`, `total_volume`, `current_probability`, `title`, `end_time`
 </ParamField>
 
-<ParamField query="order" type="string" default="desc">
+<ParamField query="sortOrder" type="string" default="desc">
   Sort direction: `asc`, `desc`
 </ParamField>
 
@@ -130,7 +130,7 @@ GET https://app.kash.bot/api/markets
 
 <CodeGroup>
 ```bash cURL
-curl "https://app.kash.bot/api/markets?status=active&limit=10&sort=total_volume&order=desc"
+curl "https://app.kash.bot/api/markets?status=active&limit=10&sortBy=total_volume&sortOrder=desc"
 ```
 
 ```javascript JavaScript
@@ -302,7 +302,7 @@ curl "https://app.kash.bot/api/markets/featured"
 ### Fetch high-volume markets
 
 ```bash
-curl "https://app.kash.bot/api/markets?sort=total_volume&order=desc&limit=10"
+curl "https://app.kash.bot/api/markets?sortBy=total_volume&sortOrder=desc&limit=10"
 ```
 
 ### Filter by category
@@ -322,6 +322,10 @@ curl "https://app.kash.bot/api/markets?threadId=abc123-def456"
 ```bash
 curl "https://app.kash.bot/api/markets?organizationId=550e8400-e29b-41d4-a716-446655440000"
 ```
+
+<Tip>
+To show **only your organization's markets** on your own site, you can also use the dedicated [`GET /api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets) endpoint, or drop in the [organization iframe](/developer-docs/public-embed-api/guides/organization-iframe) for a ready-made branded grid.
+</Tip>
 
 ### Get markets for a partner
 
@@ -362,6 +366,12 @@ async function fetchMarketFeed() {
 ## Related Endpoints
 
 <CardGroup cols={2}>
+  <Card title="GET /api/organizations/:id/markets" href="/developer-docs/public-embed-api/endpoints/organization-markets">
+    List a single organization's markets (scoped sub-resource)
+  </Card>
+  <Card title="Embedding Organization Iframes" href="/developer-docs/public-embed-api/guides/organization-iframe">
+    Drop your markets onto your site with one iframe
+  </Card>
   <Card title="GET /api/organizations/:id" href="/developer-docs/public-embed-api/endpoints/organization-detail">
     Get organization metadata for filtering
   </Card>

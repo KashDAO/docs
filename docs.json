@@ -222,6 +222,7 @@
             "group": "Embed — Organization Endpoints",
             "pages": [
               "developer-docs/public-embed-api/endpoints/organization-detail",
+              "developer-docs/public-embed-api/endpoints/organization-markets",
               "developer-docs/public-embed-api/endpoints/organization-partners",
               "developer-docs/public-embed-api/endpoints/organization-threads"
             ]
@@ -261,7 +262,8 @@
           {
             "group": "Embed — Guides",
             "pages": [
-              "developer-docs/public-embed-api/guides/thread-iframe"
+              "developer-docs/public-embed-api/guides/thread-iframe",
+              "developer-docs/public-embed-api/guides/organization-iframe"
             ]
           },
           {
