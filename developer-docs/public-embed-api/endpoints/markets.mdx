@@ -14,7 +14,19 @@ GET https://app.kash.bot/api/markets
 ## Query Parameters
 
 <ParamField query="status" type="string" default="active">
-  Filter by market status: `active`, `resolved`, `cancelled`, `paused`, `refunded`, `all`
+  Filter by market status: `active`, `resolved`, `cancelled`, `paused`, `refunded`, `all`. Defaults to `active`, so resolved markets are excluded unless you request them. Use `all` to fetch the full active + resolved set in one pass.
+</ParamField>
+
+<ParamField query="active" type="boolean">
+  Convenience filter that overrides `status` when present: `active=true` returns active markets, `active=false` returns resolved markets. Omit to keep the `status` default.
+</ParamField>
+
+<ParamField query="resolvedAfter" type="number">
+  Epoch-second lower bound on resolution time. Applies when the result set includes resolved markets (`active=false`, `status=resolved`, or `status=all`) — use it to slice a large resolved archive by date.
+</ParamField>
+
+<ParamField query="resolvedBefore" type="number">
+  Epoch-second upper bound on resolution time. Applies when the result set includes resolved markets (`active=false`, `status=resolved`, or `status=all`).
 </ParamField>
 
 <ParamField query="category" type="string">
@@ -309,6 +321,29 @@ curl "https://app.kash.bot/api/markets?sortBy=total_volume&sortOrder=desc&limit=
 
 ```bash
 curl "https://app.kash.bot/api/markets?category=crypto&status=active"
+```
+
+### Fetch the full set (active + resolved) in one pass
+
+The endpoint returns only active markets by default. Pass `status=all` to include resolved markets, then page through with `offset`/`limit` (`pagination.total` and `pagination.hasMore` tell you when to stop).
+
+```bash
+curl "https://app.kash.bot/api/markets?status=all&limit=500"
+```
+
+### Fetch only resolved markets
+
+```bash
+# active=false is equivalent to status=resolved
+curl "https://app.kash.bot/api/markets?active=false&limit=100"
+```
+
+### Slice the resolved archive by date
+
+`resolvedAfter`/`resolvedBefore` are epoch seconds, applied to each market's resolution time — handy for analysing a large resolved set without pulling it all at once.
+
+```bash
+curl "https://app.kash.bot/api/markets?active=false&resolvedAfter=1782345600&resolvedBefore=1782432000"
 ```
 
 ### Get markets from a specific thread
