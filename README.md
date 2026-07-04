@@ -1,6 +1,6 @@
 # Kash Documentation
 
-Official documentation for **Kash** - The AI-Powered Decentralized Prediction Markets Protocol.
+Public documentation for **Kash** — prediction markets on Base. This repo powers [docs.kash.bot](https://docs.kash.bot), built with [Mintlify](https://mintlify.com).
 
 [![Website](https://img.shields.io/badge/Website-kash.bot-FBD109)](https://kash.bot)
 [![Twitter](https://img.shields.io/badge/Twitter-@kash_bot-1DA1F2)](https://x.com/kash_bot)
@@ -9,63 +9,51 @@ Official documentation for **Kash** - The AI-Powered Decentralized Prediction Ma
 
 ## About Kash
 
-Kash is a revolutionary prediction markets platform that brings predictions directly to social media conversations. Built on Base (Coinbase's L2), Kash enables **permissionless market creation** where anyone can instantly create and trade on prediction markets without gatekeepers or approval processes.
+Kash is a prediction markets platform built on Base (Coinbase's L2). Users trade multi-outcome markets in the webapp at [app.kash.bot](https://app.kash.bot), with optional tweet-based trading via [@kash_bot](https://x.com/kash_bot) and embeddable markets for partners.
 
-### Key Features
+Key characteristics documented here:
 
-- 🤖 **AI-Powered**: Automated market creation and resolution using advanced AI agents
-- 🐦 **Social Native**: Predict directly from X (Twitter) using natural language with @kash_bot
-- 🔓 **Permissionless**: Anyone can create markets instantly - no approval required
-- ⚡ **Gasless**: Platform-sponsored transactions via ERC-4337 account abstraction
-- 🔐 **Non-Custodial**: Your funds, your control - MPC wallets via Privy technology
-- 🌐 **Global**: Available worldwide (subject to compliance restrictions)
+- **Webapp-first**: app.kash.bot is the primary product; X integration and embeds are companion surfaces
+- **Gasless**: platform-sponsored transactions via ERC-4337 account abstraction
+- **Self-custodial**: a Privy-powered embedded wallet signs for the user's smart account — Kash cannot withdraw user funds; trades execute only under permissions the user authorizes
+- **USDC-denominated**: trading and settlement in USDC on Base
 
-### What Makes Kash Different
+## Repository Structure
 
-Unlike traditional prediction markets where only platforms can create markets through approval processes, Kash enables **anyone to create markets instantly** without gatekeepers or restrictions. This permissionless approach, combined with native social media integration, creates the most accessible prediction market platform ever built.
+Content is organized by the tabs in `docs.json`:
 
-## Documentation Structure
-
-This repository contains comprehensive documentation organized into several sections:
-
-### 📚 Getting Started
-- **Quick Start**: What, Where, When, Who, Why, and How guides
-- **Guides**: Step-by-step tutorials for all platform features
-- **Features**: Deep dives into market mechanics, social integration, and AI capabilities
-- **Ecosystem**: Tokenomics, governance, and community programs
-- **FAQs**: Comprehensive answers to common questions
-
-### 👨‍💻 Developer Documentation
-- **API Reference**: Coming soon...
+- **`getting-started/`** — user-facing docs: quick start, guides, features, ecosystem, FAQs
+- **`developer-docs/`** — REST API, webhooks, CLI, SDKs, and embed API reference (parts are generated/synced from code — check before hand-editing)
+- **`for-businesses/`** — B2B / white-label docs for organizations and partners (new section)
+- **`assets/`** — images and other static assets
+- **`docs.json`** — navigation, theming, SEO, and footer configuration
 
 ## Local Development
 
-This documentation is built with [Mintlify](https://mintlify.com). To run locally:
-
 ### Prerequisites
 
-Install the Mintlify CLI:
+Node.js, plus the Mintlify CLI (optional if you use `npx`):
+
 ```bash
 npm i -g mint
 ```
 
 ### Running the Docs
 
-1. Clone this repository
-2. Navigate to the docs directory (where `docs.json` is located)
-3. Start the development server:
+From the repo root (where `docs.json` is located):
+
 ```bash
-mint dev
+npx mint dev
 ```
 
-The documentation will be available at `http://localhost:3000`
+The documentation will be available at `http://localhost:3000`.
 
 ### Making Changes
 
-- Edit `.mdx` files in the `pages/` directory
-- Update navigation in `docs.json`
+- Edit `.mdx` files in the section directories listed above
+- Update navigation in `docs.json` when adding, moving, or removing pages
 - Add assets to the `assets/` directory
-- Changes are automatically reflected in the dev server
+- Changes hot-reload in the dev server
 
 ## Deployment
 
@@ -77,15 +65,15 @@ We welcome contributions to improve the documentation:
 
 1. Fork this repository
 2. Create a feature branch
-3. Make your changes
+3. Make your changes and preview them locally with `npx mint dev`
 4. Submit a pull request
 
 ### Content Guidelines
 
-- Use clear, concise language
-- Include practical examples
-- Keep technical accuracy high
-- Follow the existing style and structure
+- Use clear, concise language and practical examples
+- Only document features that are live — mark planned features clearly as planned
+- Follow the existing Mintlify component style (`<Note>`, `<Warning>`, `<AccordionGroup>`, `<CardGroup>`, ...)
+- Keep frontmatter (`title`, `description`, `icon`) on every page
 - Test all code examples
 
 ## Project Links
@@ -97,19 +85,10 @@ We welcome contributions to improve the documentation:
 - **GitHub**: [KashDAO](https://github.com/KashDAO)
 - **Telegram**: [KashDAO](https://t.me/kashDAO)
 
-## Technology Stack
-
-- **Blockchain**: Base (Coinbase L2)
-- **Smart Contracts**: Solidity, ERC-4337 Account Abstraction
-- **AI Framework**: ElizaOS for natural language processing
-- **Wallet**: Privy MPC (Multi-Party Computation)
-- **Token**: $KASH (ERC-20)
-- **Documentation**: Mintlify
-
 ## License
 
 This documentation is open source and available under the MIT License.
 
 ---
 
-**Kash** - Where Opinions Become Opportunities
+**Kash** — Where Opinions Become Opportunities

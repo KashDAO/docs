@@ -171,18 +171,23 @@ cancellation. Long-running strategies should propagate Hummingbot's
 shutdown signal into every SDK call so a `ctrl-c` cleanly aborts
 in-flight ops.
 
-Lifecycle hooks (`KashProtocolHooks`) are five fire-and-forget
-callbacks for telemetry / structured logging:
+Lifecycle hooks (`KashProtocolHooks`) are six fire-and-forget
+callbacks for telemetry / structured logging — all optional, passed
+on the client config:
 
-- `on_request_start(name, attempt)`
-- `on_request_finish(name, durationMs, status)`
-- `on_simulate_revert(name, decoded)`
-- `on_signer_call(adapter)`
-- `on_bundler_call(method, durationMs, status)`
+- `on_bundler_request(BundlerRequestEvent)` — before every bundler JSON-RPC call (`method`, `url`)
+- `on_bundler_response(BundlerResponseEvent)` — on a successful bundler response (`method`, `url`, `duration_ms`, `status`)
+- `on_bundler_error(BundlerErrorEvent)` — on a bundler JSON-RPC error (`method`, `url`, `duration_ms`, `error`)
+- `on_signer_request(SignerRequestEvent)` — before a signer adapter call (`owner_address`, `kind`: `userop-hash` / `typed-data` / `transaction`)
+- `on_signer_error(SignerErrorEvent)` — on a signer adapter failure
+- `on_wait_orphaned(WaitOrphanedEvent)` — a `send.*` call gave up waiting for inclusion (consumer aborted, or the bundler poll timed out)
 
-Wire these into your existing logging stack (Hummingbot's structured
-log, OpenTelemetry, or whatever) without polluting the trade-path
-code with logging side effects.
+Hooks are invoked via `safe_fire` — exceptions never propagate into
+the request path, and async callbacks are scheduled but never
+awaited. Wire these into your existing logging stack (Hummingbot's
+structured log, OpenTelemetry, or whatever) without polluting the
+trade-path code with logging side effects. Never use hooks for
+control flow.
 
 ## Cancellation + clean shutdown
 
@@ -199,16 +204,22 @@ any, and is idempotent — calling it twice is a no-op. The
 
 ## Troubleshooting
 
-- **`KashSimulationRevertedError(SLIPPAGE_EXCEEDED)`** — your
-  `max_slippage_bps` was tighter than the market could meet. The
+- **`KashSimulationRevertedError` (code `SIMULATION_REVERTED`)** —
+  the prepared trade will revert on-chain. The decoded revert
+  reason lives in `context["revert_reason"]` (and
+  `context["decoded_error"]`) — a common cause is a
+  `max_slippage_bps` tighter than the market could meet. The
   pre-flight `eth_call` caught the revert before you paid for any
   signing-infra round-trips.
-- **`KashSignerError(STALE_SIGNED_TX)`** — you signed a tx and
-  then mutated its gas/fees/nonce before submit. The submit-side
-  staleness guard recovered the signing address from the bytes,
-  saw a mismatch, and refused to broadcast.
-- **`KashChainError(RPC_UNHEALTHY)`** — your RPC is down or
-  rate-limiting. Retryable; back off and retry.
+- **`KashSignerError` (code `STALE_SIGNED_TX`)** — you signed a tx
+  and then mutated its gas/fees/nonce before submit. The
+  submit-side staleness guard recovered the signing address from
+  the bytes, saw a mismatch, and refused to broadcast.
+- **`KashChainError` (e.g. codes `QUOTE_FAILED`,
+  `MARKET_READ_FAILED`, `TX_SEND_FAILED`)** — a chain RPC call
+  failed; often your RPC is down or rate-limiting. Back off and
+  retry; the stable `code` string tells you which read/write path
+  failed.
 
 ## See also
 

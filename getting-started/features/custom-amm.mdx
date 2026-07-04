@@ -1,11 +1,11 @@
 ---
 title: 'Custom AMM Bonding Curve'
-description: 'Revolutionary Zero-Liquidity AMM Built for Viral Social Dynamics'
+description: 'How the Kash Pythagorean AMM prices multi-outcome markets'
 icon: 'chart-mixed'
 ---
 
 <Note>
-Kash's revolutionary bonding curve is the first AMM designed specifically for viral social content and 24-hour prediction markets. No initial liquidity required, no whale manipulation, built-in leverage, and intelligent social adaptation.
+Kash markets run on a custom automated market maker (AMM) — a deterministic, weighted Pythagorean scoring rule built for multi-outcome prediction markets. Every market has tradeable liquidity from the moment it's created, with no external liquidity providers required.
 </Note>
 
 <img
@@ -21,200 +21,100 @@ Kash's revolutionary bonding curve is the first AMM designed specifically for vi
   alt="Hero Dark"
 />
 
-# The World's First Social-Native AMM
+# What the AMM Does
 
-**Kash's Custom Bonding Curve is a revolutionary breakthrough that eliminates every major problem with traditional prediction markets.** While existing platforms struggle with cold-start problems, whale manipulation, and poor social integration, our proprietary AMM is purpose-built for the social media age.
+Every Kash market holds a single USDC reserve that backs all of its outcomes. When you buy an outcome, your USDC (minus fees) goes into the reserve and the AMM mints outcome tokens to you along a fixed mathematical curve. When you sell, tokens are burned and USDC comes back out of the reserve.
 
-Kash is a complete reimagining of how prediction markets should work in a world of viral content and 24-hour news cycles.
+The curve is purely deterministic — the same trade against the same market state always produces the same result. There are no order books, no counterparties to match with, and no social-signal or engagement inputs to the pricing. It's just math against the reserve.
 
----
-
-# Revolutionary Advantages
+# Why It's Built This Way
 
 <AccordionGroup>
-  <Accordion title="Instant Liquidity from First Trade">
-    **The End of Bootstrap Problems**
-    
-    Traditional prediction markets have a fatal flaw: new markets need liquidity providers before anyone can trade at fair prices. This creates a chicken-and-egg problem where exciting new events have terrible pricing until enough money flows in.
-    
-    **Kash's Breakthrough:**
-    
-    Every market launches with instant, professional-grade liquidity from the very first trade. No waiting periods, no poor pricing, no dependency on external liquidity providers.
-    
-    **What This Means for You:**
-    - Jump into trending topics the moment they emerge
-    - Always get fair pricing, whether you're first or thousandth
-    - No frustrating delays waiting for markets to "warm up"
-    - Immediate participation in breaking news events
+  <Accordion title="Multi-Outcome Native">
+    Most prediction market AMMs are designed around binary YES/NO pairs. The Kash curve prices any number of outcomes in one market — Kash markets use 2 to 8 outcomes, and the contracts support up to 100.
+
+    Each outcome has its own token supply and weight, and all outcomes share the same USDC reserve. The curve also supports **multi-winner** resolutions: if more than one outcome is declared a winner, all winning tokens share the reserve pro-rata.
   </Accordion>
-  
-  <Accordion title="Built-In Leverage">
-    **Amplified Returns, Zero Liquidation Risk**
-    
-    Traditional leverage requires borrowing money, paying interest, and risking liquidation. Most prediction markets don't offer leverage at all, limiting your potential returns.
-    
-    **Kash's Innovation:**
-    
-    Our bonding curve naturally amplifies price movements without any borrowing, interest payments, or liquidation risks. You get enhanced returns with the same maximum risk as any normal trade.
-    
-    **What This Means for You:**
-    - Bigger wins on successful predictions
-    - No liquidation risk - maximum loss is always your stake
-    - Enhanced returns without additional complexity
+
+  <Accordion title="No External Liquidity Providers Needed">
+    A new market doesn't wait for anyone to deposit liquidity. It's seeded at creation by the **market creation fee**, which becomes the initial reserve and token supplies. Kash's vault system can allocate additional USDC to markets to deepen liquidity (public deposits open with the upcoming [Earn vault](/getting-started/features/earn)), but trading works from the first second either way.
   </Accordion>
-  
-  <Accordion title="Whale-Proof Social Intelligence">
-    **Designed for Authentic Community Participation**
-    
-    Large holders ("whales") can manipulate traditional prediction markets by placing massive trades that distort prices. This makes markets unreliable and unfair for regular users.
-    
-    **Kash's Protection:**
-    
-    Our bonding curve is specifically engineered to resist whale manipulation while amplifying genuine social consensus. Large manipulative trades face exponentially worse pricing, while authentic community participation gets rewarded.
-    
-    **What This Means for You:**
-    - Fair pricing that reflects real community opinion
-    - Protection from market manipulation
-    - Your voice matters as much as anyone else's
-    - Genuine social trends get amplified, not artificial ones
+
+  <Accordion title="Implied Chance Pricing">
+    The headline percentage you see on a market card is the **implied chance** of each outcome. It's computed from how the market's capital is concentrated across outcomes, it always sums to 100%, and it equals the break-even probability for buying that outcome at the margin.
+
+    Implied chance is *not* a fixed token price. Kash outcome tokens don't "pay $1" — winning tokens redeem pro-rata against the market's reserve. That's why trade previews show an **estimated payout if this outcome wins** instead of a per-share dollar figure. See [Claiming Your Winnings](/getting-started/guides/winning) for how redemption works.
   </Accordion>
-  
-  <Accordion title="Viral Content Optimization">
-    **The First AMM Built for Social Media**
-    
-    Traditional AMMs treat all trading volume the same, whether it's organic community interest or artificial manipulation. They can't distinguish between genuine viral moments and fake activity.
-    
-    **Kash's Social Intelligence:**
-    
-    Our bonding curve analyzes social signals, engagement patterns, and viral content metrics to provide better pricing for genuine community participation while penalizing manipulation attempts.
-    
-    **What This Means for You:**
-    - Markets that understand and reward authentic engagement
-    - Better pricing when you're part of genuine viral moments
-    - Protection against fake volume and manipulation
-    - AMM that gets smarter as social activity increases
+
+  <Accordion title="Price Impact and Slippage">
+    Like any convex AMM curve, larger trades move the price more. Buying an outcome pushes its implied chance up as you buy, so a big order gets a progressively worse average rate than a small one — this is ordinary price impact, not a penalty or an anti-whale mechanism.
+
+    Every trade preview shows exactly what you'll receive before you confirm, and every trade carries an on-chain minimum-output guard, so the transaction reverts rather than executing if the market moves against you between quote and execution.
   </Accordion>
 </AccordionGroup>
 
----
-
-# Why This Changes Everything
+# Seeding and Fees
 
 <Tabs>
-  <Tab title="Solves Fundamental Problems">
-    **Every Major Prediction Market Problem, Solved**
-    
-    **Traditional Problems:**
-    - New markets have poor liquidity and terrible pricing
-    - Large holders can manipulate prices unfairly
-    - No leverage available for enhanced returns
-    - Social manipulation is easy and profitable
-    - Markets don't understand viral social dynamics
-    
-    **Kash Solutions:**
-    - Instant professional liquidity from first trade
-    - Whale-resistant design protects all users
-    - Built-in leverage without borrowing risks
-    - Social intelligence rewards authentic participation
-    - Purpose-built for viral content and trending topics
+  <Tab title="How Markets Are Seeded">
+    **Creation fee becomes liquidity**
+
+    When a market is created, the creation fee is converted into the market's initial reserve and outcome supplies, with implied chances starting from the market's configured weights. There is no bootstrap period.
+
+    Kash's vault system may additionally allocate USDC into markets as a market-making strategy — this deepens liquidity and reduces price impact for traders. Public vault deposits open with the upcoming [Earn vault](/getting-started/features/earn).
   </Tab>
-  
-  <Tab title="Perfect for Social Media">
-    **Built for the Age of Viral Content**
-    
-    **Why Social Media Needs Special AMMs:**
-    - Content goes viral in minutes, not hours
-    - Authentic engagement needs protection from manipulation  
-    - Community sentiment drives real value
-    - 24-hour news cycles require instant market creation
-    
-    **How Kash Delivers:**
-    - New markets are created as trending topics emerge
-    - Social signals improve pricing for genuine participants
-    - Viral dynamics are mathematically amplified
-    - Community consensus gets rewarded over whale manipulation
-  </Tab>
-  
-  <Tab title="Revolutionary User Experience">
-    **What You Get That's Never Existed Before**
-    
-    **Immediate Access:**
-    - Trade on any trending topic instantly
-    - No waiting for liquidity providers
-    - Fair pricing from the first transaction
-    
-    **Enhanced Returns:**
-    - Natural leverage amplifies successful predictions
-    - No borrowing, interest, or liquidation risks
-    - Better pricing for authentic social participation
-    
-    **Fair Markets:**
-    - Whale manipulation becomes prohibitively expensive
-    - Your predictions matter as much as anyone else's
-    - Social intelligence rewards genuine engagement
+
+  <Tab title="Where Fees Go">
+    **Buys** — a 1% protocol fee is taken from your USDC before it enters the curve. The rest goes into the market reserve.
+
+    **Sells** — two fees apply: a 1% AMM sell fee that **stays in the market reserve** (benefiting remaining token holders), and a 1% protocol fee taken from your payout.
+
+    **Redemption** — claiming winnings or refunds carries **no fee**. Neither fee ever distorts the curve itself: protocol fees are skimmed at the transfer layer and the invariant is unchanged.
+
+    See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.
   </Tab>
 </Tabs>
 
----
+# For the Curious: The Math
 
-# Competitive Advantages
+<Accordion title="The Pythagorean invariant">
+  The AMM is a weighted Pythagorean scoring rule. For a market with reserve `R`, outcome supplies `s_i`, and static weights `a_i` (which sum to 1), define:
 
-<CardGroup cols={2}>
-  <Card
-    title="Zero Bootstrap Time"
-    icon="rocket"
-  >
-    Every market launches with instant liquidity. No cold-start problems, no waiting periods, no dependency on external liquidity providers.
-  </Card>
-  <Card
-    title="Built-in Leverage"
-    icon="chart-line-up"
-  >
-    Enhanced returns without borrowing, interest rates, or liquidation risks. Natural leverage that amplifies wins while limiting losses.
-  </Card>
-  <Card
-    title="Whale Resistant"
-    icon="shield-check"
-  >
-    Large manipulative trades face exponentially worse pricing while authentic community participation gets rewarded with better rates.
-  </Card>
-  <Card
-    title="Social Intelligence"
-    icon="users"
-  >
-    The first AMM designed for viral social media dynamics, trending content patterns, and authentic community engagement.
-  </Card>
-</CardGroup>
+  ```
+  A = Σ a_i · s_i²        (weighted sum of squared supplies)
+  N = √A
+  c = R / N               (the curve invariant)
+  ```
 
-# The Innovation That Makes It Possible
+  - **Buys and sells** move along this curve: the reserve and the supplies change together so that the trade is consistent with the invariant. The cost of pushing an outcome's supply up grows convexly — that's where price impact comes from.
+  - **Implied chance** for outcome `i` is its capital share: `q_i = a_i · s_i² / A`. These always sum to 100% and represent how the market's risk is concentrated.
+  - **Marginal prices** (the instantaneous token exchange rate, in USDC per token) are a different quantity from implied chance. They're shown in the app only as an advanced "AMM token rate" detail, because they are exchange rates, not probabilities.
+  - **Redemption** is pro-rata: when a market resolves, each winning token redeems for `R × tokens / (total winning supply)`. Cancelled markets snapshot each outcome's marginal price and refund at that frozen rate.
 
-**Kash's Custom Bonding Curve represents the most significant advancement in prediction market technology since AMMs were invented.**
-
-Unlike traditional constant-product formulas that treat all volume equally, our proprietary curve understands social signals, recognizes viral content, prevents whale manipulation, adapts to event timing, and learns from recent patterns.
-
-The result is a prediction market that understands social media, rewards authentic participation, and provides instant liquidity for any trending topic.
+  The full derivations, overflow bounds, and invariant tests are documented in the AMM contract repository for auditors and integrators.
+</Accordion>
 
 <Tip>
-This breakthrough eliminates every barrier that has limited prediction market adoption. For the first time, prediction markets can truly capture the speed, authenticity, and viral dynamics of social media conversations.
+Because pricing is deterministic and fully on-chain, anyone can verify a quote independently — what you see in the trade preview is exactly what the contract will do.
 </Tip>
 
 ---
 
-# Experience the Revolution
+# Learn More
 
 <CardGroup cols={2}>
   <Card
-    title="Understanding Market Mechanics"
+    title="Market Mechanics"
     icon="gears"
     href="/getting-started/features/market-mechanics"
   >
-    See how our revolutionary AMM integrates with Kash's overall system
+    Market lifecycle, resolution, fees, and claims
   </Card>
   <Card
     title="Start Trading"
     icon="crystal-ball"
     href="/getting-started/guides/predicting"
   >
-    Experience the bonding curve advantages firsthand
+    Place your first prediction
   </Card>
 </CardGroup>

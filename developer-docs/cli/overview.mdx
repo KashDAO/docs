@@ -25,14 +25,14 @@ kash --help
 kash setup
 
 # Or set explicitly
-kash config set apiKey kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+kash auth set-key kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 kash config set baseUrl https://api.kash.bot/v1
 
 # Read it back
-kash config get
+kash config show
 ```
 
-Config lives at `~/.config/kash/config.json` (XDG-compliant). For CI use the env vars instead:
+Config lives at `~/.kash/config.json` (written mode 0600). For CI use the env vars instead:
 
 ```bash
 export KASH_API_KEY="kash_live_..."
@@ -45,19 +45,23 @@ Env vars override on-disk config.
 
 ```bash
 # Markets
-kash markets list --status active --limit 10
+kash markets list --status ACTIVE --limit 10
 kash markets get <market-id>
-kash markets quote <market-id> --outcome 0 --side buy --amount 100
+
+# Quotes (top-level command; requires the markets:quote scope)
+kash quote buy <market-id> --outcome 0 --amount 100
+kash quote sell <market-id> --outcome 0 --amount 50
 
 # Trades
-kash trades create --market <market-id> --outcome 0 --amount 100 --side buy --metadata strategy=momentum-v2
-kash trades confirm <trade-id> --token <token-from-202>
-kash trades list --status completed --limit 25
-kash trades get <trade-id>
-kash trades wait <trade-id> --timeout 60s
+kash trade buy <market-id> --outcome 0 --amount 100 --wait
+kash trade sell <market-id> --outcome 0 --amount 50
+kash trade confirm <trade-id> <token-from-202>
+kash trade list --status completed --limit 25
+kash trade status <trade-id>
+kash trade status <trade-id> --poll     # poll until terminal state
 
 # Portfolio
-kash portfolio get
+kash portfolio show
 kash portfolio positions --limit 50
 
 # Account telemetry
@@ -67,9 +71,11 @@ kash account usage
 kash webhooks list --status failed --limit 20
 kash webhooks redeliver <event-id>
 kash webhooks rotate-secret
-kash webhooks trace --event-id <event-id>
-kash webhooks simulate --type trade.completed --secret $SECRET --url http://localhost:3000/webhooks/kash
-kash webhooks verify --secret $SECRET   # reads stdin, prints whether signature checks out
+kash webhooks verify --signature "t=…,v1=…" --body-file payload.json --secret $SECRET
+kash webhooks replay payload.json --target http://localhost:3000/webhooks/kash --secret $SECRET
+
+# Tracing (top-level command)
+kash trace <correlation-id>             # get it from: kash trade status <id> --json | jq -r .correlationId
 
 # Errors
 kash explain INSUFFICIENT_SCOPE         # local lookup; works offline
@@ -82,7 +88,7 @@ Every command supports `--help` for full usage.
 
 Two output shapes:
 
-- **Human (default)** — coloured, tabular, designed for interactive reading.
+- **Human (default)** — colored, tabular, designed for interactive reading.
 - **JSON (`--json`)** — stable envelope, designed for piping into `jq`, scripts, or agent contexts.
 
 ```bash
@@ -162,7 +168,7 @@ kash config import ~/kash-config.json
 
 ## Retry behaviour
 
-The CLI retries transient failures (network errors, 429, 5xx) with exponential backoff and jitter — same as the SDK. Use `--no-retry` to disable for a single command, or `--max-retries N` to override.
+The CLI retries transient failures (network errors, 429, 5xx) with exponential backoff and jitter — same as the SDK. Use the global `--max-retries <n>` flag (0–10) to override the retry budget for a single invocation — `--max-retries 0` disables retries entirely.
 
 ## Direct (self-orchestrated) mode
 

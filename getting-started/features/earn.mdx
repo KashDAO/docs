@@ -1,0 +1,97 @@
+---
+title: 'Earn'
+description: 'Coming soon — how the Kash liquidity vault will work'
+icon: 'vault'
+---
+
+<Note>
+**Coming soon.** The Earn vault will let you put your USDC to work: deposit into the vault, receive shares, and your position grows as the vault earns fees from providing liquidity to Kash's prediction markets. It will live at [app.kash.bot/earn](https://app.kash.bot/earn).
+</Note>
+
+This page describes how the vault will work at launch — details may be refined before general availability.
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# How the vault works
+
+The Earn vault is an **ERC-4626 vault** on Base. When you deposit USDC you receive vault shares, and the value of those shares tracks the vault's net asset value (NAV) — as the vault earns, each share is worth more USDC.
+
+<Warning>
+Vault deposits are at risk. Your USDC is deployed into live prediction markets, and market-making can lose money as well as earn it — returns are not guaranteed, and the value of your shares can go down as well as up. Smart contract interactions also carry their own risks. Only deposit what you can afford to lose.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="Where the yield comes from">
+    The vault's USDC is deployed as liquidity across prediction markets on Kash. The vault acts as a **market maker** — providing the liquidity that lets traders buy and sell outcome tokens — and earns trading fees plus market-making returns from that activity. As markets resolve, results flow back to the vault and are reflected in the share price.
+
+    Returns are **not fixed**: they depend on trading volume and how the vault's market positions perform. The more activity on the platform, the more fees the vault collects.
+  </Accordion>
+
+  <Accordion title="Deposits">
+    Enter the amount of USDC you want to deposit and confirm. You receive vault shares at the current share value, and your position starts accruing from that point.
+
+    - **No minimum** — deposit any amount of USDC
+    - **No lock-up** — you can request a withdrawal at any time, with no early-exit penalty
+    - Any entry fee is shown in the deposit quote before you confirm
+  </Accordion>
+
+  <Accordion title="Withdrawals">
+    Withdrawals are processed in **batches**. You request a redemption of your shares, the request is queued for the next batch, and once the batch settles you claim your USDC. Your share of the vault is valued at the share price when the redemption is processed.
+
+    If the vault is ever paused, new deposits are temporarily disabled — withdrawals and claims remain available.
+  </Accordion>
+
+  <Accordion title="Fees">
+    The protocol enforces on-chain **caps** on vault fees:
+
+    | Fee | Cap |
+    |---|---|
+    | Entry fee | up to 5% |
+    | Exit fee | up to 5% |
+    | Performance fee | up to 20% |
+
+    These are maximums, not current rates — the live values are set on-chain and may be lower. The entry fee applied to your deposit is always displayed in the quote before you confirm.
+  </Accordion>
+</AccordionGroup>
+
+# Tracking your position
+
+Your Earn page shows your position and history in one place:
+
+- **Your stake** — shares held and their current USDC value
+- **Total earned** — how your position has performed against what you deposited
+- **Activity** — a history of your deposits and withdrawals, each linked to its on-chain transaction
+
+Like everything on Kash, the vault is **non-custodial**: funds are held in smart contracts, and interactions happen from your own smart account with sponsored gas.
+
+<Tip>
+The vault provides liquidity to Kash markets. Its performance depends on market-making results, which can be negative — it is not a savings product.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Market Mechanics"
+    icon="gears"
+    href="/getting-started/features/market-mechanics"
+  >
+    How the markets your deposit supports actually work
+  </Card>
+  <Card
+    title="Depositing"
+    icon="money-bill-transfer"
+    href="/getting-started/guides/depositing"
+  >
+    Get USDC into your Kash account
+  </Card>
+</CardGroup>

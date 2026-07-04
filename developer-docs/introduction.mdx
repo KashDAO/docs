@@ -6,7 +6,7 @@ description: 'Build with Kash prediction markets'
 Welcome to the Kash developer documentation. Build trading bots and agents against the protocol, sign transactions directly on-chain, embed markets in your website, and access real-time market data.
 
 <Note>
-**Kash is non-custodial across every surface.** User funds always sit in Privy-managed MPC smart accounts that the user controls — Kash never holds keys or funds, on any path. The split below is about **who orchestrates execution**, not custody.
+**Kash is non-custodial across every surface.** User funds always sit in ERC-4337 smart accounts controlled by the user's own Privy embedded wallet — Kash never holds keys or funds, on any path. The split below is about **who orchestrates execution**, not custody.
 </Note>
 
 ## Pick your surface
@@ -69,7 +69,7 @@ Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (TypeScript or [Py
 Use the [CLI](/developer-docs/cli/overview) for shell-driven workflows: list markets, place trades, rotate webhook secrets, redeliver events, decode error codes — all with a stable JSON envelope for piping into `jq` or agent contexts.
 
 ### Embed prediction markets
-Use the [Public Embed API](/developer-docs/public-embed-api/overview) to drop iframes and read-only market data into news sites, financial platforms, or community forums. Markets are read-only — users are directed to X to make predictions.
+Use the [Public Embed API](/developer-docs/public-embed-api/overview) to drop iframes and read-only market data into news sites, financial platforms, or community forums. Embeds are read-only — users are directed to app.kash.bot to trade.
 
 ## Support
 

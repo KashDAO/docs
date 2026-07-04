@@ -1,6 +1,6 @@
 ---
 title: 'ETags & Caching'
-description: 'If-None-Match short-circuits — skip unchanged data without spending quota.'
+description: 'If-None-Match short-circuits — skip re-downloading unchanged data cheaply.'
 ---
 
 Every response from `api.kash.bot` carries an `ETag` header — a content-derived hash of the response body. Send it back on the next request as `If-None-Match` and the server short-circuits with `304 Not Modified` (and an empty body) when nothing changed.

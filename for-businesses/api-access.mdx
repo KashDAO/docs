@@ -1,0 +1,54 @@
+---
+title: 'API access'
+description: 'Org-scoped API keys, webhooks, and how embed tracking relates to revenue'
+icon: 'key'
+---
+
+Organizations can access Kash programmatically with **org-scoped API keys** — API keys tied to your organization rather than an individual user account. They work against the same REST API as regular keys, with the same authentication, scopes, and tier system.
+
+## Same tier ladder as the public API
+
+Org-scoped keys follow the public API's tier ladder — `free`, `developer`, `enterprise`, and `mm` — with each tier setting your daily spend cap, per-trade cap, and rate limit. For the current limits per tier, see the public API docs:
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/developer-docs/rest-api/authentication">
+    Key format, scopes, and request signing.
+  </Card>
+  <Card title="Rate limits" icon="gauge" href="/developer-docs/rest-api/rate-limits">
+    Per-tier limits and the rate-limit response headers.
+  </Card>
+</CardGroup>
+
+For `enterprise` and `mm` tiers (custom limits, negotiated terms), contact [partnerships@kash.bot](mailto:partnerships@kash.bot).
+
+## Scoped keys and webhooks
+
+- **Scopes** — keys are issued with explicit scopes, so you can hand a reporting integration read-only access while keeping trading capability on a separate key.
+- **Webhooks** — subscribe to HMAC-signed webhooks to react to events in real time instead of polling. See the [webhooks overview](/developer-docs/rest-api/webhooks/overview).
+
+## Embed tracking is analytics-only
+
+A common point of confusion, worth being precise about:
+
+<Warning>
+The `?source=` parameter on embeds and the per-render embed tracking are **analytics-only**. They tell you where your embed traffic comes from — they do not determine revenue share.
+</Warning>
+
+Revenue share is **trade-level**: you earn a share of fees on every trade in markets **your organization creates**, regardless of where the trade originates — the webapp, an embed on any site, or X. Embedding someone else's market does not earn you revenue share; creating markets does. See [Pricing and revenue share](/for-businesses/pricing-and-revenue-share).
+
+The two work together: embed tracking shows you which placements drive engagement, while trade-level attribution pays you for the markets you own.
+
+## No-auth option: the Public Embed API
+
+If you only need to display markets — no trading, no org data — the [Public Embed API](/developer-docs/public-embed-api/overview) is public, read-only, and requires no API key at all.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="REST API overview" icon="bolt" href="/developer-docs/rest-api/overview">
+    Endpoints, SDKs, and quickstart for the authenticated API.
+  </Card>
+  <Card title="Analytics and earnings" icon="chart-line" href="/for-businesses/analytics-and-earnings">
+    What the portal shows you without writing any code.
+  </Card>
+</CardGroup>

@@ -1,6 +1,6 @@
 ---
 title: 'How do I use Kash?'
-description: 'From Thought to Profit'
+description: 'The core loop: sign in, deposit, trade, track, claim'
 icon: "compass"
 ---
 
@@ -17,131 +17,47 @@ icon: "compass"
   alt="Hero Dark"
 />
 
-# Complete User Journey
+## The core loop
 
 <Steps>
-  <Step title="Account Creation & Setup">
-    **Get Started in 30 Seconds**
-    - Connect your X (Twitter) account to @kash_bot
-    - Automatic MPC wallet creation via Privy (no seed phrases needed)
-    - ERC-4337 smart contract wallet deployed on Base network
-    - Wallet recovery through X account - no complex backup procedures
-    - Ready to start predicting immediately
+  <Step title="Sign in">
+    Go to [app.kash.bot](https://app.kash.bot) and sign in with **X (Twitter), Google, email, or an external wallet** (via Privy). An embedded wallet and ERC-4337 smart account on Base are created for you automatically — no seed phrase needed. Details in [Creating an Account](/getting-started/guides/creating-an-account).
   </Step>
-  
-  <Step title="Wallet Funding">
-    **Multiple Funding Options**
-    - Direct crypto transfer (USDC, WETH, etc.) to your wallet
-    - Fiat on-ramps through integrated payment providers
-    - Automatic token swaps via 0x protocol if you don't have USDC
-    - Minimum funding required before placing first prediction
-    - Instant liquidity from Automated LP Vault ensures markets are ready
+
+  <Step title="Deposit USDC">
+    Fund your account with a card, Apple Pay, Google Pay, or a direct crypto transfer. Everything on Kash trades in USDC on Base. See [Depositing](/getting-started/guides/depositing).
   </Step>
-  
-  <Step title="Market Discovery">
-    **Find Active Markets**
-    ```
-    You find a market on @kash_bot's timeline:
-    "New Market: Will Taylor Swift announce tour dates this week?
-    
-    Current odds:
-    YES: $0.45 (45%)
-    NO: $0.55 (55%)
-    
-    Repost the market with your prediction!"
-    ```
+
+  <Step title="Find a market">
+    Browse **Trending**, **For You**, and **Recurring** tabs, filter by category, search by keyword, or explore [threads](/getting-started/features/threads) and the [World Cup hub](/getting-started/features/world-cup). More in [Finding Opportunities](/getting-started/guides/finding-opportunities).
   </Step>
-  
-  <Step title="Place Prediction">
-    **Use Natural Language**
-    ```
-    Your repost: "YES $75 - she's been dropping hints all week!"
-    
-    @kash_bot processes your intent and converts to:
-    - Amount: $75 USDC
-    - Outcome: YES
-    - Shares: ~167 shares at current price
-    ```
+
+  <Step title="Buy an outcome">
+    On a market page, pick the outcome you believe in, enter an amount, review the quote (price, estimated payout, 1% fee), and confirm. The trade executes gas-free from your smart account. See [Predicting](/getting-started/guides/predicting).
   </Step>
-  
-  <Step title="Transaction Execution">
-    **Automated Backend Processing**
-    ```
-    @kash_bot confirmation:
-    "Prediction placed successfully!
-    
-    Position: 167 YES shares at $0.45
-    Investment: $75.00
-    Potential payout: $163.66 (if YES wins)
-    Market closes: Friday 11:59 PM EST"
-    ```
+
+  <Step title="Track your positions">
+    Your [Portfolio](/getting-started/guides/winning) shows open positions with live P&L, your trade history, and your balance. You can sell out of a position any time while the market is open (1% protocol + 1% AMM fee on sells).
   </Step>
-  
-  <Step title="Resolution & Payout">
-    **Automatic Settlement**
-    ```
-    @kash_bot resolution:
-    "Market resolved: YES! Taylor Swift announced tour dates!
-    
-    Your 167 YES shares = $167.00 payout
-    Trade fee already paid when predicting
-    Net payout: $167.00
-    
-    Funds sent to your wallet automatically"
-    ```
-  </Step>
-  
-  <Step title="Withdrawal & Rewards">
-    **Access Your Winnings**
-    - Winning payouts automatically credited to your wallet
-    - Withdraw USDC to external wallets or convert to other tokens
-    - Revenue sharing if you create popular markets
-    - All funds remain in your non-custodial wallet at all times
+
+  <Step title="Claim winnings when the market resolves">
+    When a market resolves, winning positions become claimable — hit **Claim Winnings** in your Portfolio. If a market is cancelled instead, a **Claim Refund** option appears. Details in [Winning](/getting-started/guides/winning).
   </Step>
 </Steps>
 
 ---
 
-# Key Features
+## Optional: trade from tweets
 
-Explore what makes Kash unique and powerful:
+If you enable the trading bot in **Settings → Trading bot**, you can also place trades on X by tweeting at **Kash's dedicated trading account** with a market link and your position (for example, an amount and the outcome you're backing) — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile. The bot executes the trade from your Kash account and replies with a confirmation.
 
-<CardGroup cols={2}>
-  <Card
-    title="Market Mechanics"
-    icon="gears"
-    href="/getting-started/features/market-mechanics"
-  >
-    How prediction markets work, pricing, and automated liquidity
-  </Card>
-  <Card
-    title="Social Integration"
-    icon="share-nodes"
-    href="/getting-started/features/social"
-  >
-    Native X (Twitter) predicting and social discovery
-  </Card>
-  <Card
-    title="Natural Language"
-    icon="comment"
-    href="/getting-started/features/natural-language"
-  >
-    Predict how you talk. No complex interfaces
-  </Card>
-  <Card
-    title="Trading Options"
-    icon="chart-line"
-    href="/getting-started/features/trading-options"
-  >
-    Advanced trading with conditional orders
-  </Card>
-</CardGroup>
+<Note>
+Tweet-trading is opt-in and covers placing trades only — deposits, withdrawals, claims, and everything else happen in the webapp.
+</Note>
 
 ---
 
-# Step-by-Step Guides
-
-Ready to get started? Follow the comprehensive guides for every aspect of using Kash:
+## Step-by-step guides
 
 <CardGroup cols={3}>
   <Card

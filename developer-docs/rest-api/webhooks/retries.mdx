@@ -18,22 +18,11 @@ If your endpoint:
 
 ### Retry schedule
 
-| Attempt | Delay before     | Approximate clock time after the originating event |
-| ------- | ---------------- | -------------------------------------------------- |
-| 1       | (immediate)      | T+0                                                |
-| 2       | 30 sec           | T+30s                                              |
-| 3       | 2 min            | T+~2.5m                                            |
-| 4       | 8 min            | T+~10m                                             |
-| 5       | 30 min           | T+~40m                                             |
-| 6       | 2 hours          | T+~2h40m                                           |
-| 7       | 6 hours          | T+~8h40m                                           |
-| 8       | 12 hours         | T+~21h                                             |
-| 9       | 18 hours         | T+~39h                                             |
-| 10      | 24 hours (final) | T+~63h (~2.6 days)                                 |
+Failed deliveries are retried with **exponential backoff and jitter**: the first attempt fires immediately, early retries follow within seconds-to-minutes, and later gaps stretch to multiple hours — up to **10 attempts total over roughly 24 hours** from the originating event.
 
-After attempt 10, the event is marked `terminally failed` (`webhook_events.terminal_failure_at` is set). Automatic delivery stops; the event remains in the database for 30 days for manual replay.
+After attempt 10 (or the ~24h ceiling), the delivery moves to the dead-letter queue and the event is marked `terminally failed` (`webhook_events.terminal_failure_at` is set). Automatic delivery stops; the event remains in the database for 30 days for manual replay.
 
-Each scheduled delay carries up to 20% jitter to avoid herd retry storms.
+Delays are jittered to avoid herd retry storms — treat the schedule as approximate, not a contract.
 
 ## Distributed circuit breaker
 
@@ -63,12 +52,12 @@ curl 'https://api.kash.bot/v1/webhooks/events?status=failed&limit=20' \
       "status":          "failed",
       "delivery": {
         "attempts":          10,
-        "lastAttemptedAt":   "2026-05-04T03:42:18.000Z",
+        "lastAttemptedAt":   "2026-05-03T11:42:18.000Z",
         "lastDeliveredAt":   null,
         "lastStatusCode":    503,
         "lastFailureCode":   "http_5xx",
         "lastErrorMessage":  "Upstream returned 503 Service Unavailable",
-        "terminalFailureAt": "2026-05-04T03:42:18.000Z"
+        "terminalFailureAt": "2026-05-03T11:42:18.000Z"
       }
     }
   ],
@@ -126,13 +115,14 @@ The customer-facing API doesn't expose bulk redelivery — that's deliberate (am
 
 ## Tracing a specific event
 
-The `kash webhooks trace --event-id <id>` CLI command pulls the full distributed trace for one event:
+The top-level `kash trace <correlationId>` CLI command pulls the curated event timeline for the trade behind a delivery — get the correlation id from the originating trade:
 
 ```bash
-kash webhooks trace --event-id evt_8f3c2a1b9d0e4f7a8c1b6e5d3f4a2c9b
+kash trade status <trade-id> --json | jq -r '.correlationId'
+kash trace 33333333-3333-3333-3333-333333333333
 ```
 
-Output includes the originating trade, every delivery attempt, every retry decision, and any breaker open/close events. Useful for "why didn't this deliver?" investigations.
+Output is the trade's end-to-end event chain (intent → funding → execution → webhook delivery). Useful for "why didn't this deliver?" investigations.
 
 ## What survives 30 days
 
@@ -157,7 +147,7 @@ Output includes the originating trade, every delivery attempt, every retry decis
 5. Inspect what hits your handler.
 6. Restore the key's `webhook_url` when you're done.
 
-A safer alternative: use `kash webhooks simulate` (CLI) to generate a synthetic but properly-signed payload locally — no production data round-trip needed.
+A safer alternative: use `kash webhooks replay <body-file> --target <url> --secret <s>` (CLI) to sign a locally captured (or synthetic) payload and POST it at your endpoint — no production data round-trip needed. Pair with `kash webhooks verify` to check signatures offline.
 
 ## Next
 

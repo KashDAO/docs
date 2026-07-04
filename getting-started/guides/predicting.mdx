@@ -1,11 +1,11 @@
 ---
 title: 'Predicting'
-description: 'How to place make predictions'
+description: 'How to make predictions'
 icon: 'crystal-ball'
 ---
 
 <Note>
-Turn your insights into returns - making predictions on Kash is as simple as reposting your prediction of a market.
+Turn your insights into returns — pick a market on app.kash.bot, choose Yes or No, and confirm. That's a prediction.
 </Note>
 
 <img
@@ -27,231 +27,150 @@ Turn your insights into returns - making predictions on Kash is as simple as rep
   alt="Making predictions walkthrough"
 />
 
-# Understanding Market Odds
+# Understanding market odds
 
-## How Prediction Markets Work
-Kash uses **binary prediction markets** where prices represent probabilities:
+## How prediction markets work
+
+Every market card shows an **implied chance** — the market's current estimate of how likely each outcome is, based on real money traded:
 
 <AccordionGroup>
-  <Accordion title="Price = Probability">
-    - **YES at \$0.72** = 72% chance of event happening
-    - **NO at \$0.28** = 28% chance of event NOT happening
-    - **Always sums to \$1.00** = 100% probability total
-    - **Prices change** as people place predictions and new information emerges
+  <Accordion title="Implied chance">
+    - **Yes at 72%** means the market currently implies a 72% chance the event happens
+    - The implied chance moves as people trade and new information emerges
+    - Buying an outcome pushes its implied chance up; selling pushes it down
+    - Markets can have more than two outcomes — the same logic applies to each one
   </Accordion>
-  <Accordion title="Your Potential Returns">
-    - **Buy YES at \$0.72** - You pay \$0.72 per share
-    - **If YES wins:** You receive \$1.00 per share
-    - **Your profit:** \$0.28 per share (38.9% return)
-    - **If NO wins:** You lose your prediction entirely
-    - **Liquid Markets:** Markets remain liquid — you can exit positions at any time at available market rates
-    - **Example:** \$100 prediction → 138.89 shares → \$138.89 if correct
+  <Accordion title="Your potential returns">
+    - When you set up a trade, the ticket shows an **estimated payout if you win**
+    - The lower the implied chance when you buy, the higher your estimated payout if you're right
+    - The estimate can shift as others trade — the final payout is your pro-rata share of the market's reserve at resolution
+    - If your outcome loses, your position is worth nothing at resolution
+    - **Markets stay liquid** — you can exit positions at any time at the current market price
   </Accordion>
-  <Accordion title="Market Dynamics">
-    - **Early predictions** often get better rates before consensus forms
-    - **Breaking news** can rapidly shift prices
-    - **Large predictions** move rates more than small ones
-    - **Smart money** keeps markets efficient through arbitrage
-    - **Social sentiment** influences prediction patterns
+  <Accordion title="Market dynamics">
+    - **Early predictions** often get better prices before consensus forms
+    - **Breaking news** can rapidly shift the implied chance
+    - **Large trades** move prices more than small ones
+    - **Arbitrage** keeps prices roughly in line with real-world probabilities
   </Accordion>
 </AccordionGroup>
 
-# How to Make Predictions
+# How to make predictions
 
 <Tabs>
-  <Tab title="Finding Markets">
-    **Discover active prediction markets**
-    
-    ## Through Your X Feed
-    - **Follow @kash_bot** - Turn on notifications for instant alerts (coming soon)
-    - **Browse market posts** on @kash_bot's timeline
-    - **@mention @kash_bot** to get market suggestions on topics you care about
-    - **Shared by other predictors** in your network
-    
-    ## Ask for Recommendations
-    Tweet or DM @kash_bot with:
-    - **"Show me markets"** - See all active markets
-    - **"What can I predict on?"** - Get personalized suggestions
-    - **"Markets about [topic]?"** - Find specific category markets
-    - **"Find me crypto predictions"** - Category-specific requests
-    
-    ## Market Post Format
-    ```
-    @kash_bot: "Will the Fed raise rates this month?"
-    Current odds: YES 72% ($0.72) | NO 28% ($0.28)
-    Closes: March 20, 2024 at 2:00 PM EST
-    Repost to predict!
-    ```
+  <Tab title="On the webapp">
+    **The primary way to trade — app.kash.bot**
+
+    <Steps>
+      <Step title="Find a market">
+        Browse trending markets, categories, or search on [app.kash.bot](https://app.kash.bot). Each card shows the question and the current implied chance.
+      </Step>
+      <Step title="Pick a side">
+        Tap **Yes** or **No** (or the specific outcome in multi-outcome markets). The trade ticket opens.
+      </Step>
+      <Step title="Set your amount">
+        Enter how much USDC to spend. The ticket shows your shares and the **estimated payout if you win** before you confirm.
+      </Step>
+      <Step title="Confirm">
+        Confirm the trade — it executes gaslessly from your Kash wallet, and your position appears in your Portfolio immediately.
+      </Step>
+    </Steps>
   </Tab>
-  
-  <Tab title="Placing Predictions">
-    **Simple social prediction through replies**
-    
-    ## Easy Format
-    Just repost any market with:
-    - **"YES 50"** - Predict \$50 that the event will happen
-    - **"NO 100"** - Predict \$100 that it won't happen
-    - **"YES \$25"** - Dollar sign is optional
-    - **"no 10"** - Case doesn't matter
-    
-    ## Automatic Execution
-    1. **@kash_bot confirms** your prediction intent
-    2. **Checks wallet balance** to ensure sufficient funds
-    3. **Executes the trade** at current market price
-    4. **Replies with confirmation** and your position details
-    
+
+  <Tab title="Trading from X">
+    **Optional: trade by replying on X (Twitter)**
+
+    Kash can turn your X account into a trading interface. This is **opt-in** — enable it under **Settings → Trading bot** on app.kash.bot first. Trades go through **Kash's dedicated trading account** — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile.
+
+    ## Simple format
+    Reply to or repost any Kash market post with:
+    - **"YES 50"** — put $50 on the event happening
+    - **"NO 100"** — put $100 on it not happening
+    - **"YES $25"** — dollar sign optional, case doesn't matter
+
+    ## What happens next
+    1. Kash confirms your prediction intent
+    2. Checks your wallet balance
+    3. Executes the trade at the current market price
+    4. Replies with your position details
+
     **Example interaction:**
     ```
     You: "YES 100"
-    @kash_bot: "Bought 138.89 YES shares @ $0.72 each
+    Kash trading bot: "Bought Yes at 72% implied chance
                Total cost: $100
-               Win if YES: $138.89 (+$38.89 profit)"
+               Estimated payout if Yes wins: ~$137"
     ```
   </Tab>
-  
-  <Tab title="Market Resolution">
+
+  <Tab title="Market resolution">
     **How outcomes are determined**
-    
-    ## Market Close Process
-    - **Trading stops** at predetermined deadline
-    - **Existing positions locked** - no more changes allowed
-    - **Await final outcome** determination
-    - **Resolution typically within hours** of event conclusion
-    
-    ## AI-Powered Resolution
-    - **Automated data fetching** from trusted sources
-    - **AI verification** of outcome using multiple sources
-    - **Zero-knowledge proofs** ensure trustless resolution
-    - **Instant settlement** to winner wallets
-    - **Transparent process** - all results publicly verifiable
-  </Tab>
-  
-  <Tab title="Advanced Features">
-    **Power user prediction options**
-    
-    ## Leverage Prediction
-    - **Predict up to 2x your balance** with qualifying accounts
-    - **Higher risk, higher reward** potential
-    - **5% interest fee** paid to treasury
-    - **Example:** "YES 200 2x" to leverage a $200 prediction
-    
-    ## Private Predictions
-    **DM @kash_bot for discreet prediction:**
-    - **No public announcements** of your prediction
-    - **Same execution process** as public predictions
-    - **Ideal for large positions** that might move markets
-    - **Maintains prediction anonymity** while staying social
-    
-    ## Limit Orders
-    **Set your preferred entry price:**
-    - **"YES 100 at 0.65"** - Execute when price drops to $0.65
-    - **Executes automatically** when conditions are met
-    - **Good for patient traders** who want specific prices
-    - **Cancel anytime** before execution
+
+    ## Market close
+    - Trading stops at the market's deadline
+    - Existing positions are locked in
+    - The market awaits resolution
+
+    ## Resolution and claiming
+    - The market's oracle sets the winning outcome on-chain
+    - Winning positions become **claimable in your Portfolio**
+    - If a market can't be resolved, it can be cancelled and positions become refundable
+
+    See the [winning guide](/getting-started/guides/winning) for exactly how payouts, claims, and refunds work.
   </Tab>
 </Tabs>
 
 ---
 
-# Prediction Strategies
+# Prediction strategies
 
 <AccordionGroup>
-  <Accordion title="Information Edge">
-    **Leverage knowledge for better predictions**
-    - **Research before predicting** - Read news, analyze trends, understand context
-    - **Follow reliable sources** - Trust verified accounts and expert analysis
-    - **Spot market inefficiencies** - Find rates that don't match reality
-    - **Act on breaking news** - Be first to capitalize on new information
+  <Accordion title="Information edge">
+    - **Research before predicting** — read news, analyze trends, understand context
+    - **Follow reliable sources** — trust verified accounts and expert analysis
+    - **Spot market inefficiencies** — find implied chances that don't match reality
+    - **Act on breaking news** — be first to capitalize on new information
   </Accordion>
-  <Accordion title="Portfolio Approach">
-    **Manage risk like a professional trader**
-    - **Diversify across markets** - Don't put all eggs in one basket
-    - **Don't predict entire balance** - Keep reserves for better opportunities
-    - **Take profits regularly** - Lock in gains instead of letting them ride
-    - **Manage risk carefully** - Size predictions according to confidence level
+  <Accordion title="Portfolio approach">
+    - **Diversify across markets** — don't put all eggs in one basket
+    - **Don't trade your entire balance** — keep reserves for better opportunities
+    - **Take profits regularly** — lock in gains instead of letting them ride
+    - **Size predictions to your confidence level**
   </Accordion>
-  <Accordion title="Social Signals">
-    **Learn from the crowd and contrarian opportunities**
-    - **Watch influencer predictions** - Follow successful predictors' strategies
-    - **Monitor sentiment shifts** - Identify when opinion is changing
-    - **Copy successful traders** - Learn from proven track records
-    - **Learn from patterns** - Recognize recurring market behaviors
+  <Accordion title="Social signals">
+    - **Watch successful predictors** — follow proven track records on the leaderboards
+    - **Monitor sentiment shifts** — spot when opinion is changing before the price does
+    - **Learn from patterns** — recognize recurring market behaviors
   </Accordion>
 </AccordionGroup>
 
-# Managing Your Positions
+# Managing your positions
 
 <AccordionGroup>
-  <Accordion title="Track Your Position">
-    **Stay informed about your investments**
-    - **See current value** - Monitor real-time position worth
-    - **Monitor odds changes** - Watch how probabilities shift
-    - **Calculate profit/loss** - Understand your potential returns
-    - **Decide on exit** - Plan when to sell or hold
+  <Accordion title="Track your positions">
+    - Your **Portfolio** shows every open position, its current value, and live profit and loss
+    - Watch how the implied chance moves after your entry
+    - Plan your exit — sell early or hold to resolution
   </Accordion>
-  <Accordion title="Sell Before Close">
-    **Exit positions strategically**
-    - **Lock in profits early** - Secure gains before market closes
-    - **Cut losses if needed** - Minimize damage from bad predictions
-    - **Repost the market with "sell my YES"** - Simple command to exit position
-    - **Instant execution** - Trades happen immediately at market price
+  <Accordion title="Sell before close">
+    - **Lock in profits early** — secure gains before the market closes
+    - **Cut losses** — minimize damage when you're clearly wrong
+    - Sell from the market page or your Portfolio at the current market price
+    - Sells pay a 1% protocol fee plus a 1% AMM fee
   </Accordion>
-  <Accordion title="Add to Position">
-    **Increase your stake when confident**
-    - **Double down if confident** - Increase position size on strong conviction
-    - **Average your entry price** - Improve overall position cost basis
-    - **"YES 50 more"** - Easy command to add to existing position
-    - **No limits on trades** - Add as many times as you want
-  </Accordion>
-  <Accordion title="Unlimited Trading">
-    **Trade without restrictions**
-    - **No daily limits** on prediction placement
-    - **Post as many predictions** as you want
-    - **Engage in multiple markets** simultaneously
-    - **No throttling** or trading restrictions
-    - **24/7 availability** for active traders
-    - **Perfect for** users who want to maximize their prediction activity
+  <Accordion title="Add to a position">
+    - Buy the same outcome again anytime to increase your stake
+    - Adding at a different price averages your effective entry
+    - No limit on how many trades you can place
   </Accordion>
 </AccordionGroup>
 
----
+# Pro tips
 
-# Essential Commands & Tips
-
-<Tabs>
-  <Tab title="Quick Commands">
-    **Master these basic commands for efficient trading**
-    
-    | Action | Command | Example |
-    |--------|---------|---------|
-    | Predict on YES | `"YES [amount]"` | `"YES 50"` |
-    | Predict on NO | `"NO [amount]"` | `"NO 100"` |
-    | Check balance | `"balance"` | `"balance"` |
-    | See positions | `"my predictions"` | `"my predictions"` |
-    | Sell position | `"sell [position]"` | `"sell my YES"` |
-    | Find markets | `"show markets"` | `"show markets"` |
-    | Limit order | `"YES [amount] at [price]"` | `"YES 100 at 0.65"` |
-    | Leverage prediction | `"YES [amount] 2x"` | `"YES 200 2x"` |
-  </Tab>
-  
-  <Tab title="Pro Tips">
-    **Advanced strategies for experienced predictors**
-    
-    ## Timing Your Predictions
-    - **Early markets** often have better rates before consensus forms
-    - **Breaking news** creates temporary price inefficiencies
-    - **Market close** approaches can create last-minute opportunities
-    
-    ## Risk Management
-    - **Start small** while learning market dynamics
-    - **Set stop losses** by selling when positions turn negative
-    
-    ## Information Sources
-    - **Follow @kash_bot** for instant market alerts
-    - **Monitor news feeds** for breaking developments
-    - **Join prediction communities** for collective intelligence
-  </Tab>
-</Tabs>
+- **Early markets** often have better prices before consensus forms
+- **Breaking news** creates temporary price inefficiencies
+- **Start small** while learning market dynamics — fees are 1% on buys, 1% + 1% on sells
+- **Join the market chat** — every market has a discussion where traders share their reasoning
 
 <Tip>
 Every expert predictor started with their first prediction. Start small, learn the dynamics, and let your edge compound over time!
@@ -259,14 +178,14 @@ Every expert predictor started with their first prediction. Start small, learn t
 
 <CardGroup cols={2}>
   <Card
-    title="Finding Markets"
+    title="Finding markets"
     icon="magnifying-glass"
     href="/getting-started/guides/finding-opportunities"
   >
     Discover markets to predict on
   </Card>
   <Card
-    title="Winning & Payouts"
+    title="Winning & payouts"
     icon="trophy-star"
     href="/getting-started/guides/winning"
   >

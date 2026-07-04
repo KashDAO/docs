@@ -1,0 +1,73 @@
+---
+title: 'Parlays'
+description: 'Build a slip of crypto up/down picks and place it in one go'
+icon: 'layer-group'
+---
+
+<Note>
+The parlay builder at [app.kash.bot/parlay](https://app.kash.bot/parlay) lets you back **up or down** on the day's top coins — BTC, ETH, SOL, and more — stack multiple picks into one slip, and place them all together.
+</Note>
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+# Building a slip
+
+<Steps>
+  <Step title="Pick your coins">
+    Tap **Up** or **Down** on any coin to add it to your slip. Tap the same side again to remove it, or the other side to switch. Each coin shows the market's current chance of finishing up or down.
+  </Step>
+
+  <Step title="Set your stake">
+    Choose your **amount per pick**. The slip shows your total amount and the **potential payout if all predictions are correct**, based on each pick's current market prices — the less likely an outcome, the more it pays if correct.
+  </Step>
+
+  <Step title="Review and place">
+    Hit **Place parlay**, review your picks, and confirm. You need to be signed in with USDC in your account. You can also copy a link to your slip and share it — anyone who opens it gets your picks pre-loaded.
+  </Step>
+</Steps>
+
+# How picks resolve
+
+Each coin's market resolves at **00:00 UTC**, based on whether its price closed higher or lower than it opened that day. Winning picks pay out at the market odds you traded at.
+
+<Note>
+**Today, each pick executes as an independent trade** — one leg can win even if another loses, and each pays out on its own. That also means a slip can partially fill: if one leg fails to place, the others still go through and you can retry the rest. True single-ticket parlays, where all picks must hit for a combined payout, are **coming soon**.
+</Note>
+
+Because legs are independent, you can even **hedge** — back both up and down on the same coin — though only one side of a coin can win.
+
+# Under the hood
+
+Parlay picks are ordinary positions in daily crypto prediction markets, placed from your smart account with sponsored gas. After placing a slip, track every pick in your [Portfolio](/getting-started/guides/winning) like any other position.
+
+<Tip>
+The slip's multiplier assumes every pick hits — the honest way to read it is as a best case, not an expectation. Since legs are independent today, your realistic outcome is a mix of winning and losing picks.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card
+    title="Trading Options"
+    icon="chart-line"
+    href="/getting-started/features/trading-options"
+  >
+    All the ways to trade on Kash
+  </Card>
+  <Card
+    title="Winning"
+    icon="trophy-star"
+    href="/getting-started/guides/winning"
+  >
+    Track positions and claim your winnings
+  </Card>
+</CardGroup>

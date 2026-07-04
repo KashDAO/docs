@@ -9,7 +9,7 @@ description: 'HTTP 429 — Too Many Requests'
 
 Per-user (authenticated) or per-IP (anonymous reads) rate limit was exceeded. Limits are enforced as a sliding window in Redis.
 
-For authenticated requests, the limit is **tier-differentiated** — 60 req/min on `free`, 300 req/min on `developer`, custom (admin-set) on `enterprise` and `mm`. See [`docs/api-tiers.md`](../api-tiers.md) for the full matrix.
+For authenticated requests, the limit is **tier-differentiated** — 60 req/min on `free`, 300 req/min on `developer`, custom (admin-set) on `enterprise` and `mm`. See [Rate limits](/developer-docs/rest-api/rate-limits) for the full matrix.
 
 ## Response headers
 
@@ -31,7 +31,7 @@ Every 429 response carries:
 - Honour `Retry-After`. The TS SDK does this automatically (`KashRateLimitError.retryAfterSeconds`).
 - Add jitter to retry timing so multiple consumers don't synchronise.
 - For polling, switch to webhooks — every poll is a wasted request.
-- If you consistently bump against the limit during normal operation, upgrade your tier — see [`docs/api-tiers.md`](../api-tiers.md) for the upgrade paths. The 60 → 300 req/min jump from `free` → `developer` is 5×, and `enterprise`/`mm` have no application-level cap.
+- If you consistently bump against the limit during normal operation, upgrade your tier — see [Rate limits](/developer-docs/rest-api/rate-limits) for the upgrade paths. The 60 → 300 req/min jump from `free` → `developer` is 5×, and `enterprise`/`mm` have no application-level cap.
 
 ## Related codes
 

@@ -87,13 +87,27 @@ There is no automated dual-validity overlap window for API keys; the rotation is
 
 ## Body signing for `trades:write` (optional, hardened)
 
-For the `POST /v1/trades` route, you can opt into HMAC-signed request bodies as a defence-in-depth layer against in-flight tampering. Send the signature in `X-Kash-Signature` using the same Stripe-style format as our webhook signatures:
+For write routes like `POST /v1/trades`, you can opt into HMAC-signed request bodies as a defence-in-depth layer against captured-request replay and in-flight tampering. Send the signature in `X-Kash-Signature` using the same Stripe-style header format as our webhook signatures:
 
 ```
 X-Kash-Signature: t=<unix-ms>,v1=<hex-hmac-sha256>
 ```
 
-The HMAC is computed over `<unix-ms>.<raw-body-bytes>` under your key's `webhook_secret`. If the header is present, the server verifies it; if absent, the route still works (the API key is the canonical authentication). Use it when your threat model includes a compromised TLS-terminating proxy.
+- **Signing secret = your API key plaintext** (the same value you send in `X-API-Key`). No separate signing secret is issued — this is *not* the key's `webhook_secret`.
+- **Canonical input** is `<unix-ms-timestamp>.<METHOD>.<path>.<raw-body>` — the timestamp from `t=`, the HTTP method uppercased, the URL pathname **without the query string** (query params aren't signed because intermediaries often re-order them), and the exact raw body bytes you send.
+- **Algorithm**: HMAC-SHA256, hex-encoded.
+- **Timestamp tolerance**: ±5 minutes. Older or newer timestamps are rejected.
+
+```ts
+import { createHmac } from 'node:crypto';
+
+const ts = Date.now();                       // unix milliseconds
+const canonical = `${ts}.POST./v1/trades.${rawBody}`;
+const sig = createHmac('sha256', apiKeyPlaintext).update(canonical).digest('hex');
+// Header: X-Kash-Signature: t=<ts>,v1=<sig>
+```
+
+If the header is present, the server MUST be able to verify it — a mismatch, a malformed header, or a stale timestamp is rejected with `401 REQUEST_SIGNATURE_INVALID`. If absent, the route still works (the API key is the canonical authentication). Multiple comma-separated `v1=` values are accepted (for graceful scheme rotation later). Use body signing when your threat model includes a compromised TLS-terminating proxy or leaky request logs.
 
 ## Auth failures
 

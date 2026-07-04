@@ -17,330 +17,122 @@ icon: 'wallet'
   alt="Hero Dark"
 />
 
-# Wallet Technology and Security
+# Your Kash wallet
 
 <AccordionGroup>
   <Accordion title="Where are my funds stored?">
-    **Non-Custodial MPC Wallet Security**
-    
-    **Wallet Architecture:**
-    - **Non-custodial:** You maintain complete control over your funds
-    - **MPC Technology:** Multi-Party Computation splits private keys for security
-    - **Base Network:** Funds stored on Coinbase's secure Layer 2 blockchain
-    - **Smart Contract:** Automated, audited contract management
-    
-    **Security Features:**
-    - **Private Key Distribution:** Keys split across multiple secure locations
-    - **No Single Point of Failure:** No individual can access your funds
-    - **Seed Phrase Free:** No complex backup requirements
-    - **Social Recovery:** Account recovery through X authentication
-    
-    **Fund Protection:**
-    - **Kash Cannot Access:** Platform never controls user funds
-    - **Blockchain Security:** Protected by Base network validators
-    - **Smart Contract Audits:** Regular security reviews and updates
-    - **Transparent Operations:** All transactions publicly verifiable
-    
-    **Technical Details:**
-    - **ERC-4337 Account Abstraction:** Advanced wallet functionality
-    - **Privy Integration:** Enterprise-grade wallet infrastructure
-    - **Gas Abstraction:** Seamless transaction experience
-    - **Cross-Chain Compatibility:** Support for multiple networks
-  </Accordion>
-  
-  <Accordion title="How do I check my wallet balance?">
-    **Multiple Balance Checking Methods**
-    
-    **Via @kash_bot:**
-    - Send DM: "balance" for current USDC balance
-    - Send DM: "portfolio" for detailed position breakdown
-    - Send DM: "stats" for performance and balance summary
-    - Real-time balance updates with each transaction
-    
-    **Via Web Dashboard:**
-    - Visit kash.bot and connect with X account
-    - Comprehensive balance and portfolio view
-    - Historical balance charts and trends
-    - Detailed breakdown by currency and position
-    
-    **Balance Information Includes:**
-    - **Available Balance:** USDC available for prediction
-    - **Active Positions:** Value of current market positions
-    - **Pending Settlements:** Awaiting market resolution
+    Your funds live in your own **smart wallet** on the Base network — an ERC-4337 smart account created for you when you sign up.
 
-    
-    **Real-Time Updates:**
-    - Instant balance updates after transactions
-    - Automatic refresh across all platforms
-    - Historical balance tracking and analytics
-    - Blockchain-verified accuracy
+    - **Your account, on-chain:** the smart account belongs to you and holds your USDC and market positions
+    - **Non-custodial:** deposits, trades, and payouts all execute from your own account — Kash never takes custody of your funds
+    - **Signing:** the smart account is controlled by an embedded wallet (powered by Privy) tied to your login
+    - **Gasless:** transactions are sponsored via a paymaster, so you never need ETH for gas
+    - **Transparent:** everything is verifiable on the Base blockchain
   </Accordion>
-  
+
+  <Accordion title="How do I check my balance?">
+    Sign in at [app.kash.bot](https://app.kash.bot) and open your **Portfolio**:
+
+    - **Available balance** — USDC ready to trade or withdraw
+    - **Open positions** — the current value of your market positions
+    - **Claimable winnings** — resolved positions waiting for you to claim
+    - **History** — every deposit, trade, claim, and withdrawal
+
+    Balances update in real time as you trade, and everything is independently verifiable on a Base block explorer.
+  </Accordion>
+
   <Accordion title="What currencies does Kash support?">
-    **Comprehensive Currency Support**
-    
-    **Primary Trading Currency:**
-    - **USDC (USD Coin):** Primary currency for all prediction activities
-    - **Stable Value:** Pegged to US Dollar for predictable value
-    - **Low Volatility:** Minimal price fluctuations
-    - **Wide Acceptance:** Supported across DeFi ecosystem
-    
-    **Accepted Deposit Currencies:**
-    - **ETH:** Ethereum native token (auto-converted to USDC)
-    - **WETH:** Wrapped Ethereum (auto-converted to USDC)
-    - **DAI:** Decentralized stablecoin (auto-converted to USDC)
-    - **$KASH:** Platform token for governance
-    
-    **Reward Currencies:**
-    - **Governance Rights:** $KASH tokens provide voting power in DAO
-    - **Future Rewards:** Additional reward mechanisms may be added
-    
-    **Currency Conversion:**
-    - **Automatic Conversion:** Seamless conversion to USDC for prediction
-    - **Competitive Rates:** Best rates via DEX aggregation
-    - **No Conversion Fees:** Minimal spread, no additional charges
-    - **Real-Time Rates:** Current exchange rates displayed
+    **USDC only.** All balances, trades, payouts, and withdrawals on Kash are in USDC — a stablecoin pegged to the US dollar.
+
+    - Kash does **not** accept or auto-convert other tokens (no ETH, WETH, or DAI)
+    - Fiat deposits (card, Apple Pay, Google Pay) are converted to USDC by the payment provider before reaching your wallet
+    - **Does Kash have a token?** Kash has not launched a token. If that ever changes, it will be announced through official channels — treat anything else as a scam.
   </Accordion>
 </AccordionGroup>
 
-# Fund Management
+# Deposits
 
 <AccordionGroup>
   <Accordion title="How do I deposit funds?">
-    **Multiple Deposit Methods**
-    
-    **Supported Deposit Methods:**
-    - **Direct Transfer:** Send USDC, ETH, WETH, or DAI to wallet address
-    - **Cross-Chain Bridge:** Transfer from other networks to Base
-    - **Fiat On-Ramp:** Buy crypto directly with credit card or bank transfer
-    - **Exchange Transfer:** Send from centralized exchanges
-    
-    **Deposit Process:**
-    1. **Get Wallet Address:** Access via dashboard or DM @kash_bot "address"
-    2. **Send Funds:** Transfer supported currency to your wallet
-    3. **Auto-Conversion:** Non-USDC funds automatically convert
-    4. **Confirmation:** Funds available for prediction within minutes
-    
-    **Deposit Considerations:**
-    - **No Minimum:** Deposit any amount (consider gas fees)
-    - **No Maximum:** No upper limit on deposit amounts
-    - **No Fees:** Kash doesn't charge deposit fees
-    - **Network Fees:** Standard blockchain fees apply
-    
-    **Processing Times:**
-    - **Base Network:** 1-2 minutes for confirmation
-    - **Ethereum Mainnet:** 5-15 minutes via bridge
-    - **Other Networks:** Variable depending on bridge
-    - **Auto-Conversion:** Additional 1-2 minutes for non-USDC
+    Two ways, both from the deposit flow on app.kash.bot:
+
+    **1. Card, Apple Pay, or Google Pay** — all fiat processing is handled by third-party payment providers; Kash never sees or stores your card or bank details:
+
+    | Provider | Fee | KYC |
+    |---|---|---|
+    | Halliday | 2.9% + $0.30 | Basic (government ID) |
+
+    Additional payment options may appear in the deposit flow — fees and limits are always shown before you confirm.
+
+    **2. Direct crypto transfer** — send USDC from any wallet or exchange on **Base, Ethereum, Polygon, Arbitrum, Optimism, Avalanche, BNB Chain, Linea, Scroll, Mantle, Mode, or Blast** ($1 – $100,000 per transaction, limits subject to change; no identity verification currently required, subject to compliance screening). Anything sent on a network other than Base is automatically bridged to Base for you.
+
+    See the [depositing guide](/getting-started/guides/depositing) for step-by-step instructions.
   </Accordion>
-  
+
+  <Accordion title="How long do deposits take?">
+    - **Card / Apple Pay / Google Pay:** usually within a few minutes of payment completing
+    - **USDC on Base:** a couple of minutes
+    - **USDC on other networks:** roughly 10–15 minutes, since the funds are bridged to Base automatically
+  </Accordion>
+</AccordionGroup>
+
+# Withdrawals
+
+<AccordionGroup>
   <Accordion title="How do I withdraw funds?">
-    **Withdrawal Process**
-    
-    **Withdrawal Methods:**
-    - **Direct Withdrawal:** Send USDC to any Base network address
-    - **Cross-Chain Transfer:** Bridge to Ethereum or other networks
-    - **Exchange Deposit:** Send directly to exchange wallet
-    - **Hardware Wallet:** Transfer to cold storage
-    
-    **Withdrawal Process:**
-    1. **Access Dashboard:** Visit kash.bot or DM @kash_bot "withdraw"
-    2. **Enter Details:** Specify amount and destination address
-    3. **Confirm Transaction:** Review and approve withdrawal
-    4. **Processing:** Funds sent according to network confirmation times
-    
-    **Withdrawal Considerations:**
-    - **No Minimum:** Withdraw any amount
-    - **No Platform Fees:** Kash doesn't charge withdrawal fees
-    - **Network Fees:** Standard blockchain fees apply
-    - **24/7 Availability:** Withdrawals available anytime
-    
-    **Processing Times:**
-    - **Base Network:** 1-2 minutes for confirmation
-    - **Cross-Chain:** Variable timing depending on destination
-    - **Automated Processing:** No manual approval delays
-    - **Blockchain Dependent:** Times depend on network congestion
+    Open **Withdraw** in your wallet on app.kash.bot, enter an amount and destination address, and choose a destination network. Withdrawals are always in USDC.
+
+    **Supported destination networks:** Base, Ethereum, Arbitrum, Optimism, Polygon. Withdrawals to networks other than Base are bridged automatically; bridging costs are shown in the quote. A fiat cash-out option, handled through Kash's third-party payment providers, is also available in the withdrawal flow.
+
+    Withdrawals are processed automatically and typically complete within minutes. See the [withdrawing guide](/getting-started/guides/withdrawing) for the full walkthrough.
   </Accordion>
-  
+
+  <Accordion title="What are the withdrawal limits?">
+    | Limit | Value |
+    |---|---|
+    | Minimum per transaction | $1 |
+    | Maximum per transaction | $25,000 |
+    | Daily maximum | $10,000 |
+    | Weekly maximum | $50,000 |
+    | Withdrawals per hour | 5 |
+
+    Limits are current as of publication — the app always shows live limits before you confirm.
+  </Accordion>
+
   <Accordion title="Are there minimum balance requirements?">
-    **Flexible Balance Requirements**
-    
-    **Account Minimums:**
-    - **No Minimum Balance:** Maintain account with zero balance
-    - **No Maintenance Fees:** No charges for low balances
-    - **Recommended Starting:** $10+ for meaningful prediction
-    - **Dust Amounts:** Small amounts handled efficiently
-    
-    **Prediction Minimums:**
-    - **No Minimum Prediction:** Place predictions of any size
-    - **Practical Minimums:** Consider gas costs and 2% platform fee
-    - **Market Liquidity:** Some markets may have effective minimums
-    - **Position Sizing:** Recommended risk management practices
-    
-    **Feature Access:**
-    - **Basic Features:** Available with any balance
-    - **Advanced Features:** All features available regardless of balance
-    - **Governance:** $KASH tokens required for voting
-    - **Market Creation:** Available to all users
-    
-    **Balance Optimization:**
-    - **Efficient Prediction:** Optimize prediction sizes for fee efficiency
-    - **Portfolio Management:** Balance between available and invested
-    - **Risk Management:** Maintain appropriate reserves
-    - **Compound Growth:** Reinvest winnings for growth
+    No. There's no minimum balance, no maintenance fees, and no lock-ups. You can hold a zero balance, and every feature works regardless of how much you hold. The only hard minimum is $1 per withdrawal.
   </Accordion>
 </AccordionGroup>
 
-# Advanced Wallet Features
+# Account access and security
 
 <AccordionGroup>
-  <Accordion title="How does MPC wallet recovery work?">
-    **Social Recovery System**
-    
-    **Recovery Architecture:**
-    - **X Account Integration:** Your X account serves as the master key
-    - **Multi-Party Computation:** Private keys distributed across secure nodes
-    - **No Seed Phrases:** No complex backup requirements
-    - **Social Authentication:** Recovery through X account verification
-    
-    **Recovery Process:**
-    1. **X Account Access:** Regain access to your X account
-    2. **Platform Connection:** Connect to Kash through X authentication
-    3. **Automatic Restoration:** Wallet access restored automatically
-    4. **Full Functionality:** All features available immediately
-    
-    **Recovery Limitations:**
-    - **X Dependency:** Recovery requires X account access
-    - **No Alternative Methods:** No independent recovery mechanism
-    - **Security Trade-off:** Convenience vs. complete decentralization
-    
-    **Best Practices:**
-    - **Secure X Account:** Enable 2FA and strong password
-    - **Regular Backups:** Keep record of wallet address and transactions
-    - **Monitor Activity:** Regular checks for unauthorized access
-    - **Stay Informed:** Keep up with platform security updates
+  <Accordion title="How do I access my wallet?">
+    Your wallet is tied to your Kash account. You can sign in with **X (Twitter), Google, email, or an external wallet** — whichever you used to create your account. A recovery email can be added in Settings so you're not dependent on a single login method.
   </Accordion>
-  
-  <Accordion title="Can I use multiple wallets?">
-    **Single Wallet Architecture**
-    
-    **One Wallet Per Account:**
-    - **Automatic Creation:** Wallet created automatically with account
-    - **Unique Address:** Each account has one unique wallet address
-    - **No Multiple Wallets:** Cannot create additional wallets
-    - **Account Tied:** Wallet directly tied to X account
-    
-    **External Wallet Integration:**
-    - **Deposit From Any Wallet:** Send funds from any external wallet
-    - **Withdraw To Any Address:** Send funds to any Base address
-    - **Cross-Platform:** Compatible with all Base-compatible wallets
-    - **Future Enhancements:** Additional wallet features may be added
-    
-    **Wallet Management:**
-    - **Unified Experience:** All funds managed through single wallet
-    - **Simplified Interface:** No complex wallet selection
-    - **Automatic Setup:** No manual wallet configuration required
-    - **Seamless Integration:** Wallet integrated into platform experience
-  </Accordion>
-  
-  <Accordion title="How do I track my transaction history?">
-    **Transaction Tracking and History**
-    
-    **On-Chain Transparency:**
-    - **Public Blockchain:** All transactions recorded on Base blockchain
-    - **Permanent Record:** Transaction history cannot be altered
-    - **Full Transparency:** All activity publicly verifiable
-    - **Real-Time Updates:** Immediate transaction confirmation
-    
-    **Tracking Methods:**
-    - **@kash_bot:** Query history through direct messages
-    - **Web Dashboard:** Comprehensive transaction history
-    - **Blockchain Explorer:** View transactions on basescan.org
-    - **Third-Party Tools:** Compatible with wallet tracking apps
-    
-    **Transaction Details:**
-    - **Prediction Placements:** All prediction activity with outcomes
-    - **Deposits/Withdrawals:** Fund movements to/from wallet
-    - **Governance:** $KASH token transactions and voting
-    
-    **Historical Analysis:**
-    - **Performance Metrics:** Win/loss ratios and profitability
-    - **Market Participation:** Categories and frequency of prediction
-    - **Governance Activity:** DAO participation and voting history
-  </Accordion>
-</AccordionGroup>
 
-# Security and Best Practices
-
-<AccordionGroup>
-  <Accordion title="How do I secure my wallet?">
-    **Wallet Security Best Practices**
-    
-    **Primary Security:**
-    - **X Account Security:** Enable 2FA and strong password
-    - **Secure Networks:** Use trusted internet connections
-    - **Device Security:** Keep devices updated and secure
-    - **Phishing Awareness:** Verify all URLs and communications
-    
-    **Transaction Security:**
-    - **Verify Addresses:** Double-check withdrawal addresses
-    - **Amount Verification:** Confirm transaction amounts
-    - **Gas Fee Awareness:** Understand network fees
-    - **Confirmation Patience:** Wait for blockchain confirmation
-    
-    **Monitoring and Alerts:**
-    - **Regular Checks:** Monitor balance and activity regularly
-    - **Unusual Activity:** Report suspicious transactions immediately
-    - **Community Awareness:** Stay informed about security updates
-    - **Backup Records:** Keep records of important transactions
-    
-    **Emergency Procedures:**
-    - **Immediate Response:** Secure X account if compromised
-    - **Community Alert:** Warn others of security threats
-    - **Fund Protection:** Move funds to secure addresses if necessary
-    - **Documentation:** Keep evidence of security incidents
+  <Accordion title="How do I keep my wallet secure?">
+    - **Secure your login method** — enable 2FA on the X or Google account you sign in with, and add a recovery email
+    - **Verify addresses** before every withdrawal — blockchain transactions can't be reversed
+    - **Watch for phishing** — only use app.kash.bot and official channels; Kash will never DM you asking for credentials
+    - **Monitor your activity** — review your history regularly and contact support@kash.bot about anything suspicious
   </Accordion>
-  
+
   <Accordion title="What should I do if I have wallet issues?">
-    **Troubleshooting Wallet Problems**
-    
-    **Common Issues:**
-    - **Balance Not Updating:** Clear cache and refresh page
-    - **Transaction Pending:** Wait for blockchain confirmation
-    - **Deposit Not Showing:** Verify correct network and address
-    - **Withdrawal Failed:** Check address format and network fees
-    
-    **Troubleshooting Steps:**
-    1. **Check Network:** Verify Base network status
-    2. **Verify Transactions:** Use blockchain explorer to confirm
-    3. **Clear Cache:** Refresh browser and clear cached data
-    4. **Try Different Browser:** Test with alternative browser
-    
-    **Getting Help:**
-    - **@kash_bot:** AI assistance for common wallet questions
-    - **Discord Community:** Peer support for wallet issues
-    - **Documentation:** Comprehensive wallet guides
-    - **GitHub Issues:** Report technical problems
-    
-    **Prevention:**
-    - **Regular Updates:** Keep browser and software updated
-    - **Stable Networks:** Use reliable internet connections
-    - **Proper Procedures:** Follow documented processes
-    - **Community Learning:** Learn from others' experiences
+    1. **Balance not updating?** Refresh the page; deposits need blockchain confirmation first
+    2. **Deposit not showing?** Verify you sent USDC on a supported network to the exact address shown in the deposit flow
+    3. **Withdrawal delayed?** Check its status in the app — cross-chain withdrawals take longer
+    4. **Still stuck?** Contact support@kash.bot or use the in-app feedback widget with the transaction details
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-Your wallet security depends on X account security. Enable 2FA, use strong passwords, and never share account credentials. Kash cannot recover funds if you lose access to your X account.
+Blockchain transactions are final. Always double-check destination addresses and networks — Kash cannot recover funds sent to a wrong address or an unsupported network.
 </Warning>
-
-<Tip>
-The MPC wallet system eliminates seed phrase management while maintaining security. Your X account serves as the master key, making recovery simple but dependent on X account access.
-</Tip>
 
 <CardGroup cols={2}>
   <Card
-    title="Security Guide"
+    title="Security guide"
     icon="shield"
     href="/getting-started/faqs/security"
   >
@@ -354,6 +146,3 @@ The MPC wallet system eliminates seed phrase management while maintaining securi
     Understand transaction process
   </Card>
 </CardGroup>
-
-
-

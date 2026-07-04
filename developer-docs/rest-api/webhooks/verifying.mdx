@@ -212,17 +212,15 @@ pub fn verify_kash_signature(payload: &[u8], signature: &str, secret: &str, tole
 
 ## Testing your verifier locally
 
-The CLI has a webhook simulator that signs payloads exactly like the production worker:
+The CLI can sign a payload exactly like the production worker (`t=<unix-ms>,v1=<hex>`) and POST it to your endpoint:
 
 ```bash
-kash webhooks simulate \
-  --type trade.completed \
-  --secret $KASH_WEBHOOK_SECRET \
-  --url http://localhost:3000/webhooks/kash \
-  --market-id $MARKET_ID
+kash webhooks replay payload.json \
+  --target http://localhost:3000/webhooks/kash \
+  --secret $KASH_WEBHOOK_SECRET
 ```
 
-This POSTs a synthetic, properly-signed event to your endpoint so you can verify your handler's signature path before going live.
+This POSTs your captured (or hand-written) event body, properly signed, to your endpoint so you can verify your handler's signature path before going live. Pass `--timestamp-ms` to test your replay-window enforcement, and use `kash webhooks verify` for offline signature checks.
 
 ## Reporting verification bugs
 

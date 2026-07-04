@@ -1,11 +1,11 @@
 ---
 title: 'Creating an Account'
-description: 'How to create your Kash account and wallet'
+description: 'Sign in with X, Google, email, or a wallet — your Kash account and smart wallet are created automatically'
 icon: 'user-plus'
 ---
 
 <Note>
-Get started in seconds - creating your Kash account takes just 2 clicks through X (Twitter).
+Creating a Kash account takes seconds. Pick a sign-in method, and your wallet is set up for you — no seed phrase to write down. Kash is for users 18+ in supported regions.
 </Note>
 
 <img
@@ -21,99 +21,63 @@ Get started in seconds - creating your Kash account takes just 2 clicks through 
   alt="Hero Dark"
 />
 
-<img
-  style={{ borderRadius: '0.5rem' }}
-  src="/assets/guides/creating-account.gif"
-  alt="Creating a Kash account walkthrough"
-/>
+## Sign-in options
 
-<Tabs>
-  <Tab title="X (Twitter)">
-  <Steps>
-  <Step title="Find or Tag @kash_bot">
-    - Look for @kash_bot in any prediction market thread
-    - Or mention @kash_bot in your own tweet
-    - Or send a DM to @kash_bot
+Kash uses [Privy](https://privy.io) for authentication. Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
+
+| Method | How it works |
+|---|---|
+| **X (Twitter)** | One-click OAuth — also required if you want to use tweet-trading later |
+| **Google** | One-click OAuth with your Google account |
+| **Email** | Enter your email and confirm a one-time code |
+| **External wallet** | Connect an existing wallet you already control |
+
+<Steps>
+  <Step title="Choose a sign-in method">
+    Any of the options above works — you can start with whichever is most convenient.
   </Step>
-  <Step title="Click the Sign-Up Link">
-    - Kash bot will reply with your personal sign-up link
-    - Click the link to open kash.bot
-    - Authorize with your X account (one click)
+  <Step title="Wallet created automatically">
+    Privy creates an **embedded wallet** for you, and Kash deploys an **ERC-4337 smart account** on Base that holds your funds. This is where your USDC and positions live — under your control, not Kash's.
   </Step>
-  <Step title="Wallet Created!">
-    - Your wallet is automatically generated
-    - Linked to your X account
-    - No seed phrases to write down
-    - Ready to fund and start predicting
+  <Step title="Add a recovery email">
+    During onboarding you'll be prompted to set a **recovery email**. If you signed up with X and ever lose access to your X account, this email is how you recover your Kash account — set it, and use an address you'll keep.
   </Step>
-</Steps>
-  </Tab>
-  <Tab title="Direct Website">
-  <Steps>
-  <Step title="Visit kash.bot">
-    - Click "Connect with X"
-    - Authorize the connection
-  </Step>
-  <Step title="Wallet Created!">
-    - Your wallet is automatically generated
-    - Linked to your X account
-    - No seed phrases to write down
-    - Ready to fund and start predicting
+  <Step title="Done">
+    You're ready to browse and trade. Optionally [deposit funds](/getting-started/guides/depositing) right away, or skip it and explore first.
   </Step>
 </Steps>
-  </Tab>
-</Tabs>
 
 ---
 
-# How Account Creation Works
+## How your wallet works
 
-## Secure Wallet Technology
-**Advanced security without complexity:**
-- **Multi-party computation (MPC)** protects your private keys
-- **No seed phrases to manage** - recovery through X authentication
-- **Non-custodial design** - you always control your funds
-- **Zero single points of failure** - distributed security model
-
-## Your Account Features
 <AccordionGroup>
-  <Accordion title="Complete Self-Custody">
-    - **You own your funds** - Kash never holds your assets
-    - **Private keys secured** through advanced cryptography
-    - **No third-party control** over your wallet
-    - **Permissionless access** - Kash cannot freeze your account
+  <Accordion title="Self-custody by design">
+    - Your funds sit in **your own smart account** on Base — Kash never takes custody
+    - Trades, payouts, and withdrawals execute from your wallet, verifiable on-chain
+    - You can **export your wallet key** at any time from **Settings**, so you're never locked in
   </Accordion>
-  <Accordion title="Seamless Experience">
-    - **Gas-free transactions** - Kash sponsors all network fees
-    - **Cross-device access** - sign in from any device
-    - **Instant availability** - start predicting immediately
-    - **Social recovery** - restore access through X authentication
+  <Accordion title="No seed phrase, real recovery">
+    - No seed phrase to write down or lose
+    - Access is tied to your sign-in method (X, Google, email, or wallet)
+    - Your **recovery email** is the fallback if you lose access to your primary login
   </Accordion>
-  <Accordion title="Advanced Features">
-    - **Account abstraction** - complex transactions made simple
-    - **Automatic token swapping** - predict with any supported token
-    - **Sponsored transactions** - no need to manage ETH for gas
-    - **Smart contract integration** - programmable wallet capabilities
+  <Accordion title="Gasless transactions">
+    - The protocol sponsors gas via ERC-4337 account abstraction
+    - You never need to hold ETH or approve gas prompts
+    - Everything is priced and settled in USDC
   </Accordion>
 </AccordionGroup>
 
-# Security & Best Practices
+## Keep your account safe
 
-## Protecting Your X Account
-**Your X account is your key to Kash:**
-- **Enable two-factor authentication (2FA)** for maximum security
-- **Use a strong, unique password** not used elsewhere
-- **Never share login credentials** with anyone
-- **Monitor for suspicious activity** and report immediately
-- **Keep the X app updated** on your devices
-
-## Wallet Security Features
-- **Funds always under your control** - Kash has no access
-- **Recovery through X login** - no complex seed phrases
-- **Transparent on-chain** - all activity publicly verifiable
+- **Enable 2FA** on the account you sign in with (X, Google, or email)
+- **Set your recovery email** during onboarding — don't skip it
+- **Never share** login codes or your exported key with anyone
+- If you connect an external wallet, standard wallet-security practice applies
 
 <Tip>
-Creating a Kash account is free, instant, and gives you immediate access to all prediction markets. No complicated setup, no waiting periods. Just connect and start predicting!
+Creating an account is free, and you can browse all markets before depositing anything.
 </Tip>
 
 <CardGroup cols={2}>
@@ -129,6 +93,6 @@ Creating a Kash account is free, instant, and gives you immediate access to all 
     icon="magnifying-glass"
     href="/getting-started/guides/finding-opportunities"
   >
-    Discover prediction markets to predict on
+    Discover markets to trade on
   </Card>
 </CardGroup>

@@ -14,6 +14,7 @@ Each API key can carry an optional `webhook_url`. When set, the API POSTs `trade
 | `trade.confirmation-required`  | A high-value trade hit the confirmation gate (returned `202`)       | `pending_confirmation`    |
 | `trade.completed`              | Trade executed on-chain successfully                                | `completed`               |
 | `trade.failed`                 | Trade failed terminally (validation, on-chain revert, timeout)      | `failed`                  |
+| `trade.rejected`               | Trade was rejected by the risk engine before execution              | `rejected`                |
 
 Set `webhook_url` in the webapp's **Settings → API Keys** page when issuing or editing a key, or programmatically via the admin CLI.
 
@@ -102,6 +103,24 @@ The token itself is **NOT** in the webhook — it's only returned in the synchro
 
 `errorCode` is the same machine-readable code surface as the [REST API error codes](/developer-docs/rest-api/errors). `errorMessage` is sanitised — no stack traces, no internal URLs.
 
+### `data` for `trade.rejected`
+
+```json
+{
+  "tradeId":      "...",
+  "marketId":     "...",
+  "outcomeIndex": 0,
+  "amount":       "100",
+  "side":         "buy",
+  "status":       "rejected",
+  "errorCode":    "trade_too_large",
+  "errorMessage": "Trade rejected: amount exceeds the allowed per-trade size.",
+  "metadata":     { ... }
+}
+```
+
+Same shape as `trade.failed`, but the trade never reached the chain — the risk engine rejected it pre-execution. `errorCode` carries the risk evaluation's rejection outcome; `errorMessage` is the sanitised rejection reason. Rejection codes come from trade risk evaluation (lowercase snake_case, e.g. `trade_too_large`, `daily_limit_exceeded`) — they are a separate namespace from the [REST API error codes](/developer-docs/rest-api/errors).
+
 ## The `metadata` field
 
 Every `trade.*` payload carries the `metadata` bag from the trade's create call. Use it to route handlers without an extra `GET /v1/trades/{id}` round-trip:
@@ -186,6 +205,7 @@ app.post('/webhooks/kash',
       case 'trade.confirmation-required': /* ... */ break;
       case 'trade.completed':             /* ... */ break;
       case 'trade.failed':                /* ... */ break;
+      case 'trade.rejected':              /* ... */ break;
     }
 
     res.status(200).send('ok');

@@ -65,7 +65,7 @@ Replace `abc123` with your thread ID (obtained from the [GET /api/threads](/deve
 ## Query Parameters
 
 <ParamField query="source" type="string">
-  Source identifier for revenue tracking (e.g., your domain name). **Recommended** for proper attribution.
+  Analytics label for embed attribution (e.g., your domain name). **Recommended** — it lets you (and Kash) segment embed traffic and interactions by placement. Note: `source` does not affect revenue share, which accrues per trade to the organization or partner that created the market.
 </ParamField>
 
 ---
@@ -88,7 +88,7 @@ Here's a fully configured iframe embed:
 
 **What this does:**
 - Embeds thread `abc123` with the 20-tile market heatmap
-- Tracks source as `example.com` for revenue sharing
+- Labels embed traffic as `example.com` for analytics attribution (organizations and partners earn revenue share on trades in markets they create — independent of `source`)
 - Displays thread title, description, and stats
 - Users can click any tile to view market details in a new tab
 - Predictions are made via Twitter (no login required in the iframe)

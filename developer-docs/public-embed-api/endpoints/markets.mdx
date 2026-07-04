@@ -209,20 +209,16 @@ GET https://app.kash.bot/api/markets/trending
 
 ## Query Parameters
 
-<ParamField query="timeframe" type="string" default="7d">
-  Trending timeframe: `1d`, `7d`, `30d`
+<ParamField query="timeframe" type="string" default="24h">
+  Trending timeframe: `1h`, `24h`, `7d`
 </ParamField>
 
-<ParamField query="limit" type="number" default="10">
-  Maximum results (max: 50)
+<ParamField query="limit" type="number" default="50">
+  Maximum results (max: 200)
 </ParamField>
 
 <ParamField query="category" type="string">
   Filter by category
-</ParamField>
-
-<ParamField query="minVolume" type="number">
-  Minimum volume threshold
 </ParamField>
 
 ## Rate Limit
@@ -234,7 +230,7 @@ GET https://app.kash.bot/api/markets/trending
 ## Example Request
 
 ```bash cURL
-curl "https://app.kash.bot/api/markets/trending?timeframe=1d&limit=5"
+curl "https://app.kash.bot/api/markets/trending?timeframe=24h&limit=5"
 ```
 
 ## Example Response
@@ -258,7 +254,7 @@ curl "https://app.kash.bot/api/markets/trending?timeframe=1d&limit=5"
     }
   ],
   "timeframe": {
-    "trending": "1d"
+    "trending": "24h"
   }
 }
 ```

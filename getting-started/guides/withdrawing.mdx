@@ -5,7 +5,7 @@ icon: 'arrow-left'
 ---
 
 <Note>
-Your funds, your control - withdraw winnings and deposits anytime with instant processing.
+Your funds, your control — withdraw your USDC to any external wallet anytime. Withdrawals are processed automatically and typically complete within minutes.
 </Note>
 
 <img
@@ -21,174 +21,109 @@ Your funds, your control - withdraw winnings and deposits anytime with instant p
   alt="Hero Dark"
 />
 
-# Withdrawal Overview
+# Withdrawal overview
 
-## What You Can Withdraw
-- **USDC** - Primary currency for all withdrawals
-- **Winnings** - Instantly available after market resolution
-- **Original deposits** - No lock-up periods
+Withdrawals are always in **USDC**, sent from your Kash smart wallet to any external address you choose. You can withdraw to Base directly, or have Kash bridge your USDC to another supported network.
 
-## Processing & Fees
-<AccordionGroup>
-  <Accordion title="Processing Time">
-    - **Instant execution** - No manual approval needed
-    - **Network confirmation** - 1-2 minutes on Base
-    - **24/7 availability** - Withdraw anytime
-    - **No waiting periods** - Funds immediately accessible
-  </Accordion>
-  <Accordion title="Fee Structure">
-    - **No withdrawal fees** - Only 2% fee on trades applies
-    - **Gas fees covered** - Kash sponsors all network fees
-    - **No hidden charges** - Fees clearly displayed upfront
-    - **Auto-conversion included** - No extra fees for token swaps
-  </Accordion>
-  <Accordion title="Security Features">
-    - **You control the destination** - Send to any supported address
-    - **Non-custodial** - Kash never holds your funds
-    - **Instant settlement** - No intermediary delays
-    - **Transparent on-chain** - All transactions verifiable
-  </Accordion>
-</AccordionGroup>
+**Supported destination networks:**
 
-## Security Best Practices
-**Before every withdrawal:**
-- **Double-check destination addresses** - No undo button exists
-- **Confirm Base network** - Wrong network = lost funds
-- **Start with small test amounts** - Verify process works
-- **Save verified addresses** - For future use
-- **Keep transaction records** - For tax and tracking purposes
+- **Base** (fastest — no bridging needed)
+- **Ethereum**
+- **Arbitrum**
+- **Optimism**
+- **Polygon**
 
+Withdrawals to networks other than Base are bridged automatically — you just enter the destination address and pick the network. Cross-chain withdrawals take a little longer and may include bridging costs, which are shown in the quote before you confirm.
 
-# Withdrawal Methods
+<Note>
+Kash also supports cashing out to fiat through Kash's third-party payment providers — look for the cash-out option in the withdrawal flow. Fees and limits are always shown before you confirm.
+</Note>
 
-<Tabs>
-  <Tab title="X (Twitter) DM">
-    **Withdraw directly through messaging @kash_bot**
-    
-    <Steps>
-      <Step title="Send withdrawal request">
-        - Message @kash_bot: "withdraw [amount]" 
-        - Or use: "withdraw all" for full balance
-        - Specify amount in USDC (e.g., "withdraw 500")
-      </Step>
-      <Step title="Provide destination address">
-        - Reply with your external wallet address (Base network)
-        - Must be a valid Base address starting with 0x
-        - Bot will verify address format
-      </Step>
-      <Step title="Confirm the transaction">
-        - Review amount, address, and fees
-        - Reply "yes" to confirm withdrawal
-        - Reply "cancel" to abort
-      </Step>
-      <Step title="Receive confirmation">
-        - USDC sent to your address on Base network
-        - Transaction hash provided for tracking
-        - Funds arrive in 1-2 minutes
-      </Step>
-    </Steps>
+## Withdrawal limits
 
-    **Example conversation:**
-    ```
-    You: "withdraw 500"
-    @kash_bot: "Send 500 USDC to which address? (Base network only)"
-    You: "0x123...abc"
-    @kash_bot: "Confirm: Send 500 USDC to 0x123...abc? (No withdrawal fees)"
-    You: "yes"
-    @kash_bot: "Withdrawal complete! TX: 0xdef...789"
-    ```
-  </Tab>
-  
-  <Tab title="Web Dashboard">
-    **Use the web interface for detailed control**
-    
-    <Steps>
-      <Step title="Access withdrawal page">
-        - Visit kash.bot and sign in
-        - Click "Withdraw" or "Send Funds"
-        - View current balance
-      </Step>
-      <Step title="Enter withdrawal details">
-        - Select amount or click "Max"
-        - Enter destination address (Base network)
-        - Review fees and net amount
-      </Step>
-      <Step title="Confirm and execute">
-        - Double-check all details
-        - Click "Confirm Withdrawal"
-        - Sign transaction if prompted
-      </Step>
-      <Step title="Track transaction">
-        - View transaction status
-        - Get transaction hash for tracking
-        - Receive email confirmation
-      </Step>
-    </Steps>
-  </Tab>
-  
-  <Tab title="To Exchanges">
-    **Withdraw directly to centralized exchanges**
-    
-    <Steps>
-      <Step title="Get exchange deposit address">
-        - Log into your CEX account
-        - Navigate to USDC deposits
-        - **Important:** Select Base network
-        - Copy the deposit address
-      </Step>
-      <Step title="Withdraw from Kash">
-        - Use either DM or web method above
-        - Paste exchange address as destination
-        - Verify it's the correct Base address
-      </Step>
-      <Step title="Confirm arrival">
-        - USDC appears in exchange account
-        - Usually takes 2-5 minutes
-        - Available for trading immediately
-      </Step>
-    </Steps>
-    
-    **Supported exchanges with Base:**
-    - Coinbase / Coinbase Pro
-    - Binance
-    - Kraken
-    - OKX
-    - Other major centralized exchanges
-  </Tab>
-</Tabs>
+| Limit | Value |
+|---|---|
+| Minimum per transaction | $1 |
+| Maximum per transaction | $25,000 |
+| Daily maximum | $10,000 |
+| Weekly maximum | $50,000 |
+| Withdrawals per hour | 5 |
 
----
+Limits are current as of publication — the app always shows live limits before you confirm.
 
-# After Withdrawal
+## How processing works
 
-## Confirmation Signs
-**Your withdrawal was successful when you see:**
-- **Transaction hash provided** by @kash_bot or dashboard
-- **Blockchain confirmation** (usually within 2 minutes)
-- **Funds appear in destination** wallet or exchange
-- **Kash balance updated** to reflect withdrawal
+Withdrawals are processed **asynchronously**: your request is validated instantly, then queued and executed on-chain automatically — no manual approval step.
 
-## Troubleshooting
+1. **Pending** — request validated and queued
+2. **Processing** — transaction being executed on-chain
+3. **Confirming** — waiting for blockchain confirmation
+4. **Completed** — funds arrived at your destination address
+
+Most withdrawals typically complete within minutes. Cross-chain withdrawals can take roughly 10–15 minutes depending on the destination network.
+
+# How to withdraw
+
+<Steps>
+  <Step title="Open the withdrawal flow">
+    Sign in at [app.kash.bot](https://app.kash.bot), open your wallet, and choose **Withdraw**.
+  </Step>
+  <Step title="Enter the details">
+    - Enter the amount (or select your full available balance)
+    - Paste the destination address
+    - Choose the destination network — make sure the address you're sending to supports that network
+  </Step>
+  <Step title="Review and confirm">
+    Double-check the address, network, and amount. For cross-chain withdrawals, review the bridging quote before confirming.
+  </Step>
+  <Step title="Track the status">
+    The app shows live progress until the withdrawal completes, including the transaction hash so you can verify it on a block explorer.
+  </Step>
+</Steps>
+
+## Withdrawing to an exchange
+
+You can withdraw directly to a centralized exchange (Binance, Kraken, OKX, and others):
+
+1. In your exchange account, open **USDC deposits** and select a network that both the exchange and Kash support (Base is usually fastest)
+2. Copy the exchange's deposit address
+3. Withdraw from Kash to that address, on that exact network
+4. Exchanges may take a few extra minutes to credit the deposit after it confirms on-chain
+
+<Warning>
+Always verify the destination address and network before confirming. Blockchain transactions are final — funds sent to a wrong address or unsupported network cannot be recovered.
+</Warning>
+
+## Security best practices
+
+- **Double-check destination addresses** — there is no undo
+- **Match the network** — the destination must support the network you selected
+- **Start with a small test amount** when withdrawing to a new address
+- **Keep transaction records** for tax and tracking purposes
+
+# Troubleshooting
+
 If your withdrawal doesn't arrive:
-1. **Check the transaction hash** on Base block explorer
-2. **Verify correct network** - ensure destination supports Base
-3. **Contact support** - DM @kash_bot with transaction details
-4. **Allow extra time** - some exchanges may take longer to credit
+
+1. **Check the status** in the app — it updates as the withdrawal progresses
+2. **Look up the transaction hash** on a block explorer for the destination network
+3. **Allow extra time** for cross-chain withdrawals and exchange crediting
+4. **Contact support** at support@kash.bot with the withdrawal details if something looks stuck
 
 <Tip>
-Your funds are always yours. Kash provides the prediction platform, but you maintain complete control over deposits and withdrawals!
+Your funds are always yours. Kash provides the prediction platform, but you keep full control over deposits and withdrawals.
 </Tip>
 
 <CardGroup cols={2}>
   <Card
-    title="Winning & Payouts"
+    title="Winning & payouts"
     icon="trophy-star"
     href="/getting-started/guides/winning"
   >
     Understand winnings and payouts
   </Card>
   <Card
-    title="Depositing Funds"
+    title="Depositing funds"
     icon="arrow-right"
     href="/getting-started/guides/depositing"
   >

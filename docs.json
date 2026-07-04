@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "sequoia",
   "name": "Kash",
-  "description": "Bringing prediction marketplaces to your feed.",
+  "description": "Prediction markets for your community — trade, create, and embed markets anywhere.",
   "colors": {
     "primary": "#FBD109",
     "light": "#FBD109",
@@ -54,7 +54,10 @@
               "getting-started/features/trading-options",
               "getting-started/features/natural-language",
               "getting-started/features/social",
-              "getting-started/features/kustom"
+              "getting-started/features/earn",
+              "getting-started/features/threads",
+              "getting-started/features/parlays",
+              "getting-started/features/world-cup"
             ]
           },
           {
@@ -80,6 +83,23 @@
               "getting-started/faqs/troubleshooting",
               "getting-started/faqs/support",
               "getting-started/faqs/legal"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "For Businesses",
+        "groups": [
+          {
+            "group": "For Businesses",
+            "pages": [
+              "for-businesses/overview",
+              "for-businesses/pricing-and-revenue-share",
+              "for-businesses/partner-portal-quickstart",
+              "for-businesses/market-creation",
+              "for-businesses/white-label-branding",
+              "for-businesses/analytics-and-earnings",
+              "for-businesses/api-access"
             ]
           }
         ]
@@ -322,18 +342,18 @@
   },
   "seo": {
     "metatags": {
-      "description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
-      "keywords": "permissionless, prediction, marketplace, prediction market, prediction marketplace, kash, kash bot, kash docs",
+      "description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
+      "keywords": "prediction market, prediction marketplace, prediction markets api, embed prediction markets, kash, kash bot, kash docs",
       "author": "Kash",
       "og:title": "Docs | Kash",
-      "og:description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
+      "og:description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
       "og:site_name": "Kash Docs",
       "og:type": "website",
       "og:url": "https://docs.kash.bot",
       "og:locale": "en_US",
       "og:image": "/assets/thumbnail/thumbnail.png",
       "twitter:title": "Kash Bot",
-      "twitter:description": "Kash is a permissionless prediction marketplace that allows you to predict anything.",
+      "twitter:description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
       "twitter:image:alt": "Kash Bot",
       "twitter:card": "summary_large_image",
       "twitter:site": "@kash_bot",
@@ -349,7 +369,7 @@
     "primary": {
       "type": "button",
       "label": "Kash App",
-      "href": "https://kash.bot"
+      "href": "https://app.kash.bot"
     }
   },
   "footer": {

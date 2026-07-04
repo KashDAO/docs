@@ -100,7 +100,7 @@ Most endpoints share the per-key tier quota. A few are tighter:
 ## Best practices
 
 - **Read your headers.** Cheaper than retry-after-rejection. Aim to keep `X-RateLimit-Remaining` above 10% of `X-RateLimit-Limit` under steady-state load.
-- **Use ETags on read paths.** A `304 Not Modified` doesn't count toward your quota — see **[ETags](/developer-docs/rest-api/etags)**.
+- **Use ETags on read paths.** A `304 Not Modified` still consumes one request from your quota (rate limiting runs before the ETag check) — the savings are bandwidth and server work, not quota. See **[ETags](/developer-docs/rest-api/etags)**.
 - **Use the SDK.** It handles `Retry-After`, exponential backoff, jitter, and idempotency-safe retries automatically.
 - **Distribute across keys carefully.** Rate-limit quota is per-`user_id`, so multiple keys for the same user don't help with HTTP throughput. (Spending caps ARE per-key.) If you need higher throughput, the upgrade path is below.
 - **Don't hammer the quote endpoint.** Quotes are RPC-heavy. Cache results client-side for the freshness window your strategy can tolerate (typically 5–15s).

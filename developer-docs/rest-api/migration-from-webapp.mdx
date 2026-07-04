@@ -16,11 +16,11 @@ If you're a programmatic consumer (a trading bot, a market maker, a portfolio to
 | Rate limiting          | Per-IP                                    | Per-key (much higher quotas, attribution, telemetry)    |
 | Response shape         | UI-shaped (rich; tuned for rendering)     | Lean wire shape (decimal strings for big numbers)       |
 | Trade execution        | Not exposed — frontend signs directly      | First-class — `POST /v1/trades`                         |
-| Webhooks               | None                                      | `trade.confirmation-required`, `.completed`, `.failed`  |
+| Webhooks               | None                                      | `trade.confirmation-required`, `.completed`, `.failed`, `.rejected` |
 | Idempotency            | No                                        | `Idempotency-Key` + `clientRequestId`                   |
 | Pagination             | Offset (legacy)                           | Cursor (stable under concurrent writes)                 |
 | Error format           | Various                                   | RFC 7807 Problem Details with stable `code`             |
-| ETags / `If-None-Match`| No                                        | Yes — every response, free read quota for unchanged data|
+| ETags / `If-None-Match`| No                                        | Yes — every response, cheap 304 revalidation (no body transfer; still counts toward quota) |
 | Versioning             | None                                      | URL-versioned (`/v1/`) + `X-Kash-Api-Version` header     |
 | Deprecation policy     | Best-effort                               | RFC 8594 `Sunset` + `Deprecation` headers, 12-month notice |
 
@@ -41,18 +41,18 @@ Both list markets, cursor-paginated/offset-paginated respectively.
 ```
 
 Differences:
-- AWS uses `cursor` not `offset`. Walk pages by passing the `pagination.cursor` from the previous response.
-- AWS uses `data: [...]` consistently; webapp uses `markets: [...]`.
-- AWS response is leaner (no `yesPrice`/`noPrice` convenience fields — those are derivable from `outcomes[].probability`).
-- AWS requires `markets:read` scope.
+- The REST API uses `cursor` not `offset`. Walk pages by passing the `pagination.cursor` from the previous response.
+- The REST API uses `data: [...]` consistently; webapp uses `markets: [...]`.
+- The REST API response is leaner (no `yesPrice`/`noPrice` convenience fields — those are derivable from `outcomes[].probability`).
+- The REST API requires the `markets:read` scope.
 
 ### `GET /api/markets/{id}` → `GET /v1/markets/{id}`
 
-Single market detail. Same caveats as above. AWS adds the dual-key `data:` alias on every single-resource response.
+Single market detail. Same caveats as above. The REST API adds the dual-key `data:` alias on every single-resource response.
 
 ### `GET /api/markets/{id}/quote` → `GET /v1/markets/{id}/quote`
 
-Both fetch on-chain price quotes. **The AWS endpoint is the canonical implementation** — the webapp's quote endpoint was the prototype; the AWS one is the production-grade version with stricter precision (decimal-string bigints), explicit `units` block, and proper kill-switch behaviour during RPC degradation.
+Both fetch on-chain price quotes. **The `api.kash.bot` endpoint is the canonical implementation** — the webapp's quote endpoint was the prototype; the public REST API's is the production-grade version with stricter precision (decimal-string bigints), explicit `units` block, and proper kill-switch behaviour during RPC degradation.
 
 ```diff
 - GET https://app.kash.bot/api/markets/{id}/quote?outcomeIndex=0&action=buy&amount=100
@@ -61,10 +61,10 @@ Both fetch on-chain price quotes. **The AWS endpoint is the canonical implementa
 ```
 
 Differences:
-- `amount` on AWS is in **atomic units** (USDC atomic-6 for buys, token WAD-18 for sells). The webapp accepts decimal USDC. Multiply by `1_000_000` going from one to the other.
-- AWS requires `markets:quote` scope (separate from `markets:read` so you can throttle quote traffic independently).
-- AWS returns all bigint fields as decimal strings (`tokensOut: "237340124711760000000"` instead of a JS number that loses precision).
-- AWS includes a `units` block (`{ usdc: "atomic-6", token: "wad-18" }`) so consumers don't guess.
+- `amount` on the REST API is in **atomic units** (USDC atomic-6 for buys, token WAD-18 for sells). The webapp accepts decimal USDC. Multiply by `1_000_000` going from one to the other.
+- The REST API requires the `markets:quote` scope (separate from `markets:read` so you can throttle quote traffic independently).
+- The REST API returns all bigint fields as decimal strings (`tokensOut: "237340124711760000000"` instead of a JS number that loses precision).
+- The REST API includes a `units` block (`{ usdc: "atomic-6", token: "wad-18" }`) so consumers don't guess.
 
 ### `GET /api/portfolio` → `GET /v1/portfolio`
 
@@ -80,11 +80,11 @@ Portfolio summary.
 Differences:
 - Auth: Privy session JWT → API key.
 - Response is per-key user, not per-Privy-user. (For most cases these are the same person, but if you have multi-user setups, mind the distinction.)
-- AWS requires `portfolio:read` scope.
+- The REST API requires the `portfolio:read` scope.
 
-### `POST /api/account/api-keys` → (NOT in AWS; webapp is the issuer)
+### `POST /api/account/api-keys` → (not on `api.kash.bot`; webapp is the issuer)
 
-Self-serve API key issuance lives **only** in the webapp. The AWS API reads from the same `api_keys` table but doesn't issue keys — issuance requires a Privy session (the human).
+Self-serve API key issuance lives **only** in the webapp. The public REST API reads from the same `api_keys` table but doesn't issue keys — issuance requires a Privy session (the human).
 
 If you're automating key provisioning programmatically, use the admin CLI on a machine with admin credentials:
 
@@ -93,9 +93,9 @@ kash-admin api-keys issue --tier developer --user <user-id> \
   --scopes markets:read,markets:quote,trades:read,trades:write
 ```
 
-## Endpoints unique to AWS
+## Endpoints unique to the public REST API
 
-These have no webapp equivalent — the AWS API introduces them:
+These have no webapp equivalent — `api.kash.bot/v1` introduces them:
 
 - `POST /v1/trades` — **trade execution**. The big one. The webapp doesn't expose this; all trading happens via direct frontend transactions.
 - `POST /v1/trades/{id}/confirm` — high-value trade confirmation gate.
@@ -107,7 +107,7 @@ These have no webapp equivalent — the AWS API introduces them:
 
 ## Endpoints unique to the webapp
 
-These won't appear on AWS — they serve UI/embedding workloads:
+These won't appear on `api.kash.bot` — they serve UI/embedding workloads:
 
 - `GET /api/markets/trending`, `GET /api/markets/featured`, `GET /api/markets/for-you` — engagement/personalisation.
 - `GET /api/community/leaderboard` — global rankings.
@@ -115,7 +115,7 @@ These won't appear on AWS — they serve UI/embedding workloads:
 - All thread/social/embed endpoints — those are the [Public Embed API](/developer-docs/public-embed-api/overview).
 - All ramp/onramp/withdrawal flows — those are user account operations, not programmatic.
 
-If you need any of these from a programmatic context, file an issue — there may be a path to expose a subset on AWS.
+If you need any of these from a programmatic context, file an issue — there may be a path to expose a subset on the public REST API.
 
 ## Migration checklist
 
@@ -137,9 +137,9 @@ For a typical migration from `app.kash.bot/api/markets*` + `app.kash.bot/api/por
 
 ## A note on the "prototype" quote endpoint
 
-The webapp's quote endpoint was the prototype for the AWS one. The AWS version is now the source of truth. If the two diverge in output (rare; we monitor for divergence), the AWS response is canonical.
+The webapp's quote endpoint was the prototype for the `api.kash.bot` one. The public REST API version is now the source of truth. If the two diverge in output (rare; we monitor for divergence), the `api.kash.bot` response is canonical.
 
-We don't currently plan to formally deprecate the webapp's quote endpoint — it serves the embed audience well — but new programmatic code should call AWS.
+We don't currently plan to formally deprecate the webapp's quote endpoint — it serves the embed audience well — but new programmatic code should call `api.kash.bot/v1`.
 
 ## Need help migrating?
 

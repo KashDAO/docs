@@ -21,330 +21,134 @@ icon: 'user'
 
 <AccordionGroup>
   <Accordion title="How do I create a Kash account?">
-    **Simple X (Twitter) Integration**
-    
-    Creating a Kash account is seamless:
-    
-    1. **Via X (Twitter):** Interact with @kash_bot by replying to any market tweet or sending a direct message
-    2. **Via Web:** Visit kash.bot and connect your X account
-    3. **Automatic Setup:** Your account and MPC wallet are created automatically
-    
-    **No Requirements:**
-    - No email address needed
-    - No phone number verification
-    - No identity verification required
-    - No complex forms to fill out
-    
-    **What You Get:**
-    - Non-custodial MPC wallet on Base network
-    - Access to prediction markets
-    - Integration with X for social trading
-    - Ability to participate in community governance
+    **Sign In With the Method You Prefer**
+
+    Go to [app.kash.bot](https://app.kash.bot) and sign in with any of the supported login methods (powered by Privy):
+
+    - **X (Twitter)** account
+    - **Google** account
+    - **Email** (one-time code, no password to remember)
+    - **External wallet** you already own
+
+    **What happens on signup:**
+    - A self-custodial wallet and smart account are created for you automatically
+    - No seed phrase to write down
+    - No identity documents required to get started
+
+    **Recommended next step:** add a **recovery email** in Settings so you can regain access if you ever lose your primary login method.
   </Accordion>
-  
+
   <Accordion title="Can I have multiple accounts?">
-    **One Account Per X Profile**
-    
-    **Account Policy:**
-    - Each X (Twitter) account can have only one Kash account
+    **One Account Per Person**
+
     - Multiple accounts per person are not permitted
     - Account sharing is prohibited
-    - Each account has its own unique wallet
-    
-    **Why This Policy:**
-    - Prevents abuse and market manipulation
-    - Ensures fair participation
-    - Maintains platform integrity
-    - Enables accurate community governance
-    
-    **Account Independence:**
-    - Accounts cannot be merged
-    - Funds cannot be transferred between accounts
-    - Each account maintains separate history
-    - Reputation is account-specific
+    - Each account has its own unique wallet, history, and reputation
+
+    **Why:** one-account-per-person keeps markets, leaderboards, competitions, and referral rewards fair, and prevents manipulation.
+
+    Accounts cannot be merged, and funds cannot be transferred between accounts.
   </Accordion>
-  
+
   <Accordion title="How do I access my account?">
     **Access Methods**
-    
-    **Primary Access:**
-    - **X (Twitter):** Message or mention @kash_bot from your connected account
-    - **Web Dashboard:** Visit kash.bot and authenticate with X
-    - **Mobile:** Access through mobile browser with X authentication
-    
-    **Authentication:**
-    - Your X account serves as your login
-    - No separate passwords required
-    - Secure OAuth integration with X
-    - Automatic wallet connection
-    
-    **Available Features:**
-    - View balance and transaction history
-    - Place predictions and manage positions
-    - Create markets through natural language
-    - Participate in governance discussions
+
+    - **Webapp:** visit [app.kash.bot](https://app.kash.bot) and sign in — works on desktop and mobile browsers, and you can install it as an app (PWA) on your phone
+    - **Tweet trading (optional):** after authorizing your X account in **Settings → Trading bot**, you can also trade by tweeting at **Kash's dedicated trading account** — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile
+
+    Your login method (X, Google, email, or wallet) is your key — there's no separate Kash password.
   </Accordion>
 </AccordionGroup>
 
 # Account Security and Recovery
 
 <AccordionGroup>
-  <Accordion title="What if I lose access to my X account?">
-    **Account Recovery Dependencies**
-    
-    **Critical Dependency:**
-    - Your Kash account is directly tied to your X account
-    - Losing X access means losing Kash access
-    - Recovery requires regaining X account access
-    - No independent recovery mechanism exists
-    
-    **Prevention:**
-    - Enable two-factor authentication on X
-    - Use strong, unique password for X
-    - Keep X account credentials secure
-    - Monitor X account activity regularly
-    
-    **If You Lose X Access:**
-    - Follow X's account recovery process
-    - Contact X support for help
-    - Your wallet and funds remain secure on blockchain
-    - Regaining X access restores Kash functionality
-    
-    **Important Note:**
-    - Always maintain secure access to your X account
-    - Consider X account security as your primary security concern
-    - No alternative recovery methods currently available
+  <Accordion title="What if I lose access to my login method?">
+    **Recovery Options**
+
+    - **Recovery email:** if you've set a recovery email in Settings, you can use it to regain access to your account — set it up now if you haven't
+    - **Primary login recovery:** regaining access to your X/Google/email account through that provider restores your Kash access
+    - **Key export:** you can export your wallet key from Settings at any time, giving you an independent backup of access to your funds
+
+    **Prevention checklist:**
+    - Add a recovery email in Settings
+    - Enable 2FA on the account you use to log in (X or Google)
+    - Consider exporting and securely storing your wallet key
   </Accordion>
-  
+
   <Accordion title="How do I secure my account?">
     **Security Best Practices**
-    
-    **X Account Security (Critical):**
-    - Enable two-factor authentication (2FA)
-    - Use strong, unique password
-    - Monitor login activity
-    - Be cautious of phishing attempts
-    
-    **Platform Security:**
-    - Only interact with verified @kash_bot account
-    - Verify kash.bot domain before login
-    - Monitor transaction notifications
-    - Report suspicious activity to community
-    
-    **MPC Wallet Security:**
-    - Wallet uses Multi-Party Computation for security
-    - Private keys are distributed, never stored in one place
-    - You maintain control without managing seed phrases
-    - Transactions require X authentication
-    
-    **Additional Protection:**
-    - Review transaction history regularly
-    - Use secure networks for account access
-    - Keep browsers updated
-    - Be aware of social engineering attempts
+
+    **Login security:**
+    - Enable two-factor authentication on your X or Google account
+    - Use a strong, unique password on your login provider
+    - Add a recovery email in Kash Settings
+
+    **Platform security:**
+    - Always verify you're on the **app.kash.bot** domain before signing in
+    - Kash will never ask for your password or exported key
+    - Review your transaction history regularly
+
+    **Wallet model:**
+    - Your funds are held in your own smart account, controlled by a Privy-powered embedded wallet that only you can authorize
+    - Kash cannot withdraw your funds; trades execute only under permissions you authorize
+    - See the [Security FAQ](/getting-started/faqs/security) for the full custody model
   </Accordion>
-  
-  <Accordion title="Can I export my account data?">
-    **Data Access and Transparency**
-    
-    **Available Information:**
-    - **Transaction History:** All prediction activity recorded on Base blockchain
-    - **Public Data:** Market participation is publicly visible
-    - **Wallet Address:** Base wallet address is publicly accessible
-    - **Governance Activity:** DAO participation is recorded
-    
-    **Access Methods:**
-    - **Blockchain Explorer:** View transactions on basescan.org
-    - **@kash_bot:** Query history through direct messages
-    - **Web Dashboard:** View account information
-    - **Public APIs:** Access blockchain data directly
-    
-    **Data Transparency:**
-    - All prediction activity is on-chain and public
-    - Market creation and participation is recorded
-    - Governance votes are publicly visible
-    - No hidden or private data storage
-    
-    **Privacy Considerations:**
-    - Your X username is associated with your wallet
-    - All transactions are publicly visible
-    - Consider privacy implications before participating
+
+  <Accordion title="Can I export my wallet or account data?">
+    **Yes — Your Wallet Is Yours**
+
+    - **Key export:** export your embedded wallet's key from **Settings** to use your wallet outside of Kash
+    - **Transaction history:** all trading activity is recorded on the Base blockchain and viewable on [basescan.org](https://basescan.org)
+    - **In-app history:** the Portfolio page shows your positions, trades, and claims
+
+    **Privacy note:** blockchain activity is public. Your on-chain trades are visible to anyone who knows your wallet address.
   </Accordion>
 </AccordionGroup>
 
 # Account Management
 
 <AccordionGroup>
-  <Accordion title="How do I update my account information?">
+  <Accordion title="How do I update my profile and settings?">
     **Profile Management**
-    
-    **Display Information:**
-    - Display name syncs from your X profile
-    - Profile picture updates from X account
-    - Changes on X reflect in Kash automatically
-    - No separate profile management needed
-    
-    **Account Settings:**
-    - Basic notification preferences
-    - Display preferences for dashboard
-    - Language based on browser/X settings
-    - No additional contact information required
-    
-    **X Integration:**
-    - Profile tied directly to X account
-    - No email or phone required
-    - No separate verification needed
-    - Updates happen automatically
-    
-    **Settings Access:**
-    - Web dashboard for basic preferences
-    - @kash_bot commands for account queries
-    - Mobile-responsive interface
+
+    - Profile details sync from the account you signed in with
+    - Settings (language, theme, notifications, privacy, API keys, trading bot) live in **Settings** on the webapp — see the [Settings FAQ](/getting-started/faqs/settings)
+    - Adding or changing your recovery email is also done in Settings
   </Accordion>
-  
-  <Accordion title="How do I manage my wallet?">
-    **MPC Wallet Management**
-    
-    **Wallet Features:**
-    - **Non-custodial:** You maintain control of funds
-    - **No Seed Phrases:** No complex backup requirements
-    - **Base Network:** Operates on Base blockchain
-    - **Automatic Setup:** Created automatically with account
-    
-    **Basic Operations:**
-    - **Deposits:** Send supported tokens to your wallet
-    - **Withdrawals:** Send funds to any Base address
-    - **Predicting:** Use funds for prediction markets
-    - **Governance:** Participate with $KASH tokens
-    
-    **Security:**
-    - Multi-Party Computation for enhanced security
-    - X authentication required for transactions
-    - Blockchain security through Base network
-    - All transactions publicly verifiable
-    
-    **Limitations:**
-    - Wallet access requires X account access
-    - Primarily operates on Base network
-    - No independent recovery mechanism
-    - All transactions are publicly visible
-  </Accordion>
-  
+
   <Accordion title="Can I delete my account?">
-    **Account Deactivation**
-    
-    **Blockchain Permanence:**
-    - Account data is stored on blockchain
-    - Transaction history cannot be deleted
-    - Wallet address remains on Base network
-    - Governance participation is permanently recorded
-    
-    **Stopping Usage:**
-    - **Withdraw Funds:** Move funds to external wallet
-    - **Stop Using Platform:** Simply stop interacting with @kash_bot
-    - **X Disconnection:** Disconnect X account if desired
-    - **Natural Deactivation:** Account becomes inactive without use
-    
-    **What Remains:**
-    - All past transactions remain visible on blockchain
-    - Past prediction activity stays recorded
-    - DAO participation remains public
-    - Wallet address remains on network
-    
-    **Privacy Note:**
-    - Blockchain data is permanent and public
-    - Consider privacy implications before participating
-    - No data deletion possible once on blockchain
-  </Accordion>
-</AccordionGroup>
+    **Account Deletion via Support**
 
-# Community Participation
+    To delete your account, contact **support@kash.bot** from the email associated with your account (or include your account details).
 
-<AccordionGroup>
-  <Accordion title="How do I participate in governance?">
-    **KashDAO Governance**
-    
-    **Governance Basics:**
-    - **$KASH Tokens:** Governance tokens for voting on platform decisions
-    - **Voting Rights:** Vote on platform improvements
-    - **Community Decisions:** Participate in major decisions
-    - **Treasury Input:** Input on fund allocation
-    
-    **Governance Process:**
-    - **Proposals:** Community members submit proposals
-    - **Discussion:** Community discussion period
-    - **Voting:** Token holders vote on proposals
-    - **Implementation:** Approved proposals are implemented
-    
-    **Governance Topics:**
-    - Platform fee adjustments
-    - Feature development priorities
-    - Treasury fund allocation
-    - Community guidelines and policies
+    **Before you request deletion:**
+    - **Withdraw your funds** — move your balance to an external wallet or off-ramp first
+    - **Consider exporting your key** so you retain access to the wallet independently
+
+    **What can't be deleted:**
+    - On-chain transaction history is permanent and public — blockchain records cannot be erased
+    - Deletion removes your Kash account and platform data, not the public blockchain record
   </Accordion>
-  
-  <Accordion title="How do I create markets?">
-    **Market Creation**
-    
-    **Creating Markets:**
-    - **Natural Language:** Describe market idea to @kash_bot
-    - **AI Processing:** AI structures your market concept
-    - **Community Review:** Community provides feedback
-    - **Market Launch:** Approved markets go live
-    
-    **Market Requirements:**
-    - **Clear Resolution:** Market must have verifiable outcome
-    - **Appropriate Timeline:** Reasonable timeframe for resolution
-    - **Public Interest:** Should interest the community
-    - **Platform Compliance:** Must follow community guidelines
-    
-    **Market Categories:**
-    - Current events and politics
-    - Sports and competitions
-    - Technology developments
-    - Entertainment and culture
-    
-    **Creator Benefits:**
-    - **Community Recognition:** Build reputation
-    - **Platform Contribution:** Help expand offerings
-    - **Learning:** Gain prediction market insights
-  </Accordion>
-  
+
   <Accordion title="How do I get help?">
-    **Support Resources**
-    
-    **Primary Support:**
-    - **@kash_bot:** AI assistant for common questions
-    - **Discord Community:** Active community support
-    - **Documentation:** Comprehensive guides and FAQs
-    - **GitHub:** Open source development and issues
-    
-    **Community Help:**
-    - **Discord Channels:** Topic-specific help
-    - **Peer Assistance:** Experienced users help newcomers
-    - **Knowledge Sharing:** Community solutions
-    - **Regular Updates:** Platform announcements
-    
-    **Self-Service:**
-    - **AI Bot:** 24/7 assistance through @kash_bot
-    - **Documentation:** Detailed feature guides
-    - **Blockchain Explorer:** Verify transactions independently
-    - **Web Dashboard:** Account information and history
-    
-    **For Complex Issues:**
-    - **Community Discussion:** Discuss in Discord
-    - **Bug Reporting:** Report issues through community
-    - **Governance:** For platform policy questions
-    - **Security:** Follow responsible disclosure for security issues
+    **Support Channels**
+
+    - **Email:** support@kash.bot
+    - **In-app feedback widget:** report a bug or share an idea (with screenshots) directly from the webapp
+    - **Discord:** [community support](https://discord.com/invite/n9eumqjMPb)
+    - **Help center:** [docs.kash.bot](https://docs.kash.bot)
+
+    See the [Support FAQ](/getting-started/faqs/support) for details.
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-Your Kash account depends entirely on your X account. Losing X access means losing Kash access. Always maintain secure access to your X account with strong passwords and two-factor authentication.
+Protect the account you use to sign in to Kash — it controls your wallet. Enable 2FA on your login provider and add a recovery email in Settings.
 </Warning>
 
 <Tip>
-All your activity on Kash is recorded on the Base blockchain and is publicly visible. Consider the privacy implications before participating in prediction markets.
+Your trading activity is recorded on the Base blockchain and is publicly visible. Consider the privacy implications before participating in prediction markets.
 </Tip>
 
 <CardGroup cols={2}>
@@ -356,10 +160,10 @@ All your activity on Kash is recorded on the Base blockchain and is publicly vis
     Learn about account security
   </Card>
   <Card
-    title="Governance"
-    icon="users"
-    href="/getting-started/ecosystem/governance"
+    title="Settings"
+    icon="gear"
+    href="/getting-started/faqs/settings"
   >
-    Participate in KashDAO
+    Configure your account
   </Card>
 </CardGroup>

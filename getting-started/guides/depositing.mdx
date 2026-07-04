@@ -5,7 +5,7 @@ icon: 'arrow-right'
 ---
 
 <Note>
-Fund your Kash wallet easily with crypto or traditional payment methods - deposits arrive in minutes.
+Fund your Kash balance with a card, Apple Pay, Google Pay, or a direct USDC transfer. Deposits typically arrive within minutes.
 </Note>
 
 <img
@@ -21,137 +21,103 @@ Fund your Kash wallet easily with crypto or traditional payment methods - deposi
   alt="Hero Dark"
 />
 
-# Primary Currency
+# How deposits work
 
-## USDC (USD Coin)
-**The main currency for all predictions:**
-- Stable value pegged to US Dollar
-- Widely available on exchanges and wallets
-- Low transaction fees on Base network
-- Instant settlement for winnings
+Everything on Kash runs on **USDC** (a US dollar stablecoin) on the **Base** network. When you deposit, USDC is delivered directly to your own Kash smart wallet — Kash never takes custody of your funds.
 
-## Other Supported Tokens
-- **ETH, WETH, DAI** - Auto-converted to USDC
-- **$KASH tokens** - Can be used for predicting
-- **Base network only** - Ensure correct network
+- **USDC only** — Kash does not accept or auto-convert other tokens (no ETH, WETH, or DAI)
+- **Delivered to Base** — fiat purchases arrive on Base directly; crypto sent on other networks is automatically bridged to Base for you
+- **No deposit fee from Kash** — payment providers charge their own processing fees (listed below)
 
-# Deposit Methods
+# Deposit methods
 
 <Tabs>
-  <Tab title="Crypto Transfer">
-    **Transfer crypto from exchanges or wallets**
-    
+  <Tab title="Card, Apple Pay & Google Pay">
+    **Buy USDC directly with a card or mobile wallet**
+
     <Steps>
-      <Step title="Get your Kash wallet address">
-        - DM @kash_bot with "wallet" or "address"
-        - Visit kash.bot dashboard
-        - Copy your Base network address
-        - Save for future use
+      <Step title="Open the deposit flow">
+        On [app.kash.bot](https://app.kash.bot), open your wallet and choose **Deposit** (or **Add funds**).
       </Step>
-      <Step title="Send USDC on Base network">
-        - From any exchange or wallet that supports Base
-        - **Critical:** Select Base network (not Ethereum!)
-        - Send USDC to your Kash address
-        - Arrives in 1-2 minutes
+      <Step title="Choose an amount and payment method">
+        Select how much USDC you want and pay with card, Apple Pay, or Google Pay.
       </Step>
-      <Step title="Other tokens auto-convert">
-        - Send ETH, WETH, or DAI on Base
-        - Automatically swapped to USDC at best rates
-        - No manual conversion needed
-        - Small conversion fee applies
+      <Step title="Complete the purchase">
+        Fees and the amount you'll receive are shown before you confirm. USDC is sent straight to your Kash wallet, usually within a few minutes.
       </Step>
     </Steps>
-    
+
+    **Payment provider**
+
+    All fiat processing is handled by third-party payment providers — Kash never sees or stores your card or bank details.
+
+    | Provider | Methods | Fee | KYC |
+    |---|---|---|---|
+    | **Halliday** | Card, Apple Pay, Google Pay | 2.9% + $0.30 | Basic (government ID) |
+
+    <Note>
+    Additional payment options may appear in the deposit flow. Provider fees are current as of publication — the app always shows live fees and limits before you confirm.
+    </Note>
+  </Tab>
+
+  <Tab title="Crypto transfer">
+    **Send USDC from an exchange or external wallet**
+
+    <Steps>
+      <Step title="Get your deposit address">
+        In the deposit flow on app.kash.bot, choose **Crypto** and select the network you're sending from. Kash shows you the exact address (and QR code) to send to.
+      </Step>
+      <Step title="Send USDC">
+        Transfer USDC from any wallet or exchange. Supported networks:
+        - **Base** (fastest — arrives in minutes)
+        - **Ethereum**
+        - **Polygon**
+        - **Arbitrum**
+        - **Optimism**
+        - **Avalanche**
+        - **BNB Chain**
+        - **Linea**, **Scroll**, **Mantle**, **Mode**, and **Blast**
+
+        The full list is always shown in the deposit flow.
+      </Step>
+      <Step title="Automatic bridging to Base">
+        USDC sent on any network other than Base is automatically bridged to Base and credited to your Kash wallet. Cross-chain deposits typically take around 10–15 minutes; Base deposits arrive in a couple of minutes.
+      </Step>
+    </Steps>
+
+    - **Limits:** $1 – $100,000 per transaction (limits subject to change)
+    - **Fees:** Kash charges nothing — you only pay the sending network's gas (and bridge costs on cross-chain transfers)
+    - Crypto deposits don't currently require identity verification; Kash applies compliance screening, and verification requirements may change
+
     <Warning>
-    Always double-check you're using **Base network** - wrong network = lost funds!
+    Send **USDC only**, on one of the supported networks, to the exact address shown in the deposit flow. Other tokens are not supported and may be unrecoverable.
     </Warning>
-  </Tab>
-  
-  <Tab title="Card & Bank Payments">
-    **Buy crypto directly with traditional payment methods**
-    
-    <Steps>
-      <Step title="Visit kash.bot dashboard">
-        - Click "Add Funds" or "Deposit"
-        - Select amount (\$10 minimum recommended)
-      </Step>
-      <Step title="Choose payment method">
-        - Credit/debit card
-        - Bank transfer (ACH)
-        - Apple Pay/Google Pay
-        - PayPal (where available)
-      </Step>
-      <Step title="Complete purchase">
-        - Rates and fees shown upfront
-        - USDC sent directly to your Kash wallet
-        - Usually arrives in 5-10 minutes
-        - Email confirmation sent
-      </Step>
-    </Steps>
-  </Tab>
-  
-  <Tab title="Earn & Receive">
-    **Get funds through Kash ecosystem activities**
-    
-    - **Compete** in community leaderboards and challenges
-    - **Build reputation** through accurate predictions
-    - **Create markets** on topics you're passionate about
-    - **Convert $KASH** to prediction power automatically
-    - **Ecosystem rewards** and competitions
   </Tab>
 </Tabs>
 
 ---
 
-# After Your Deposit
+# After your deposit
 
-## Instant Confirmation
-- **Balance updates in real-time** as deposit arrives
-- **@kash_bot confirms receipt** with notification
-- **Ready to predict immediately** - no waiting periods
-- **Transaction history** available in dashboard
-
-## Using Your Funds
-<AccordionGroup>
-  <Accordion title="Start Predicting">
-    - Predict on any open prediction market
-    - No minimum prediction amounts
-    - Funds instantly available for use
-    - Gas fees sponsored by Kash
-  </Accordion>
-  <Accordion title="Withdraw Anytime">
-    - No lock-up periods or restrictions
-    - Withdraw partial or full balance
-    - Same-day processing
-    - You always control your funds
-  </Accordion>
-  <Accordion title="Earn While Idle">
-    - Unused USDC can earn yield
-    - Automatic optimization
-    - Withdraw earnings anytime
-  </Accordion>
-</AccordionGroup>
-
-## Security Best Practices
-- **Start with small amounts** for your first deposit
-- **Verify wallet addresses** carefully before sending
-- **Save your Kash address** for future deposits
-- **Enable X/Twitter notifications** for deposit confirmations
+- **Balance updates automatically** once the deposit is confirmed
+- **Ready to predict immediately** — no waiting periods
+- **Transaction history** is available in your portfolio
+- **Withdraw anytime** — no lock-ups; see the withdrawing guide for limits
 
 <Tip>
-Depositing is just the beginning. The real value comes from making accurate predictions and growing your bankroll through strategic predictions!
+Start with a small first deposit to get comfortable with the flow, and save your deposit address for future crypto transfers.
 </Tip>
 
 <CardGroup cols={2}>
   <Card
-    title="Making Predictions"
+    title="Making predictions"
     icon="crystal-ball"
     href="/getting-started/guides/predicting"
   >
     Learn how to place predictions
   </Card>
   <Card
-    title="Withdrawing Funds"
+    title="Withdrawing funds"
     icon="arrow-left"
     href="/getting-started/guides/withdrawing"
   >

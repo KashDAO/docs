@@ -34,7 +34,7 @@ export KASH_API_KEY="kash_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 The `kash_test_` prefix marks staging keys; production keys use `kash_live_`.
 
 <Tip>
-Prefer the CLI for issuance? You can also issue keys via the `@kashdao/cli` (`kash` command) once you've authenticated it with a Privy session. See the [CLI guide](/developer-docs/cli/overview).
+Key issuance happens in the webapp's **Settings → API Keys** page — the CLI can't issue keys. Once you have one, store it in the CLI with `kash auth set-key` so every `kash` command picks it up. See the [CLI guide](/developer-docs/cli/overview).
 </Tip>
 
 ## 3. Make your first request
@@ -46,7 +46,7 @@ curl https://api-staging.kash.bot/v1/markets?limit=5 \
 
 You should get back a `200 OK` with a page of markets.
 
-If you get `401 INSUFFICIENT_SCOPE`, your key is missing `markets:read`. If you get `429`, you've hit your tier's rate limit — the response includes `X-RateLimit-Reset` and `Retry-After`.
+If you get `403 INSUFFICIENT_SCOPE`, your key is missing `markets:read`. If you get `429`, you've hit your tier's rate limit — the response includes `X-RateLimit-Reset` and `Retry-After`.
 
 ## 4. Get a quote
 

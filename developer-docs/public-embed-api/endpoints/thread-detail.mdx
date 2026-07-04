@@ -17,6 +17,12 @@ GET https://app.kash.bot/api/threads/:id
   The unique thread identifier (UUID format)
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="includeMarkets" type="boolean" default="false">
+  When `true`, the response also includes the thread's markets alongside the thread details. Defaults to `false` (thread details only).
+</ParamField>
+
 ## Response
 
 <ResponseField name="thread" type="object">
@@ -64,7 +70,7 @@ GET https://app.kash.bot/api/threads/:id
     </ResponseField>
 
     <ResponseField name="status" type="string">
-      Current status: `active`, `upcoming`, `completed`, `resolved`, `cancelled`, `paused`
+      Current status (derived from start/end times): `active`, `upcoming`, `closed`
     </ResponseField>
 
     <ResponseField name="category" type="string">

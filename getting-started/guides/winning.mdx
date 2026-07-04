@@ -1,11 +1,11 @@
 ---
 title: 'Winning'
-description: 'How to claim your winnings and maximize returns'
+description: 'How claims, refunds, and payouts work'
 icon: 'trophy-star'
 ---
 
 <Note>
-When your predictions prove correct, winnings are automatically credited to your wallet - no claims needed.
+When a market resolves in your favor, your winnings become claimable — head to your Portfolio and hit **Claim** to receive your USDC.
 </Note>
 
 <img
@@ -21,202 +21,134 @@ When your predictions prove correct, winnings are automatically credited to your
   alt="Hero Dark"
 />
 
-# Automatic Winning Process
+# Claiming your winnings
 
-## Instant Settlement System
-When an event concludes, Kash's AI resolution system:
+## When a market resolves
 
-1. **Fetches verified results** from multiple trusted data sources
-2. **Validates outcome** using zero-knowledge proofs for transparency
-3. **Processes payouts** automatically via smart contracts
-4. **Credits winners instantly** - no manual claims or delays
-5. **Notifies all participants** of final results
+1. **The oracle resolves the market** — the winning outcome (or outcomes) is set on-chain
+2. **Your winning position becomes claimable** — you'll see it flagged in your Portfolio
+3. **You claim** — press **Claim** on the position, and your winning shares are redeemed for USDC
+4. **USDC lands in your wallet** — redemption executes from your own smart wallet; Kash never holds your winnings
 
-## Winning Notification
-When you win, you'll receive an immediate confirmation:
+<Note>
+On mainnet, a claim may deduct a small gas amount in USDC from your winnings — you receive the net USDC. There is no Kash fee on redemption.
+</Note>
 
-```
-@kash_bot: "Market Resolved: Fed raised rates to 5.5%!
+## When a market is cancelled
 
-Your position: 250 YES shares @ $0.70
-Payout: $250 (profit: $75!)
-Funds added to your wallet
+If a market can't be resolved (for example, the event was called off), it can be cancelled instead. Your position becomes refundable, and you claim it the same way — press **Claim refund** in your Portfolio.
 
-View transaction: [link]"
-```
+- **Refund value:** each outcome is refunded at its market price **snapshotted at the moment of cancellation** — not your entry price. If you bought at $0.30 and the price at cancellation was $0.45, you're refunded at $0.45 per share (and vice versa).
+- **Trading fees you already paid are not refunded**, but no new fees are charged on the refund itself.
 
-# Understanding Payouts
+<Note>
+**Contract-enforced exit:** if a market's oracle ever goes unresponsive, *anyone* can cancel the market once the resolution deadline plus a grace period has passed. Recovery from a stuck market doesn't depend on Kash or the oracle — the cancellation path is enforced by the contract itself (subject to normal smart-contract risk).
+</Note>
 
-## Payout Mathematics
-**Simple and transparent:**
-- **Each winning share pays exactly $1.00** when the market resolves
-- **Your shares × $1.00 = total payout**
-- **Profit = payout - original prediction amount**
-- **Return % = (payout ÷ prediction amount) - 1**
+# Understanding payouts
 
-## Fee Structure
+## How payouts are calculated
+
+Winning shares don't pay a fixed amount. Instead, winning shares redeem for a **pro-rata share of the market's reserve** — the pool of USDC that traders paid in:
+
+- **Your payout = your winning shares' proportion of all winning shares × the market reserve**
+- The trade ticket shows an **estimated payout if you win** at the moment you trade — this is your best guide to what a position is worth
+- The estimate can shift as others trade, because the final reserve and share supply are only fixed at resolution
+- In markets where **multiple outcomes win**, all winning outcomes share the reserve
+
+## Fees
+
 <AccordionGroup>
-  <Accordion title="Simple Fee Structure">
-    **Transparent and competitive pricing**
-    - **2% fee** on all trades (buying or selling shares)
-    - **0% additional fees** on winning payouts
-    - **No fees** on deposits, withdrawals, or holding positions
-    - **Gas fees sponsored** by Kash treasury
+  <Accordion title="Fee schedule">
+    - **Buys:** 1% protocol fee
+    - **Sells:** 1% protocol fee + 1% AMM fee
+    - **Redemption:** no fee — you claim your full pro-rata payout (minus a small USDC gas deduction on mainnet claims)
+    - **Gas:** sponsored by Kash for trading — no ETH needed
   </Accordion>
-  <Accordion title="Fee Timing">
-    **When fees are charged throughout your trading journey**
-    - **Prediction placement:** 2% fee charged at time of trade
-    - **Winning payout:** No additional fees
-    - **Holding positions:** No fees for holding shares
-    - **All gas costs:** Covered by Kash
+  <Accordion title="When fees are charged">
+    - Fees are charged **at the time of the trade** — nothing extra is taken from winning payouts
+    - Holding positions costs nothing
+    - Kash charges no deposit fee; payment providers charge their own processing fees
   </Accordion>
 </AccordionGroup>
 
-## Payout Example
+## Payout example
+
 ```
-Your prediction: $100 on YES at $0.40 per share
-Shares bought: 250 shares
-Event outcome: YES wins
-Gross payout: 250 × $1.00 = $250
-Trade fee already paid when predicting
-Net received: $250
-Net profit: $150 (+150% return)
+You spend $100 on Yes when the implied chance is 40%.
+The trade ticket shows: "Estimated payout if you win: ~$240"
+
+The market resolves Yes.
+Your position becomes claimable in Portfolio.
+You claim and receive your pro-rata share of the market
+reserve — close to the estimate, adjusted for trading
+that happened after your entry.
 ```
 
-# Types of Winning Scenarios
+The "estimated payout" on the ticket is exactly that — an estimate based on the market state when you trade, not a guaranteed fixed amount per share.
+
+# Ways a position can end
 
 <AccordionGroup>
-  <Accordion title="Full Market Win">
-    **Your prediction was correct at resolution**
-    - **Event outcome matches your prediction** (YES/NO)
-    - **Receive $1.00 per share owned**
-    - **Automatic instant credit to wallet** - no claims needed
-    - **Full profit from your position** - maximum potential returns
+  <Accordion title="Market win">
+    Your outcome is among the winners at resolution. Your shares redeem for a pro-rata share of the market reserve — claim from your Portfolio.
   </Accordion>
-  <Accordion title="Early Exit Profit">
-    **Sold your position before market closed**
-    - **Locked in profit** by selling at higher price
-    - **Avoided resolution risk** and uncertainty
-    - **Received immediate USDC funds** - instant liquidity
-    - **Smaller but locked-in profit** - bird in the hand strategy
+  <Accordion title="Early exit">
+    You sold before resolution. You locked in your profit (or cut your loss) at the market price and received USDC immediately — no claim needed. Sells pay the 1% protocol + 1% AMM fee.
   </Accordion>
-  <Accordion title="Market Invalidation">
-    **Event was cancelled or unclear outcome**
-    - **All participants get full refunds** - fair resolution
-    - **Both YES and NO predictions returned** at entry price
-    - **Original stakes returned** regardless of side
+  <Accordion title="Market loss">
+    Your outcome didn't win. Losing shares are worth nothing at resolution — this is why position sizing matters.
   </Accordion>
-  <Accordion title="Leveraged Wins">
-    **Won with leverage prediction**
-    - **Amplified returns** from 2x position size
-    - **5% interest fee deducted** from profits
-    - **Higher absolute dollar gains** - multiply your success
-    - **Enhanced return potential** for qualified users
+  <Accordion title="Market cancelled">
+    The market was cancelled. Claim your refund from Portfolio — each outcome refunds at its cancellation-snapshot price, with no new fees.
   </Accordion>
 </AccordionGroup>
 
-# Strategies for Maximizing Wins
+# Managing positions and risk
 
 <AccordionGroup>
-  <Accordion title="Early Bird Advantage">
-    **Predict before consensus forms for better opportunities**
-    - **Better rates available** in early markets before prices stabilize
-    - **Higher potential returns** when fewer people have noticed
-    - **First-mover advantage** on breaking news and events
-    - **Influence market direction** with early positions
-    - **Lower competition** from other predictors initially
+  <Accordion title="Smart position sizing">
+    - Never risk more than you can afford to lose completely
+    - Spread across markets instead of going all-in on one
+    - Scale up gradually as your track record grows
   </Accordion>
-  <Accordion title="Smart Position Sizing">
-    **Optimize your prediction amounts for sustainable growth**
-    - **Never predict more than you can afford** to lose completely
-    - **Leave room for multiple opportunities** - don't go all-in
-    - **Compound winnings** by reinvesting profits strategically
-    - **Scale up gradually** as your bankroll and confidence grows
-    - **Diversify across markets** to reduce overall portfolio risk
+  <Accordion title="Exit timing">
+    - You don't have to wait for resolution — selling early locks in gains and removes resolution risk
+    - Cut losses when you're clearly wrong instead of hoping
+    - Remember sells carry the extra 1% AMM fee; factor it into exit decisions
   </Accordion>
-  <Accordion title="Strategic Exit Timing">
-    **Know when to take profits and cut losses**
-    - **Sell early** if you've made good profits to lock in gains
-    - **Don't always wait** for resolution - lock in profits early
-    - **Take advantage of momentum** when odds swing your way
-    - **Preserve capital** by cutting losses when clearly wrong
-    - **Use limit orders** to automate profit-taking at target prices
-  </Accordion>
-  <Accordion title="Information Edge">
-    **Leverage your knowledge and expertise**
-    - **Specialize in categories** you understand well and follow closely
-    - **Follow reliable sources** for breaking news and insider information
-    - **Join expert communities** for collective insights and analysis
-    - **Track your performance** by market type to identify strengths
-    - **Learn from both wins and losses** to improve future predictions
+  <Accordion title="Information edge">
+    - Specialize in categories you genuinely understand
+    - Early positions, before consensus forms, often offer the best prices
+    - Review both wins and losses — your Portfolio history shows exactly how each position played out
   </Accordion>
 </AccordionGroup>
 
-# Performance Tracking & Recognition
+# Track your performance
 
-<Tabs>
-  <Tab title="Performance Analytics">
-    **Monitor your prediction success with detailed metrics**
-    
-    ## Win Statistics Commands
-    Ask @kash_bot for instant performance data:
-    - **"my stats"** - Complete performance overview
-    - **"win rate"** - Percentage of successful predictions
-    - **"total profit"** - All-time earnings summary
-    - **"best wins"** - Your most profitable predictions
-    - **"recent performance"** - Last 30 days analysis
-    
-    ## Key Performance Metrics
-    | Metric | Description | Why It Matters |
-    |--------|-------------|----------------|
-    | **Win Rate** | Percentage of winning predictions | Measures prediction accuracy |
-    | **ROI** | Return on investment | Shows profitability efficiency |
-    | **Total Profit** | All-time earnings | Tracks absolute success |
-    | **Win Streak** | Consecutive wins | Indicates hot streaks |
-    | **Average Prediction** | Typical position size | Shows risk management |
-    | **Best Category** | Top performing market type | Reveals your expertise |
-  </Tab>
-  
-  <Tab title="Leaderboards & Recognition">
-    **Compete with other predictors and earn recognition**
-    
-    ## Global Leaderboards
-    - **Top Predictors by Profit** - All-time earnings leaders
-    - **Best Win Rates** - Most accurate predictors (min. 50 predictions)
-    - **Monthly Champions** - Current period leaders
-    - **Category Specialists** - Best in specific market types
-    - **Rising Stars** - New predictors with strong performance
-    
-    ## Achievement System
-    - **Unlock badges** for prediction milestones
-    - **Gain special privileges** like early market access
-    - **Join elite tiers** with exclusive benefits
-    
-    ## Social Recognition
-    - **@kash_bot announces** your biggest wins publicly
-    - **Share success** on your timeline automatically
-    - **Build following** from successful prediction history
-    - **Attract copiers** who want to follow your predictions
-  </Tab>
-</Tabs>
+Kash has built-in performance tracking on the webapp:
+
+- **Portfolio** — open positions, claimable winnings, realized profit and loss, and full history
+- **Leaderboards** — see how you rank against other predictors by profit and volume on the community page
+- **Achievements** — unlock badges for prediction milestones
 
 <Tip>
-Winning is great, but consistent winning comes from discipline, research, and proper bankroll management. Let Kash handle the instant payouts while you focus on finding the next opportunity!
+Winning feels great, but consistent winning comes from discipline, research, and bankroll management. Claim your winnings, review what worked, and find the next opportunity.
 </Tip>
 
 <CardGroup cols={2}>
   <Card
-    title="Making Predictions"
+    title="Making predictions"
     icon="crystal-ball"
     href="/getting-started/guides/predicting"
   >
     Learn how to place predictions
   </Card>
   <Card
-    title="Creating Markets"
-    icon="helmet-safety"
-    href="/getting-started/guides/creating-opportunities"
+    title="Earn (coming soon)"
+    icon="coins"
+    href="/getting-started/features/earn"
   >
-    Create your own prediction markets
+    The Earn vault will let you put idle USDC to work
   </Card>
 </CardGroup>

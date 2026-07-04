@@ -1,11 +1,11 @@
 ---
 title: 'Creating Opportunities'
-description: 'How to create opportunities'
+description: 'How to create your own prediction market on Kash'
 icon: 'helmet-safety'
 ---
 
 <Note>
-Turn your insights into markets! Learn how to suggest prediction markets that engage the community.
+Market creation is rolling out gradually — it's currently available to approved accounts, with access expanding so that anyone will be able to submit a market. You submit it through the create form, it goes through review, and the creation fee is charged once your market is approved and goes live.
 </Note>
 
 <img
@@ -21,187 +21,58 @@ Turn your insights into markets! Learn how to suggest prediction markets that en
   alt="Hero Dark"
 />
 
-# How Market Creation Works
+## How it works
 
-**AI agents create all markets**, but users play a crucial role by suggesting ideas. When you tag @kash_bot with a market suggestion, Kash's specialized AI evaluates it and may create the market if it meets quality standards.
+<Steps>
+  <Step title="Open the create form">
+    Click **Create Market** in the sidebar at [app.kash.bot](https://app.kash.bot).
+  </Step>
+  <Step title="Define your market">
+    - **Title** — the question the market answers
+    - **Outcomes** — 2 to 8 possible answers
+    - **Resolve time** — when the outcome will be known
+    - **Rules and sources** — what counts as each outcome, and where the result will be verified
+  </Step>
+  <Step title="Review">
+    Your submission goes to Kash for review — checking that the question is clear, the outcome is verifiable from the stated sources, and the content is allowed.
+  </Step>
+  <Step title="Approval and fee">
+    Once approved, a one-time creation fee is charged from your balance. It seeds the market's initial liquidity and keeps submissions serious.
+  </Step>
+  <Step title="Live">
+    The market is deployed on-chain and appears on app.kash.bot for everyone to trade.
+  </Step>
+</Steps>
 
-## Two Ways Markets Get Created
+Suggestions can also be surfaced to organizations and partners on Kash, who curate ideas from their communities and elevate the strongest ones into live markets.
 
-<Tabs>
-  <Tab title="Automatic Detection">
-    **AI identifies trending topics**
-    
-    1. **AI detection** identifies trending topics with prediction potential
-    2. **AI evaluation** assesses prediction potential and engagement
-    3. **Quality validation** ensures verifiable outcomes
-    4. **Instant deployment** creates markets automatically
-    5. **Market published** to @kash_bot's timeline for community discovery
-  </Tab>
-  
-  <Tab title="User Suggestions">
-    **Tag @kash_bot to suggest markets**
-    
-    **Natural posts:**
-    ```
-    "I think the next iPhone will have an AI chip. @kash_bot"
-    ```
-    
-    **Direct requests:**
-    ```
-    "@kash_bot create market: Will Taylor Swift announce a world tour in 2025?"
-    ```
-    
-    **What happens:**
-    1. AI detects your suggestion and evaluates quality
-    2. Validates market potential and verifiability  
-    3. Creates market if approved
-    4. Credits you as suggester with potential rewards
-  </Tab>
-</Tabs>
-
----
-
-# What Makes a Good Suggestion
+## What makes a good market
 
 <AccordionGroup>
-  <Accordion title="Essential Requirements">
-    **Every suggestion must have these elements**
-    
-    - **Clear YES/NO question** - "Will Bitcoin reach $150,000 by March 1, 2025?"
-    - **Verifiable outcome** - Can be confirmed by reliable sources
-    - **Specific timeline** - Must resolve within 30 days maximum
-    - **Public sources** - Official websites, major news outlets, government data
+  <Accordion title="Essentials">
+    - **A precise question** — "Will BTC close above $150,000 on March 1?" beats "Will Bitcoin moon?"
+    - **Mutually exclusive outcomes** — exactly one should be able to win
+    - **A verifiable result** — resolvable from public, reliable sources
+    - **A sensible resolve time** — soon enough to stay interesting, late enough that the answer is knowable
   </Accordion>
-  
-  <Accordion title="Quality Standards">
-    **What makes suggestions successful**
-    
-    - **Trending topics** with active social discussion
-    - **Events people care about** and want to debate
-    - **Clear opposing sides** for meaningful predictions
-    - **Timely relevance** aligned with news cycles
+  <Accordion title="What gets approved">
+    Markets on public events with objective outcomes: sports results, elections, economic data, product launches, awards, crypto milestones. Timely questions tied to things people are already talking about attract the most volume.
+  </Accordion>
+  <Accordion title="What gets rejected">
+    - Predictions involving death, harm, or violence
+    - Private individuals or personal information
+    - Outcomes the creator or traders could manipulate
+    - Illegal content or markets involving minors
+    - Ambiguous questions that can't be objectively resolved
   </Accordion>
 </AccordionGroup>
 
-# Content Guidelines
+## Creating markets for a community
 
-<Tabs>
-  <Tab title="Allowed Content">
-    **Focus on public events and outcomes**
-    
-    - Sports results and competitions
-    - Political elections and policy decisions
-    - Economic indicators and market movements
-    - Technology announcements and launches
-    - Entertainment awards and cultural events
-    - Cryptocurrency and financial milestones
-  </Tab>
-  
-  <Tab title="Prohibited Content">
-    **Never allowed**
-    
-    - Death, harm, or violence predictions
-    - Private personal information
-    - Illegal activities or content
-    - Markets involving minors
-    - Medical diagnoses or health outcomes
-    - Manipulatable outcomes
-  </Tab>
-</Tabs>
-
----
-
-# AI Personas
-
-When you suggest a market, one of Kash's specialized AI personas evaluates it based on the topic:
-
-<AccordionGroup>
-  <Accordion title="Crypto-Degen Agent">
-    **Handles crypto and DeFi topics**
-    - Token listings and exchange announcements
-    - ETF approvals and regulatory decisions
-    - Protocol launches and adoption metrics
-    - **Best practice:** Include specific tokens, dates, and measurable metrics
-  </Accordion>
-  
-  <Accordion title="Sports Agent">
-    **Handles athletic competitions**
-    - Match outcomes and player performance
-    - Championship predictions and records
-    - Transfer decisions and draft picks
-    - **Best practice:** Reference specific teams, players, and official sources
-  </Accordion>
-  
-  <Accordion title="Tech Agent">
-    **Handles technology and innovation**
-    - Product launches and announcements
-    - AI breakthroughs and releases
-    - IPO announcements and earnings
-    - **Best practice:** Include version numbers, dates, and official sources
-  </Accordion>
-  
-  <Accordion title="Macro Agent">
-    **Handles economic and political events**
-    - Interest rate decisions and economic data
-    - Election outcomes and policy announcements
-    - Regulatory decisions and government votes
-    - **Best practice:** Reference official calendars and government sources
-  </Accordion>
-  
-  <Accordion title="Pop-Culture Agent">
-    **Handles entertainment and viral content**
-    - Award show winners and chart performance
-    - Celebrity announcements and viral moments
-    - Box office and streaming predictions
-    - **Best practice:** Include official dates and verifiable metrics
-  </Accordion>
-</AccordionGroup>
-
-# Successful Suggestions
-
-<AccordionGroup>
-  <Accordion title="How Rewards Work">
-    **What happens when your suggestion is accepted**
-    
-    - **Attribution credit** as the market suggester
-    - **Reputation building** in the community
-    - **Leaderboard recognition** for high-engagement markets
-  </Accordion>
-  
-  <Accordion title="Reward Factors">
-    **What influences your rewards**
-    
-    - **Market volume** - Higher trading activity increases rewards
-    - **Engagement level** - Social shares and discussion boost rewards
-    - **Quality score** - Well-structured suggestions earn more
-    - **Timing** - Early suggestions on trending topics get bonuses
-    
-    <Note>
-    Specific reward amounts are determined by DAO governance and may vary based on market performance and protocol treasury status.
-    </Note>
-  </Accordion>
-</AccordionGroup>
-
-# Getting Started
-
-## Quick Tips for Success
-
-- **Start with topics you know well** - Use your expertise
-- **Follow trending news** - Suggest markets on breaking developments  
-- **Keep questions simple** - Clear YES/NO format works best
-- **Include deadlines** - Specific timeframes under 30 days
-- **Check sources** - Ensure outcomes can be verified publicly
-
-## Common Commands
-
-| Action | Example |
-|--------|---------|
-| Natural suggestion | "I think X will happen. @kash_bot" |
-| Direct request | "@kash_bot create market: Will X happen?" |
-| Private suggestion | DM @kash_bot with your idea |
+Organizations and partners can create and curate markets for their own audiences — with branded pages, embeds, and revenue share on trades in markets they create. If you run a community, see [Market creation for organizations](/for-businesses/market-creation).
 
 <Tip>
-The best market suggesters combine timely topics, clear questions, and strong expertise. Start with events you understand well, then expand as you learn what gets approved by AI!
+The best market creators write questions people already argue about, with resolution rules nobody can argue about.
 </Tip>
 
 <CardGroup cols={2}>
@@ -210,7 +81,7 @@ The best market suggesters combine timely topics, clear questions, and strong ex
     icon="magnifying-glass"
     href="/getting-started/guides/finding-opportunities"
   >
-    Discover markets to predict on
+    Discover markets to trade on
   </Card>
   <Card
     title="Making Predictions"

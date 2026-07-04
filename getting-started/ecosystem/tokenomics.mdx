@@ -1,11 +1,15 @@
 ---
 title: 'Tokenomics'
-description: 'The $KASH Token Economy'
+description: 'The Planned $KASH Token Economy'
 icon: 'coins'
 ---
 
+<Warning>
+**Kash has not launched a token.** $KASH is planned but does not exist yet — there is no contract address, presale, or airdrop. Everything on this page describes a proposed design and is **subject to change** before any launch. Beware of scams claiming to be $KASH; official announcements come only through [official Kash channels](/getting-started/ecosystem/socials). This page is not an offer or solicitation of any kind.
+</Warning>
+
 <Note>
-$KASH is the native token powering the Kash ecosystem, designed with automated buybacks, community incentives, and decentralized governance participation.
+$KASH is the planned native token of the Kash ecosystem, designed around automated buybacks, community incentives, and decentralized governance participation.
 </Note>
 
 <img
@@ -21,10 +25,10 @@ $KASH is the native token powering the Kash ecosystem, designed with automated b
   alt="Hero Dark"
 />
 
-# Token Distribution
+# Proposed Token Distribution
 
 <Note>
-Total supply allocated with community-first approach: 65% to community, 25% to team/advisors, 10% to investors.
+The planned supply would be allocated with a community-first approach: 65% to community, 25% to team/advisors, 10% to investors.
 </Note>
 
 ### Community Allocations (65% - Governance Controlled)
@@ -48,56 +52,51 @@ Total supply allocated with community-first approach: 65% to community, 25% to t
 
 | **Category** | **% of Supply** | **Available at TGE** | **Lock-Up (months)** | **Monthly Vesting** | **Purpose** |
 |--------------|-----------------|----------------------|----------------------|---------------------|-------------|
-| **Private Investors** | 10.00% | 0-5% | 12 | 18-24 | Investors across multiple rounds |
+| **Private Investors** | 10.00% | 0-5% | 12 | 18-24 | Investors across multiple rounds (proposed allocation — no token sale has occurred) |
 
 <Warning>
-Community allocations (65%) may be re-bucketed or adjusted through DAO governance. Team and investor allocations (35%) remain fixed and cannot be modified by governance.
+Under the proposed design, community allocations (65%) could be re-bucketed or adjusted through DAO governance, while team and investor allocations (35%) would remain fixed. All figures above are provisional until a token launch is officially announced.
 </Warning>
 
 ---
 
-# Token Utility
+# Planned Token Utility
 
 <Tabs>
   <Tab title="Core Functions">
-    **Primary Token Uses**
-    
+    **Primary Intended Uses**
+
     **Prediction Currency:**
-    - Alternative to USDC for placing predictions
-    - Automatic swap to USDC when predicting with $KASH
-    - Seamless prediction experience across all markets
-    
+    - Planned alternative to USDC for placing predictions
+    - Would be automatically swapped to USDC when predicting with $KASH
+
     **Governance Rights:**
     - Vote on protocol upgrades and changes
     - Influence fee structures and parameters
     - Direct community fund allocation decisions
-    - Emergency protocol decisions
-    
+
     **Staking:**
     - Stake for enhanced governance weight
-    - Enhanced voting power with longer locks
+    - Longer locks would grant greater voting power
   </Tab>
-  
+
   <Tab title="Community Growth">
-    **$KASH in the Ecosystem**
+    **$KASH in the Ecosystem (Planned)**
 
     **Governance Voting:**
-    - $KASH holders vote on protocol upgrades, fee structures, and treasury allocation
-    - Voting weight increases with staking duration
-    - Active governance participation shapes the platform's direction
+    - $KASH holders would vote on protocol upgrades, fee structures, and treasury allocation
+    - Voting weight would increase with staking duration
 
     **Staking:**
-    - Stake $KASH for enhanced governance weight
     - Flexible lock durations from 30 days to 365 days
 
     **Community Incentives Allocation:**
-    - 25% of total supply is allocated to Community Incentives
-    - Supports ecosystem growth through various programs announced via official channels
-    - Allocation governed by DAO decisions and community voting
+    - 25% of total supply would be allocated to Community Incentives
+    - Programs would be announced via official channels and governed by DAO decisions
   </Tab>
-  
+
   <Tab title="Staking & Governance">
-    **Lock Periods and Governance Weight**
+    **Proposed Lock Periods and Governance Weight**
 
     | Lock Duration | Governance Weight | Additional Benefits |
     |---------------|-------------------|-------------------|
@@ -106,7 +105,7 @@ Community allocations (65%) may be re-bucketed or adjusted through DAO governanc
     | 180 days | 2.0x multiplier | Beta feature access |
     | 365 days | 3.0x multiplier | Maximum governance weight |
 
-    **Governance Participation:**
+    **Proposed Participation Thresholds:**
     - Minimum 1,000 $KASH for basic voting
     - 10,000 $KASH for proposal submission
     - 100,000 $KASH for major protocol changes
@@ -115,141 +114,92 @@ Community allocations (65%) may be re-bucketed or adjusted through DAO governanc
 
 ---
 
-# Token Buyback Mechanism
+# Proposed Buyback Mechanism
 
 <AccordionGroup>
   <Accordion title="Automated Buyback System">
-    **Monthly Treasury Operations**
-    
-    **Revenue Sources:**
-    - **2% Trading Fees:** Primary revenue from all prediction market trades
-    - **Aave Lending Yield:** Interest earned on idle USDC deposits in treasury
-    - **Auto Swap Revenue:** Small spread capture from 0x protocol token conversions
-    - **MEV Capture:** Revenue from transaction optimization and private mempool routing
-    - **Strategic Partnerships:** Revenue sharing from ecosystem integrations
-    
-    **Monthly Buyback Process:**
+    **Planned Monthly Treasury Operations**
+
+    **Intended Revenue Sources:**
+    - **Protocol trading fees:** Primary revenue from prediction market trades
+    - **Treasury yield:** Interest earned on idle treasury USDC
+    - **Strategic partnerships:** Revenue sharing from ecosystem integrations
+
+    **Proposed Monthly Buyback Process:**
     1. Treasury accumulates USDC from platform fees
     2. Smart contract calculates optimal buyback amount
-    3. Automated purchase from USDC/KASH liquidity pool
+    3. Automated purchase from a USDC/KASH liquidity pool
     4. Bought tokens distributed for community incentives
-    
-    **Smart Buyback Formula:**
+
+    **Proposed Buyback Formula:**
     ```
     Bₘ = min((0.005 × S / V̄) × Vₘᵉᵐᵃ, 0.01 × S)
-    
+
     Where:
     - Vₘᵉᵐᵃ = γVₘ + (1-γ)Vₘ₋₁ᵉᵐᵃ (exponential moving average)
     - γ = 0.3 (smoothing factor, variable based on market metrics)
     - V̄ = 1/12 × Σ(Vₘ₋ᵢᵉᵐᵃ) for i=1 to 12 (12-month average)
     - S = total supply of $KASH tokens
     ```
-    
-    **Buyback Constraints:**
+
+    **Proposed Constraints:**
     - Maximum 1% of supply bought back per month
-    - Targets ~0.5% of supply in liquidity pool (similar to Sky/MakerDAO)
-    - Formula engineered to yield around 0.5% buyback rate
-    - Creates consistent buying pressure from protocol success
+    - Targets ~0.5% of supply in the liquidity pool
+    - Formula engineered to yield around a 0.5% buyback rate
   </Accordion>
-  
+
   <Accordion title="Treasury Architecture">
-    **Professional Asset Management**
-    
+    **Proposed Treasury Design**
+
     **Treasury Flow Diagram:**
     ```mermaid
     graph TD
-        A["Platform Fees (2%)"] --> B["Treasury Core Module"]
+        A["Platform Fees"] --> B["Treasury Core Module"]
         B --> C["Asset Manager Module"]
-        C --> D["Aave (Yield)"]
+        C --> D["Yield Strategies"]
         D --> E["Yield Returns"]
         E --> B
         B --> F["Smart Burn Module"]
         F --> G["Monthly $KASH Buybacks"]
         G --> H["Community Rewards Module"]
         B --> I["Bond Depository Module"]
-        B --> J["Risk Fund Module"]
-        
+
         style A fill:#e1f5fe
         style B fill:#fff3e0
         style F fill:#f3e5f5
         style G fill:#e8f5e8
         style H fill:#fff8e1
     ```
-    
-    **Module Interactions:**
-    - **Treasury Core Module:** Central hub storing all USDC, $KASH, LP tokens, and sub-fund balances
-    - **Asset Manager Module:** Automatically deploys idle USDC to Aave for yield generation
-    - **Smart Burn Module:** Calculates and executes monthly $KASH buybacks from accumulated fees
-    - **Bond Depository Module:** Enables LPs to buy $KASH at discount for fast liquidity bootstrapping
-    - **Risk Fund Module:** Maintains reserves for bug bounties and insurance coverage
-    - **Community Rewards Module:** Distributes bought-back tokens for community incentives
-    
-    **Operational Flow:**
-    1. **Fee Collection:** 2% trading fees accumulate in Treasury Core
-    2. **Yield Generation:** Idle USDC automatically deployed to Aave for interest
-    3. **Monthly Buyback:** Smart contract calculates optimal $KASH purchase amount
-    4. **Token Distribution:** Bought tokens distributed to stakers and community programs
-    5. **Risk Management:** Portion allocated to risk fund for platform security
-    
-    **Governance Controls:**
-    - **Parameter Adjustment:** Community can modify buyback formulas and allocation percentages
-    - **Yield Strategy:** Governance approves new yield protocols and risk parameters
-    - **Emergency Powers:** Multi-sig can pause operations in extreme circumstances
-    - **Transparency:** All treasury operations publicly auditable on-chain
+
+    **Planned Module Interactions:**
+    - **Treasury Core Module:** Central hub storing USDC, $KASH, LP tokens, and sub-fund balances
+    - **Asset Manager Module:** Would deploy idle USDC to conservative yield strategies
+    - **Smart Burn Module:** Would calculate and execute monthly $KASH buybacks from accumulated fees
+    - **Bond Depository Module:** Would enable LPs to buy $KASH at a discount for liquidity bootstrapping
+    - **Community Rewards Module:** Would distribute bought-back tokens for community incentives
+
+    **Planned Governance Controls:**
+    - **Parameter adjustment:** Community would be able to modify buyback formulas and allocation percentages
+    - **Yield strategy:** Governance would approve yield protocols and risk parameters
+    - **Emergency powers:** Multisig could pause operations in extreme circumstances
+    - **Transparency:** All treasury operations would be publicly auditable on-chain
   </Accordion>
-  
-  <Accordion title="Revenue Generation from Lending and Swaps">
-    **Maximizing Treasury Efficiency**
-    
-    **Aave Integration for Yield:**
-    - **Idle USDC Deployment:** Treasury automatically deposits unused USDC into Aave
-    - **Conservative Risk Profile:** Only blue-chip lending protocols with proven track records
-    - **Yield Optimization:** Smart contract monitors rates and rebalances for optimal returns
-    - **Liquidity Management:** Maintains sufficient liquid reserves for platform operations
-    
-    **Auto Swap Revenue Model:**
-    - **0x Protocol Integration:** Users can predict with any ERC-20 token (ETH, WETH, DAI, etc.)
-    - **Automatic Conversion:** Tokens instantly swapped to USDC for predicting
-    - **Spread Capture:** Small percentage of swap spread retained by treasury
-    - **Gas Optimization:** Batch swaps reduce overall transaction costs
-    
-    **Revenue Distribution:**
-    ```
-    Example Monthly Revenue Breakdown:
-    - Trading Fees (2%): $45,000 (primary source)
-    - Aave Lending Yield: $3,200 (on $2M treasury)
-    - Auto Swap Spreads: $1,800 (from token conversions)
-    - MEV Capture: $2,000 (from large trade protection)
-    Total: $52,000 → $KASH Buybacks
-    ```
-    
-    **Risk Management:**
-    - **Diversified Yield Sources:** Multiple revenue streams reduce dependency
-    - **Conservative Allocation:** Maximum 70% of treasury in yield protocols
-    - **Emergency Withdrawal:** Instant liquidity access for platform needs
-    - **Regular Audits:** Quarterly reviews of yield strategy performance
-  </Accordion>
-  
+
   <Accordion title="Economic Alignment">
-    **Sustainable Protocol Economics**
-    
+    **Intended Protocol Economics**
+
     **Revenue Model:**
-    - 2% fee on all trading volume
-    - Variable interest on USDC deposits
-    - No entity profits - all goes to community
+    - Protocol fees on trading volume (see [Market Mechanics](/getting-started/features/market-mechanics) for the current live fee schedule)
+    - Yield on treasury deposits
     - Transparent fee distribution
-    
-    **Community Benefits:**
-    - Monthly buybacks create demand
-    - Community incentives drive engagement
-    - Governance participation increases utility
-    
+
+    **Intended Community Benefits:**
+    - Community incentives would drive engagement
+    - Governance participation would increase utility
+
     **Growth Mechanics:**
     - Higher trading volume → larger buybacks
-    - Better rewards → more engagement → network effects
-    - Platform success directly benefits token holders
-    - Community ownership drives innovation
-    
+
     **Risk Management:**
     - Maximum 1% monthly buyback limit
     - Controlled token release schedules
@@ -259,22 +209,22 @@ Community allocations (65%) may be re-bucketed or adjusted through DAO governanc
 </AccordionGroup>
 
 <Tip>
-$KASH tokenomics prioritize community ownership and sustainable growth. The combination of automated buybacks, utility-driven demand, and governance participation creates a robust economic model where platform success directly benefits all token holders.
+The proposed $KASH tokenomics prioritize community ownership and sustainable growth. Follow [official channels](/getting-started/ecosystem/socials) for any future token announcements — and treat any unannounced "$KASH" token as a scam.
 </Tip>
 
 <CardGroup cols={2}>
   <Card
-    title="Community Incentives"
+    title="Rewards"
     icon="coins"
     href="/getting-started/ecosystem/incentives-and-rewards"
   >
-    Learn about the incentives program
+    See the live rewards programs
   </Card>
   <Card
     title="Governance"
     icon="landmark"
     href="/getting-started/ecosystem/governance"
   >
-    Participate in decisions
+    Current and planned governance
   </Card>
 </CardGroup>

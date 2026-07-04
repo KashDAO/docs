@@ -13,8 +13,8 @@ GET https://app.kash.bot/api/threads
 
 ## Query Parameters
 
-<ParamField query="status" type="string">
-  Filter by thread status. Options: `active`, `upcoming`, `completed`, `resolved`, `cancelled`, `paused`
+<ParamField query="status" type="string" default="active">
+  Filter by thread status (derived from the thread's start/end times). Options: `active`, `upcoming`, `closed`, `all`
 </ParamField>
 
 <ParamField query="category" type="string">
@@ -34,7 +34,7 @@ GET https://app.kash.bot/api/threads
 </ParamField>
 
 <ParamField query="sortBy" type="string" default="created_at">
-  Field to sort by. Options: `created_at`, `updated_at`, `total_volume`, `market_count`, `title`
+  Field to sort by. Options: `created_at`, `start_time`, `total_volume`
 </ParamField>
 
 <ParamField query="sortOrder" type="string" default="desc">
@@ -80,7 +80,7 @@ GET https://app.kash.bot/api/threads
     </ResponseField>
 
     <ResponseField name="status" type="string">
-      Current status: `active`, `upcoming`, `completed`, `resolved`, `cancelled`, `paused`
+      Current status (derived from start/end times): `active`, `upcoming`, `closed`
     </ResponseField>
 
     <ResponseField name="category" type="string">

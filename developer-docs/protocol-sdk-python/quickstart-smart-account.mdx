@@ -87,8 +87,11 @@ this automatically.
 ## Run the bundled examples
 
 ```bash
-python examples/smart-account/01_quickstart.py        # read-side
-python examples/smart-account/02_one_line_trade.py --confirm  # broadcasts a real UserOp
+# Read-only by default: derives the SA via CREATE2, prints deploy/balance state and a quote
+python examples/smart_account/buy_with_simple_account.py
+
+# --confirm opts in to broadcasting: submits a real SA BUY UserOp on Base Sepolia
+python examples/smart_account/quote_and_buy.py --confirm
 ```
 
 ## What's next
