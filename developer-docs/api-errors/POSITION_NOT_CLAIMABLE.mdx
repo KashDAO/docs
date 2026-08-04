@@ -1,0 +1,29 @@
+---
+title: 'POSITION_NOT_CLAIMABLE'
+description: 'HTTP 409 — Position not claimable'
+---
+
+**HTTP status:** 409 · **Title:** "Position not claimable"
+
+## When it fires
+
+`POST /v1/redemptions` was called for a `(marketId, outcomeIndex)` that is not currently claimable for your key's user. Claimability is decided by the same authority the webapp uses, so an accepted claim is one the payout pipeline can always fulfil.
+
+## Why it happens
+
+- **The outcome did not win.** On a resolved market, only the winning outcome(s) pay out; losing-outcome tokens keep a non-zero on-chain balance but are worthless.
+- **No refund for that outcome.** On a cancelled market, only outcomes with a non-zero cancel price are refundable.
+- **The market is not in self-service mode.** It resolved before self-service redemption was enabled and was paid out automatically.
+- **Already redeemed.** The position has already been paid out (on-chain) or has an in-flight payout.
+- **A previous claim failed.** An earlier claim for this exact position ended in a failed state. It still occupies the one request slot, so a new claim cannot be created through the API until an operator clears it — the `detail` says so.
+
+## How to fix
+
+- Redeem the **winning** outcome index. On a cancelled market, redeem an outcome you actually hold that carries a refund.
+- If the market was auto-paid, your USDC is already settled — check `GET /v1/portfolio`.
+- If you have an **in-flight** (non-failed) claim, a repeat returns `200` with that original request rather than this error.
+- If a previous claim **failed**, contact support — the stuck request must be cleared before a new one can be made.
+
+## Related codes
+
+- [`INSUFFICIENT_BALANCE`](./INSUFFICIENT_BALANCE.md), [`REDEMPTIONS_NOT_ENABLED`](./REDEMPTIONS_NOT_ENABLED.md)

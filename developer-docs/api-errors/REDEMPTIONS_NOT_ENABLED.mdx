@@ -1,0 +1,26 @@
+---
+title: 'REDEMPTIONS_NOT_ENABLED'
+description: 'HTTP 404 — Redemptions not enabled'
+---
+
+**HTTP status:** 404 · **Title:** "Redemptions not enabled"
+
+## When it fires
+
+`POST /v1/redemptions` is called while self-service redemption is not live on the platform. Resolved markets are paid out automatically (bulk fan-out) rather than by user-initiated claim, so there is nothing for the endpoint to do.
+
+## Why it happens
+
+- Self-service redemption has not been rolled out to this environment yet (the default). Markets settle to automated payout and are paid without a claim.
+- The feature was rolled back platform-wide.
+
+This is distinct from a per-route **kill switch** (a temporary `503` operational lever): `REDEMPTIONS_NOT_ENABLED` means the capability is not enabled at all.
+
+## How to fix
+
+- Nothing to do as an integrator — your winnings are still paid out automatically once the market resolves. Poll `GET /v1/portfolio` for the settled balance.
+- If you believe self-service redemption should be enabled for your environment, contact support.
+
+## Related codes
+
+- [`POSITION_NOT_CLAIMABLE`](./POSITION_NOT_CLAIMABLE.md)

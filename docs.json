@@ -10,13 +10,7 @@
   },
   "favicon": "/assets/favicon.svg",
   "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity"
-    ]
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity"]
   },
   "navigation": {
     "tabs": [
@@ -109,9 +103,7 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": [
-              "developer-docs/introduction"
-            ]
+            "pages": ["developer-docs/introduction"]
           },
           {
             "group": "REST API",
@@ -139,9 +131,7 @@
           },
           {
             "group": "TypeScript SDK",
-            "pages": [
-              "developer-docs/rest-api/sdks/typescript"
-            ]
+            "pages": ["developer-docs/rest-api/sdks/typescript"]
           },
           {
             "group": "CLI",
@@ -200,6 +190,7 @@
               "developer-docs/api-errors/API_KEY_REVOKED",
               "developer-docs/api-errors/API_TRADE_PROCESSING_HALTED",
               "developer-docs/api-errors/API_VERSION_UNSUPPORTED",
+              "developer-docs/api-errors/CHAIN_NOT_SUPPORTED",
               "developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT",
               "developer-docs/api-errors/CONFIRMATION_EXPIRED",
               "developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
@@ -216,8 +207,10 @@
               "developer-docs/api-errors/MARKET_NOT_FOUND",
               "developer-docs/api-errors/MARKET_NOT_TRADEABLE",
               "developer-docs/api-errors/OUTCOME_INDEX_INVALID",
+              "developer-docs/api-errors/POSITION_NOT_CLAIMABLE",
               "developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
               "developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE",
+              "developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED",
               "developer-docs/api-errors/REQUEST_SIGNATURE_INVALID",
               "developer-docs/api-errors/REQUEST_TIMEOUT",
               "developer-docs/api-errors/RESOURCE_NOT_FOUND",

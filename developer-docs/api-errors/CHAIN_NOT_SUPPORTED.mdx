@@ -1,0 +1,26 @@
+---
+title: 'CHAIN_NOT_SUPPORTED'
+description: 'HTTP 400 — Chain not supported'
+---
+
+**HTTP status:** 400 · **Title:** "Chain not supported"
+
+## When it fires
+
+A route that performs an on-chain read (`POST /v1/redemptions`, `GET /v1/markets/{id}/quote`) resolved a market whose chain the API cannot read — either the chain is not registered, or it is registered but missing a required contract address (e.g. the outcome-token ERC-1155).
+
+## Why it happens
+
+- The market is on a chain this environment does not support.
+- A configuration gap: the chain is known but a contract address for it is not configured server-side.
+
+Your request is well-formed — this is a server/config condition, not a client input error, so it is a permanent `400` (retrying will not help).
+
+## How to fix
+
+- Confirm the market's chain is one of the supported chains (the `detail` lists them).
+- If you believe the chain should be supported, contact support — it is a server configuration gap, not something the caller can correct.
+
+## Related codes
+
+- [`MARKET_NOT_FOUND`](./MARKET_NOT_FOUND.md), [`DEPENDENCY_UNAVAILABLE`](./DEPENDENCY_UNAVAILABLE.md)
