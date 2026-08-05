@@ -110,6 +110,7 @@
             "pages": [
               "developer-docs/rest-api/overview",
               "developer-docs/rest-api/quickstart",
+              "developer-docs/rest-api/trading-bot",
               "developer-docs/rest-api/authentication",
               "developer-docs/rest-api/rate-limits",
               "developer-docs/rest-api/errors",
@@ -130,7 +131,7 @@
             ]
           },
           {
-            "group": "TypeScript SDK",
+            "group": "REST API SDK (TypeScript)",
             "pages": ["developer-docs/rest-api/sdks/typescript"]
           },
           {

@@ -16,6 +16,15 @@ curl https://api.kash.bot/v1/markets \
 
 Keys are issued via the webapp's **Settings → API Keys** page or the admin CLI.
 
+<Tip>
+With [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) you don't set the header yourself — construct the client with your key and it authenticates every request (and auto-routes to staging for a `kash_test_*` key, production for `kash_live_*`):
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+const kash = new KashClient({ apiKey: process.env.KASH_API_KEY! });
+```
+</Tip>
+
 ## Key format
 
 ```
