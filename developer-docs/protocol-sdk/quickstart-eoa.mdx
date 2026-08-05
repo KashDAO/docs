@@ -33,14 +33,14 @@ the protocol is two methods.
 
 ```ts
 const minimal = await client.markets.get('0xMARKET_ADDRESS');
-// → { marketAddress, numOutcomes, status: 'ACTIVE' | 'FROZEN' | 'RESOLVED' | 'UNSEEDED' }
+// → { marketAddress, numOutcomes, status: 'unseeded' | 'active' | 'frozen' | 'resolved' }
 
 const quote = await client.markets.quote('0xMARKET_ADDRESS', {
   side:    'BUY',
   outcome: 0,
   amount:  usdc(10), // 10 USDC
 });
-// → { tokensOut, impliedPriceWad, slippageBps }
+// → { side, outcomeIndex, amountIn, amountOut, reserveAfterWad, pricesAfterWad }
 ```
 
 The read surface is **mode-agnostic** — same shapes whether you

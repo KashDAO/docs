@@ -43,7 +43,7 @@ try {
         // Re-issue the key with `trades:write`.
         break;
       case 'RATE_LIMIT_EXCEEDED':
-        await sleep(err.retryAfterMs ?? 1000);
+        await sleep((err.retryAfterSeconds ?? 1) * 1000);
         // retry
         break;
       case 'IDEMPOTENCY_KEY_CONFLICT':
@@ -73,11 +73,9 @@ The TypeScript SDK throws typed subclasses (`KashRateLimitError`, `KashAuthoriza
 | `404`  | Resource doesn't exist (or doesn't exist *to you* — ownership-checked routes return 404 not 403 to prevent enumeration). |
 | `409`  | Conflict (`IDEMPOTENCY_KEY_CONFLICT`, `SPENDING_LIMIT_EXCEEDED`, `TRADE_NOT_AWAITING_CONFIRMATION`, `INSUFFICIENT_BALANCE`, etc.). |
 | `410`  | Gone (a previously valid resource is permanently removed).                      |
-| `422`  | Semantically valid but rejected by domain rules (e.g. `MARKET_NOT_TRADEABLE`).  |
 | `429`  | Rate limit exceeded. Honour `Retry-After`.                                      |
 | `500`  | Server bug. Include `requestId` when reporting.                                 |
-| `502`  | Upstream dependency error (RPC, DB).                                            |
-| `503`  | Route temporarily disabled (`ROUTE_DISABLED`) or dependency unavailable.        |
+| `503`  | Route temporarily disabled (`ROUTE_DISABLED`) or dependency unavailable (`DEPENDENCY_UNAVAILABLE`). |
 | `504`  | Upstream timeout.                                                               |
 
 ## Error code catalog
@@ -104,7 +102,7 @@ Common codes to know:
 | `SPENDING_LIMIT_EXCEEDED`    | Trade would exceed the key's per-trade or daily cap. The `extensions.cap` field is `per_trade` or `daily_volume`. Caps are tier-differentiated — see [Rate Limits](/developer-docs/rest-api/rate-limits) for the matrix and upgrade path. |
 | `VALIDATION_FAILED`          | Request body or query failed schema validation.                        |
 | `IDEMPOTENCY_KEY_CONFLICT`   | Same `Idempotency-Key` reused with a different body. See [Idempotency](/developer-docs/rest-api/idempotency). |
-| `MARKET_NOT_TRADEABLE`       | Market is FROZEN/RESOLVED, on an unsupported chain, or otherwise inactive. |
+| `MARKET_NOT_TRADEABLE`       | Market is FROZEN/RESOLVED or otherwise not tradeable. (Unsupported chain is a distinct code, `CHAIN_NOT_SUPPORTED`.) |
 | `INSUFFICIENT_BALANCE`       | Smart account doesn't have enough USDC for the trade.                  |
 | `TRADE_NOT_AWAITING_CONFIRMATION` | Confirm called on a trade that's not in `pending_confirmation`.   |
 | `CONFIRMATION_TOKEN_INVALID` | Confirmation token didn't match.                                       |

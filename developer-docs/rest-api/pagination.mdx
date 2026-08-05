@@ -3,7 +3,9 @@ title: 'Pagination'
 description: 'Cursor-based pagination on every list endpoint.'
 ---
 
-Every list endpoint (`GET /v1/markets`, `GET /v1/trades`, `GET /v1/markets/{id}/predictions`, `GET /v1/portfolio/positions`, `GET /v1/webhooks/events`) returns a paginated response with an opaque cursor.
+Every list endpoint (`GET /v1/markets`, `GET /v1/trades`, `GET /v1/markets/{id}/predictions`, `GET /v1/webhooks/events`) returns a paginated response with an opaque cursor.
+
+`GET /v1/portfolio/positions` is **not** cursor-paginated in v1 — it returns the full position set in a single `{ data, _meta }` response and accepts only a `?marketId=` filter.
 
 We deliberately do **not** support offset-based pagination — offsets are inconsistent under concurrent writes and degrade with table size.
 
@@ -74,7 +76,6 @@ const next = await page.getNextPage();
 | `GET /v1/markets`              | 20            | 100       |
 | `GET /v1/markets/{id}/predictions` | 50         | 100       |
 | `GET /v1/trades`               | 20            | 100       |
-| `GET /v1/portfolio/positions`  | 20            | 100       |
 | `GET /v1/webhooks/events`      | 25            | 100       |
 
 Override with `?limit=N`. Requests with `limit > 100` get clamped to `100` silently.

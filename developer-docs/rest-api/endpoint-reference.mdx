@@ -50,10 +50,14 @@ The full surface, grouped by domain:
 - `GET /v1/trades` — list your trades
 - `GET /v1/trades/{id}` — single trade detail
 
+### Redemptions
+
+- `POST /v1/redemptions` — claim a settled position (redeem a winning outcome, or a refund on a cancelled market). Body is `{ marketId, outcomeIndex }`; requires the `trades:write` scope. Idempotent — a repeat claim returns the original request with `200`. The route inserts a claim and the payout pipeline settles it asynchronously; poll `GET /v1/portfolio` for the resulting USDC. Only available where self-service redemption is enabled (otherwise winnings are auto-paid and the route returns `404 REDEMPTIONS_NOT_ENABLED`).
+
 ### Portfolio
 
 - `GET /v1/portfolio` — smart-account address + aggregate position summary
-- `GET /v1/portfolio/positions` — per-market position detail (cursor-paginated)
+- `GET /v1/portfolio/positions` — per-market position detail (not paginated in v1; filter with `?marketId=`)
 
 ### Webhooks
 

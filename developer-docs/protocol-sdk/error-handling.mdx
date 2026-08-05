@@ -37,8 +37,9 @@ try {
   await client.trades.send.buy(MARKET, params);
 } catch (err) {
   if (err instanceof KashSimulationRevertedError) {
-    // `revertHint` decodes the on-chain custom error name when known.
-    console.error('would revert:', err.revertHint ?? err.message);
+    // `context.revertReason` holds the decoded custom error name when known.
+    // `actionableRevertHint(err)` turns it into a user-facing suggestion.
+    console.error('would revert:', err.context?.revertReason ?? err.message);
     // Update slippage / amount / market and try again.
     return;
   }
@@ -65,8 +66,11 @@ try {
 
 ## Decoded revert hints
 
-`KashSimulationRevertedError.revertHint` decodes Market/EntryPoint
-custom errors into readable strings. Today's catalogue includes:
+`KashSimulationRevertedError` exposes the decoded reason on
+`err.context?.revertReason`. The exported helpers
+`decodeMarketRevert(...)` and `actionableRevertHint(err)` turn
+Market/EntryPoint custom errors into readable strings. Today's
+catalogue includes:
 
 - `SlippageExceeded(actualOut, minOut)` — your `maxSlippageBps`
   was tighter than the market could meet.

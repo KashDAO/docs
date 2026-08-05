@@ -7,7 +7,10 @@ description: 'HTTP 409 — Insufficient balance'
 
 ## When it fires
 
-The actor's smart-account USDC balance is below the requested `amount`.
+The actor lacks the balance the operation needs — the exact meaning depends on the endpoint:
+
+- **`POST /v1/trades`** — the smart account's USDC balance is below the requested `amount` (the rest of this page).
+- **`POST /v1/redemptions`** — the smart account holds **zero** of the outcome token you are trying to claim, so there is nothing to redeem (e.g. the tokens were already moved or redeemed). For redemptions, ignore the USDC-funding advice below — check the account actually holds the outcome token via `GET /v1/portfolio/positions`.
 
 ## Why it happens
 
@@ -25,4 +28,4 @@ The actor's smart-account USDC balance is below the requested `amount`.
 
 ## Related codes
 
-- [`SMART_ACCOUNT_NOT_PROVISIONED`](./SMART_ACCOUNT_NOT_PROVISIONED.md), [`SPENDING_LIMIT_EXCEEDED`](./SPENDING_LIMIT_EXCEEDED.md)
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED), [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED)

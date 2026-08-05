@@ -65,7 +65,7 @@ const client  = createSmartAccountClient({ chainId: 84532, rpc, signer, bundler 
 ## Derive the SmartAccount address
 
 ```ts
-const sa = await client.account.address();
+const sa = await client.account.computeAddress(client.signer.ownerAddress);
 console.log('SmartAccount address:', sa);
 ```
 
@@ -88,7 +88,7 @@ const result = await client.trades.send.buy(
     // `account` is the shared `BuildBuyParams` field — in SA mode
     // pass the SmartAccount address (derived deterministically from
     // your signer's owner address).
-    account:        await client.account.address(),
+    account:        await client.account.computeAddress(client.signer.ownerAddress),
     outcome:        0,
     amountUsdc:     usdc(10),
     maxSlippageBps: 50,
@@ -121,10 +121,12 @@ estimate accounts for this automatically via the bundler's
 ## Power users — explicit UserOp lifecycle
 
 ```ts
-const built  = await client.trades.buildBuy(MARKET, params);     // unsigned UserOp
-const ready  = await client.trades.prepareBuy(MARKET, params);   // built + populated gas + fees
-const signed = await client.trades.signUserOp(ready);            // your signer signs the userOpHash
-const result = await client.trades.submit(signed);               // hands to bundler
+const built     = await client.trades.buildBuy(MARKET, params);   // unsigned UserOp
+const ready     = await client.trades.prepareBuy(MARKET, params); // built + populated gas + fees
+const signature = await client.signer.signUserOpHash(            // your signer signs the userOpHash
+  client.trades.hashOf(ready),
+);
+const result    = await client.trades.submit({ ...ready, signature }); // hands to bundler
 ```
 
 `client.trades.hashOf(userOp)` is the canonical hash you sign over.

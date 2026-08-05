@@ -131,7 +131,6 @@ import {
   KashAuthorizationError,     // 403
   KashConflictError,          // 409
   KashNotFoundError,          // 404
-  KashNotModifiedError,       // 304
   KashRateLimitError,         // 429
   KashServerError,            // 5xx
   KashNetworkError,
@@ -145,7 +144,7 @@ try {
   await kash.trades.create(body);
 } catch (err) {
   if (err instanceof KashRateLimitError) {
-    console.log(`Backoff for ${err.retryAfterMs}ms`);
+    console.log(`Backoff for ${err.retryAfterSeconds}s`);
   } else if (err instanceof KashAuthorizationError && err.code === 'INSUFFICIENT_SCOPE') {
     console.log('Re-issue the key with trades:write');
   } else if (KashError.isKashError(err)) {

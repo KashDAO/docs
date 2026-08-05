@@ -14,6 +14,7 @@ The `marketId` (UUID) you passed doesn't match any market.
 - Typo in the market id.
 - Cross-environment confusion: a staging market id sent to production, or vice versa. Markets do not exist across environments.
 - The market was never created — you may have a placeholder id from documentation rather than a real one.
+- **Redemptions only:** the market exists but has no on-chain id yet (it hasn't been created on-chain), so it cannot be redeemed against. `POST /v1/redemptions` reports this as `MARKET_NOT_FOUND` — wait until the market is live on-chain.
 
 ## How to fix
 
@@ -23,4 +24,4 @@ The `marketId` (UUID) you passed doesn't match any market.
 
 ## Related codes
 
-- [`MARKET_NOT_TRADEABLE`](./MARKET_NOT_TRADEABLE.md) — market exists but is FROZEN/RESOLVED
+- [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) — market exists but is FROZEN/RESOLVED

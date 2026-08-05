@@ -6,7 +6,7 @@ description: 'Build a Hummingbot strategy that trades on Kash. Reference cross-v
 [Hummingbot](https://hummingbot.org) is the canonical open-source
 market-making framework for Python. The Python protocol SDK is the
 intended integration path — you import it inside a
-`ScriptStrategyBase` subclass and drive trades through it on every
+`StrategyV2Base` subclass and drive trades through it on every
 tick. Kash never sees a private key; the strategy holds the signer.
 
 ## Architectural shape
@@ -16,7 +16,7 @@ tick. Kash never sees a private key; the strategy holds the signer.
 │ Hummingbot process                                         │
 │                                                            │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │ KashAmmArbStrategy (ScriptStrategyBase)             │   │
+│  │ KashAmmArbStrategy (StrategyV2Base)                 │   │
 │  │                                                     │   │
 │  │  on_tick() → safe_ensure_future(_tick_async())      │   │
 │  │                                                     │   │
@@ -57,7 +57,7 @@ signer; your RPC sees the read traffic and the signed transaction.
 
 The package ships
 `examples/hummingbot/amm_arb_kash_uniswap.py` — a working
-`ScriptStrategyBase` that demonstrates the canonical SDK
+`StrategyV2Base` that demonstrates the canonical SDK
 integration pattern. Skeleton runs against Base Sepolia in EOA
 mode; the Uniswap leg + sizing model are stubbed for you to wire to
 your real venue.
@@ -72,10 +72,10 @@ from kashdao_protocol_sdk import (
     usdc,
     viem_account_eoa_signer,
 )
-from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
+from hummingbot.strategy.strategy_v2_base import StrategyV2Base
 
 
-class KashAmmArbStrategy(ScriptStrategyBase):
+class KashAmmArbStrategy(StrategyV2Base):
     markets: ClassVar[dict[str, set[str]]] = {}  # no Hummingbot connectors
 
     def __init__(self, *args, **kwargs):
@@ -109,9 +109,10 @@ class KashAmmArbStrategy(ScriptStrategyBase):
             await self._kash.trades.send.buy(
                 os.environ["KASH_MARKET_ADDRESS"],
                 BuildBuyParams(
-                    # `smart_account` is the shared param-shape field
-                    # name in both modes; in EOA mode pass the EOA.
-                    smart_account=self._owner,
+                    # `account` is the canonical field name in both
+                    # modes; in EOA mode pass the EOA. (`smart_account=`
+                    # still works but is deprecated.)
+                    account=self._owner,
                     outcome=0,
                     amount_usdc=usdc(10),
                     max_slippage_bps=50,

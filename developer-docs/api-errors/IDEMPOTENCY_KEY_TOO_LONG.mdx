@@ -18,9 +18,9 @@ description: 'HTTP 400 — Idempotency key too long'
 
 - Use a UUID v4 (`uuidgen`, `crypto.randomUUID()`) or a ULID — both are 26–36 chars and unique enough, well under the 255 cap.
 - If you need to embed semantic information, hash it: `sha256(your-blob).slice(0, 32)` instead of the raw concatenation.
-- Acceptable character set: `[A-Za-z0-9_\-:.]` — see [`IDEMPOTENCY_KEY_FORMAT_INVALID`](./IDEMPOTENCY_KEY_FORMAT_INVALID.md).
+- Acceptable character set: `[A-Za-z0-9_\-:.]` — see [`IDEMPOTENCY_KEY_FORMAT_INVALID`](/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID).
 
 ## Related codes
 
-- [`IDEMPOTENCY_KEY_FORMAT_INVALID`](./IDEMPOTENCY_KEY_FORMAT_INVALID.md) — disallowed characters
-- [`IDEMPOTENCY_KEY_CONFLICT`](./IDEMPOTENCY_KEY_CONFLICT.md) — same key, different body
+- [`IDEMPOTENCY_KEY_FORMAT_INVALID`](/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID) — disallowed characters
+- [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) — same key, different body
