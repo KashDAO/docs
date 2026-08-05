@@ -11,10 +11,10 @@ description: 'HTTP 409 — Trade not awaiting confirmation'
 
 ## Why it happens
 
-- The trade was already confirmed (you'll see this if you accidentally call confirm twice) — see also [`CONFIRMATION_TOKEN_USED`](./CONFIRMATION_TOKEN_USED.md).
+- The trade was already confirmed (you'll see this if you accidentally call confirm twice) — see also [`CONFIRMATION_TOKEN_USED`](/developer-docs/api-errors/CONFIRMATION_TOKEN_USED).
 - The trade was below your tier's high-value threshold and never required confirmation in the first place.
 - The trade has progressed past confirmation into `pending` / `executing` / a terminal state.
-- The confirmation window expired and the trade was auto-cancelled — see [`CONFIRMATION_EXPIRED`](./CONFIRMATION_EXPIRED.md).
+- The confirmation window expired and the trade was auto-cancelled — see [`CONFIRMATION_EXPIRED`](/developer-docs/api-errors/CONFIRMATION_EXPIRED).
 
 ## How to fix
 
@@ -24,4 +24,4 @@ description: 'HTTP 409 — Trade not awaiting confirmation'
 
 ## Related codes
 
-- [`CONFIRMATION_EXPIRED`](./CONFIRMATION_EXPIRED.md), [`CONFIRMATION_TOKEN_INVALID`](./CONFIRMATION_TOKEN_INVALID.md), [`CONFIRMATION_TOKEN_USED`](./CONFIRMATION_TOKEN_USED.md)
+- [`CONFIRMATION_EXPIRED`](/developer-docs/api-errors/CONFIRMATION_EXPIRED), [`CONFIRMATION_TOKEN_INVALID`](/developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID), [`CONFIRMATION_TOKEN_USED`](/developer-docs/api-errors/CONFIRMATION_TOKEN_USED)

@@ -37,13 +37,14 @@ async def main() -> None:
         print(f"market has {minimal.num_outcomes} outcomes; status={minimal.status}")
 
         # All-in-one trade.
-        # `BuildBuyParams.smart_account` is the shared field name
-        # used by both EOA and SA modes — in EOA mode pass the EOA
-        # address itself (the trader IS the signer).
+        # `BuildBuyParams.account` is the canonical field name used
+        # by both EOA and SA modes — in EOA mode pass the EOA
+        # address itself (the trader IS the signer). The legacy
+        # `smart_account=` alias is still accepted but deprecated.
         result = await client.trades.send.buy(
             os.environ["KASH_MARKET"],
             BuildBuyParams(
-                smart_account=client.signer.owner_address,
+                account=client.signer.owner_address,
                 outcome=0,
                 amount_usdc=usdc(10),               # 10 USDC
                 max_slippage_bps=50,                # 0.5%

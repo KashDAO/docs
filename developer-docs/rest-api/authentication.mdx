@@ -36,8 +36,8 @@ A scope is a coarse-grained permission. Every endpoint declares the scope(s) it 
 | `portfolio:read` | `GET /v1/portfolio`, `GET /v1/portfolio/positions`                       |
 | `trades:read`    | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{id}`           |
 | `trades:write`   | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`                        |
-| `webhooks:manage`| `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{id}/redeliver`     |
-| `auth:manage`    | `POST /v1/auth/api-keys/me/webhook-secret/rotate`, `GET /v1/account/usage` |
+| `webhooks:manage`| `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{id}/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate` |
+| `auth:manage`    | `GET /v1/account/usage`                                                 |
 
 <Tip>
 **Default scopes by tier.** Self-served `free` and `developer` keys default to `markets:read`, `markets:quote`, `portfolio:read`. Admin-issued `enterprise` and `mm` keys add `trades:read`, `trades:write`. You can override at issuance — request the scopes that match your use case, no more.
@@ -114,8 +114,10 @@ If the header is present, the server MUST be able to verify it — a mismatch, a
 | Status | `code`                | Meaning                                                       |
 | ------ | --------------------- | ------------------------------------------------------------- |
 | 401    | `API_KEY_MISSING`     | No `X-API-Key` header.                                        |
+| 401    | `API_KEY_MALFORMED`   | Header present but not a well-formed key.                     |
 | 401    | `API_KEY_INVALID`     | Key not recognised, or HMAC mismatch.                         |
 | 401    | `API_KEY_REVOKED`     | Key was found but has been revoked.                           |
+| 401    | `API_KEY_EXPIRED`     | Key is past its `expires_at` timestamp.                       |
 | 403    | `INSUFFICIENT_SCOPE`  | Key is valid but doesn't carry the scope this route requires. |
 | 403    | `IP_NOT_ALLOWED`      | Source IP not in this key's allowlist.                        |
 | 401    | `REQUEST_SIGNATURE_INVALID` | Body-signing was opted into and failed verification.   |

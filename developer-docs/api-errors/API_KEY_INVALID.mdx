@@ -11,7 +11,7 @@ The `X-API-Key` header is well-formed but no row in the API key store matches it
 
 ## Why it happens
 
-- The key was deleted (not just revoked — see [`API_KEY_REVOKED`](./API_KEY_REVOKED.md) for that distinct case).
+- The key was deleted (not just revoked — see [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) for that distinct case).
 - A character was modified in transit or storage (e.g., copy-paste truncation that still happened to land on the right length).
 - Wrong environment — a `kash_test_…` key sent to production, or vice versa. Production never accepts test keys.
 - The HMAC pepper has been rotated and the rotation grace period has elapsed for an old issuance.
@@ -24,6 +24,6 @@ The `X-API-Key` header is well-formed but no row in the API key store matches it
 
 ## Related codes
 
-- [`API_KEY_MISSING`](./API_KEY_MISSING.md), [`API_KEY_MALFORMED`](./API_KEY_MALFORMED.md) — earlier failure points
-- [`API_KEY_REVOKED`](./API_KEY_REVOKED.md) — key existed but was explicitly revoked
-- [`API_KEY_EXPIRED`](./API_KEY_EXPIRED.md) — key existed but is past `expires_at`
+- [`API_KEY_MISSING`](/developer-docs/api-errors/API_KEY_MISSING), [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED) — earlier failure points
+- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — key existed but was explicitly revoked
+- [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) — key existed but is past `expires_at`

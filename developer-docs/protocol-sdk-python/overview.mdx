@@ -44,7 +44,7 @@ what `examples/hummingbot/amm_arb_kash_uniswap.py` demonstrates.
 
 | Chain        | Chain ID | Status                                                                |
 | ------------ | -------- | --------------------------------------------------------------------- |
-| Base mainnet | 8453     | ⏳ Pre-deploy — `KashChainError(CHAIN_NOT_DEPLOYED)` until launch     |
+| Base mainnet | 8453     | ⏳ Pre-deploy — `KashConfigError(CHAIN_NOT_DEPLOYED)` until launch    |
 | Base Sepolia | 84532    | ✅ Live                                                               |
 | Custom chain | any      | ✅ Via `custom_chain=CustomChain(...)` (Anvil / forks / dev)          |
 
@@ -80,7 +80,7 @@ hierarchy. Just Pythonic ergonomics on the surface.
 - **Factories**: `create_eoa_client`, `create_smart_account_client`
 - **Trade lifecycle**: `client.trades.{build_*, prepare_*, simulate, hash_of, submit, send.*}`
 - **Market reads**: `client.markets.{get, state, quote, watch}`
-- **Account reads**: `client.account.{usdc_balance, position, gas_balance, usdc_allowance, compute_address}`
+- **Account reads**: `client.account.{usdc_balance, position, gas_balance, usdc_allowance}` (plus `compute_address`, `is_deployed` in smart-account mode only)
 - **Signers**: `LocalEoaSigner`, `JsonRpcEoaSigner` (EOA); `LocalSigner`, `JsonRpcSigner` (SA)
 - **Bundlers** (SA): `create_generic_bundler_client` plus presets for Pimlico / Alchemy / Flashbots
 - **Unit conversion**: `usdc`, `tokens`, `format_usdc`, `format_tokens`, `MAX_UINT256`

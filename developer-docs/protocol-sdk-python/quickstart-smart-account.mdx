@@ -59,20 +59,26 @@ sa = await client.account.compute_address(client.signer.owner_address)
 result = await client.trades.send.buy(
     os.environ["KASH_MARKET"],
     BuildBuyParams(
-        smart_account=sa,
+        account=sa,
         outcome=0,
         amount_usdc=usdc(10),
         max_slippage_bps=50,
     ),
 )
-print(result.user_op_hash, result.transaction_hash, result.success)
+print(
+    result.user_op_hash,
+    result.receipt.receipt.get("transactionHash"),
+    result.receipt.success,
+)
 ```
 
-The `userOpHash` is what the signer signed — useful for log
-correlation across the bundler RPC and the EntryPoint contract.
-The `transactionHash` is the bundler-reported on-chain tx that
-contains the UserOp. Both are surfaced because external monitoring
-typically wants both views.
+The `user_op_hash` is what the signer signed — useful for log
+correlation across the bundler RPC and the EntryPoint contract. The
+smart-account `send.buy` result carries only `user_op_hash` and the
+bundler-returned `receipt`; the on-chain transaction hash is nested
+at `result.receipt.receipt["transactionHash"]` and success at
+`result.receipt.success`. External monitoring typically wants both
+views.
 
 ## First-trade-with-deployment
 

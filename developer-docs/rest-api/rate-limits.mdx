@@ -19,7 +19,7 @@ A tier sets four independent limits:
 - **Rate limit** — HTTP requests per minute, sliding window. Hit this and you get `429 RATE_LIMIT_EXCEEDED`.
 - **Daily spend cap** — rolling 24h aggregate USDC volume per key. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "daily_volume"`. Sells and close-position intents do NOT draw against this cap.
 - **Per-trade cap** — single-trade USDC amount. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "per_trade"`.
-- **High-value confirm gate** — for tiers that have one, any trade ≥ this amount returns `202 Accepted` with a `confirmationToken`; you then `POST /v1/trades/{id}/confirm` to actually execute. Two-step flow lets you catch a runaway bot before it commits a six-figure trade.
+- **High-value confirm gate** — for tiers that have one, any trade ≥ this amount returns `202 Accepted` with the token nested as `confirmation: { token, expiresAt }`; you then `POST /v1/trades/{id}/confirm` with `confirmation.token` to actually execute. Two-step flow lets you catch a runaway bot before it commits a six-figure trade.
 
 The rate-limit window is **per `user_id`**, not per individual key. If a single user holds two keys, HTTP requests across both share the quota — so issuing extra keys doesn't multiply your throughput. The **spending caps**, however, are **per key** — each key gets its own daily allotment.
 

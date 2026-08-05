@@ -9,7 +9,7 @@ description: 'HTTP 503 — Service unavailable'
 
 A required external dependency (Postgres, Secrets Manager, Redis, blockchain RPC) is unreachable, and the route can't degrade further.
 
-Distinct from [`INTERNAL_ERROR`](./INTERNAL_ERROR.md) (which is "we don't know what happened") and [`ROUTE_DISABLED`](./ROUTE_DISABLED.md) (which is "ops disabled this on purpose").
+Distinct from [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) (which is "we don't know what happened") and [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) (which is "ops disabled this on purpose").
 
 ## Why it happens
 
@@ -25,5 +25,5 @@ Distinct from [`INTERNAL_ERROR`](./INTERNAL_ERROR.md) (which is "we don't know w
 
 ## Related codes
 
-- [`API_TRADE_PROCESSING_HALTED`](./API_TRADE_PROCESSING_HALTED.md) — ops-driven, not infra-driven
-- [`REQUEST_TIMEOUT`](./REQUEST_TIMEOUT.md), [`INTERNAL_ERROR`](./INTERNAL_ERROR.md)
+- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — ops-driven, not infra-driven
+- [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT), [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR)
