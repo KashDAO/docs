@@ -7,14 +7,13 @@ description: 'HTTP 400 — Chain not supported'
 
 ## When it fires
 
-A route that performs an on-chain read (`POST /v1/redemptions`, `GET /v1/markets/{id}/quote`) resolved a market whose chain the API cannot read — either the chain is not registered, or it is registered but missing a required contract address (e.g. the outcome-token ERC-1155).
+A route that performs an on-chain read (`POST /v1/redemptions`, `GET /v1/markets/{id}/quote`) resolved a market on a chain the API does not support for on-chain reads.
 
 ## Why it happens
 
 - The market is on a chain this environment does not support.
-- A configuration gap: the chain is known but a contract address for it is not configured server-side.
 
-Your request is well-formed — this is a server/config condition, not a client input error, so it is a permanent `400` (retrying will not help).
+Your request is well-formed — this is a chain-support condition, not a client input error, so it is a permanent `400` (retrying will not help). (A *supported* chain missing a contract address is a server-config fault and returns `500 INTERNAL_ERROR`, not this code.)
 
 ## How to fix
 
