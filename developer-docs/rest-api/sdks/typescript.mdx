@@ -223,7 +223,7 @@ const kash = new KashClient({
 });
 ```
 
-Server response carries `X-API-Version` (the canonical version) plus `Sunset` / `Deprecation` headers when your pinned version is winding down (12-month deprecation window per RFC 8594). The SDK's `onResponse` hook surfaces both — wire it into your monitoring to flag deprecations early. Pinning to an unknown date returns `410 API_VERSION_UNSUPPORTED` with the supported list in `metadata.supported`.
+Server response carries `X-Kash-Api-Version` (the canonical version) plus `Sunset` / `Deprecation` headers when your pinned version is winding down (12-month deprecation window per RFC 8594). The SDK's `onResponse` hook surfaces both — wire it into your monitoring to flag deprecations early. Pinning to an unknown date returns `410 API_VERSION_UNSUPPORTED` with the supported list in `metadata.supported`.
 
 ## Quality gates
 
