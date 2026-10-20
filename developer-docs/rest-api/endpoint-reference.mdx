@@ -40,20 +40,6 @@ The **rate-limit class** says which budget a request draws from: `read` routes u
 | `GET`  | [`/v1/portfolio/positions`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `portfolio:read` | read |
 | `POST` | [`/v1/redemptions`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `trades:write` | write |
 
-## Competitions
-
-| Method | Path | Scope | Class |
-| ------ | ---- | ----- | ----- |
-| `GET`  | [`/v1/competitions`](/developer-docs/rest-api/endpoints/competitions) | `markets:read` | read |
-| `GET`  | [`/v1/competitions/{competitionId}`](/developer-docs/rest-api/endpoints/competitions) | `markets:read` | read |
-| `GET`  | [`/v1/competitions/{competitionId}/entrants`](/developer-docs/rest-api/endpoints/competitions) | `markets:read` | read |
-| `GET`  | [`/v1/competitions/{competitionId}/leaderboard`](/developer-docs/rest-api/endpoints/competitions) | `markets:read` | read |
-| `POST` | [`/v1/competitions/{competitionId}/join`](/developer-docs/rest-api/endpoints/competitions) | `trades:write` | write |
-| `POST` | [`/v1/competitions/{competitionId}/contribute`](/developer-docs/rest-api/endpoints/competitions) | `trades:write` | write |
-| `POST` | [`/v1/competitions/{competitionId}/sponsor`](/developer-docs/rest-api/endpoints/competitions) | `trades:write` | write |
-| `POST` | [`/v1/competitions/{competitionId}/claim`](/developer-docs/rest-api/endpoints/competitions) | `trades:write` | write |
-| `POST` | [`/v1/competitions/{competitionId}/refund`](/developer-docs/rest-api/endpoints/competitions) | `trades:write` | write |
-
 ## Webhook management
 
 | Method | Path | Scope | Class |

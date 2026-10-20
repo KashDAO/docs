@@ -1,6 +1,6 @@
 ---
 title: 'REST API Overview'
-description: 'Programmatic access to Kash markets, trades, portfolios, competitions and webhooks at api.kash.bot.'
+description: 'Programmatic access to Kash markets, trades, portfolios, disputes and webhooks at api.kash.bot.'
 ---
 
 The Kash REST API is the programmatic interface to Kash prediction markets. It is built for developers, automated agents and market makers: anything that talks to Kash without a human in the loop.
@@ -8,7 +8,7 @@ The Kash REST API is the programmatic interface to Kash prediction markets. It i
 <Note>
 **Two surfaces, and when to use which:**
 
-- **`api.kash.bot`** (this API) is for **machines**. Every request carries an API key, which gives you per-key rate limits, telemetry and spending caps. Trading, portfolio, competitions and webhooks live here.
+- **`api.kash.bot`** (this API) is for **machines**. Every request carries an API key, which gives you per-key rate limits, telemetry and spending caps. Trading, portfolio, disputes and webhooks live here.
 - **`app.kash.bot/api`** (the [Public Embed API](/developer-docs/public-embed-api/overview)) is for **embedding**: anonymous reads for showing markets in websites and apps. No trading.
 </Note>
 
@@ -27,9 +27,6 @@ The Kash REST API is the programmatic interface to Kash prediction markets. It i
   </Card>
   <Card title="Portfolio & redemptions" icon="wallet" href="/developer-docs/rest-api/endpoints/portfolio-and-redemptions">
     Your smart account and positions; claim settled positions back to USDC.
-  </Card>
-  <Card title="Competitions" icon="trophy" href="/developer-docs/rest-api/endpoints/competitions">
-    Read standings, enter and fund entries, sponsor pots, claim prizes.
   </Card>
   <Card title="Market disputes" icon="gavel" href="/developer-docs/rest-api/endpoints/disputes">
     Dispute a proposed resolution during its dispute window.

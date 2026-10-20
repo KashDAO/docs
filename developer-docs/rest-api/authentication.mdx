@@ -41,11 +41,11 @@ Each key carries a set of scopes, and each route requires one. A key without the
 
 | Scope             | Routes |
 | ----------------- | ------ |
-| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions`, `GET /v1/markets/{id}/disputes`, and all `GET /v1/competitions…` routes |
+| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` and `GET /v1/markets/{id}/disputes` |
 | `markets:quote`   | `GET /v1/markets/{id}/quote` |
 | `portfolio:read`  | `GET /v1/portfolio`, `GET /v1/portfolio/positions` |
 | `trades:read`     | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` |
-| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, `POST /v1/markets/{id}/disputes`, and the competition `join`, `contribute`, `sponsor`, `claim` and `refund` routes |
+| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions` and `POST /v1/markets/{id}/disputes` |
 | `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{eventId}/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate` |
 | `auth:manage`     | `GET /v1/account/usage` |
 

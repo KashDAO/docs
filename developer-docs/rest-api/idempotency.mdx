@@ -20,7 +20,7 @@ Idempotency-Key: c2b9a1f8-7e6d-4b3a-9c1e-5f0d8a3b7c2e
 
 Generate one key per logical operation, for example a random UUID. Keys are at most 255 characters from `A-Z a-z 0-9 _ - : .` (`400 IDEMPOTENCY_KEY_TOO_LONG` or `400 IDEMPOTENCY_KEY_FORMAT_INVALID` otherwise).
 
-Honoured on: `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, `POST /v1/markets/{id}/disputes`, `POST /v1/webhooks/events/{eventId}/redeliver`, and the competition `join`, `contribute`, `sponsor`, `claim` and `refund` routes. Keys are scoped per user and per route.
+Honoured on: `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, `POST /v1/markets/{id}/disputes` and `POST /v1/webhooks/events/{eventId}/redeliver`. Keys are scoped per user and per route.
 
 Behaviour:
 
@@ -80,7 +80,6 @@ Don't retry with the same key and the new body. Either send the original body ag
 ## Routes without `Idempotency-Key`
 
 - **`POST /v1/auth/api-keys/me/webhook-secret/rotate`** rotates on every call, guarded by a 60-second cooldown (`429 WEBHOOK_SECRET_ROTATION_COOLDOWN`). Don't retry it blindly: see [Secret rotation](/developer-docs/rest-api/webhooks/secret-rotation).
-- Competition `contribute` and `sponsor` are additionally idempotent on their `externalRef` body field.
 
 ## Next
 

@@ -22,10 +22,10 @@ The key authenticated successfully but does not carry the scope the endpoint req
 
 | Scope             | Endpoints                                                                                                                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/:id`, `GET /v1/markets/:id/predictions`, `GET /v1/markets/:id/disputes`, `GET /v1/competitions`, `GET /v1/competitions/:competitionId` (and its `entrants` and `leaderboard`) |
+| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/:id`, `GET /v1/markets/:id/predictions`, `GET /v1/markets/:id/disputes` |
 | `markets:quote`   | `GET /v1/markets/:id/quote`                                                                                                                                                                 |
 | `trades:read`     | `GET /v1/trades`, `GET /v1/trades/:id`, `GET /v1/traces/:correlationId`                                                                                                                     |
-| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/:id/confirm`, `POST /v1/redemptions`, `POST /v1/markets/:id/disputes`, `POST /v1/competitions/:competitionId/join`, `contribute`, `claim`, `refund`, `sponsor` |
+| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/:id/confirm`, `POST /v1/redemptions`, `POST /v1/markets/:id/disputes` |
 | `portfolio:read`  | `GET /v1/portfolio`, `GET /v1/portfolio/positions`                                                                                                                                          |
 | `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/:eventId/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate`                                                                  |
 | `auth:manage`     | `GET /v1/account/usage`                                                                                                                                                                     |

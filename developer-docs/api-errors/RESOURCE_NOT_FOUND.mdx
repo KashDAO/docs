@@ -9,7 +9,7 @@ description: 'HTTP 404 — Not Found'
 
 A request for a specific resource found nothing the caller is allowed to see. Returned by `GET /v1/trades/{id}`, `POST /v1/trades/{id}/confirm`, `GET /v1/traces/{correlationId}`, `/v1/markets/{id}/disputes` and `POST /v1/webhooks/events/{eventId}/redeliver`, among others.
 
-This is the generic 404. Some resources have their own code where the distinction helps, such as [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) and [`COMPETITION_NOT_FOUND`](/developer-docs/api-errors/COMPETITION_NOT_FOUND).
+This is the generic 404. Some resources have their own code where the distinction helps, such as [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND).
 
 ## Why it happens
 
@@ -27,4 +27,3 @@ A request to a path that is not an API endpoint at all returns a 404 with `code:
 ## Related codes
 
 - [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) — specific to markets
-- [`COMPETITION_NOT_FOUND`](/developer-docs/api-errors/COMPETITION_NOT_FOUND) — specific to competitions

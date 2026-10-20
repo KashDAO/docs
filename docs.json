@@ -107,7 +107,6 @@
               "developer-docs/rest-api/endpoints/trades",
               "developer-docs/rest-api/endpoints/portfolio-and-redemptions",
               "developer-docs/rest-api/endpoints/disputes",
-              "developer-docs/rest-api/endpoints/competitions",
               "developer-docs/rest-api/endpoints/webhooks",
               "developer-docs/rest-api/endpoints/account-and-traces",
               "developer-docs/rest-api/endpoints/system"
@@ -182,22 +181,6 @@
               "developer-docs/api-errors/API_VERSION_UNSUPPORTED",
               "developer-docs/api-errors/CHAIN_NOT_SUPPORTED",
               "developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT",
-              "developer-docs/api-errors/COMPETITION_ALREADY_ENTERED",
-              "developer-docs/api-errors/COMPETITION_ALREADY_IN_ANOTHER_ENTRY",
-              "developer-docs/api-errors/COMPETITION_CONTRIBUTION_BELOW_MINIMUM",
-              "developer-docs/api-errors/COMPETITION_CONTRIBUTION_REF_CONFLICT",
-              "developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE",
-              "developer-docs/api-errors/COMPETITION_NOTHING_TO_REFUND",
-              "developer-docs/api-errors/COMPETITION_NOT_CANCELLED",
-              "developer-docs/api-errors/COMPETITION_NOT_ENTRY_MEMBER",
-              "developer-docs/api-errors/COMPETITION_NOT_FOUND",
-              "developer-docs/api-errors/COMPETITION_NOT_GROUP_OWNER",
-              "developer-docs/api-errors/COMPETITION_NOT_SETTLED",
-              "developer-docs/api-errors/COMPETITION_PRIZE_AUTO_DISTRIBUTED",
-              "developer-docs/api-errors/COMPETITION_PRIZE_CLAIM_FAILED",
-              "developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE",
-              "developer-docs/api-errors/COMPETITION_REFUND_FAILED",
-              "developer-docs/api-errors/COMPETITION_SPONSOR_NO_SMART_ACCOUNT",
               "developer-docs/api-errors/CONFIRMATION_EXPIRED",
               "developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
               "developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
@@ -444,6 +427,10 @@
     {
       "source": "/developer-docs/public-embed-api/guides/organization-iframe",
       "destination": "/developer-docs/public-embed-api/guides/thread-iframe"
+    },
+    {
+      "source": "/getting-started/ecosystem/competitions-and-tournaments",
+      "destination": "/getting-started/ecosystem/incentives-and-rewards"
     }
   ]
 }

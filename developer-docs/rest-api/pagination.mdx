@@ -13,9 +13,6 @@ List endpoints return one page at a time with an opaque cursor. There is no offs
 | `GET /v1/markets/{id}/predictions` | newest first | 50 | 100 |
 | `GET /v1/trades` | newest first | 20 | 100 |
 | `GET /v1/webhooks/events` | newest first | 25 | 100 |
-| `GET /v1/competitions` | newest first | 20 | 100 |
-| `GET /v1/competitions/{competitionId}/entrants` | by entrant | 200 | 500 |
-| `GET /v1/competitions/{competitionId}/leaderboard` | best rank first | 200 | 500 |
 
 A `limit` outside the allowed range is refused with `400 VALIDATION_FAILED`; it is not clamped.
 
