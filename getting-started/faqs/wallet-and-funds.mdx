@@ -17,11 +17,11 @@ icon: 'wallet'
   alt="Hero Dark"
 />
 
-# Your Kash wallet
+# Your wallet
 
 <AccordionGroup>
   <Accordion title="Where are my funds stored?">
-    In **your own Solana wallet**, created when you signed up. Kash doesn't hold your funds in a pool: trades and payouts move USDC directly between your wallet and each market. You can export the wallet's private key from **Settings → Account → Wallet backup**.
+    In **your own embedded Solana wallet**, set up when you signed up. You own it, and Kash never holds custody of your funds: trades and redemptions move USDC directly between your wallet and each on-chain market. You can export the wallet's private key from **Settings → Account → Wallet backup**.
   </Accordion>
 
   <Accordion title="How do I check my balance?">
@@ -29,7 +29,7 @@ icon: 'wallet'
   </Accordion>
 
   <Accordion title="What currencies does Kash support?">
-    **USDC on Solana.** Every price, trade, payout and withdrawal is in USDC. You never need SOL, because Kash pays the Solana network fees.
+    **USDC on Solana.** Every price, trade, redemption and withdrawal is in USDC. You never need SOL, because Kash pays the Solana network fees.
   </Accordion>
 </AccordionGroup>
 
@@ -41,7 +41,7 @@ icon: 'wallet'
   </Accordion>
 
   <Accordion title="How long do deposits take?">
-    A USDC transfer on Solana usually confirms within a minute or two. Checkout purchases depend on the payment method, and the checkout shows the expected time.
+    A USDC transfer on Solana is credited once it confirms on-chain. Checkout purchases depend on the payment method, and the checkout shows the expected time.
   </Accordion>
 
   <Accordion title="Can I deposit other tokens, or USDC on another network?">
@@ -53,7 +53,7 @@ icon: 'wallet'
 
 <AccordionGroup>
   <Accordion title="How do I withdraw funds?">
-    Choose **Withdraw**, enter the amount and the destination address, check the network, and confirm. Crypto withdrawals usually complete in one to two minutes. See [Withdrawing](/getting-started/guides/withdrawing).
+    Choose **Withdraw**, enter the amount and the destination address, check the network, and confirm. You can follow its status in the app. See [Withdrawing](/getting-started/guides/withdrawing).
   </Accordion>
 
   <Accordion title="Can I send USDC to another Kash user?">
@@ -61,7 +61,7 @@ icon: 'wallet'
   </Accordion>
 
   <Accordion title="Are there minimum balance requirements?">
-    No. There's no minimum balance to keep an account. Individual actions can have minimums, such as the minimum trade on X.
+    No. There's no minimum balance to keep an account. Some actions have minimums, and the app or the bot tells you if an amount is too small.
   </Accordion>
 </AccordionGroup>
 
@@ -70,7 +70,7 @@ icon: 'wallet'
 <AccordionGroup>
   <Accordion title="I have USDC from Kash's earlier network. What do I do?">
     Kash markets used to run on Base. If you still hold USDC there, the app shows that balance with two options:
-    - **Move to Solana · One-way:** moves it to your Solana wallet so you can trade it on current markets. A bridging fee is shown before you confirm, and the move usually takes a few minutes. It can't be reversed, and there's a minimum amount and a daily limit across all users.
+    - **Move to Solana · One-way:** moves it to your Solana wallet so you can trade it on current markets. A bridging fee is shown before you confirm, and the move can't be reversed. The app tells you if an amount can't be moved.
     - **Withdraw** it to an outside address instead.
   </Accordion>
 </AccordionGroup>

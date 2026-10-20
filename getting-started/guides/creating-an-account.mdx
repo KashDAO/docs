@@ -1,6 +1,6 @@
 ---
 title: 'Creating an Account'
-description: 'Sign in with X, Google, email, Telegram or Discord. Your Kash account and Solana wallet are created automatically'
+description: 'Sign in with X, Google, email, Telegram or Discord. Your account and your own embedded Solana wallet are set up automatically'
 icon: 'user-plus'
 ---
 
@@ -23,7 +23,7 @@ Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
 
 | Method | How it works |
 |---|---|
-| **X (Twitter)** | One-click sign-in. Linking X is also what lets you [trade from X](/getting-started/features/trading-on-x) |
+| **X (Twitter)** | One-click sign-in. Connecting X is also what lets you [trade from X](/getting-started/features/trading-on-x) and [create markets](/getting-started/guides/creating-opportunities) |
 | **Google** | One-click sign-in with your Google account |
 | **Email** | Enter your email and confirm a one-time code |
 | **Telegram** | Sign in with Telegram, including when you open Kash inside Telegram |
@@ -34,10 +34,10 @@ Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
     Any option works. You can link the others later from **Settings → Account**.
   </Step>
   <Step title="Your wallet is created">
-    Kash creates a **Solana wallet** for you automatically. This is where your USDC and positions live. There's no seed phrase to write down.
+    You get your own **embedded Solana wallet** automatically. It belongs to you, and it is where your USDC and positions live. There's no seed phrase to write down.
   </Step>
-  <Step title="Approve Kash to place your trades">
-    You'll be asked to allow Kash to place trades from your wallet. This lets Kash execute the trades you request, in the app or on X, without a signing prompt each time.
+  <Step title="Give your wallet trading permission">
+    You'll be asked to give your wallet permission for Kash to submit trades. This lets the trades you request, in the app or on X, go through without a signing prompt each time. Your funds stay in your wallet.
   </Step>
   <Step title="Add a recovery method">
     Add a **recovery email** or a **passkey**. If you ever lose access to the account you signed in with, this is how you get back in.
@@ -53,8 +53,8 @@ Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
 
 <AccordionGroup>
   <Accordion title="Your funds stay in your wallet">
-    - Your USDC sits in **your own Solana wallet**, not in a Kash pool
-    - Trades and payouts move funds directly between your wallet and the market
+    - Your USDC sits in **your own Solana wallet**. Kash never holds custody of your funds
+    - Trades and redemptions move funds directly between your wallet and the on-chain market
     - You can **export your private key** from **Settings → Account → Wallet backup** and import it into a compatible Solana wallet. Kash never sees your private key
   </Accordion>
   <Accordion title="No seed phrase, real recovery">

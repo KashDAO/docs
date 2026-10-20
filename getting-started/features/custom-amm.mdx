@@ -19,7 +19,7 @@ icon: 'chart-mixed'
 
 # What the AMM does
 
-Every Kash market holds a single USDC pool that backs all of its outcomes. When you buy an outcome, your USDC (minus the protocol fee) goes into the pool and the AMM issues outcome shares to you along a fixed mathematical curve. When you sell, your shares are burned and USDC comes back out of the pool.
+Every market holds its own on-chain USDC pool, controlled by the protocol's program rather than by Kash, that backs all of its outcomes. When you buy an outcome, your USDC (minus the protocol fee) goes into the pool and the AMM issues outcome shares to you along a fixed mathematical curve. When you sell, your shares are burned and USDC comes back out of the pool.
 
 The curve is deterministic: the same trade against the same market state always produces the same result. There's no order book, no counterparty to match with, and no social or engagement input to pricing.
 
@@ -31,13 +31,13 @@ The curve is deterministic: the same trade against the same market state always 
   </Accordion>
 
   <Accordion title="Liquidity from the first second">
-    A new market doesn't wait for liquidity providers. The creator's starting liquidity is converted into the market's pool and an equal starting position across every outcome, so prices begin even and trading works immediately.
+    A new market doesn't wait for liquidity providers. The creator's starting liquidity, paid from their own funds, is converted into the market's pool and an equal starting position across every outcome, so prices begin even and trading works immediately.
   </Accordion>
 
   <Accordion title="Implied chance pricing">
     The percentage shown for each outcome is its **implied chance**. It's computed from how the market's capital is concentrated across outcomes, and it always sums to 100%.
 
-    Implied chance is *not* a fixed share price. Kash shares don't "pay $1": winning shares redeem for a portion of the market's pool. That's why trade previews show an **estimated payout if this outcome wins** rather than a per-share dollar figure. See [Winning](/getting-started/guides/winning).
+    Implied chance is *not* a fixed share price. Shares don't "pay $1": winning shares redeem for a portion of the market's pool. That's why trade previews show an **estimated payout if this outcome wins** rather than a per-share dollar figure. See [Redeeming positions](/getting-started/guides/winning).
   </Accordion>
 
   <Accordion title="Price impact and slippage protection">
@@ -51,7 +51,7 @@ The curve is deterministic: the same trade against the same market state always 
 
 - **Buys:** a protocol fee is taken from your USDC before it enters the curve. The rest goes into the pool.
 - **Sells:** an AMM sell fee **stays in the pool**, benefiting the remaining holders, and a protocol fee is taken from your proceeds.
-- **Claims:** no protocol fee. A claim covers only its own small network fee.
+- **Claims:** no protocol fee. A claim covers only its own network fee.
 
 Protocol fees are kept separate from the pool, so they never distort the curve. See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.
 

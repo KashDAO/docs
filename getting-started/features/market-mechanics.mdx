@@ -1,6 +1,6 @@
 ---
 title: 'Market Mechanics'
-description: 'How Kash markets are created, traded, resolved and paid out'
+description: 'How markets are created, traded, resolved and redeemed'
 icon: 'gears'
 ---
 
@@ -35,13 +35,13 @@ icon: 'gears'
 
 <Steps>
   <Step title="Creation">
-    A user, an organization or Kash describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. Kash reviews every market automatically before launch. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
+    A creator connects their X account in the web app and describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. The creator pays to create it from their own funds, at least $20, and owns the market. Every market is reviewed automatically before it goes live. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
   </Step>
   <Step title="Live">
-    The market launches on Solana with its starting liquidity in place. Anyone can buy or sell any outcome.
+    The market is created on the open, permissionless Solana protocol with its starting liquidity in place. Anyone can buy or sell any outcome.
   </Step>
   <Step title="Frozen">
-    Trading closes a set time before the resolution time. The lead depends on the market's length: shorter for short markets, longer for long ones. The market page shows when trading closes.
+    Trading closes shortly before the resolution time, and the market page shows exactly when.
   </Step>
   <Step title="Waiting for resolution">
     After the resolution time, the outcome is proposed from the market's sources and rules, and a dispute window opens.
@@ -50,7 +50,7 @@ icon: 'gears'
     With no open dispute when the window closes, the market settles to its winning outcome. A market can instead be cancelled, and then every holder is refunded at the snapshot price.
   </Step>
   <Step title="Claim">
-    Winners claim their payout, and holders of a cancelled market claim their refund, from Portfolio. See [Winning](/getting-started/guides/winning).
+    Holders of the winning outcome redeem their shares, and holders of a cancelled market claim their refund, from Portfolio. See [Redeeming positions](/getting-started/guides/winning).
   </Step>
 </Steps>
 
@@ -58,15 +58,15 @@ icon: 'gears'
 
 <AccordionGroup>
   <Accordion title="How outcomes are proposed">
-    Once a market reaches its resolution time, Kash resolves it automatically: the outcome is proposed from the market's published sources under its resolution rules. If the evidence isn't available yet, Kash waits and checks again.
+    Once a market reaches its resolution time, it is resolved automatically: the outcome is proposed from the market's published sources under its resolution rules. If the evidence isn't available yet, resolution waits and checks again.
   </Accordion>
   <Accordion title="Disputes">
     A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute stops settlement until the dispute has been resolved.
   </Accordion>
   <Accordion title="Cancellation and the refund safety net">
-    A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market stays unresolved for too long after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live odds no longer matter once a market is cancelled.
+    A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market can't be resolved after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live prices no longer matter once a market is cancelled.
   </Accordion>
-  <Accordion title="Payouts">
+  <Accordion title="Redemption">
     Winning shares redeem for a pro-rata portion of the market's pool. Losing shares are worth nothing. Refunds pay each holder at the cancellation snapshot price.
   </Accordion>
 </AccordionGroup>
@@ -79,8 +79,8 @@ icon: 'gears'
 | Sell | A protocol fee plus an AMM sell fee | The AMM sell fee stays in the market's pool |
 | Trade from X | No transaction fee | |
 | Trade in the web app | A small network fee in USDC may be added | Covers the Solana network fee Kash pays |
-| Claim | No protocol fee | The claim's network fee is deducted from the payout |
-| Launch a market | Shown in the launch panel | The creator funds the market's starting liquidity |
+| Claim | No protocol fee | The claim's network fee is deducted from the amount you receive |
+| Create a market | At least $20, shown in the launch panel | Paid by the creator from their own funds; it becomes the market's starting liquidity |
 
 The app always shows the exact fees before you confirm.
 
@@ -88,7 +88,7 @@ The app always shows the exact fees before you confirm.
 
 <AccordionGroup>
   <Accordion title="Solana and USDC">
-    Markets run as programs on Solana, and every balance, trade and payout is in USDC. Your funds stay in your own Solana wallet until you trade. Kash pays the SOL network fees, so you never need to hold SOL.
+    Markets run on an open, permissionless protocol on Solana, and every balance, trade and redemption is in USDC. Your USDC and positions are held in your own Solana wallet, and the USDC you trade into a market sits in that market's on-chain pool. Kash never holds custody of user funds. Kash pays the SOL network fees, so you never need to hold SOL.
   </Accordion>
   <Accordion title="Slippage protection">
     Every trade is quoted before you confirm and carries an on-chain minimum-output guard. If the market moves against you before execution, the trade fails instead of filling at a worse price.
@@ -104,10 +104,10 @@ The app always shows the exact fees before you confirm.
     How prices are calculated
   </Card>
   <Card
-    title="Claiming Winnings"
+    title="Redeeming positions"
     icon="trophy-star"
     href="/getting-started/guides/winning"
   >
-    Claims, refunds and payouts
+    Claims and refunds
   </Card>
 </CardGroup>

@@ -17,7 +17,7 @@ icon: 'x-twitter'
   alt="Hero Dark"
 />
 
-Kash markets are posted on X, and you can trade them without leaving X. Reply to a market's post and mention the trading account, and Kash places the trade from your Kash wallet.
+Kash markets are posted on X, and you can trade them without leaving X. Reply to a market's post and mention the trading account, and the trade is submitted from your own wallet.
 
 ## Before your first trade
 
@@ -25,14 +25,14 @@ Kash markets are posted on X, and you can trade them without leaving X. Reply to
   <Step title="Create a Kash account">
     Sign up at [app.kash.bot](https://app.kash.bot). See [Creating an Account](/getting-started/guides/creating-an-account).
   </Step>
-  <Step title="Link your X account">
-    Sign in with X, or link X later from **Settings → Account**. The bot recognises you by your linked X account.
+  <Step title="Connect your X account">
+    Sign in with X, or connect X later from **Settings → Account**. The bot recognises you by your connected X account.
   </Step>
-  <Step title="Approve Kash to place trades">
-    You approve this once, during onboarding. If you skipped it, the bot will tell you to finish it in the app.
+  <Step title="Give your wallet trading permission">
+    You give this once, during onboarding. If you skipped it, the bot will tell you to finish it in the app.
   </Step>
   <Step title="Add USDC">
-    Trades are paid from your Kash balance. See [Depositing](/getting-started/guides/depositing).
+    Trades are paid from the USDC in your own wallet. See [Depositing](/getting-started/guides/depositing).
   </Step>
 </Steps>
 
@@ -41,25 +41,25 @@ Kash markets are posted on X, and you can trade them without leaving X. Reply to
 Find the market's post on X, then either **reply** to it (anywhere in its thread) or **quote** it, and mention **@kash_bot_trade** with your amount and outcome:
 
 ```
-@kash_bot_trade $50 on Yes
+@kash_bot_trade buy $50 of Yes
 ```
 
 ```
-@kash_bot_trade put $10 on Argentina
+@kash_bot_trade buy $10 of Argentina
 ```
 
 Kash reads the amount and matches the outcome by its label, in several languages. When the trade goes through, the bot replies with a confirmation such as **"✅ Yes for $50"** and a link to the transaction.
 
-You can also close a position the same way, or ask the bot for the odds, the time left or your P&L on that market.
+You can also close a position the same way, or ask the bot for the current prices, the time left or your P&L on that market.
 
 <Warning>
-**Mention the account that posted the market.** Most markets are posted by [@kash_bot_trade](https://x.com/kash_bot_trade), but organizations and creators can post markets from their own accounts. If you mention the wrong account, the bot will tell you which one to use.
+**Mention the account that posted the market.** Most markets are posted by [@kash_bot_trade](https://x.com/kash_bot_trade), but creators can post markets from their own accounts. If you mention the wrong account, the bot will tell you which one to use.
 </Warning>
 
 ## Rules and limits
 
 - **Reply to or quote the market post.** A mention on its own, a pasted market link, or a quote of a post that isn't a market won't be traded.
-- **Minimum trade:** a minimum trade amount applies; the bot tells you if your amount is below it.
+- **Trade size:** the bot tells you if your amount is too small to trade.
 - **Act promptly:** a mention that's too old when it's processed is refused rather than filled at a stale price.
 - **Open markets only:** markets that have frozen, resolved or been cancelled can't be traded.
 - **No transaction fee:** trades placed on X don't carry the network fee that web trades may include. The usual protocol fee applies.
@@ -68,8 +68,8 @@ You can also close a position the same way, or ask the bot for the odds, the tim
 
 You can DM the bot to:
 - check your **balance**, **portfolio**, **P&L**, **trade history** and **pending trades**
-- get the **odds** on a market or **discover** markets
-- request an **export** of your data (the download link expires after a while)
+- get the **prices** on a market or **discover** markets
+- request an **export** of your data
 
 Trading happens by replying to market posts, not in DMs, and markets are created in the web app.
 

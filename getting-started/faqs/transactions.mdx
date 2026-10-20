@@ -27,9 +27,9 @@ icon: 'arrow-right-arrow-left'
     | Sell | A protocol fee plus an AMM sell fee (stays in the market's pool) |
     | Trade on X | No transaction fee |
     | Trade in the web app | A small network fee in USDC may be added |
-    | Claim winnings or a refund | No protocol fee; the claim's network fee is deducted from the payout |
-    | Deposit | No Kash fee; the payment partner may charge its own |
-    | Launch a market | Shown in the launch panel; you fund the market's starting liquidity |
+    | Claim a resolved position or a refund | No protocol fee; the claim's network fee is deducted from the amount you receive |
+    | Deposit | No Kash fee; the payment provider may charge its own |
+    | Create a market | At least $20, paid from your own funds; the exact amount is shown in the launch panel |
 
     The app shows the exact fees before you confirm.
   </Accordion>
@@ -62,15 +62,15 @@ icon: 'arrow-right-arrow-left'
   </Accordion>
 </AccordionGroup>
 
-# Claims and payouts
+# Claims and refunds
 
 <AccordionGroup>
-  <Accordion title="How do I claim my winnings?">
-    When a market resolves, winning positions appear under **Claimable** in **Portfolio**. Tap **Claim winnings**, or **Claim all**. For cancelled markets, tap **Claim refund**. See [Winning](/getting-started/guides/winning).
+  <Accordion title="How do I claim a resolved position?">
+    When a market resolves, winning positions appear under **Claimable** in **Portfolio**. Tap **Claim winnings**, or **Claim all**. For cancelled markets, tap **Claim refund**. See [Redeeming positions](/getting-started/guides/winning).
   </Accordion>
 
-  <Accordion title="How much will I receive when I win?">
-    Your share of the market's pool: your winning shares ÷ all winning shares × the pool, minus the claim's small network fee. The trade ticket's **estimated payout if you win** is your best guide.
+  <Accordion title="How much will I receive if my outcome wins?">
+    Your share of the market's on-chain pool: your winning shares ÷ all winning shares × the pool, minus the claim's network fee. The trade ticket's **estimated payout if your outcome wins** is your best guide.
   </Accordion>
 </AccordionGroup>
 
@@ -78,11 +78,11 @@ icon: 'arrow-right-arrow-left'
 
 <AccordionGroup>
   <Accordion title="How long do withdrawals take?">
-    Crypto withdrawals usually complete in one to two minutes. An exchange may take longer to credit you.
+    Crypto withdrawals complete once the transfer confirms on Solana, and you can follow the status in the app. An exchange may take longer to credit you.
   </Accordion>
 
-  <Accordion title="Can I make several withdrawals at once?">
-    One withdrawal can be in progress at a time. If one is interrupted, it clears automatically and you can try again.
+  <Accordion title="What if a withdrawal is interrupted?">
+    It clears automatically and you can try again.
   </Accordion>
 </AccordionGroup>
 
@@ -94,7 +94,7 @@ icon: 'arrow-right-arrow-left'
   </Accordion>
 
   <Accordion title="What if I sent funds to the wrong address?">
-    On-chain transfers can't be reversed. If you sent to an exchange on the wrong network, contact the exchange, as they can sometimes recover it. If you sent the wrong token or network to your Kash address, contact [support@kash.bot](mailto:support@kash.bot) with the transaction details.
+    On-chain transfers can't be reversed. If you sent to an exchange on the wrong network, contact the exchange, as they can sometimes recover it. If you sent the wrong token or network to your wallet address, contact [support@kash.bot](mailto:support@kash.bot) with the transaction details.
   </Accordion>
 
   <Accordion title="How do I report a transaction problem?">

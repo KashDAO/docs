@@ -21,11 +21,11 @@ icon: 'shield'
 
 <AccordionGroup>
   <Accordion title="Who controls my funds?">
-    Your USDC sits in **your own Solana wallet**, created for you when you sign up. Kash doesn't pool user funds: trades and payouts move USDC directly between your wallet and the market. You can export your wallet's private key at any time.
+    You do. Your USDC and positions sit in **your own embedded Solana wallet**, set up when you sign up. Kash is a non-custodial interface: it never holds custody of user funds and doesn't pool them. Trades and redemptions move USDC directly between your wallet and the on-chain market. You can export your wallet's private key at any time.
   </Accordion>
 
   <Accordion title="What can Kash do with my wallet?">
-    When you sign up, you approve Kash to place trades from your wallet. That's what lets trades from the app, from X and from copy trading go through without a signing prompt each time. Withdrawals to outside addresses are confirmed by you in the app, and transfers to other Kash users are sent only when you send them.
+    When you sign up, you give your wallet permission for Kash to submit the trades you request. That's what lets trades from the app, from X and from copy trading go through without a signing prompt each time. Withdrawals to outside addresses are confirmed by you in the app, and transfers to other Kash users are sent only when you send them.
   </Accordion>
 
   <Accordion title="Is there a seed phrase? How does recovery work?">
@@ -33,7 +33,7 @@ icon: 'shield'
   </Accordion>
 
   <Accordion title="How are markets secured?">
-    Markets run as programs on Solana, so every trade and settlement is recorded on-chain. Kash's protocol controls are held in multisig accounts that need several approvals. Proposed outcomes go through a public dispute window before they settle, and if a market stays unresolved for too long after its resolution time, anyone can cancel it so holders are refunded.
+    Markets live on an open, permissionless protocol on Solana, so every trade and settlement is recorded on-chain. Protocol administration is held in multisig accounts that need several approvals. Proposed outcomes go through a public dispute window before they settle, and if a market can't be resolved after its resolution time, anyone can cancel it so holders are refunded.
   </Accordion>
 </AccordionGroup>
 
