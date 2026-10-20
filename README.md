@@ -17,7 +17,7 @@ Key characteristics documented here:
 - **Non-custodial**: each user has their own embedded Solana wallet; Kash never holds custody of user funds, and the private key can be exported
 - **No SOL needed**: Kash pays the Solana network fees
 - **USDC-denominated**: trading and settlement in USDC on Solana
-- **Chat-created markets**: Kash AI drafts each market; outcomes are proposed from published sources and rules, with a public dispute window
+- **Chat-created markets**: Kash AI drafts each market; outcomes are determined by Kash's automated resolution system from published sources and rules, with a dispute window
 
 ## Repository Structure
 

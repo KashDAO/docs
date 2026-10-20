@@ -27,7 +27,7 @@ icon: 'gears'
     Each outcome shows an implied chance, set by the [AMM](/getting-started/features/custom-amm) from how the market's capital is spread across outcomes. Implied chances always sum to 100%.
   </Accordion>
   <Accordion title="Rules and sources">
-    Every market publishes its resolution rules and a primary source (plus a fallback where needed). These decide the result, so they're shown on the market page.
+    Every market publishes its resolution rules and a primary source (plus a fallback where needed). Kash's automated resolution system determines the result from them, so they're shown on the market page.
   </Accordion>
 </AccordionGroup>
 
@@ -44,7 +44,7 @@ icon: 'gears'
     Trading closes shortly before the resolution time, and the market page shows exactly when.
   </Step>
   <Step title="Waiting for resolution">
-    After the resolution time, the outcome is proposed from the market's sources and rules, and a dispute window opens.
+    After the resolution time, Kash's automated resolution system proposes the outcome from the market's sources and rules, and a dispute window opens.
   </Step>
   <Step title="Resolved or cancelled">
     With no open dispute when the window closes, the market settles to its winning outcome. A market can instead be cancelled, and then every holder is refunded at the snapshot price.
@@ -58,10 +58,10 @@ icon: 'gears'
 
 <AccordionGroup>
   <Accordion title="How outcomes are proposed">
-    Once a market reaches its resolution time, it is resolved automatically: the outcome is proposed from the market's published sources under its resolution rules. If the evidence isn't available yet, resolution waits and checks again.
+    Outcomes are determined by Kash's automated resolution system from each market's published sources and rules. Once a market reaches its resolution time, the system proposes the outcome. If the evidence isn't available yet, it waits and checks again.
   </Accordion>
   <Accordion title="Disputes">
-    A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute stops settlement until the dispute has been resolved.
+    A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute holds settlement while the same automated system reviews the dispute against the market's sources and rules, and the market then settles on the result of that review.
   </Accordion>
   <Accordion title="Cancellation and the refund safety net">
     A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market can't be resolved after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live prices no longer matter once a market is cancelled.

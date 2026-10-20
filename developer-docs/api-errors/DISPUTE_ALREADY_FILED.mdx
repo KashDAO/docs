@@ -16,7 +16,7 @@ description: 'HTTP 409 — Dispute already filed'
 
 ## How to fix
 
-- Treat this as success: your dispute exists, and it holds settlement until Kash decides the market. This holds even if your first attempt returned a 503 after recording the dispute; nothing is lost by stopping your retries here.
+- Treat this as success: your dispute exists, and it holds settlement until the automated review completes. This holds even if your first attempt returned a 503 after recording the dispute; nothing is lost by stopping your retries here.
 - Fetch your dispute, including its review outcome (`status`, `reviewedAt`, `reviewNote`), with `GET /v1/markets/{id}/disputes`.
 - A dispute cannot be amended; the original `reason` stands. If you have material new evidence, contact Kash support.
 

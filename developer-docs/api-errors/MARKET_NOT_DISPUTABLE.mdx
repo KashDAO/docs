@@ -12,7 +12,7 @@ description: 'HTTP 422 — Market not disputable'
 - **"no pending proposal"**: nothing has been proposed yet, so there is nothing to dispute.
 - **"settlement has begun"**, **"already finalized"** or **"already cancelled"**: the proposal has moved past `proposed`, so the right to dispute has ended.
 
-A proposal whose dispute window has ended is refused with [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), and one Kash has already decided with [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED); both are 409. The filing is checked atomically against the live settlement state, so even if the market's `resolution` object showed `proposed` when you read it, a filing that races settlement is refused rather than recorded against a settled market.
+A proposal whose dispute window has ended is refused with [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), and one whose disputes have already been reviewed with [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED); both are 409. The filing is checked atomically against the live settlement state, so even if the market's `resolution` object showed `proposed` when you read it, a filing that races settlement is refused rather than recorded against a settled market.
 
 ## Why it happens
 
