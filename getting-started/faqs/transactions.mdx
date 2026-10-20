@@ -23,29 +23,17 @@ icon: 'arrow-right-arrow-left'
   <Accordion title="What fees does Kash charge?">
     | Action | Fee |
     |---|---|
-    | Buy | 1% protocol fee |
-    | Sell | 1% protocol fee + 0.5% AMM sell fee (stays in the market's pool) |
+    | Buy | A protocol fee |
+    | Sell | A protocol fee plus an AMM sell fee (stays in the market's pool) |
     | Trade on X | No transaction fee |
     | Trade in the web app | A small network fee in USDC may be added |
     | Claim winnings or a refund | No protocol fee; the claim's network fee is deducted from the payout |
     | Deposit | No Kash fee; the payment partner may charge its own |
-    | Launch a market | No creation fee; you fund the market's starting liquidity |
+    | Launch a market | Shown in the launch panel; you fund the market's starting liquidity |
 
     The app shows the exact fees before you confirm.
   </Accordion>
 
-  <Accordion title="Fee example">
-    ```
-    Buy $100 of an outcome:
-      Protocol fee (1%):        $1.00
-      Into the market:         $99.00
-
-    Later, sell for $150 before the AMM sell fee:
-      AMM sell fee (0.5%):      $0.75  (stays in the pool)
-      Protocol fee (1%):        $1.49
-      You receive:            ~$147.76
-    ```
-  </Accordion>
 
   <Accordion title="How do network fees work?">
     Every Solana transaction has a small network fee in SOL. Kash pays it for you, so you never need SOL. On web trades and claims, a small amount is charged back in USDC, and the app shows it before you confirm. Trades placed on X skip it.

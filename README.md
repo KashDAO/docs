@@ -9,7 +9,7 @@ Public documentation for **Kash**, a social prediction market on Solana. This re
 
 ## About Kash
 
-Kash is a prediction market where users trade multi-outcome markets in USDC on Solana, in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Markets are created by chatting with Kash AI and reviewed before they go live.
+Kash is a prediction market where users trade multi-outcome markets in USDC on Solana, in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Markets are created by chatting with Kash AI and reviewed automatically before they go live.
 
 Key characteristics documented here:
 
@@ -25,7 +25,7 @@ Content is organized by the tabs in `docs.json`:
 
 - **`getting-started/`** — user-facing docs: quick start, guides, features, ecosystem, FAQs
 - **`developer-docs/`** — REST API, webhooks, CLI, SDKs, and embed API reference (parts are generated/synced from code — check before hand-editing)
-- **`for-businesses/`** — B2B / white-label docs for organizations and partners
+- **`for-businesses/`** — docs for businesses and organizations using Kash
 - **`assets/`** — images and other static assets
 - **`docs.json`** — navigation, theming, SEO, and footer configuration
 
@@ -84,7 +84,7 @@ We welcome contributions to improve the documentation:
 - **Twitter**: [@kash_bot](https://x.com/kash_bot)
 - **Discord**: [Community](https://discord.com/invite/n9eumqjMPb)
 - **GitHub**: [KashDAO](https://github.com/KashDAO)
-- **Telegram**: [kashprediction](https://t.me/kashprediction)
+- **Telegram**: [KashDAO](https://t.me/kashDAO)
 
 ## License
 

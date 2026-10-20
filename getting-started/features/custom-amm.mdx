@@ -49,8 +49,8 @@ The curve is deterministic: the same trade against the same market state always 
 
 # Fees and the curve
 
-- **Buys:** a 1% protocol fee is taken from your USDC before it enters the curve. The rest goes into the pool.
-- **Sells:** a 0.5% AMM sell fee **stays in the pool**, benefiting the remaining holders, and a 1% protocol fee is taken from your proceeds.
+- **Buys:** a protocol fee is taken from your USDC before it enters the curve. The rest goes into the pool.
+- **Sells:** an AMM sell fee **stays in the pool**, benefiting the remaining holders, and a protocol fee is taken from your proceeds.
 - **Claims:** no protocol fee. A claim covers only its own small network fee.
 
 Protocol fees are kept separate from the pool, so they never distort the curve. See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.

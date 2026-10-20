@@ -21,7 +21,7 @@ icon: 'gears'
 
 <AccordionGroup>
   <Accordion title="Multi-outcome markets">
-    A market lists between 2 and 96 outcomes, and exactly one of them wins. "Will X happen?" is a two-outcome market; "Who wins the tournament?" can list every contender.
+    A market lists two or more outcomes, and exactly one of them wins. "Will X happen?" is a two-outcome market; "Who wins the tournament?" can list every contender.
   </Accordion>
   <Accordion title="Implied chance">
     Each outcome shows an implied chance, set by the [AMM](/getting-started/features/custom-amm) from how the market's capital is spread across outcomes. Implied chances always sum to 100%.
@@ -35,13 +35,13 @@ icon: 'gears'
 
 <Steps>
   <Step title="Creation">
-    A user, an organization or Kash describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. Every market is reviewed before launch. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
+    A user, an organization or Kash describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. Kash reviews every market automatically before launch. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
   </Step>
   <Step title="Live">
     The market launches on Solana with its starting liquidity in place. Anyone can buy or sell any outcome.
   </Step>
   <Step title="Frozen">
-    Trading closes a set time before the resolution time. The lead depends on the market's length, from a few minutes for short markets up to a day for long ones.
+    Trading closes a set time before the resolution time. The lead depends on the market's length: shorter for short markets, longer for long ones. The market page shows when trading closes.
   </Step>
   <Step title="Waiting for resolution">
     After the resolution time, the outcome is proposed from the market's sources and rules, and a dispute window opens.
@@ -58,13 +58,13 @@ icon: 'gears'
 
 <AccordionGroup>
   <Accordion title="How outcomes are proposed">
-    Once a market reaches its resolution time, Kash's automated resolver reads the market's published sources under its resolution rules and proposes an outcome. If the evidence isn't available yet, it waits and checks again. If it can't reach a confident answer, a person at Kash reviews the market.
+    Once a market reaches its resolution time, Kash resolves it automatically: the outcome is proposed from the market's published sources under its resolution rules. If the evidence isn't available yet, Kash waits and checks again.
   </Accordion>
   <Accordion title="Disputes">
-    A proposed outcome opens a **dispute window**, typically 30 minutes. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute stops settlement until it's handled: the outcome is re-checked automatically, and a person at Kash decides when the re-check disagrees or the market is disputed again.
+    A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute stops settlement until the dispute has been resolved.
   </Accordion>
   <Accordion title="Cancellation and the refund safety net">
-    A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market is still unresolved a day after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live odds no longer matter once a market is cancelled.
+    A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market stays unresolved for too long after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live odds no longer matter once a market is cancelled.
   </Accordion>
   <Accordion title="Payouts">
     Winning shares redeem for a pro-rata portion of the market's pool. Losing shares are worth nothing. Refunds pay each holder at the cancellation snapshot price.
@@ -75,12 +75,12 @@ icon: 'gears'
 
 | Action | Fee | Where it goes |
 |---|---|---|
-| Buy | 1% protocol fee | Shared between the market's creator side and Kash |
-| Sell | 1% protocol fee + 0.5% AMM sell fee | The AMM sell fee stays in the market's pool |
+| Buy | A protocol fee | Shared between the market's creator side and Kash |
+| Sell | A protocol fee plus an AMM sell fee | The AMM sell fee stays in the market's pool |
 | Trade from X | No transaction fee | |
 | Trade in the web app | A small network fee in USDC may be added | Covers the Solana network fee Kash pays |
 | Claim | No protocol fee | The claim's network fee is deducted from the payout |
-| Launch a market | No creation fee | The creator funds the market's starting liquidity |
+| Launch a market | Shown in the launch panel | The creator funds the market's starting liquidity |
 
 The app always shows the exact fees before you confirm.
 

@@ -7,7 +7,7 @@ description: 'HTTP 409 — Dispute already decided'
 
 ## When it fires
 
-`POST /v1/markets/{id}/disputes` was called for a market whose disputes Kash has already decided. When a proposal is disputed, a Kash administrator decides the final outcome: the proposed one, a different one, or cancelling the market. That decision is final, is settled immediately and cannot itself be disputed, so every later filing on the market is refused.
+`POST /v1/markets/{id}/disputes` was called for a market whose disputes Kash has already decided. When a proposal is disputed, Kash decides the final outcome: the proposed one, a different one, or cancelling the market. That decision is final, is settled immediately and cannot itself be disputed, so every later filing on the market is refused.
 
 ## Why it happens
 
