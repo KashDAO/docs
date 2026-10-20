@@ -1,0 +1,39 @@
+---
+title: 'Health & Spec'
+description: 'Unauthenticated liveness, readiness, OpenAPI spec and interactive reference.'
+---
+
+These four routes need no API key and are not rate-limited.
+
+| Method | Path                 | Returns |
+| ------ | -------------------- | ------- |
+| `GET`  | `/v1/health`         | Liveness. |
+| `GET`  | `/v1/ready`          | Readiness of the API's dependencies. |
+| `GET`  | `/v1/openapi.json`   | The OpenAPI 3.1 specification. |
+| `GET`  | `/v1/docs`           | An interactive reference rendered from that spec. |
+
+## `GET /v1/health`
+
+`200` whenever the API process is up:
+
+```json
+{ "status": "ok", "version": "…", "uptime_seconds": 86400, "timestamp": "…" }
+```
+
+## `GET /v1/ready`
+
+`200` when every dependency the API needs is reachable, `503` otherwise. The body lists a status per check:
+
+```json
+{
+  "status": "ready",
+  "checks": { "…": { "status": "ok", "latencyMs": 3 } },
+  "timestamp": "…"
+}
+```
+
+Each check's `status` is `ok`, `degraded` or `fail`. Use `/v1/ready` for an external monitor; use `/v1/health` for plain liveness.
+
+## `GET /v1/openapi.json` and `GET /v1/docs`
+
+The spec is generated from the same schemas the API validates with, so it always matches the deployed API. It includes the webhook payloads under the OpenAPI `webhooks` section. Both are served with `Cache-Control: public, max-age=60, stale-while-revalidate=300`.
