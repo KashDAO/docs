@@ -9,12 +9,12 @@ Public documentation for **Kash**, a social prediction market on Solana. This re
 
 ## About Kash
 
-Kash is a prediction market where users trade multi-outcome markets in USDC on Solana, in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Markets are created by chatting with Kash AI and reviewed automatically before they go live.
+Kash is an interface to an open, permissionless prediction-market protocol on Solana. Users trade multi-outcome markets in USDC in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Creators connect their X account in the web app and create markets by chatting with Kash AI.
 
 Key characteristics documented here:
 
 - **Web app and X**: app.kash.bot for everything, plus trading by reply on X
-- **Your own wallet**: each user gets a Solana wallet; funds are not pooled, and the private key can be exported
+- **Non-custodial**: each user has their own embedded Solana wallet; Kash never holds custody of user funds, and the private key can be exported
 - **No SOL needed**: Kash pays the Solana network fees
 - **USDC-denominated**: trading and settlement in USDC on Solana
 - **Chat-created markets**: Kash AI drafts each market; outcomes are proposed from published sources and rules, with a public dispute window
@@ -25,7 +25,6 @@ Content is organized by the tabs in `docs.json`:
 
 - **`getting-started/`** — user-facing docs: quick start, guides, features, ecosystem, FAQs
 - **`developer-docs/`** — REST API, webhooks, CLI, SDKs, and embed API reference (parts are generated/synced from code — check before hand-editing)
-- **`for-businesses/`** — docs for businesses and organizations using Kash
 - **`assets/`** — images and other static assets
 - **`docs.json`** — navigation, theming, SEO, and footer configuration
 
@@ -72,7 +71,6 @@ We welcome contributions to improve the documentation:
 ### Content Guidelines
 
 - Use clear, concise language and practical examples
-- Only document features that are live today; the docs describe the current product, with no changelog or roadmap content
 - Follow the existing Mintlify component style (`<Note>`, `<Warning>`, `<AccordionGroup>`, `<CardGroup>`, ...)
 - Keep frontmatter (`title`, `description`, `icon`) on every page
 - Test all code examples

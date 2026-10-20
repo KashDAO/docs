@@ -82,19 +82,6 @@
         ]
       },
       {
-        "tab": "For Businesses",
-        "groups": [
-          {
-            "group": "For Businesses",
-            "pages": [
-              "for-businesses/overview",
-              "for-businesses/market-creation",
-              "for-businesses/api-access"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "Developer Docs",
         "groups": [
           {
@@ -260,25 +247,6 @@
             ]
           },
           {
-            "group": "Embed — Organization Endpoints",
-            "pages": [
-              "developer-docs/public-embed-api/endpoints/organization-detail",
-              "developer-docs/public-embed-api/endpoints/organization-markets",
-              "developer-docs/public-embed-api/endpoints/organization-partners",
-              "developer-docs/public-embed-api/endpoints/organization-threads",
-              "developer-docs/public-embed-api/endpoints/organization-profile",
-              "developer-docs/public-embed-api/endpoints/organization-leaderboard",
-              "developer-docs/public-embed-api/endpoints/organizations-featured"
-            ]
-          },
-          {
-            "group": "Embed — Partner Endpoints",
-            "pages": [
-              "developer-docs/public-embed-api/endpoints/partner-detail",
-              "developer-docs/public-embed-api/endpoints/partner-threads"
-            ]
-          },
-          {
             "group": "Embed — Thread Endpoints",
             "pages": [
               "developer-docs/public-embed-api/endpoints/threads",
@@ -310,8 +278,7 @@
           {
             "group": "Embed — Guides",
             "pages": [
-              "developer-docs/public-embed-api/guides/thread-iframe",
-              "developer-docs/public-embed-api/guides/organization-iframe"
+              "developer-docs/public-embed-api/guides/thread-iframe"
             ]
           },
           {
@@ -411,20 +378,72 @@
   },
   "redirects": [
     {
+      "source": "/for-businesses/overview",
+      "destination": "/getting-started/quick-start/what-kash"
+    },
+    {
+      "source": "/for-businesses/market-creation",
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/for-businesses/api-access",
+      "destination": "/developer-docs/rest-api/authentication"
+    },
+    {
       "source": "/for-businesses/partner-portal-quickstart",
-      "destination": "/for-businesses/overview"
+      "destination": "/getting-started/guides/creating-opportunities"
     },
     {
       "source": "/for-businesses/pricing-and-revenue-share",
-      "destination": "/for-businesses/overview"
+      "destination": "/getting-started/guides/creating-opportunities"
     },
     {
       "source": "/for-businesses/white-label-branding",
-      "destination": "/for-businesses/overview"
+      "destination": "/getting-started/quick-start/what-kash"
     },
     {
       "source": "/for-businesses/analytics-and-earnings",
-      "destination": "/for-businesses/overview"
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-detail",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-markets",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-partners",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-threads",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-profile",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-leaderboard",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organizations-featured",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/partner-detail",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/partner-threads",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/guides/organization-iframe",
+      "destination": "/developer-docs/public-embed-api/guides/thread-iframe"
     }
   ]
 }
