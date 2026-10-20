@@ -127,7 +127,7 @@ const { quote } = await kash.quote(
   usdc * 1_000_000 // atomic USDC
 );
 console.log(`$${usdc} buys ${quote.estimate?.tokensReceived?.toFixed(2)} tokens`);
-console.log(`Pays about $${quote.estimate?.payoutAtCurrentOddsUsdc?.toFixed(2)} if it wins at today's prices`);
+console.log(`Pays about $${quote.estimate?.payoutAtCurrentPriceUsdc?.toFixed(2)} if it wins at today's prices`);
 ```
 
 ## "Predict on X" buttons

@@ -127,7 +127,7 @@ Keys can carry an expiry date; an expired key gets `401 API_KEY_EXPIRED`. API ke
 | 403    | `ORGANIZATION_INACTIVE`     | The key's account is suspended or closed. |
 | 403    | `IP_NOT_ALLOWED`            | Source address not on the key's allowlist. |
 
-Failed authentication is counted per source address: **50 failures within 5 minutes** locks that address out for **15 minutes**, answered with `429 RATE_LIMIT_EXCEEDED` and `Retry-After: 900`.
+Failed authentication is counted per source address: too many failures in a short window lock that address out for a period, answered with `429 RATE_LIMIT_EXCEEDED` and a `Retry-After` header.
 
 ## Next
 

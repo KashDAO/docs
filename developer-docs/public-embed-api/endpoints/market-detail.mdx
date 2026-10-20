@@ -34,7 +34,7 @@ GET https://app.kash.bot/api/markets/:id
 ## Response
 
 <ResponseField name="market" type="Market">
-  A [market object](/developer-docs/public-embed-api/endpoints/markets#response). Prices are normalized as described there, and `oddsKnown` is included.
+  A [market object](/developer-docs/public-embed-api/endpoints/markets#response). Prices are normalized as described there, and `priceKnown` is included.
 </ResponseField>
 
 <ResponseField name="priceHistory" type="object[]">
@@ -59,7 +59,7 @@ Priced markets are cached at the edge for 5 seconds, plus 5 seconds stale-while-
 
 ## Rate limit
 
-Market reads group: 600 requests per minute per IP.
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
 ## Example request
 
@@ -90,9 +90,8 @@ console.log(market.title, market.outcomes[0].impliedChance, priceHistory.length)
       { "outcomeIndex": 0, "label": "Yes", "probability": 0.279436651, "impliedChance": 0.279436651 },
       { "outcomeIndex": 1, "label": "No", "probability": 0.7205633489, "impliedChance": 0.7205633489 }
     ],
-    "oddsKnown": true,
-    "totalVolume": 35000000,
-    "organizationSlug": "kash"
+    "priceKnown": true,
+    "totalVolume": 35000000
   },
   "priceHistory": [
     { "timestamp": "2026-10-20T01:43:09.000Z", "price": 0.523076, "probability": 0.523076, "volume": 1000000 }

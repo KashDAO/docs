@@ -91,7 +91,7 @@ All IDs are UUIDs. An ID that is not a valid UUID returns `400 VALIDATION_ERROR`
 
 ## Prices and implied probability
 
-Show `outcomes[].impliedChance` (or `currentImpliedChance` for the first outcome) as each outcome's market-implied probability. On `/api/markets`, `/api/markets/:id` and the state endpoints, each outcome's `probability` is set to the same value as its `impliedChance`, and `oddsKnown` is `false` when there is no price yet. The thread-markets list returns the AMM's raw marginal `probability` instead, so read `impliedChance` there too.
+Show `outcomes[].impliedChance` (or `currentImpliedChance` for the first outcome) as each outcome's market-implied probability. On `/api/markets`, `/api/markets/:id` and the state endpoints, each outcome's `probability` is set to the same value as its `impliedChance`, and `priceKnown` is `false` when there is no price yet. The thread-markets list returns the AMM's raw marginal `probability` instead, so read `impliedChance` there too.
 
 ## Pagination
 
@@ -105,17 +105,17 @@ List endpoints take `limit` and `offset` and return:
 
 ## Rate limits
 
-Limits apply per IP address, per minute. Endpoints in the same group share one budget.
+Limits apply per IP address. Endpoints in the same group share one budget. Read the current values from the `X-RateLimit-*` headers.
 
-| Group | Endpoints | Limit |
-|---|---|---|
-| Market reads | `/api/markets`, `/api/markets/:id`, `/quote`, `/twitter-link`, `/api/markets/category-stats`, `/api/markets/participants`, `/api/threads/:id/twitter-links` | 600 |
-| Market state | `/api/markets/state`, `/api/markets/:id/state` | 360 |
-| Leaderboards | `/api/markets/:id/leaderboard` | 300 |
-| Thread list | `/api/threads` | 300 |
-| Thread detail | `/api/threads/:id` | 300 |
-| Thread markets | `/api/threads/:id/markets` | 300 |
-| Batch deep links | `POST /api/twitter-links` | 240 |
+| Group | Endpoints |
+|---|---|
+| Market reads | `/api/markets`, `/api/markets/:id`, `/quote`, `/twitter-link`, `/api/markets/category-stats`, `/api/markets/participants`, `/api/threads/:id/twitter-links` |
+| Market state | `/api/markets/state`, `/api/markets/:id/state` |
+| Leaderboards | `/api/markets/:id/leaderboard` |
+| Thread list | `/api/threads` |
+| Thread detail | `/api/threads/:id` |
+| Thread markets | `/api/threads/:id/markets` |
+| Batch deep links | `POST /api/twitter-links` |
 
 Some responses are served from a cache before the limit is checked, and those don't count. Responses the CDN can't cache carry `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` (a Unix time in milliseconds).
 

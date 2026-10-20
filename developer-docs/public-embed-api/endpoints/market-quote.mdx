@@ -45,9 +45,9 @@ GET https://app.kash.bot/api/markets/:id/quote
     <ResponseField name="qAfter" type="string[]">Each outcome's token supply after the trade, WAD</ResponseField>
     <ResponseField name="effectivePrice" type="number">USDC paid per token</ResponseField>
     <ResponseField name="impliedProbability" type="number">The outcome's marginal price after the trade (0 to 1)</ResponseField>
-    <ResponseField name="protocolTradeFeeBps" type="number">Protocol fee in basis points (`100` is 1%)</ResponseField>
+    <ResponseField name="protocolTradeFeeBps" type="number">Protocol fee in basis points</ResponseField>
     <ResponseField name="estimate" type="object | null">
-      Payout estimate in whole USDC: `youPayUsdc`, `protocolFeeUsdc`, `netIntoAmmUsdc`, `tokensReceived`, `payoutAtCurrentOddsUsdc` (what the position pays if it wins and prices stay where they are), `estimatedWinningsUsdc` and `snapshotPayoutUsdc` (the same value with a historical adjustment applied), `winningsUplift`, `winningsUpliftPercentile`, `impliedChanceAfter`, `effectiveBreakEvenChance` and `gasEstimateUsdc`. A promotional `promotionalEstimatedEarningsUsdc` string may also be present. It is display-only and does not change the trade. `estimate` is `null` when it can't be computed.
+      Payout estimate in whole USDC: `youPayUsdc`, `protocolFeeUsdc`, `netIntoAmmUsdc`, `tokensReceived`, `payoutAtCurrentPriceUsdc` (what the position pays if it wins and prices stay where they are), `estimatedPayoutUsdc` and `snapshotPayoutUsdc` (the same value with a historical adjustment applied), `payoutUplift`, `payoutUpliftPercentile`, `impliedChanceAfter`, `effectiveBreakEvenChance` and `gasEstimateUsdc`. A promotional `promotionalEstimatedPayoutUsdc` string may also be present. It is display-only and does not change the trade. `estimate` is `null` when it can't be computed.
     </ResponseField>
   </Expandable>
   <Expandable title="Quote (sell)">
@@ -78,7 +78,7 @@ GET https://app.kash.bot/api/markets/:id/quote
 
 ## Caching and rate limit
 
-Quotes are cached for 10 seconds. Market reads group: 600 requests per minute per IP.
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
 ## Example request
 
@@ -98,7 +98,7 @@ const res = await fetch(
   `https://app.kash.bot/api/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/quote?${params}`
 );
 const { quote } = await res.json();
-console.log(`You get ${quote.estimate?.tokensReceived} tokens; pays ~$${quote.estimate?.payoutAtCurrentOddsUsdc} if it wins`);
+console.log(`You get ${quote.estimate?.tokensReceived} tokens; pays ~$${quote.estimate?.payoutAtCurrentPriceUsdc} if it wins`);
 ```
 </CodeGroup>
 
@@ -117,18 +117,17 @@ console.log(`You get ${quote.estimate?.tokensReceived} tokens; pays ~$${quote.es
     "qAfter": ["28613465361609033879", "41836357394017945260"],
     "effectivePrice": 0.39056978630252775,
     "impliedProbability": 0.399183389531376,
-    "protocolTradeFeeBps": 100,
     "estimate": {
       "youPayUsdc": 1,
       "protocolFeeUsdc": 0.01,
       "netIntoAmmUsdc": 0.99,
       "tokensReceived": 2.5603618996412063,
       "snapshotPayoutUsdc": 4.490933220704572,
-      "estimatedWinningsUsdc": 4.490933220704572,
-      "payoutAtCurrentOddsUsdc": 3.2069995480610554,
+      "estimatedPayoutUsdc": 4.490933220704572,
+      "payoutAtCurrentPriceUsdc": 3.2069995480610554,
       "impliedChanceAfter": 0.3186947569,
-      "winningsUplift": 1.40035355584,
-      "winningsUpliftPercentile": 95,
+      "payoutUplift": 1.40035355584,
+      "payoutUpliftPercentile": 95,
       "effectiveBreakEvenChance": 0.3118179422895765,
       "gasEstimateUsdc": 0.05
     }

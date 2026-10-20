@@ -42,7 +42,7 @@ GET https://app.kash.bot/api/threads/:id/markets
 ## Response
 
 <ResponseField name="markets" type="Market[]">
-  [Market objects](/developer-docs/public-embed-api/endpoints/markets#response), with one difference: `outcomes[].probability` is the AMM's raw marginal price and `oddsKnown` is not included. Show `outcomes[].impliedChance` as the implied probability.
+  [Market objects](/developer-docs/public-embed-api/endpoints/markets#response), with one difference: `outcomes[].probability` is the AMM's raw marginal price and `priceKnown` is not included. Show `outcomes[].impliedChance` as the implied probability.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">`{ offset, limit, total, hasMore }`</ResponseField>
@@ -51,7 +51,7 @@ GET https://app.kash.bot/api/threads/:id/markets
 
 ## Caching and rate limit
 
-Cached at the edge for 10 seconds, plus 10 seconds stale-while-revalidate. Thread markets group: 300 requests per minute per IP.
+Thread markets group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
 ## Example request
 

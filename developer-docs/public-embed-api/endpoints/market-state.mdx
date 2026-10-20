@@ -46,7 +46,7 @@ GET https://app.kash.bot/api/markets/:id/state
 
 ## Rate limit
 
-Market state group: 360 requests per minute per IP. The group's budget is shared with [`GET /api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state).
+Market state group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). The group's budget is shared with [`GET /api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state). Responses may be served from a short-lived cache.
 
 ## Example request
 

@@ -3,7 +3,7 @@ title: 'API_TRADE_PROCESSING_HALTED'
 description: 'HTTP 503 — Service unavailable'
 ---
 
-**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** 300s
+**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** computed per response
 
 ## When it fires
 
@@ -13,7 +13,7 @@ Read endpoints (markets, quotes, portfolio, trade lookup) stay available through
 
 ## How to fix
 
-- Honour `Retry-After: 300` and back off. Polling faster will not restore it sooner.
+- Honour `Retry-After` and back off. Polling faster will not restore it sooner.
 - Keep using the read endpoints, and show a "trading temporarily unavailable" message in your UI rather than failing silently.
 - The TypeScript SDK raises this as `KashMaintenanceError`.
 

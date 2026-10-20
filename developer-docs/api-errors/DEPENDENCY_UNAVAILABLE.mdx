@@ -3,7 +3,7 @@ title: 'DEPENDENCY_UNAVAILABLE'
 description: 'HTTP 503 — Service unavailable'
 ---
 
-**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** 30s
+**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** computed per response
 
 ## When it fires
 
@@ -18,7 +18,7 @@ It is distinct from [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR
 
 ## How to fix
 
-- Honour `Retry-After: 30` and back off with jitter. Most occurrences clear within one retry.
+- Honour `Retry-After` and back off with jitter. Most occurrences clear within one retry.
 - The TypeScript SDK raises this as `KashServerError` and retries it automatically within its retry budget.
 - Retry writes with the same `Idempotency-Key` so a retry cannot execute twice. See [Idempotency](/developer-docs/rest-api/idempotency).
 - If retries keep failing for more than a few minutes, contact Kash support with a `requestId`.

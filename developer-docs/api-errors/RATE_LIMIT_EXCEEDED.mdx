@@ -3,24 +3,15 @@ title: 'RATE_LIMIT_EXCEEDED'
 description: 'HTTP 429 — Too Many Requests'
 ---
 
-**HTTP status:** 429 · **Title:** "Too Many Requests" · **Retry-After:** computed per response (60s default)
+**HTTP status:** 429 · **Title:** "Too Many Requests" · **Retry-After:** computed per response
 
 ## When it fires
 
 You exceeded a rate limit. Authenticated requests are limited per user (shared by every key on the account) and per key; anonymous reads are limited per client IP. Limits use a sliding one-minute window.
 
-Authenticated limits depend on your tier:
+Authenticated limits depend on your key's tier. Read the limit that applied from `X-RateLimit-Limit`. See [Rate limits](/developer-docs/rest-api/rate-limits).
 
-| Tier         | Requests per minute |
-| ------------ | ------------------- |
-| `free`       | 60                  |
-| `developer`  | 300                 |
-| `enterprise` | 3,000               |
-| `mm`         | 12,000              |
-
-Enterprise and market-maker contracts can set custom limits. See [Rate limits](/developer-docs/rest-api/rate-limits) for the full matrix.
-
-The same code is also returned during a temporary **authentication lockout**: after too many failed authentication attempts from one source, requests from it are refused for 15 minutes (`Retry-After: 900`).
+The same code is also returned during a temporary **authentication lockout**: after too many failed authentication attempts from one source, requests from it are refused for a period given by `Retry-After`.
 
 ## Response headers
 

@@ -3,7 +3,7 @@ title: 'RATE_LIMIT_UNAVAILABLE'
 description: 'HTTP 503 — Rate limit subsystem unavailable'
 ---
 
-**HTTP status:** 503 · **Title:** "Rate limit subsystem unavailable" · **Retry-After:** 1s
+**HTTP status:** 503 · **Title:** "Rate limit subsystem unavailable" · **Retry-After:** computed per response
 
 ## When it fires
 
@@ -18,13 +18,13 @@ This is short-lived by design. If the rate limiter stays unavailable, the API st
 
 ## How to fix
 
-- **Honour `Retry-After: 1`.** The TypeScript SDK retries 5xx responses with exponential backoff by default, so most occurrences never reach your code. If you disabled SDK retries (`maxRetries: 0`), add your own backoff.
+- **Honour `Retry-After`.** The TypeScript SDK retries 5xx responses with exponential backoff by default, so most occurrences never reach your code. If you disabled SDK retries (`maxRetries: 0`), add your own backoff.
 - **Don't treat it as quota exhaustion.** [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) (429) means you are over your limit; `RATE_LIMIT_UNAVAILABLE` means the limit could not be checked. Don't show it to users as a quota event.
 - If you see these steadily for several minutes, contact Kash support with a `requestId`.
 
 ## Response headers
 
-- `Retry-After: 1`
+- `Retry-After`
 - `X-RateLimit-*` headers are **not** sent on this response, because there is no quota answer to report.
 
 ## Related codes

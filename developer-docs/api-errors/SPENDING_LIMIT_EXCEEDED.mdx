@@ -11,16 +11,7 @@ description: 'HTTP 409 — Spending limit exceeded'
 
 Your key also has a **daily spending limit** (rolling 24 hours, across all trades). That limit is checked after the trade is accepted: a trade that would exceed it is accepted with `202` and then ends as `rejected`, visible on `GET /v1/trades/{id}` and in trade webhooks, rather than returning this code synchronously.
 
-## Default limits by tier
-
-| Tier         | Per-trade limit | Daily limit   |
-| ------------ | --------------- | ------------- |
-| `free`       | 500 USDC        | 1,000 USDC    |
-| `developer`  | 2,500 USDC      | 10,000 USDC   |
-| `enterprise` | 25,000 USDC     | 100,000 USDC  |
-| `mm`         | 50,000 USDC     | 1,000,000 USDC |
-
-Individual keys can be configured with lower limits.
+Your key's tier sets both limits, and individual keys can be configured with lower ones. The `detail` field states the limit that applied.
 
 ## Why it happens
 
@@ -35,11 +26,10 @@ Individual keys can be configured with lower limits.
 
 ## How to raise the limit
 
-Limits follow your key's tier. See [Rate limits](/developer-docs/rest-api/rate-limits) for the tier matrix, then:
+Limits follow your key's tier. See [Rate limits](/developer-docs/rest-api/rate-limits), then:
 
 - **`free` → `developer`**: email [support@kash.bot](mailto:support@kash.bot).
-- **`developer` → `enterprise`**: [contact sales](mailto:sales@kash.bot); pricing is contractual.
-- **Market-maker terms**: [contact sales](mailto:sales@kash.bot); KYB and terms attestation are required.
+- **`enterprise`** or **`mm`**: [contact sales](mailto:sales@kash.bot).
 
 The limits are not punitive. They bound the damage a leaked key or runaway bot can do, and protect market liquidity. When you outgrow your tier, the limit is the signal to upgrade, not something to work around.
 

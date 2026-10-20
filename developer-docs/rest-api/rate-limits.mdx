@@ -1,27 +1,20 @@
 ---
 title: 'Rate Limits'
-description: 'Per-tier request quotas and spending caps, the X-RateLimit-* headers, and how to handle 429s.'
+description: 'Request quotas and spending caps, the X-RateLimit-* headers, and how to handle 429s.'
 ---
 
 Every authenticated route is rate-limited per minute. When you exceed the limit, the request is refused with `429 RATE_LIMIT_EXCEEDED`, a `Retry-After` header and the `X-RateLimit-*` headers, so you can back off cleanly.
 
-## Per-tier defaults
+## Limits set by your key's tier
 
-| Tier         | Requests per minute | Daily spend cap | Per-trade cap | High-value confirmation from |
-| ------------ | ------------------- | --------------- | ------------- | ---------------------------- |
-| `free`       | 60                  | 1,000 USDC      | 500 USDC      | none                         |
-| `developer`  | 300                 | 10,000 USDC     | 2,500 USDC    | none                         |
-| `enterprise` | 3,000               | 100,000 USDC    | 25,000 USDC   | 25,000 USDC                  |
-| `mm`         | 12,000              | 1,000,000 USDC  | 50,000 USDC   | 50,000 USDC                  |
-
-These are tier defaults. Kash can set different caps on an individual `enterprise` or `mm` key.
+Your key's tier sets its limits. Read the live values from the `X-RateLimit-*` headers and from the bodies of `409` and `429` refusals rather than hard-coding them.
 
 A tier sets four independent limits:
 
 - **Request rate.** Requests per minute. Exceeding it returns `429 RATE_LIMIT_EXCEEDED`.
 - **Per-trade cap.** The USDC amount of one trade. A larger trade is refused at once with `409 SPENDING_LIMIT_EXCEEDED`.
 - **Daily spend cap.** Total USDC bought through the key since 00:00 UTC. This is checked after the trade is accepted: a buy that would exceed it moves to `rejected` and fires a `trade.rejected` webhook. Sells do not count against it.
-- **High-value confirmation.** On tiers that have one, a trade at or above the threshold returns `202 Accepted` with `confirmation: { token, expiresAt }`. Release it within 60 seconds with `POST /v1/trades/{id}/confirm`. This gives your system a chance to stop a runaway bot before it commits a large trade.
+- **High-value confirmation.** On tiers that have one, a trade at or above the threshold returns `202 Accepted` with `confirmation: { token, expiresAt }`. Release it before `expiresAt` with `POST /v1/trades/{id}/confirm`. This gives your system a chance to stop a runaway bot before it commits a large trade.
 
 There is also a cap on **unfinished trades** per account: a new trade while the account already has its tier's maximum in flight is refused with `429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` and a short `Retry-After`.
 
@@ -40,8 +33,8 @@ The [endpoint reference](/developer-docs/rest-api/endpoint-reference) shows each
 Every rate-limited response, successful or not, carries the state of the budget closest to running out:
 
 ```
-X-RateLimit-Limit:     300
-X-RateLimit-Remaining: 287
+X-RateLimit-Limit:     100
+X-RateLimit-Remaining: 87
 X-RateLimit-Reset:     1792000060
 ```
 
@@ -57,7 +50,7 @@ Pace yourself from these rather than waiting for a `429`.
 HTTP/1.1 429 Too Many Requests
 Content-Type: application/problem+json
 Retry-After: 12
-X-RateLimit-Limit: 300
+X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1792000072
 
@@ -74,18 +67,18 @@ X-RateLimit-Reset: 1792000072
 
 `Retry-After` is computed for your bucket: the seconds until it admits another request. Always honour it. The TypeScript SDK does this automatically.
 
-If the rate limiter itself is briefly unavailable, requests are refused with `503 RATE_LIMIT_UNAVAILABLE` and `Retry-After: 1`. That is not a quota event; retry it.
+If the rate limiter itself is briefly unavailable, requests are refused with `503 RATE_LIMIT_UNAVAILABLE` and a short `Retry-After`. That is not a quota event; retry it.
 
 ## Temporarily disabled routes
 
-Separately from rate limiting, an individual route can be temporarily unavailable, returning `503 ROUTE_DISABLED` with `Retry-After: 60`. API trade writes can also be temporarily unavailable, returning `503 API_TRADE_PROCESSING_HALTED` with `Retry-After: 300` on trade creation and confirmation while reads keep working. Back off and retry in both cases.
+Separately from rate limiting, an individual route can be temporarily unavailable, returning `503 ROUTE_DISABLED` with a `Retry-After` header. API trade writes can also be temporarily unavailable, returning `503 API_TRADE_PROCESSING_HALTED` with a `Retry-After` header on trade creation and confirmation while reads keep working. Back off and retry in both cases.
 
 ## Best practices
 
 - **Read the headers** and keep `X-RateLimit-Remaining` comfortably above zero under steady load.
 - **Use conditional requests** for polling. A `304 Not Modified` still counts as a request, but it is cheap. See [ETags](/developer-docs/rest-api/etags).
 - **Prefer webhooks to polling** trade status.
-- **Cache quotes briefly.** Quote responses carry `Cache-Control: public, max-age=10`.
+- **Cache quotes briefly.** Quote responses carry a short `Cache-Control` max-age.
 - **Use the SDK.** It honours `Retry-After` with exponential backoff and jitter, and sends an idempotency key on writes so retries are safe.
 
 ## Upgrading your tier

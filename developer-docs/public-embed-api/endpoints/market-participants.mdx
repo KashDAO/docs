@@ -25,7 +25,7 @@ GET https://app.kash.bot/api/markets/participants?ids=:id1,:id2
 
 ## Caching and rate limit
 
-Cached for 30 seconds. Market reads group: 600 requests per minute per IP.
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
 ## Example request
 

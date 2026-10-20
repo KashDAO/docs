@@ -12,7 +12,7 @@ description: 'HTTP 409 — Trade not awaiting confirmation'
 ## Why it happens
 
 - The trade was already confirmed (for example confirm was called twice); see also [`CONFIRMATION_TOKEN_USED`](/developer-docs/api-errors/CONFIRMATION_TOKEN_USED).
-- The trade was below your key's high-value threshold and never needed confirmation. (`free` and `developer` keys have no threshold by default; `enterprise` defaults to 25,000 USDC and `mm` to 50,000 USDC.)
+- The trade was below your key's high-value threshold and never needed confirmation.
 - The trade has moved past confirmation into execution or a final state.
 - The confirmation window expired; see [`CONFIRMATION_EXPIRED`](/developer-docs/api-errors/CONFIRMATION_EXPIRED).
 

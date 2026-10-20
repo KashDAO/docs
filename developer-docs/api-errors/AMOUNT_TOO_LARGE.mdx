@@ -7,7 +7,7 @@ description: 'HTTP 400 — Amount too large'
 
 ## When it fires
 
-`amount` on `POST /v1/trades` exceeds the platform-wide per-trade ceiling of 10,000,000 USDC. This safety net is separate from your key's per-trade and daily spending limits and applies whatever your tier.
+`amount` on `POST /v1/trades` exceeds the platform-wide per-trade ceiling. This safety net is separate from your key's per-trade and daily spending limits and applies whatever your tier.
 
 ## Why it happens
 
@@ -17,7 +17,7 @@ Almost always a **units mistake**: an amount in atomic units, such as `1000000` 
 
 - Send `amount` as a string holding the USDC value a person would type: `"100"`, `"0.50"`, `"2500"`. Up to 6 decimal places are allowed.
 - If you hold an atomic USDC value, divide by 10^6 first.
-- Your key's own per-trade limit is far lower than this ceiling; see [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) for how to raise it.
+- Your key's own per-trade limit is lower than this ceiling; see [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) for how to raise it.
 
 ## Related codes
 

@@ -105,7 +105,7 @@ GET https://app.kash.bot/api/markets
     <ResponseField name="outcomes" type="object[]">
       `{ outcomeIndex, tokenId, label, weight, shareSupply, probability, impliedChance }`. `impliedChance` is the displayed implied probability (0 to 1), and `probability` is set to the same value. `weight` and `shareSupply` are WAD strings.
     </ResponseField>
-    <ResponseField name="oddsKnown" type="boolean">`false` when there is no price yet, so the prices are only a placeholder</ResponseField>
+    <ResponseField name="priceKnown" type="boolean">`false` when there is no price yet, so the prices are only a placeholder</ResponseField>
     <ResponseField name="currentImpliedChance" type="number">Implied probability of outcome 0</ResponseField>
     <ResponseField name="currentProbability" type="number">AMM marginal price for outcome 0. Not normalized, so show `currentImpliedChance` instead.</ResponseField>
     <ResponseField name="totalVolume" type="number">Lifetime volume in atomic USDC (6 decimals)</ResponseField>
@@ -113,18 +113,15 @@ GET https://app.kash.bot/api/markets
     <ResponseField name="seedAmountAtomic" type="string">Opening liquidity in atomic USDC</ResponseField>
     <ResponseField name="tradeCount" type="integer">Number of trades</ResponseField>
     <ResponseField name="participantCount" type="integer">Number of distinct traders</ResponseField>
-    <ResponseField name="tradingFee" type="number">Trading fee as a fraction (`0.02` is 2%)</ResponseField>
-    <ResponseField name="minBet" type="number">Smallest trade, in atomic USDC</ResponseField>
-    <ResponseField name="maxBet" type="number">Largest trade, in atomic USDC</ResponseField>
+    <ResponseField name="tradingFee" type="number">Trading fee as a fraction of the trade amount</ResponseField>
+    <ResponseField name="minTrade" type="number">Smallest trade, in atomic USDC</ResponseField>
+    <ResponseField name="maxTrade" type="number">Largest trade, in atomic USDC</ResponseField>
     <ResponseField name="category" type="string | null">Category slug</ResponseField>
     <ResponseField name="categoryLabel" type="string | null">Category display name</ResponseField>
     <ResponseField name="subCategory" type="string | null">Subcategory slug</ResponseField>
     <ResponseField name="subCategoryLabel" type="string | null">Subcategory display name</ResponseField>
-    <ResponseField name="supabaseImageUrl" type="string | null">HTTPS banner image URL</ResponseField>
+    <ResponseField name="bannerImageUrl" type="string | null">HTTPS banner image URL</ResponseField>
     <ResponseField name="imageUrl" type="string | null">Image URI from the market metadata (may be `ipfs://`)</ResponseField>
-    <ResponseField name="organizationId" type="string | null">ID of the account the market is listed under</ResponseField>
-    <ResponseField name="organizationName" type="string | null">That account's name</ResponseField>
-    <ResponseField name="organizationSlug" type="string | null">That account's slug</ResponseField>
     <ResponseField name="creator" type="string | null">Creator's display name</ResponseField>
     <ResponseField name="creatorUsername" type="string | null">Creator's username</ResponseField>
     <ResponseField name="creatorAvatarUrl" type="string | null">Creator's avatar</ResponseField>
@@ -140,7 +137,7 @@ GET https://app.kash.bot/api/markets
 
 ## Rate limit
 
-Market reads group: 600 requests per minute per IP. Results are cached for up to 30 seconds at the edge.
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
 ## Example request
 
@@ -200,18 +197,14 @@ print(data["pagination"]["total"], "resolved markets")
         { "outcomeIndex": 0, "tokenId": 60928, "label": "Yes", "weight": "500000000000000000", "shareSupply": "26053103461967827528", "probability": 0.279436651, "impliedChance": 0.279436651 },
         { "outcomeIndex": 1, "tokenId": 60929, "label": "No", "weight": "500000000000000000", "shareSupply": "41836357394017945260", "probability": 0.7205633489, "impliedChance": 0.7205633489 }
       ],
-      "oddsKnown": true,
+      "priceKnown": true,
       "currentImpliedChance": 0.279436651,
       "totalVolume": 35000000,
       "seedAmountAtomic": "20000000",
       "tradeCount": 4,
       "participantCount": 4,
-      "tradingFee": 0.02,
       "category": "football",
       "categoryLabel": "Football",
-      "organizationId": "6b617368-6277-6864-7800-000000000001",
-      "organizationName": "Kash",
-      "organizationSlug": "kash",
       "marketBotHandle": "hot_takefc",
       "sourceTweetUrl": "https://x.com/hot_takefc/status/2112339123369394597"
     }

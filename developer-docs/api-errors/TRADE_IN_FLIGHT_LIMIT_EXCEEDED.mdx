@@ -3,7 +3,7 @@ title: 'TRADE_IN_FLIGHT_LIMIT_EXCEEDED'
 description: 'HTTP 429 — Too many trades in flight'
 ---
 
-**HTTP status:** 429 · **Title:** "Too many trades in flight" · **Retry-After:** computed per response (5s default)
+**HTTP status:** 429 · **Title:** "Too many trades in flight" · **Retry-After:** computed per response
 
 ## When it fires
 
@@ -21,14 +21,7 @@ Your account's trades execute one after another, in the order you placed them. A
 can work through in time would not make your trades faster; the tail would expire unexecuted. Refusing at the door
 tells you immediately and lets you decide what to resend.
 
-| Tier         | Trades in flight per account |
-| ------------ | ---------------------------- |
-| `free`       | 30                           |
-| `developer`  | 30                           |
-| `enterprise` | 60                           |
-| `mm`         | 60                           |
-
-A trade stops counting once it settles, or 10 minutes after it was placed, whichever comes first.
+Your key's tier sets the maximum; the response body's `maxInFlight` gives it. A trade stops counting once it settles, or after a timeout if it has not settled.
 
 This is separate from [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED): that limits how fast requests
 **arrive**; this limits how many trades are **unfinished**.
