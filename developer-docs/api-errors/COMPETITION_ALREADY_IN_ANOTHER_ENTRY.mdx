@@ -1,0 +1,28 @@
+---
+title: 'COMPETITION_ALREADY_IN_ANOTHER_ENTRY'
+description: 'HTTP 409 — Already in another entry'
+---
+
+**HTTP status:** 409 · **Title:** "Already in another entry"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/contribute` was called by someone who already contributes to a **different** entry in the same competition.
+
+## Why it happens
+
+Each member contributes to at most one entry per competition. The contribution is refused when the caller has already contributed to another entry in that competition.
+
+## Why it is refused rather than accepted
+
+Standings are attributed per entry, and contributions determine each member's share of a group's reward allocation. A member contributing to two entries in one competition would have their trading count for both, so the standings could not be calculated fairly.
+
+## How to fix
+
+- Contribute to the entry you already belong to. `GET /v1/competitions/{competitionId}` lists your entry.
+- If you meant to move to a different entry, leave the first one before contributing to another. A contribution already made cannot be transferred between entries.
+
+## Related codes
+
+- [`COMPETITION_NOT_ENTRY_MEMBER`](/developer-docs/api-errors/COMPETITION_NOT_ENTRY_MEMBER) — the caller does not belong to the entry at all
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the entry or competition is not accepting contributions

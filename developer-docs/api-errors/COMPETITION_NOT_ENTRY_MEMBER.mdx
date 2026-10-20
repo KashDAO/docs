@@ -1,0 +1,31 @@
+---
+title: 'COMPETITION_NOT_ENTRY_MEMBER'
+description: 'HTTP 403 — Not a member of this entry'
+---
+
+**HTTP status:** 403 · **Title:** "Not a member of this entry"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/contribute` was called by someone who does not belong to the entry they tried to contribute to.
+
+## Why it happens
+
+- For a **group** entry, the caller is not a member of that group.
+- For an **individual** entry, the caller is not the entrant.
+
+The contributing member is always the authenticated caller; it is never read from the request body, so this cannot be worked around by naming a different user.
+
+## Why it is refused rather than accepted
+
+Contributions determine each member's share of a group's reward allocation, so only the entry's own members may contribute to it.
+
+## How to fix
+
+- Join the group before contributing to its entry.
+- Check that the `entrantId` in the body is the entry you meant. Contributing to another group's entry by mistake produces this error.
+
+## Related codes
+
+- [`COMPETITION_ALREADY_IN_ANOTHER_ENTRY`](/developer-docs/api-errors/COMPETITION_ALREADY_IN_ANOTHER_ENTRY) — you are a member, but of a different entry
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the entry or competition is not accepting contributions

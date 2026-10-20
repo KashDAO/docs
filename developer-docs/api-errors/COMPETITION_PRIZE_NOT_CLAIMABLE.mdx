@@ -1,0 +1,30 @@
+---
+title: 'COMPETITION_PRIZE_NOT_CLAIMABLE'
+description: 'HTTP 403 — Competition prize not claimable'
+---
+
+**HTTP status:** 403 · **Title:** "Competition prize not claimable"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/claim` was called and you cannot claim in the competition's current settlement, for one of two reasons specific to you. The code deliberately does not say which, so nobody can probe another entrant's standing.
+
+## Why it happens
+
+**1. You own no rewarded entry.**
+
+- Your entry did not finish in a rewarded position in the settled standings.
+- The rewarded entry is a **group** entry and you are not that group's owner. Only the group owner may claim a group's reward.
+- A re-settlement replaced an earlier one; only the current settlement's rewarded entries are paid.
+
+**2. You own more than one rewarded entry** in the current settlement (an individual entry plus a group you own, or two groups you own). The endpoint refuses rather than pay an arbitrary one. These rewards cannot be claimed through the API.
+
+## How to fix
+
+- Confirm you entered the competition and finished in a rewarded position.
+- If the rewarded entry is a group, claim with an API key belonging to the group's owner.
+- If you own several rewarded entries, contact Kash support.
+
+## Related codes
+
+- [`COMPETITION_NOT_SETTLED`](/developer-docs/api-errors/COMPETITION_NOT_SETTLED), [`COMPETITION_PRIZE_AUTO_DISTRIBUTED`](/developer-docs/api-errors/COMPETITION_PRIZE_AUTO_DISTRIBUTED), [`COMPETITION_PRIZE_CLAIM_FAILED`](/developer-docs/api-errors/COMPETITION_PRIZE_CLAIM_FAILED)

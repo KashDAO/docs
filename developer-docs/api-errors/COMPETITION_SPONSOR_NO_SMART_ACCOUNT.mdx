@@ -1,0 +1,24 @@
+---
+title: 'COMPETITION_SPONSOR_NO_SMART_ACCOUNT'
+description: 'HTTP 409 — Organization has no smart account'
+---
+
+**HTTP status:** 409 · **Title:** "Organization has no smart account"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/sponsor` was called with an API key whose account has no smart account, so there is no address to sponsor from.
+
+## Why the address is not taken from the request
+
+If the competition is cancelled, a sponsorship is returned to the address it came from. That address therefore decides where the funds go back to, so it is derived from the account behind the API key rather than accepted in the request body.
+
+## How to fix
+
+- Finish setting up the account's smart account, then retry.
+- Check that the API key belongs to the account you mean to sponsor from. The sponsor is always the key's account.
+
+## Related codes
+
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the competition is not accepting contributions
+- [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) — the competition's chain does not support sponsorship in this environment

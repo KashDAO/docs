@@ -1,0 +1,24 @@
+---
+title: 'COMPETITION_PRIZE_AUTO_DISTRIBUTED'
+description: 'HTTP 409 — Competition prize auto-distributed'
+---
+
+**HTTP status:** 409 · **Title:** "Competition prize auto-distributed"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/claim` was called for a competition whose rewards are **distributed automatically** (settlement mode `offchain_airdrop` or `none`). Only `onchain_escrow` and `sponsored` competitions are claimed through this endpoint.
+
+## Why it happens
+
+The competition settles by automatic distribution, so there is nothing to claim: rewards arrive without a caller-initiated claim.
+
+This is a state conflict on the competition, not an authorization failure about you (that would be `403` [`COMPETITION_PRIZE_NOT_CLAIMABLE`](/developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE)), so it is a permanent `409` and retrying will not help.
+
+## How to fix
+
+- Nothing to do on the claim endpoint. Any reward allocated to you is distributed automatically; check your balance and history instead of claiming.
+
+## Related codes
+
+- [`COMPETITION_PRIZE_NOT_CLAIMABLE`](/developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE), [`COMPETITION_NOT_SETTLED`](/developer-docs/api-errors/COMPETITION_NOT_SETTLED)

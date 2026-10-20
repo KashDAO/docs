@@ -1,0 +1,22 @@
+---
+title: 'COMPETITION_PRIZE_CLAIM_FAILED'
+description: 'HTTP 409 — Competition prize claim failed'
+---
+
+**HTTP status:** 409 · **Title:** "Competition prize claim failed"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/claim` authorised your claim, but the payment for it is recorded as `failed`. No reward was paid.
+
+## Why it happens
+
+An earlier payment attempt for this exact reward ended in a final `failed` state. It still occupies the claim, so it cannot be re-attempted through the API.
+
+## How to fix
+
+- Contact Kash support with the `requestId` so the failed request can be retried. Retrying the request yourself will not change the outcome.
+
+## Related codes
+
+- [`COMPETITION_PRIZE_NOT_CLAIMABLE`](/developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE), [`COMPETITION_NOT_SETTLED`](/developer-docs/api-errors/COMPETITION_NOT_SETTLED), [`COMPETITION_REFUND_FAILED`](/developer-docs/api-errors/COMPETITION_REFUND_FAILED)

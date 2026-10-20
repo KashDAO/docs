@@ -1,0 +1,28 @@
+---
+title: 'COMPETITION_NOT_CANCELLED'
+description: 'HTTP 409 — Competition is not cancelled'
+---
+
+**HTTP status:** 409 · **Title:** "Competition is not cancelled"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/refund` was called for a competition that is not `cancelled`.
+
+## Why it happens
+
+A refund returns a contributor's own participation contribution, and that is only available once the competition is cancelled. Before that:
+
+- A **running** competition has not been cancelled, so there is nothing to refund.
+- A **settled** competition pays rewards through the claim endpoint (`POST /v1/competitions/{competitionId}/claim`), not this endpoint.
+
+## How to fix
+
+- Read the competition's `state`. If it is `running`, `registration` or `published`, there is nothing to refund yet.
+- If it is `settled` or `paid_out`, use the claim endpoint instead.
+- When a competition is cancelled, for example because too few entrants joined by the deadline, the refund becomes available with no further action from you.
+
+## Related codes
+
+- [`COMPETITION_NOTHING_TO_REFUND`](/developer-docs/api-errors/COMPETITION_NOTHING_TO_REFUND) — the competition is cancelled, but you have nothing outstanding
+- [`COMPETITION_NOT_SETTLED`](/developer-docs/api-errors/COMPETITION_NOT_SETTLED) — the mirror-image refusal on the claim endpoint
