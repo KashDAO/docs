@@ -1,89 +1,103 @@
 ---
 title: 'Partner Portal quickstart'
-description: 'Create your organization and get set up in the Partner Portal — self-serve'
+description: 'Sign in, create your organization and find your way around the Partner Portal'
 icon: 'rocket'
 ---
 
-The Partner Portal is the self-serve home for your organization: analytics, earnings, market curation, branding, team, and billing. This page walks you from first sign-in to a fully set-up organization.
+The Partner Portal is where your organization lives on Kash: markets, balance, analytics, earnings, branding, team and channels. This page takes you from first sign-in to your first market.
 
-## 1. Sign in
+## 1. Sign in with X
 
-The portal uses Privy for authentication. Sign in with:
+The portal signs you in with your **X (Twitter)** account. Use the account you'll run your organization from; you can add teammates later.
 
-- **Email** — a one-time code, no password
-- **Google**
-- **X (Twitter)**
+## 2. Create or join an organization
 
-Signing in with X is a natural fit if you plan to run markets for your X audience, but any method works.
-
-## 2. Create your organization
-
-On first sign-in you'll be prompted to create your organization:
+On first sign-in you can create an organization or join one with an invite link or code. Creating one asks for:
 
 | Field | What it's for |
 |---|---|
-| Name | Your organization's name |
-| Slug | Your URL handle — this becomes your public namespace on app.kash.bot |
-| Contact email | Where Kash reaches you about your organization |
-| Branding | Display name, tagline, and logo — all editable later |
+| Organization name | How your organization is named across Kash |
+| Contact email | Where Kash sends account and billing notices |
+| Organization URL | Your slug, which becomes your public handle on app.kash.bot |
+| Logo | Optional now, editable later in **Settings → Account** |
 
-New organizations start on the basic tier under the Kash parent organization. You can upgrade at any time from Billing.
+Whoever creates the organization becomes its first admin.
 
-## 3. Work through the onboarding checklist
+## 3. Follow the setup checklist
 
-The portal dashboard shows a setup checklist that tracks four steps:
+Admins see a short checklist on the dashboard:
 
 <Steps>
-  <Step title="Organization created">
-    Done as soon as you complete step 2.
+  <Step title="Set up your workspace">
+    Done when your organization is created.
   </Step>
-  <Step title="Billing active">
-    Set up a paid subscription in **Billing** if you want tiered features — free-tier organizations can skip this and still curate markets.
+  <Step title="Connect your channels">
+    Connect your X account in **Settings → Platforms** so markets can be announced from it. Organizations that haven't unlocked custom branding post through Kash's own channels instead.
   </Step>
-  <Step title="Platform connected">
-    Connect the platform where your markets will be distributed — for example your X account.
-  </Step>
-  <Step title="Credentials stored">
-    Store the delivery credentials for your connected platform so Kash can post and respond on your behalf.
+  <Step title="Create a market">
+    Open **Markets** and describe your first market to the AI assistant. See [Market creation](/for-businesses/market-creation).
   </Step>
 </Steps>
+
+Before you submit a market, add USDC to your organization's balance on the **Fund** page. It pays the new market's starting liquidity.
 
 ## 4. Find your way around
 
 <AccordionGroup>
-  <Accordion title="Dashboard and analytics">
-    Your landing page: setup progress, headline stats, and recent activity. **Analytics** breaks down volume, trades, unique traders, active markets, and new users over time — see [Analytics and earnings](/for-businesses/analytics-and-earnings).
-  </Accordion>
-  <Accordion title="Insights">
-    Deeper audience and market intelligence for your organization.
-  </Accordion>
-  <Accordion title="Earnings">
-    Your accrued revenue share and settled payouts, with per-partner attribution.
-  </Accordion>
-  <Accordion title="Fund">
-    Manage your organization's smart account balance — used, for example, to pay market creation fees on behalf of your creators.
+  <Accordion title="Dashboard">
+    Setup progress, headline numbers and recent activity.
   </Accordion>
   <Accordion title="Markets">
-    The heart of the portal: your community's suggestions, your proposal queue, and your live markets. See [Market creation](/for-businesses/market-creation).
+    Create markets with the AI assistant, approve teammates' drafts in the **Queue**, and follow each request from draft to live.
+  </Accordion>
+  <Accordion title="Competitions">
+    Competitions Kash runs with your organization, with their status and prize pot.
+  </Accordion>
+  <Accordion title="Fund">
+    Your organization's USDC balance and wallet address, with deposit and withdraw, and a record of the payments it has made.
+  </Accordion>
+  <Accordion title="Analytics">
+    Volume, traders, markets and fees over time, plus an AI assistant for questions about your numbers. See [Analytics and earnings](/for-businesses/analytics-and-earnings).
+  </Accordion>
+  <Accordion title="Earnings">
+    Your revenue share: generated, projected, pending and paid, by market and by partner. Admins only.
+  </Accordion>
+  <Accordion title="Insights">
+    Deeper analysis and data export, part of the Community Intelligence add-on. Admins only.
   </Accordion>
   <Accordion title="Share">
-    Embed codes and share links for your branded markets, threads, and organization grid.
+    Ready-to-post summaries of your performance and top markets.
   </Accordion>
   <Accordion title="Settings">
-    Account, team members, partners, platform connections, revenue share, referral programs, and trade access.
-  </Accordion>
-  <Accordion title="Billing">
-    Your subscription tier and payment details.
+    - **Account:** organization details and brand assets
+    - **Team:** members, roles and invite links
+    - **Platforms:** your connected X account, announcement style and delivery options
+    - **Distribution:** Discord channels that receive your market announcements
+    - **Partners:** the partners you work with
+    - **Trade access:** allow or block specific traders on your markets
+    - **Revenue share:** how fees on your markets are split
+    - **Redemption assets:** extra payout options for winners besides USDC
+    - **Market feed:** if Kash drafts market ideas for your organization, whether they go forward for review automatically
+    - **Subscription:** your tier and the Community Intelligence add-on
   </Accordion>
 </AccordionGroup>
+
+## Roles
+
+| Role | Can |
+|---|---|
+| Admin | Manage the team, settings, balance, earnings and subscription, and submit markets directly |
+| Member | View settings and draft markets for an admin to approve |
+
+Invite teammates from **Settings → Team** with a link that sets their role, how many people can use it and when it expires.
 
 ## Next steps
 
 <CardGroup cols={2}>
   <Card title="Market creation" icon="lightbulb" href="/for-businesses/market-creation">
-    Get your first market from idea to live on-chain.
+    Take your first market from idea to live.
   </Card>
   <Card title="White-label branding" icon="palette" href="/for-businesses/white-label-branding">
-    Make your markets look like yours.
+    Make your pages and embeds look like you.
   </Card>
 </CardGroup>
