@@ -88,11 +88,7 @@
             "group": "For Businesses",
             "pages": [
               "for-businesses/overview",
-              "for-businesses/pricing-and-revenue-share",
-              "for-businesses/partner-portal-quickstart",
               "for-businesses/market-creation",
-              "for-businesses/white-label-branding",
-              "for-businesses/analytics-and-earnings",
               "for-businesses/api-access"
             ]
           }
@@ -412,5 +408,23 @@
       "github": "https://github.com/KashDAO",
       "telegram": "https://t.me/kashDAO"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/for-businesses/partner-portal-quickstart",
+      "destination": "/for-businesses/overview"
+    },
+    {
+      "source": "/for-businesses/pricing-and-revenue-share",
+      "destination": "/for-businesses/overview"
+    },
+    {
+      "source": "/for-businesses/white-label-branding",
+      "destination": "/for-businesses/overview"
+    },
+    {
+      "source": "/for-businesses/analytics-and-earnings",
+      "destination": "/for-businesses/overview"
+    }
+  ]
 }

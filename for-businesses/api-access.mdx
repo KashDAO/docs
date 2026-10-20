@@ -8,7 +8,7 @@ Kash has two APIs you can build on: the authenticated **REST API** at `api.kash.
 
 ## REST API keys
 
-Keys for the REST API are created in the Kash web app under **Settings → API Keys**, not in the Partner Portal. Each key belongs to an organization, and if that organization is suspended its keys stop working.
+Keys for the REST API are created in the Kash web app under **Settings → API Keys**. Each key belongs to an organization, and if that organization is suspended its keys stop working.
 
 - **Scopes:** each key carries explicit scopes, so a reporting integration can have read-only access while trading lives on a separate key.
 - **Tiers:** each key's tier sets its rate limit and spending caps. `free` is self-serve; `developer`, `enterprise` and the market-maker tier `mm` are issued by Kash.
@@ -31,7 +31,7 @@ If you only need to display markets, the [Public Embed API](/developer-docs/publ
 
 ## Embeds and revenue share
 
-Embedding helps people find your markets, but what you earn depends on which markets your organization **created**, not on where a trade happens. A trade in your market earns your share whether it comes from app.kash.bot, an embed on any site, or X. Embedding another organization's market doesn't earn you its revenue share. See [Pricing and revenue share](/for-businesses/pricing-and-revenue-share).
+Embedding helps people find your markets, but revenue share follows who **created** a market, not where a trade happens. A trade in your market counts whether it comes from app.kash.bot, an embed on any site, or X. Embedding someone else's market doesn't earn you its revenue share.
 
 ## Next steps
 
@@ -39,7 +39,7 @@ Embedding helps people find your markets, but what you earn depends on which mar
   <Card title="REST API overview" icon="bolt" href="/developer-docs/rest-api/overview">
     Endpoints, SDK and quickstart.
   </Card>
-  <Card title="Analytics and earnings" icon="chart-line" href="/for-businesses/analytics-and-earnings">
-    What the portal shows you without writing code.
+  <Card title="Market creation" icon="lightbulb" href="/for-businesses/market-creation">
+    Launch markets from the web app, no code needed.
   </Card>
 </CardGroup>
