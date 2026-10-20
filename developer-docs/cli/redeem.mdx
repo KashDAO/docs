@@ -1,0 +1,35 @@
+---
+title: 'redeem'
+description: 'Redeem a settled position: a resolved market''s winning outcome, or a cancelled market''s refund.'
+---
+
+Redeem a settled position: a resolved market's winning outcome, or a cancelled market's refund.
+
+> Generated from `kash docs --json`. Run `kash redeem --help` for full usage and examples.
+
+## Usage
+
+```bash
+kash redeem <marketId> [options]
+```
+
+**Arguments**
+
+- `marketId` — market UUID
+
+## Options
+
+| Flag | Description |
+| --- | --- |
+| `-o, --outcome <index>` | outcome index to redeem (0-based) |
+| `--idempotency-key <key>` | sets the Idempotency-Key HTTP header |
+| `--auto-idempotency-key` | auto-generate an Idempotency-Key (UUID v4) and surface it in the response |
+| `--dry-run` | preview the request without sending — emits the would-be body and resolved headers |
+
+Redeeming again for a position that already has a redemption request returns that request (`idempotent: true`). `POSITION_NOT_CLAIMABLE` means the position cannot be redeemed (unresolved market, losing outcome, already redeemed) or a previous redemption for it failed and must be cleared by support; the message says which.
+
+```bash
+kash redeem 9f0b... --outcome 0
+kash redeem 9f0b... --outcome 1 --auto-idempotency-key --json --quiet
+kash redeem 9f0b... --outcome 0 --dry-run --json
+```
