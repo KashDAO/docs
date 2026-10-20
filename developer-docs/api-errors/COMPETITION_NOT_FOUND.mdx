@@ -1,0 +1,22 @@
+---
+title: 'COMPETITION_NOT_FOUND'
+description: 'HTTP 404 — Competition not found'
+---
+
+**HTTP status:** 404 · **Title:** "Competition not found"
+
+## When it fires
+
+The `competitionId` in the path does not correspond to any competition. Returned by `GET /v1/competitions/{competitionId}` (and its `entrants` and `leaderboard`), and by the `claim`, `refund` and `sponsor` endpoints.
+
+## Why it happens
+
+- The `competitionId` is a well-formed UUID but names no competition: a typo, the wrong environment, or a draft that was deleted.
+
+## How to fix
+
+- Verify the `competitionId`. List competitions with `GET /v1/competitions`.
+
+## Related codes
+
+- [`COMPETITION_NOT_SETTLED`](/developer-docs/api-errors/COMPETITION_NOT_SETTLED), [`COMPETITION_PRIZE_NOT_CLAIMABLE`](/developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE), [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND)

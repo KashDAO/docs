@@ -1,0 +1,28 @@
+---
+title: 'COMPETITION_ALREADY_ENTERED'
+description: 'HTTP 409 — Already entered this competition'
+---
+
+**HTTP status:** 409 · **Title:** "Already entered this competition"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/join` was called for a group (or user) that already has an entry in this competition.
+
+## Why it happens
+
+Entries are unique per competition: one per group, one per user. The existing entry may still be in `funding` (not yet fully paid), which is exactly when a caller is most likely to try joining again.
+
+## Why a second entry is refused rather than created
+
+The entry fee is pooled. A second entry would split the group's contributions across two pools, and neither might reach the entry fee, so the group would pay twice and compete in neither.
+
+## How to fix
+
+- Fund the **existing** entry: `POST /v1/competitions/{competitionId}/contribute` with that entry's `entrantId`.
+- A withdrawn or rejected entry does not block a new one; any other state does.
+
+## Related codes
+
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the entry exists but is not accepting money
+- [`COMPETITION_NOT_GROUP_OWNER`](/developer-docs/api-errors/COMPETITION_NOT_GROUP_OWNER) — the caller may not create the entry

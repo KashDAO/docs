@@ -1,0 +1,31 @@
+---
+title: 'COMPETITION_NOTHING_TO_REFUND'
+description: 'HTTP 404 — No refundable contribution'
+---
+
+**HTTP status:** 404 · **Title:** "No refundable contribution"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/refund` on a **cancelled** competition where you have no outstanding refundable contribution.
+
+## Why it happens
+
+Two situations produce it, deliberately with the same answer:
+
+1. **You never contributed** to any entry in this competition.
+2. **You have already been refunded.** The refundable amount is your contribution minus refunds already paid to you, so once you are paid there is nothing left.
+
+The second case is what makes the endpoint safe to retry: a repeat call after a successful refund finds nothing to do and returns this code, rather than paying you twice. It is a final state more than an error.
+
+It is scoped to **you**. In a pooled group entry each member is refunded their own contribution independently; another member still being owed money does not reopen your settled refund.
+
+## How to fix
+
+- If you expected a refund, check the contribution was made by the account whose API key you are using. Contributions are attributed to the authenticated caller.
+- If you already received the refund, no action is needed.
+
+## Related codes
+
+- [`COMPETITION_NOT_CANCELLED`](/developer-docs/api-errors/COMPETITION_NOT_CANCELLED) — the competition is not cancelled, so nothing is refundable yet
+- [`COMPETITION_REFUND_FAILED`](/developer-docs/api-errors/COMPETITION_REFUND_FAILED) — a refund was found but could not be recorded

@@ -1,0 +1,28 @@
+---
+title: 'MARKET_NOT_QUOTABLE'
+description: 'HTTP 422 — Market not quotable'
+---
+
+**HTTP status:** 422 · **Title:** "Market not quotable"
+
+## When it fires
+
+`GET /v1/markets/{id}/quote` asked the market's on-chain program for a price and it **refused**: it cannot price this request in its current on-chain state. A typical cause is market state that makes the pricing maths fail (for example a division by zero).
+
+This is the market's own, deterministic answer. Sending the same request again gets the same answer until the market's on-chain state changes.
+
+## Why it is not a 503
+
+[`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) (503) means the API could not **read** the chain at all (a timeout, a transport error, a provider rate limit), so retrying can help. `MARKET_NOT_QUOTABLE` means the read succeeded and the market refused, so retrying cannot help. That makes it a 4xx.
+
+## How to fix
+
+- Don't retry the same quote in a loop.
+- Check the market with `GET /v1/markets/{id}`. If it does not accept trades, you get
+  [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) instead.
+- Try a different `outcomeIndex` or `amount`; a refusal can be specific to one request.
+- If a tradeable market refuses every quote, report it to Kash support with the `requestId`.
+
+## Related codes
+
+- [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE), [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE)

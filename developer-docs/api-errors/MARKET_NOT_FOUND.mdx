@@ -7,21 +7,22 @@ description: 'HTTP 404 — Market not found'
 
 ## When it fires
 
-The `marketId` (UUID) you passed doesn't match any market.
+The market id (a UUID) you passed doesn't match any market. Returned by `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions`, `GET /v1/markets/{id}/quote`, `POST /v1/trades`, `POST /v1/trades/{id}/confirm` and `POST /v1/redemptions`.
 
 ## Why it happens
 
-- Typo in the market id.
-- Cross-environment confusion: a staging market id sent to production, or vice versa. Markets do not exist across environments.
-- The market was never created — you may have a placeholder id from documentation rather than a real one.
-- **Redemptions only:** the market exists but has no on-chain id yet (it hasn't been created on-chain), so it cannot be redeemed against. `POST /v1/redemptions` reports this as `MARKET_NOT_FOUND` — wait until the market is live on-chain.
+- A typo in the market id.
+- Cross-environment confusion: a staging market id sent to production, or the reverse. Markets don't exist across environments.
+- A placeholder id copied from documentation rather than a real one.
+- **Redemptions only:** the market exists but has not been created on-chain yet, so there is nothing to redeem against. `POST /v1/redemptions` reports this as `MARKET_NOT_FOUND`.
 
 ## How to fix
 
-- Look up real market ids via `GET /v1/markets?status=active` (filterable by status).
-- Cache the id once you've found it; markets are immutable in their identity.
-- If you suspect the market should exist (e.g., you saw it in the webapp), confirm you're hitting the same environment.
+- Look up real market ids with `GET /v1/markets` (filterable by status).
+- Cache the id once you have it; a market's id never changes.
+- If you expect the market to exist (for example you saw it in the Kash app), confirm you are calling the same environment.
 
 ## Related codes
 
-- [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) — market exists but is FROZEN/RESOLVED
+- [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) — the market exists but does not accept trades
+- [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND) — the generic 404 for other resources

@@ -1,0 +1,25 @@
+---
+title: 'DISPUTE_WINDOW_CLOSED'
+description: 'HTTP 409 — Dispute window closed'
+---
+
+**HTTP status:** 409 · **Title:** "Dispute window closed"
+
+## When it fires
+
+`POST /v1/markets/{id}/disputes` was called after the dispute window of the market's proposed resolution ended. Every proposal opens one dispute window, ending at `resolution.finalizableAt` on `GET /v1/markets/{id}`. An undisputed proposal is settled when the window ends, so no dispute is accepted afterwards: a later filing could only race the settlement. The check is atomic, so a request that crosses the window's end is refused rather than recorded.
+
+## Why it happens
+
+- The filing was sent after `finalizableAt`.
+- The filing was sent just before `finalizableAt` and was processed after it.
+
+## How to fix
+
+- There is nothing to retry: the proposal is being settled, and a retry is refused the same way.
+- File disputes while `resolution.resolutionState` is `proposed` and `finalizableAt` is still in the future.
+- Follow the settlement through `GET /v1/markets/{id}`.
+
+## Related codes
+
+- [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED), [`DISPUTE_ALREADY_FILED`](/developer-docs/api-errors/DISPUTE_ALREADY_FILED), [`MARKET_NOT_DISPUTABLE`](/developer-docs/api-errors/MARKET_NOT_DISPUTABLE)

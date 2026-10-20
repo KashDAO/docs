@@ -7,22 +7,23 @@ description: 'HTTP 500 — Internal Server Error'
 
 ## When it fires
 
-The error handler caught something it didn't recognise. The actual cause is logged + Sentry-captured server-side; nothing leaks to the caller.
+Something unexpected happened while handling the request. The cause is recorded on Kash's side, and the response carries no internal detail.
 
-This is the catch-all — any other code in this catalogue is a structured, anticipated failure. `INTERNAL_ERROR` means we hit something we hadn't categorised.
+This is the catch-all. Every other code in this catalogue is an anticipated, structured failure; `INTERNAL_ERROR` means Kash hit something it had not categorised.
 
 ## Why it happens
 
-- A genuinely unexpected condition (the most common reason this fires).
-- A new code path that hasn't been instrumented with a typed error yet — please report it so we can add a proper code.
+- A genuinely unexpected condition.
+- A server-side configuration fault (for example, a supported chain whose configuration is incomplete).
+- A failure mode that does not yet have its own code. Please report it so Kash can add one.
 
 ## How to fix
 
-- **Always include `requestId` in any support ticket.** It's our handle into the trace, the logs, and the Sentry capture.
-- Retry once — if it was a transient bug, you may get past it.
-- If it's reproducible from a specific request, tell us the exact request shape (with secrets redacted) and we'll trace it.
-- The TS SDK exposes `requestId` on `KashServerError`; raw HTTP callers should pull it from the `requestId` field on the problem response.
+- **Include the `requestId` in any support request.** It is Kash's handle into the logs and traces for your call.
+- Retry once. If the problem was transient, the retry may succeed. Retry writes with the same `Idempotency-Key`.
+- If it reproduces for a specific request, send Kash support the request shape (with secrets removed) and the `requestId`.
+- The TypeScript SDK raises this as `KashServerError` with `requestId` set; raw HTTP callers can read `requestId` from the problem body.
 
 ## Related codes
 
-Every other code in this catalogue is preferable — if you see `INTERNAL_ERROR` consistently for one operation, the right fix is for us to add a new typed code, not for you to work around it.
+Every other code in this catalogue is preferable. If you see `INTERNAL_ERROR` consistently for one operation, the right fix is for Kash to add a typed code, not for you to work around it.
