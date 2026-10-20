@@ -1,222 +1,86 @@
 ---
-title: 'Embedding Organization Iframes'
-description: "Embed all of your organization's prediction markets on your website with a single iframe"
+title: 'Organization Iframe'
+description: "Embed every market your organization runs with one iframe"
 ---
 
-Show **only your organization's markets** on your own website with one iframe. The widget renders a branded grid of your markets — each card links straight to Twitter so visitors can post and trade without leaving your page (no login required).
+The organization widget shows **only your organization's markets** in a branded grid. Each card is a full market card with live odds and a predict button that opens X with the prediction tweet already written. You don't need any API calls.
 
-This is the fastest way to put your markets in front of your audience: no API calls, no custom UI, just one `<iframe>`.
-
----
-
-## Quick Start
+## Quick start
 
 ```html
 <iframe
-  src="https://app.kash.bot/o/your-org/iframe?source=your-site"
+  src="https://app.kash.bot/o/kash/iframe"
   width="100%"
   height="900"
   frameborder="0"
+  loading="lazy"
   allow="clipboard-write"
-  title="Our Prediction Markets"
+  title="Our prediction markets"
 ></iframe>
 ```
 
-Replace `your-org` with your organization's **slug** or **UUID** (both work). The widget automatically shows every active market that belongs to your organization — and nothing else.
-
----
+Replace `kash` with your organization's slug or UUID.
 
 ## The organization identifier
 
-The `{org}` segment in `https://app.kash.bot/o/{org}/iframe` accepts either form:
+The `{org}` segment of `https://app.kash.bot/o/{org}/iframe` accepts either:
 
-<ParamField path="slug" type="string">
-  Your organization's slug — friendly and human-readable, e.g. `acme`.
-  Recommended for embeds you hand-write.
-</ParamField>
+- **a slug**: lowercase letters, digits and hyphens, up to 64 characters (for example `kash`)
+- **a UUID**: the `organizationId` used by the JSON API
 
-<ParamField path="uuid" type="string">
-  Your organization's UUID, e.g. `550e8400-e29b-41d4-a716-446655440000`.
-  Matches the `organizationId` used by the REST API.
-</ParamField>
+Both values are in [`GET /api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail) as `slug` and `id`. If the identifier matches nothing, the widget shows a "not found" message instead of redirecting.
 
-You can find both values via [`GET /api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail) (the response includes `id` and `slug`).
+## What it shows
 
-<Info>
-Only your organization's markets are ever returned — the organization is fixed by the URL, so another organization's markets can never appear in your embed.
-</Info>
+- Your organization's logo, display name and tagline
+- The number of markets loaded so far
+- A grid of your organization's **active** markets, including markets on which it is the partner, newest first. The data is the same as [`GET /api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets).
+- 50 markets at a time, with a "load more" button. The grid scrolls inside the frame, so a taller frame shows more at once.
 
----
+The organization is fixed by the URL, so another organization's markets never appear in your widget. The widget reads no query parameters.
 
-## Iframe Attributes
+## Recommended attributes
 
-### Required Attributes
+| Attribute | Value |
+|---|---|
+| `width` | `100%` |
+| `height` | 700 to 900px |
+| `loading` | `lazy` below the fold |
+| `allow` | `clipboard-write` (fallback when a new tab can't be opened) |
+| `title` | A description for screen readers |
 
-<ParamField path="src" type="string" required>
-  The organization iframe URL: `https://app.kash.bot/o/{org}/iframe`
-</ParamField>
+The sandbox and Content Security Policy notes in [Market and Thread Iframes](/developer-docs/public-embed-api/guides/thread-iframe#recommended-attributes) apply here too.
 
-### Recommended Attributes
+## Events
 
-<ParamField path="width" type="string" default="100%">
-  Iframe width - use `100%` for responsive design
-</ParamField>
+Once the markets have loaded, the widget posts this message to your page:
 
-<ParamField path="height" type="string" default="900">
-  Iframe height in pixels. The grid scrolls internally, so taller is better for showing more markets without scrolling.
-</ParamField>
-
-<ParamField path="frameborder" type="string" default="0">
-  Border width (set to `0` for seamless embed)
-</ParamField>
-
-<ParamField path="loading" type="string" default="lazy">
-  Use `eager` for above-fold embeds, `lazy` for below-fold
-</ParamField>
-
-<ParamField path="title" type="string">
-  Accessibility: describe the iframe content for screen readers
-</ParamField>
-
----
-
-## Query Parameters
-
-<ParamField query="source" type="string">
-  Source label for embed analytics (e.g., your domain name). **Recommended** so you can see where embed traffic comes from.
-</ParamField>
-
----
-
-## Complete Example
-
-```html
-<iframe
-  src="https://app.kash.bot/o/acme/iframe?source=acme.com"
-  width="100%"
-  height="900"
-  frameborder="0"
-  allow="clipboard-write"
-  loading="lazy"
-  title="Acme prediction markets"
-></iframe>
+```json
+{ "type": "kash-iframe-ready", "data": { "organizationId": "6b617368-…", "marketCount": 47 }, "origin": "https://app.kash.bot", "timestamp": 1792526400000 }
 ```
 
-**What this does:**
-- Embeds every active market belonging to the `acme` organization
-- Renders a branded grid with your organization's logo and name
-- Labels embed traffic as `acme.com` in analytics (revenue share itself is earned on trades in markets your organization creates)
-- Each card deep-links to Twitter so visitors can post & trade (no login required in the iframe)
+Prediction actions on the cards send the same `kash-tweet-share-*` and `kash-open-twitter` messages as the market widget. They are listed in [Events](/developer-docs/public-embed-api/guides/thread-iframe#events).
 
----
-
-## Responsive Design
-
-Wrap the iframe in a responsive container:
-
-```html
-<div class="kash-embed-container">
-  <iframe
-    src="https://app.kash.bot/o/acme/iframe?source=your-site"
-    frameborder="0"
-  ></iframe>
-</div>
-
-<style>
-  .kash-embed-container {
-    position: relative;
-    width: 100%;
-    height: 900px;
+```javascript
+window.addEventListener('message', (event) => {
+  if (event.origin !== 'https://app.kash.bot') return;
+  if (event.data?.type === 'kash-iframe-ready') {
+    console.log(`${event.data.data.marketCount} markets loaded`);
   }
-
-  .kash-embed-container iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-
-  @media (max-width: 768px) {
-    .kash-embed-container { height: 700px; }
-  }
-</style>
+});
 ```
 
-The market grid is responsive on its own (3 columns on wide screens, down to 1 on narrow ones) and scrolls inside the iframe, so you only need to size the iframe's outer height.
+## Building your own grid instead
 
----
+To control the layout yourself, read the same data from the JSON API:
 
-## Security Considerations
+1. [`GET /api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail) for branding
+2. [`GET /api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets) for the markets
+3. [`GET /api/markets/state?ids=…`](/developer-docs/public-embed-api/endpoints/markets-state) to keep the odds live
+4. [`GET /api/markets/:id/twitter-link`](/developer-docs/public-embed-api/endpoints/market-twitter-link) for each "Predict" button
 
-### Sandbox Attribute
+The [React example](/developer-docs/public-embed-api/examples/react) does exactly this.
 
-```html
-<iframe
-  src="https://app.kash.bot/o/acme/iframe?source=your-site"
-  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-></iframe>
-```
-
-**Sandbox permissions explained:**
-- `allow-scripts` - Required for embed functionality
-- `allow-same-origin` - Allows API calls to Kash backend
-- `allow-popups` - Enables opening Twitter to post & trade
-- `allow-forms` - Allows trading form submissions
-
-<Warning>
-**Do not use `allow-top-navigation`** - This prevents the iframe from redirecting your parent page.
-</Warning>
-
-### Content Security Policy (CSP)
-
-If your site uses CSP headers, add Kash to allowed sources:
-
-```
-Content-Security-Policy: frame-src https://app.kash.bot; script-src 'self' https://app.kash.bot;
-```
-
----
-
-## Performance Best Practices
-
-### Preconnect to Kash Domain
-
-```html
-<head>
-  <link rel="preconnect" href="https://app.kash.bot" />
-  <link rel="dns-prefetch" href="https://app.kash.bot" />
-</head>
-```
-
----
-
-## Common Issues
-
-### Widget shows no markets
-
-**Problem:** Embed loads but the grid is empty
-
-**Solutions:**
-1. Confirm your organization has active markets via [`GET /api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets)
-2. Verify the slug or UUID in the URL is correct
-3. If you only have resolved markets, they won't show by default — the widget shows active markets
-
-### "Organization not found"
-
-**Problem:** The widget renders a not-found message
-
-**Solutions:**
-1. Double-check the slug or UUID — a typo can't be matched to an organization
-2. Fetch your organization to confirm its identifiers: [`GET /api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail)
-
----
-
-## Next Steps
-
-<CardGroup cols={2}>
-  <Card title="GET /api/organizations/:id/markets" href="/developer-docs/public-embed-api/endpoints/organization-markets">
-    Fetch your markets programmatically instead of embedding
-  </Card>
-  <Card title="Embedding Thread Iframes" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Embed a single thread's markets instead
-  </Card>
-</CardGroup>
+<Note>
+Organizations earn a share of trading fees on markets they create. See [Kash for businesses](/for-businesses/overview).
+</Note>
