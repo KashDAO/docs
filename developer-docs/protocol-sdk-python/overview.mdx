@@ -4,8 +4,7 @@ description: 'kashdao-protocol-sdk — non-custodial Python SDK for the Kash mar
 ---
 
 `kashdao-protocol-sdk` is the **direct-to-chain** Python SDK for Kash.
-Its `kashdao_protocol_sdk.solana` module talks straight to the Kash
-market program on Solana mainnet-beta, with the same trust model and
+It talks straight to the Kash market program on Solana mainnet-beta, with the same trust model and
 the same client shape as the TypeScript
 [`@kashdao/protocol-sdk`](/developer-docs/protocol-sdk/overview).
 
@@ -14,7 +13,7 @@ analysis. For a hosted, API-key-authed integration instead, call the
 [REST API](/developer-docs/rest-api/overview) directly.
 
 <Note>
-The package is in beta (`0.2.0b2`). Pin the version you test against.
+The package is in beta (`0.3.0b2`, Solana only). Pin the version you test against. Positions from the earlier Base markets need `0.2.0b2`.
 </Note>
 
 ## Trust model
@@ -28,10 +27,13 @@ and sends through your RPC.
 ## Install
 
 ```bash
-pip install 'kashdao-protocol-sdk[solana]'
+pip install kashdao-protocol-sdk
 ```
 
-The `[solana]` extra adds `solders`, which the Solana client needs.
+```python
+from kashdao_protocol_sdk import create_solana_client, keypair_signer
+```
+
 Requires Python 3.10 or later.
 
 ## Supported clusters

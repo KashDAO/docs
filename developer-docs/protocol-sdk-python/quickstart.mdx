@@ -16,7 +16,7 @@ trades from a local keypair. Steps 1 and 2 need no wallet or funds.
   the position account's rent.
 
 ```bash
-pip install 'kashdao-protocol-sdk[solana]'
+pip install kashdao-protocol-sdk
 ```
 
 ## 1. Read a market
@@ -25,7 +25,7 @@ pip install 'kashdao-protocol-sdk[solana]'
 import asyncio
 import os
 
-from kashdao_protocol_sdk.solana import create_solana_client
+from kashdao_protocol_sdk import create_solana_client
 
 
 async def main() -> None:
@@ -62,7 +62,7 @@ print(f"{sell.amount_out_usdc} atomic USDC")
 ```python
 from solders.keypair import Keypair
 
-from kashdao_protocol_sdk.solana import keypair_signer
+from kashdao_protocol_sdk import keypair_signer
 
 keypair = Keypair.from_base58_string(os.environ["SOLANA_SECRET_KEY"])
 # or, for a solana-keygen JSON file's byte array:
@@ -133,7 +133,7 @@ differ from the owner who signs.
 ## Handling errors
 
 ```python
-from kashdao_protocol_sdk.solana import (
+from kashdao_protocol_sdk import (
     KashSimulationRevertedError,
     KashTransactionExpiredError,
     KashTransactionOutcomeUnknownError,
