@@ -7,26 +7,18 @@ description: 'HTTP 503 — Service unavailable'
 
 ## When it fires
 
-Trading through the API has been temporarily halted by Kash operations. It is returned by `POST /v1/trades` and `POST /v1/trades/{id}/confirm`. Kash uses this halt during incidents, for example a blockchain RPC outage, an oracle problem or a security investigation.
+Trading through the API is temporarily unavailable. It is returned by `POST /v1/trades` and `POST /v1/trades/{id}/confirm`.
 
 Read endpoints (markets, quotes, portfolio, trade lookup) stay available throughout. Only trade writes are blocked.
 
-The problem body carries a top-level `flag` member naming the switch that is engaged. You can log it, but you don't need to act on its value.
-
-## Why it happens
-
-- An active incident.
-- A planned freeze around high-risk maintenance.
-- A security-driven freeze.
-
 ## How to fix
 
-- Honour `Retry-After: 300` and back off. Polling faster will not end the halt sooner.
-- Keep using the read endpoints, and show a "trading temporarily paused" message in your UI rather than failing silently.
+- Honour `Retry-After: 300` and back off. Polling faster will not restore it sooner.
+- Keep using the read endpoints, and show a "trading temporarily unavailable" message in your UI rather than failing silently.
 - The TypeScript SDK raises this as `KashMaintenanceError`.
 
 ## Related codes
 
 - [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) — a single endpoint disabled, rather than all trading
-- [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) — trading is busy, not halted
+- [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) — trading is busy, not unavailable
 - [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) — an unplanned dependency failure

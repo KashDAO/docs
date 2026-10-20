@@ -20,10 +20,8 @@ uses the same class names and codes.
 | `KashTransactionOutcomeUnknownError` | `WAIT_RECEIPT_FAILED`: the transaction **may have landed**                                                       | **No**: look it up first   |
 | `KashSignerError`                    | The signer failed or cannot sign (e.g. `SIGNER_UNSUPPORTED` for a disconnected wallet)                          | No                         |
 
-Refusals checked before signing include `Paused` (program paused),
-`InvalidState` (market not active), a frozen market, and
-`HaltedEntries` (buys refused on a halted market; holders can still
-sell).
+Refusals checked before signing include `InvalidState` (market not
+active) and a frozen market.
 
 ## Sending: which failures are safe to retry
 

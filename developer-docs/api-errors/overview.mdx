@@ -31,8 +31,7 @@ The Kash REST API returns errors as
 | `requestId` | yes            | Correlation id for this request. Quote it to Kash support                                |
 
 Some codes add **extension members** at the top level of the body, next to
-the standard fields: for example `flag` on
-[`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED),
+the standard fields: for example
 `inFlight` and `maxInFlight` on
 [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED),
 `queueAgeSeconds` on
@@ -123,7 +122,7 @@ try {
   }
   if (err instanceof KashMaintenanceError) {
     // ROUTE_DISABLED or API_TRADE_PROCESSING_HALTED
-    return showPausedBanner(err.extensions?.flag, err.retryAfterSeconds);
+    return showUnavailableBanner(err.retryAfterSeconds);
   }
   if (err instanceof KashConflictError && err.code === 'MARKET_NOT_TRADEABLE') {
     return pickAnotherMarket();

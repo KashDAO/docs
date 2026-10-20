@@ -31,7 +31,7 @@ from kashdao_protocol_sdk.solana import create_solana_client
 async def main() -> None:
     async with create_solana_client(rpc_url=os.environ["SOLANA_RPC_URL"]) as kash:  # mainnet-beta
         config = await kash.protocol.config()
-        print(f"protocol fee {config.default_protocol_fee_bps} bps, paused={config.paused}")
+        print(f"protocol fee {config.default_protocol_fee_bps} bps")
 
         # By numeric market id, or by the market account address
         # (the REST API's `contractAddress` for a Solana market).

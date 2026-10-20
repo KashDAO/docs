@@ -30,7 +30,7 @@ const kash = createSolanaClient({
 }); // mainnet-beta by default
 
 const config = await kash.protocol.config();
-console.log(`protocol fee ${config.defaultProtocolFeeBps} bps, paused=${config.paused}`);
+console.log(`protocol fee ${config.defaultProtocolFeeBps} bps`);
 
 // By numeric market id, or by the market account address
 // (the REST API's `contractAddress` for a Solana market).
@@ -95,8 +95,8 @@ console.log(`sold: ${sold.signature} for at least ${sold.plan.minAmountOutUsdc} 
 ```
 
 `buy` and `sell` refuse before signing, with a `KashValidationError`,
-when the program is paused, the market is not active or is frozen, or
-(for buys) the market is halted.
+when the market is not accepting the trade, for example because it is
+not active or is frozen.
 
 ## 4. Build, simulate, then send
 

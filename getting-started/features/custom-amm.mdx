@@ -1,6 +1,6 @@
 ---
 title: 'Custom AMM Bonding Curve'
-description: 'How the Kash Pythagorean AMM prices multi-outcome markets'
+description: 'How market prices are set'
 icon: 'chart-mixed'
 ---
 
@@ -19,62 +19,21 @@ icon: 'chart-mixed'
 
 # What the AMM does
 
-Every market holds its own on-chain USDC pool, held by the market program, that backs all of its outcomes. When you buy an outcome, your USDC (minus the protocol fee) goes into the pool and the AMM issues outcome shares to you along a fixed mathematical curve. When you sell, your shares are burned and USDC comes back out of the pool.
-
-The curve is deterministic: the same trade against the same market state always produces the same result. There's no order book, no counterparty to match with, and no social or engagement input to pricing.
-
-# Why it's built this way
+Every market has its own on-chain USDC pool that backs all of its outcomes. Prices are set by the protocol's automated market maker, a bonding-curve style pricing function: buying an outcome raises its price, and selling lowers it. There's no order book and no counterparty to match with.
 
 <AccordionGroup>
-  <Accordion title="Multi-outcome native">
-    Most prediction market AMMs are designed around Yes/No pairs. The Kash curve prices any number of outcomes in one market, with every outcome drawing on the same pool. Each market has exactly one winning outcome.
-  </Accordion>
-
-  <Accordion title="Liquidity from the first second">
-    A new market doesn't wait for liquidity providers. The creator's starting liquidity, paid from their own funds, is converted into the market's pool and an equal starting position across every outcome, so prices begin even and trading works immediately.
-  </Accordion>
-
-  <Accordion title="Implied chance pricing">
-    The percentage shown for each outcome is its **implied chance**. It's computed from how the market's capital is concentrated across outcomes, and it always sums to 100%.
-
-    Implied chance is *not* a fixed share price. Shares don't "pay $1": winning shares redeem for a portion of the market's pool. That's why trade previews show an **estimated payout if this outcome wins** rather than a per-share dollar figure. See [Redeeming positions](/getting-started/guides/winning).
+  <Accordion title="Implied chance">
+    The percentage shown for each outcome is its **implied chance**, and the percentages always sum to 100%. It is not a fixed share price. When a market resolves, holders of the winning outcome redeem the market's pool in proportion to their holdings, so trade previews show an **estimated payout if this outcome wins**. See [Redeeming positions](/getting-started/guides/winning).
   </Accordion>
 
   <Accordion title="Price impact and slippage protection">
-    Larger trades move the price more. Buying an outcome pushes its implied chance up as you buy, so a big order gets a progressively worse average rate than a small one. This is ordinary price impact, not a penalty.
-
-    Every trade preview shows what you'll receive before you confirm, and every trade carries an on-chain minimum-output guard: if the market moves against you between quote and execution, the trade fails instead of filling at a worse price.
+    Larger trades move the price more, so a big order gets a worse average rate than a small one. Every trade preview shows what you'll receive before you confirm, and if the market moves against you before execution, the trade fails instead of filling at a worse price.
   </Accordion>
 </AccordionGroup>
 
-# Fees and the curve
+# Fees
 
-- **Buys:** a protocol fee is taken from your USDC before it enters the curve. The rest goes into the pool.
-- **Sells:** an AMM sell fee **stays in the pool**, benefiting the remaining holders, and a protocol fee is taken from your proceeds.
-- **Claims:** no protocol fee. A claim covers only its own network fee.
-
-Protocol fees are kept separate from the pool, so they never distort the curve. See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.
-
-# For the curious: the math
-
-<Accordion title="The Pythagorean invariant">
-  The AMM is a weighted Pythagorean scoring rule. For a market with pool `R`, outcome supplies `s_i` and equal weights `a_i = 1/n`, define:
-
-  ```
-  A = Σ a_i · s_i²        (weighted sum of squared supplies)
-  N = √A
-  c = R / N               (the curve invariant)
-  ```
-
-  - **Buys and sells** move along this curve: the pool and the supplies change together so the trade is consistent with the invariant. The cost of pushing an outcome's supply up grows convexly, which is where price impact comes from.
-  - **Implied chance** for outcome `i` is its capital share: `q_i = a_i · s_i² / A`. These always sum to 100%.
-  - **Marginal prices** (the instantaneous USDC-per-share rate, `R · a_i · s_i / A`) are a different quantity from implied chance. They are exchange rates, not probabilities.
-  - **Redemption** is pro-rata: when a market resolves, each winning share redeems for `R × shares / (total winning supply)`. A cancelled market snapshots each outcome's price and refunds at that frozen rate.
-</Accordion>
-
-<Tip>
-Because pricing is deterministic and on-chain, anyone can verify a quote independently. What you see in the trade preview is what the program will do.
-</Tip>
+A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. The app shows the exact fees before you confirm.
 
 ---
 

@@ -24,7 +24,7 @@ icon: 'gears'
     A market lists two or more outcomes, and exactly one of them wins. "Will X happen?" is a two-outcome market; "Who wins the tournament?" can list every contender.
   </Accordion>
   <Accordion title="Implied chance">
-    Each outcome shows an implied chance, set by the [AMM](/getting-started/features/custom-amm) from how the market's capital is spread across outcomes. Implied chances always sum to 100%.
+    Prices are set by the protocol's [automated market maker](/getting-started/features/custom-amm), a bonding-curve style pricing function: buying an outcome raises its price, and selling lowers it. Each outcome shows an implied chance, computed from how the market's capital is spread across outcomes. Implied chances always sum to 100%.
   </Accordion>
   <Accordion title="Rules and sources">
     Every market publishes its resolution rules and a primary source (plus a fallback where needed). Kash's automated resolution system determines the result from them, so they're shown on the market page.
@@ -38,7 +38,7 @@ icon: 'gears'
     A creator connects their X account in the web app and describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. The creator pays to create it from their own funds, at least $20, and owns the market. Every market is reviewed automatically before it goes live. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
   </Step>
   <Step title="Live">
-    The market is created on the open, permissionless Solana protocol with its starting liquidity in place. Anyone can buy or sell any outcome.
+    The market is created on the open, permissionless Solana protocol with its initial liquidity in place. Anyone can buy or sell any outcome.
   </Step>
   <Step title="Frozen">
     Trading closes shortly before the resolution time, and the market page shows exactly when.
@@ -67,22 +67,13 @@ icon: 'gears'
     A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market can't be resolved after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live prices no longer matter once a market is cancelled.
   </Accordion>
   <Accordion title="Redemption">
-    Winning shares redeem for a pro-rata portion of the market's pool. Losing shares are worth nothing. Refunds pay each holder at the cancellation snapshot price.
+    When a market resolves, holders of the winning outcome redeem the market's pool in proportion to their holdings. Losing shares are worth nothing. Refunds pay each holder at the cancellation snapshot price.
   </Accordion>
 </AccordionGroup>
 
 # Fees
 
-| Action | Fee | Where it goes |
-|---|---|---|
-| Buy | A protocol fee | Shared between the market's creator side and Kash |
-| Sell | A protocol fee plus an AMM sell fee | The AMM sell fee stays in the market's pool |
-| Trade from X | No transaction fee | |
-| Trade in the web app | A small network fee in USDC may be added | Covers the Solana network fee Kash pays |
-| Claim | No protocol fee | The claim's network fee is deducted from the amount you receive |
-| Create a market | At least $20, shown in the launch panel | Paid by the creator from their own funds; it becomes the market's starting liquidity |
-
-The app always shows the exact fees before you confirm.
+A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The app always shows the exact fees before you confirm.
 
 # Infrastructure
 

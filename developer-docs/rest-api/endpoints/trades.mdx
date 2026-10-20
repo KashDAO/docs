@@ -46,7 +46,7 @@ Status lifecycle: `pending → validating → executing → completed`, ending i
 | `side`            | `buy` \| `sell`, required | |
 | `clientRequestId` | string   | 1 to 128 characters from `A-Z a-z 0-9 _ - : .`. See [Idempotency](/developer-docs/rest-api/idempotency). |
 | `metadata`        | object   | Up to 10 string tags. Keys are 1 to 64 characters from `a-z A-Z 0-9 _ - .`; values are at most 500 characters. Echoed on the trade and on every trade webhook. |
-| `ambassadorToken` | string   | Optional Market Ambassadors share-link token, used for trade attribution. 1 to 128 characters from `A-Z a-z 0-9 _ -`. |
+| `ambassadorToken` | string   | Optional Market Ambassadors referral-link token, used for referral attribution. 1 to 128 characters from `A-Z a-z 0-9 _ -`. |
 
 ```bash
 curl -X POST https://api.kash.bot/v1/trades \
@@ -63,7 +63,7 @@ Responses:
 - **`200 OK`**: a repeat of an earlier request with the same `clientRequestId` and the same body. The existing trade is returned with `_meta.idempotent: true`.
 - **`202 Accepted`**: the amount reached your key's high-value threshold. The trade is held in `pending_confirmation` and the body adds `confirmation: { token, expiresAt }`. The token expires **60 seconds** after issue. Release the trade with `POST /v1/trades/{id}/confirm`.
 
-Before anything is written, the request is checked in this order of concern: the market (`404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE`, `400 CHAIN_NOT_SUPPORTED`, `400 OUTCOME_INDEX_INVALID`), the amount (`400 AMOUNT_TOO_LARGE`), your account (`409 SMART_ACCOUNT_NOT_PROVISIONED`, `409 WALLET_DELEGATION_NOT_ENABLED`), the key's per-trade cap (`409 SPENDING_LIMIT_EXCEEDED`), and admission control (`429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` when the account already has its tier's maximum of unfinished trades, `503 TRADE_ADMISSION_BUSY` while the pipeline works through a backlog; both carry `Retry-After`). A reused `clientRequestId` with a different body is `409 CLIENT_REQUEST_ID_CONFLICT`. Trading can be paused platform-wide (`503 API_TRADE_PROCESSING_HALTED`, `Retry-After: 300`).
+Before anything is written, the request is checked in this order of concern: the market (`404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE`, `400 CHAIN_NOT_SUPPORTED`, `400 OUTCOME_INDEX_INVALID`), the amount (`400 AMOUNT_TOO_LARGE`), your account (`409 SMART_ACCOUNT_NOT_PROVISIONED`, `409 WALLET_DELEGATION_NOT_ENABLED`), the key's per-trade cap (`409 SPENDING_LIMIT_EXCEEDED`), and admission control (`429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` when the account already has its tier's maximum of unfinished trades, `503 TRADE_ADMISSION_BUSY` while the pipeline works through a backlog; both carry `Retry-After`). A reused `clientRequestId` with a different body is `409 CLIENT_REQUEST_ID_CONFLICT`. API trading can be temporarily unavailable (`503 API_TRADE_PROCESSING_HALTED`, `Retry-After: 300`).
 
 Some checks run after the trade is accepted. The key's **daily** spending cap, the smart account's USDC balance and other risk rules are evaluated in the pipeline. A trade that fails them moves to `rejected` (with a `trade.rejected` webhook) rather than being refused synchronously.
 

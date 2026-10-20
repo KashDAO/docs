@@ -204,7 +204,7 @@ import {
   KashNotFoundError,          // 404
   KashConflictError,          // 409, and 410 for an expired idempotency key
   KashRateLimitError,         // 429
-  KashMaintenanceError,       // 503 kill switch (API_TRADE_PROCESSING_HALTED, ROUTE_DISABLED)
+  KashMaintenanceError,       // 503 temporarily unavailable (API_TRADE_PROCESSING_HALTED, ROUTE_DISABLED)
   KashServerError,            // other 5xx
   KashValidationError,        // 400 / 422, or a response that failed schema validation
   KashNetworkError,

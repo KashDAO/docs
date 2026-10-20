@@ -194,7 +194,7 @@ try {
   } else if (err instanceof KashAuthorizationError) {
     // missing scope / IP not allowed — fix the key, don't retry
   } else if (err instanceof KashMaintenanceError) {
-    // 503 — trading temporarily halted; back off for err.retryAfterSeconds
+    // 503 — trading temporarily unavailable; back off for err.retryAfterSeconds
   } else if (err instanceof KashValidationError) {
     // 400 — bad input; inspect err.issues and fix the request
   } else {

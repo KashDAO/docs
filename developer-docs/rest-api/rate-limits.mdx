@@ -78,7 +78,7 @@ If the rate limiter itself is briefly unavailable, requests are refused with `50
 
 ## Temporarily disabled routes
 
-Separately from rate limiting, Kash can pause an individual route, for example during a chain incident. The route then returns `503 ROUTE_DISABLED` with `Retry-After: 60`. Trading can also be paused as a whole, returning `503 API_TRADE_PROCESSING_HALTED` with `Retry-After: 300` on trade creation and confirmation while reads keep working. Back off and retry in both cases.
+Separately from rate limiting, an individual route can be temporarily unavailable, returning `503 ROUTE_DISABLED` with `Retry-After: 60`. API trade writes can also be temporarily unavailable, returning `503 API_TRADE_PROCESSING_HALTED` with `Retry-After: 300` on trade creation and confirmation while reads keep working. Back off and retry in both cases.
 
 ## Best practices
 

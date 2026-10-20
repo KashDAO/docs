@@ -29,7 +29,7 @@ Every error from `api.kash.bot` is an [RFC 7807 Problem Details](https://datatra
 | `instance`  | The request path that failed. |
 | `requestId` | Matches the `X-Request-ID` response header. Quote it to support. |
 
-Some codes add extension members at the top level of the body, for example `flag` on `ROUTE_DISABLED`, or `supported` on `API_VERSION_UNSUPPORTED`. Each code's catalogue page lists them. Retryable errors carry `Retry-After` in seconds.
+Some codes add extension members at the top level of the body, for example `supported` on `API_VERSION_UNSUPPORTED`. Each code's catalogue page lists them. Retryable errors carry `Retry-After` in seconds.
 
 ## How to handle errors
 

@@ -23,8 +23,8 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
 
 ## On-chain and non-custodial
 
-- **The markets live on an open protocol.** Every market is created and traded on an open, permissionless on-chain protocol on Solana.
-- **Kash provides the interface and runs market creation and resolution.** The Kash web app and the X bot are an interface to that protocol, so you can use it without dealing with the chain directly. Kash also operates the automated system that creates markets and determines their outcomes.
+- **The markets live on an open protocol.** Every market is created and traded on a decentralized, permissionless on-chain protocol on Solana that anyone can use directly.
+- **Kash provides the interface and runs market creation and resolution.** Kash is an interface built on that protocol: the Kash web app and the X bot let you use it without dealing with the chain directly. Kash also operates the automated system that creates markets and determines their outcomes.
 - **Kash never holds your funds.** Your USDC and your positions sit in your own wallet, and you can export its private key. So that you can trade from the app, chat and X without a signing prompt each time, you approve Kash's app to submit transactions from your wallet on your behalf. Kash never takes custody of user funds, at any point.
 - **You own what you create.** Your wallet, your positions and the markets you create are yours.
 
@@ -42,7 +42,7 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
   </Accordion>
 
   <Accordion title="Instant liquidity">
-    Every market trades against an on-chain automated market maker (AMM) that is funded when the market is created. You can buy or sell whenever trading is open. There's no order book and no waiting for a counterparty.
+    Every market trades against the protocol's on-chain automated market maker (AMM), which is funded when the market is created and sets prices: buying an outcome raises its price, and selling lowers it. You can buy or sell whenever trading is open. There's no order book and no waiting for a counterparty.
   </Accordion>
 
   <Accordion title="Markets created by chatting with Kash AI">
@@ -58,15 +58,7 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
 
 ## Fees
 
-| Action | Fee |
-|---|---|
-| Buy an outcome | A protocol fee |
-| Sell an outcome | A protocol fee plus an AMM sell fee (kept in the market) |
-| Trade from X | No transaction fee |
-| Trade on the web | A small network fee in USDC may be added |
-| Create a market | At least $20, paid from your own funds. The exact amount is shown before you submit |
-
-The app always shows the exact fees before you confirm. See [Transactions](/getting-started/faqs/transactions) for details.
+A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The app always shows the exact fees before you confirm. See [Transactions](/getting-started/faqs/transactions) for details.
 
 ## Where you can use it
 

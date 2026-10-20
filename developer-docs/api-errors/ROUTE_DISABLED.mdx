@@ -7,9 +7,9 @@ description: 'HTTP 503 — Route disabled'
 
 ## When it fires
 
-One endpoint has been temporarily disabled by Kash operations. Every `/v1/*` endpoint can be disabled individually, so this is distinct from [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED): you can tell "all API trading is paused" apart from "just this endpoint is off".
+One endpoint is temporarily unavailable. This is distinct from [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED), which covers all API trade writes.
 
-The problem body carries a top-level `flag` member identifying which endpoint switch is engaged, for example `"api-quotes-read"`:
+Example problem body:
 
 ```json
 {
@@ -17,26 +17,20 @@ The problem body carries a top-level `flag` member identifying which endpoint sw
   "title": "Route disabled",
   "status": 503,
   "code": "ROUTE_DISABLED",
-  "detail": "This endpoint is temporarily disabled by ops (api-quotes-read). Retry after the cooldown.",
+  "detail": "This endpoint is temporarily unavailable. Retry after the cooldown.",
   "instance": "/v1/markets/3f6c.../quote?outcomeIndex=0&amount=10",
-  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H",
-  "flag": "api-quotes-read"
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
 }
 ```
-
-## Why it happens
-
-- A targeted mitigation after a problem specific to that endpoint.
-- Maintenance on one endpoint while the rest of the API stays live.
 
 ## How to fix
 
 - Honour `Retry-After`. Polling faster will not re-enable the endpoint.
 - Other endpoints are unaffected. If you don't need this one right now, carry on.
 - For an endpoint critical to your integration, contact Kash support for an estimate.
-- The TypeScript SDK raises this as `KashMaintenanceError`, with the `flag` value at `err.extensions?.flag`.
+- The TypeScript SDK raises this as `KashMaintenanceError`.
 
 ## Related codes
 
-- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — all API trade writes paused
-- [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) — an unplanned failure rather than a deliberate one
+- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — all API trade writes unavailable
+- [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) — a dependency failure

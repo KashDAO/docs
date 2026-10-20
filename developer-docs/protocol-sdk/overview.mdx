@@ -54,7 +54,7 @@ with four namespaces:
 | `markets.get(ref)`                                                                                                    | Decoded market: status (`active` / `frozen` / `resolved` / `cancelled`), prices, probabilities  |
 | `markets.quoteBuy` / `quoteSell` / `quoteRedeem`                                                                      | Exact quotes from the program's own integer curve                                                |
 | `account.position` / `positions` / `usdcBalance`                                                                      | Position balances and the wallet's USDC balance                                                  |
-| `protocol.config` / `template` / `templates`                                                                          | Program config (protocol fee, pause flag) and market templates                                   |
+| `protocol.config` / `template` / `templates`                                                                          | Program config and market templates                                   |
 | `trades.buildBuy` / `buildSell` / `buildRedeem` / `buildRedeemCancelled` / `buildOpenPosition` / `buildClosePosition` | A plan: the instructions plus the bounds they encode                                             |
 | `trades.simulate(plan, { payer })` / `trades.send(plan, { signer })`                                                  | Simulate unsigned, or sign, send and confirm                                                     |
 | `trades.buy` / `sell` / `redeem` / `redeemCancelled` / `openPosition` / `closePosition`                               | Build and send in one call, with the signer as trader                                            |
