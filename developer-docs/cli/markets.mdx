@@ -37,14 +37,10 @@ Fetch a single market by id.
 
 - `id` — market UUID
 
-**Options**
-
-| Flag | Description |
-| --- | --- |
-| `--fields <list>` | comma-separated dot-paths to project on JSON output (e.g. id,title,outcomes.label) — applied only with `--json`/`--ndjson` |
+Project fields with the global `--fields` flag (applied only with `--json`/`--ndjson`):
 
 ```bash
-kash markets get 9f0b... --fields id,status,resolvedOutcomeIndex --json --quiet
+kash markets get 9f0b... --fields id,status,resolvedAt,outcomes.label --json --quiet
 ```
 
 ### `kash markets predictions`
