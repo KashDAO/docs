@@ -11,7 +11,7 @@ The competition or entry is not accepting money right now. Returned by `POST /v1
 
 ## Why it happens
 
-- The competition does not pool an entry fee. Only `onchain_escrow` competitions do; `sponsored`, `offchain_airdrop` and `none` competitions have nothing to fund.
+- The competition does not collect entry contributions. Only `onchain_escrow` competitions do; `sponsored`, `offchain_airdrop` and `none` competitions have nothing to fund.
 - The competition is outside its funding window: before submissions open, or at or after `join_deadline`.
 - The competition is no longer `published` or `registration` (it has started, been cancelled or settled).
 - The entry no longer accepts contributions because it was withdrawn, rejected, disqualified or refunded. Entries in `funding` or `joined` accept contributions; nothing else does.

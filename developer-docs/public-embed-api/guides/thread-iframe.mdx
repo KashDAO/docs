@@ -7,12 +7,10 @@ Kash serves two iframe widgets that need no API calls at all:
 
 | Widget | URL | Shows |
 |---|---|---|
-| Market | `https://app.kash.bot/markets/{marketId}/iframe` | One market card with live odds, a countdown and a predict button |
+| Market | `https://app.kash.bot/markets/{marketId}/iframe` | One market card with live prices, a countdown and a predict button |
 | Thread | `https://app.kash.bot/threads/{threadId}/iframe` | A thread's title and stats, plus a heatmap grid of all its markets ranked by volume |
 
 Both take a UUID in the path. They read no query parameters. Any site may frame them, because they send `Content-Security-Policy: frame-ancestors *`. They are not indexed by search engines.
-
-For a widget that shows every market an organization runs, see [Organization iframe](/developer-docs/public-embed-api/guides/organization-iframe).
 
 ## Market iframe
 
@@ -28,7 +26,7 @@ For a widget that shows every market an organization runs, see [Organization ifr
 ></iframe>
 ```
 
-The card refreshes its odds live. Visitors choose an outcome and an amount, and the widget opens X with a prediction tweet already written, which the Kash trading bot reads to place the trade. If a new tab can't be opened, the widget asks your page to open the link (see [Events](#events)), and if that fails too, it copies the link to the clipboard. That clipboard fallback is why `allow="clipboard-write"` is recommended.
+The card refreshes its prices live. Visitors choose an outcome and an amount, and the widget opens X with a prediction tweet already written, which the Kash trading bot reads to place the trade. If a new tab can't be opened, the widget asks your page to open the link (see [Events](#events)), and if that fails too, it copies the link to the clipboard. That clipboard fallback is why `allow="clipboard-write"` is recommended.
 
 Get market IDs from [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets).
 
@@ -54,7 +52,7 @@ The thread widget shows:
 
 Visitors add Yes or No predictions on binary markets in the grid, then post them all in one tweet. Selecting a market tile, or predicting on a market with more than two outcomes, opens that market on app.kash.bot in a new tab.
 
-Get thread IDs from [`GET /api/threads`](/developer-docs/public-embed-api/endpoints/threads) or [`GET /api/organizations/:id/threads`](/developer-docs/public-embed-api/endpoints/organization-threads). If a thread has no markets, the widget shows an empty state.
+Get thread IDs from [`GET /api/threads`](/developer-docs/public-embed-api/endpoints/threads). If a thread has no markets, the widget shows an empty state.
 
 ## Recommended attributes
 
@@ -84,7 +82,7 @@ The widgets post messages to the parent window, addressed to your page's origin.
 
 | `type` | Sent by | `data` |
 |---|---|---|
-| `kash-iframe-ready` | Thread, organization | Thread: `{ threadId, marketCount, totalVolume }`. Organization: `{ organizationId, marketCount }`. |
+| `kash-iframe-ready` | Thread | `{ threadId, marketCount, totalVolume }` |
 | `kash-market-clicked` | Thread | `{ threadId, marketId }` |
 | `kash-tweet-share-attempt` | Market, thread | `{ templateId, contentType, privacy, characterCount, timestamp }` |
 | `kash-tweet-share-success` | Market, thread | `{ templateId, url, timestamp }`: the X compose tab opened |
@@ -119,8 +117,8 @@ window.addEventListener('message', (event) => {
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Organization iframe" href="/developer-docs/public-embed-api/guides/organization-iframe">
-    Every market an organization runs
+  <Card title="Quickstart" href="/developer-docs/public-embed-api/quickstart">
+    Embed your first market
   </Card>
   <Card title="HTML examples" href="/developer-docs/public-embed-api/examples/html">
     Copy-paste pages

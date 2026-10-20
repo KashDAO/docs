@@ -252,12 +252,12 @@ const kash = new KashClient({
 
 ## Cloning a client
 
-`withConfig` returns a new client with overridden fields. Useful for tenant switching or per-scope timeouts:
+`withConfig` returns a new client with overridden fields. Useful for switching between API keys or per-scope timeouts:
 
 ```ts
-const tenantA = new KashClient({ apiKey: process.env.TENANT_A_KEY! });
-const tenantB = tenantA.withConfig({ apiKey: process.env.TENANT_B_KEY! });
-const slow    = tenantA.withConfig({ timeoutMs: 120_000 });
+const readOnly = new KashClient({ apiKey: process.env.KASH_READ_KEY! });
+const trading  = readOnly.withConfig({ apiKey: process.env.KASH_TRADE_KEY! });
+const slow     = readOnly.withConfig({ timeoutMs: 120_000 });
 ```
 
 `withConfig` re-validates, so an invalid override throws `KashConfigurationError`. Per-call overrides (`timeoutMs`, `maxRetries`, `signal`, `headers`) can also be passed as the last argument of any method.

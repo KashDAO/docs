@@ -5,21 +5,21 @@ description: 'Embed Kash prediction markets on your website with iframes, public
 
 The Public Embed API lets anyone show Kash prediction markets on their own website. It has three parts:
 
-- **Iframe embeds.** Drop-in widgets for a single market, a thread of markets, or every market an organization runs.
-- **Public read endpoints.** JSON endpoints for organizations, partners, threads and markets, which you can call from a browser on any origin.
-- **X (Twitter) deep links.** Ready-made `twitter.com/intent/tweet` URLs. When a user posts one, the Kash trading bot reads it and places their prediction. This only works for users who have linked their X account to Kash.
+- **Iframe embeds.** Drop-in widgets for a single market or a thread of markets.
+- **Public read endpoints.** JSON endpoints for threads and markets, which you can call from a browser on any origin.
+- **X (Twitter) deep links.** Ready-made `twitter.com/intent/tweet` URLs. When a user posts one, the Kash trading bot reads it and places their prediction. This only works for users who have connected their X account to Kash. The trade is submitted from the user's own wallet.
 
 Everything here is read-only and anonymous. To trade, users either post a deep-link tweet or open the market on [app.kash.bot](https://app.kash.bot).
 
 <CardGroup cols={2}>
   <Card title="Iframe embeds" icon="window" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Market, thread and organization widgets
+    Market and thread widgets
   </Card>
   <Card title="X deep links" icon="x-twitter" href="/developer-docs/public-embed-api/endpoints/market-twitter-link">
     Tweet links that place predictions
   </Card>
   <Card title="Read endpoints" icon="code" href="/developer-docs/public-embed-api/endpoints/markets">
-    Organizations, partners, threads and markets
+    Threads and markets
   </Card>
   <Card title="No API key" icon="bolt" href="/developer-docs/public-embed-api/quickstart">
     No sign-up and no authentication
@@ -37,26 +37,9 @@ Iframe embeds use these page URLs:
 ```
 Market:        https://app.kash.bot/markets/{marketId}/iframe
 Thread:        https://app.kash.bot/threads/{threadId}/iframe
-Organization:  https://app.kash.bot/o/{orgSlugOrId}/iframe
 ```
 
 ## Endpoints
-
-### Organizations and partners
-
-A **partner** is a partner-tier organization that an organization hosts. Partners use the same ID format as organizations.
-
-| Method | Path | Description |
-|---|---|---|
-| GET | [`/api/organizations/featured`](/developer-docs/public-embed-api/endpoints/organizations-featured) | Featured organizations, with creator stats |
-| GET | [`/api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail) | Organization branding and metadata |
-| GET | [`/api/organizations/:id/profile`](/developer-docs/public-embed-api/endpoints/organization-profile) | Organization metadata plus stats and follower count |
-| GET | [`/api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets) | An organization's markets |
-| GET | [`/api/organizations/:id/threads`](/developer-docs/public-embed-api/endpoints/organization-threads) | An organization's threads |
-| GET | [`/api/organizations/:id/partners`](/developer-docs/public-embed-api/endpoints/organization-partners) | Partners hosted by an organization |
-| GET | [`/api/organizations/:id/leaderboard`](/developer-docs/public-embed-api/endpoints/organization-leaderboard) | Top traders on an organization's markets |
-| GET | [`/api/partners/:id`](/developer-docs/public-embed-api/endpoints/partner-detail) | Partner branding and metadata |
-| GET | [`/api/partners/:id/threads`](/developer-docs/public-embed-api/endpoints/partner-threads) | A partner's threads |
 
 ### Threads
 
@@ -74,8 +57,8 @@ A **thread** is a curated collection of related markets.
 |---|---|---|
 | GET | [`/api/markets`](/developer-docs/public-embed-api/endpoints/markets) | List, filter and search markets |
 | GET | [`/api/markets/:id`](/developer-docs/public-embed-api/endpoints/market-detail) | One market, optionally with price history and trades |
-| GET | [`/api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state) | Live odds and volume for up to 200 markets |
-| GET | [`/api/markets/:id/state`](/developer-docs/public-embed-api/endpoints/market-state) | Live odds and volume for one market |
+| GET | [`/api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state) | Live prices and volume for up to 200 markets |
+| GET | [`/api/markets/:id/state`](/developer-docs/public-embed-api/endpoints/market-state) | Live prices and volume for one market |
 | GET | [`/api/markets/:id/quote`](/developer-docs/public-embed-api/endpoints/market-quote) | Price quote for a buy or a sell |
 | GET | [`/api/markets/:id/leaderboard`](/developer-docs/public-embed-api/endpoints/market-leaderboard) | Positions in one market, ranked by size |
 | GET | [`/api/markets/participants`](/developer-docs/public-embed-api/endpoints/market-participants) | Participant avatars for up to 50 markets |
@@ -97,18 +80,18 @@ No API key is needed. Every `GET` endpoint above returns `Access-Control-Allow-O
 
 ## IDs
 
-All IDs are UUIDs. An ID that is not a valid UUID returns `400 VALIDATION_ERROR`, and a valid UUID that matches nothing returns `404 NOT_FOUND`. Slugs are accepted only by the organization iframe (`/o/{slug}/iframe`), not by the JSON endpoints.
+All IDs are UUIDs. An ID that is not a valid UUID returns `400 VALIDATION_ERROR`, and a valid UUID that matches nothing returns `404 NOT_FOUND`.
 
 ## Units and chains
 
 - **USDC amounts** such as `totalVolume` and `seedAmountAtomic` are atomic units with 6 decimals, so `35000000` is 35 USDC. Some fields return these as numbers and others as strings. Each endpoint page says which.
 - **Outcome-token amounts** such as `shareSupply`, and AMM values, are WAD strings with 18 decimals.
 - **Timestamps.** `endTime` is milliseconds since the epoch. `expiresAt`, `freezeAt` and `resolveTime` are seconds since the epoch. Other timestamps are ISO 8601 or Postgres timestamp strings.
-- **Chains.** New markets run on Solana, with `chainId` `9000001` and base58 `contractAddress` values. Kash's earlier markets ran on Base, with `chainId` `8453` and `0x` addresses. Those older markets still appear in resolved results while Base is phased out.
+- **Chains.** New markets run on Solana, with `chainId` `9000001` and base58 `contractAddress` values. Earlier markets ran on Base, with `chainId` `8453` and `0x` addresses. Those older markets still appear in resolved results while Base is phased out.
 
-## Odds
+## Prices and implied probability
 
-Show `outcomes[].impliedChance` (or `currentImpliedChance` for the first outcome) as a market's odds. On `/api/markets`, `/api/markets/:id` and the state endpoints, each outcome's `probability` is set to the same value as its `impliedChance`, and `oddsKnown` is `false` when there is no price yet. The organization-markets and thread-markets lists return the AMM's raw marginal `probability` instead, so read `impliedChance` there too.
+Show `outcomes[].impliedChance` (or `currentImpliedChance` for the first outcome) as each outcome's market-implied probability. On `/api/markets`, `/api/markets/:id` and the state endpoints, each outcome's `probability` is set to the same value as its `impliedChance`, and `oddsKnown` is `false` when there is no price yet. The thread-markets list returns the AMM's raw marginal `probability` instead, so read `impliedChance` there too.
 
 ## Pagination
 
@@ -126,13 +109,12 @@ Limits apply per IP address, per minute. Endpoints in the same group share one b
 
 | Group | Endpoints | Limit |
 |---|---|---|
-| Market reads | `/api/markets`, `/api/markets/:id`, `/quote`, `/twitter-link`, `/api/markets/category-stats`, `/api/markets/participants`, `/api/organizations/:id/markets`, `/api/threads/:id/twitter-links` | 600 |
+| Market reads | `/api/markets`, `/api/markets/:id`, `/quote`, `/twitter-link`, `/api/markets/category-stats`, `/api/markets/participants`, `/api/threads/:id/twitter-links` | 600 |
 | Market state | `/api/markets/state`, `/api/markets/:id/state` | 360 |
-| Leaderboards | `/api/markets/:id/leaderboard`, `/api/organizations/:id/leaderboard` | 300 |
+| Leaderboards | `/api/markets/:id/leaderboard` | 300 |
 | Thread list | `/api/threads` | 300 |
 | Thread detail | `/api/threads/:id` | 300 |
 | Thread markets | `/api/threads/:id/markets` | 300 |
-| Organization and partner reads | `/api/organizations/featured`, `/api/organizations/:id`, `/profile`, `/partners`, `/threads`, `/api/partners/:id`, `/api/partners/:id/threads` | 600 |
 | Batch deep links | `POST /api/twitter-links` | 240 |
 
 Some responses are served from a cache before the limit is checked, and those don't count. Responses the CDN can't cache carry `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` (a Unix time in milliseconds).
@@ -177,7 +159,7 @@ Errors use one envelope:
   <Card title="Technical support" icon="headset">
     Email [dev@kash.bot](mailto:dev@kash.bot)
   </Card>
-  <Card title="Partnerships" icon="handshake">
-    Email [partnerships@kash.bot](mailto:partnerships@kash.bot)
+  <Card title="Community" icon="discord">
+    Ask other builders in the [Kash Discord](https://discord.com/invite/n9eumqjMPb)
   </Card>
 </CardGroup>

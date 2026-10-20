@@ -27,7 +27,7 @@ The dispute endpoints under `/v1/markets/{id}/disputes` are on the [Market dispu
 | `title`              | string \| null    | |
 | `description`        | string \| null    | |
 | `status`             | enum \| null      | `UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED`. Stays `ACTIVE` for a market cancelled on chain or past its freeze deadline, so use `tradeable`. |
-| `outcomeCount`       | integer           | 2 to 100. |
+| `outcomeCount`       | integer           | Number of outcomes. |
 | `outcomes[]`         | array             | `{ index, label, probability }`. `probability` is a number from 0 to 1. |
 | `imageUrl`           | string \| null    | |
 | `createdAt`          | date-time         | |

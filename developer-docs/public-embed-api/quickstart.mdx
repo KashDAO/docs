@@ -53,27 +53,11 @@ Copy the market's `id`.
 
 Replace `{marketId}` with the ID from step 1. Any site can frame the embed pages. They send `Content-Security-Policy: frame-ancestors *`.
 
-## Step 3: Embed every market an organization runs (optional)
+See [Thread iframe](/developer-docs/public-embed-api/guides/thread-iframe) for the thread widget.
 
-The organization embed takes an organization slug or UUID and shows all of that organization's markets in a branded grid:
+## Step 3: Listen for embed events (optional)
 
-```html HTML
-<iframe
-  src="https://app.kash.bot/o/kash/iframe"
-  width="100%"
-  height="900"
-  frameborder="0"
-  loading="lazy"
-  allow="clipboard-write"
-  title="Kash prediction markets"
-></iframe>
-```
-
-See [Organization iframe](/developer-docs/public-embed-api/guides/organization-iframe) and [Thread iframe](/developer-docs/public-embed-api/guides/thread-iframe) for the other widgets.
-
-## Step 4: Listen for embed events (optional)
-
-The thread and organization embeds post messages to the parent page. Each message is `{ type, data, origin, timestamp }`, and `type` always starts with `kash-`:
+The thread embed posts messages to the parent page. Each message is `{ type, data, origin, timestamp }`, and `type` always starts with `kash-`:
 
 ```javascript JavaScript
 window.addEventListener('message', (event) => {
@@ -81,15 +65,15 @@ window.addEventListener('message', (event) => {
   const { type, data } = event.data ?? {};
 
   if (type === 'kash-iframe-ready') {
-    console.log('Embed loaded', data); // { organizationId, marketCount } or { threadId, marketCount, totalVolume }
+    console.log('Embed loaded', data); // { threadId, marketCount, totalVolume }
   }
   if (type === 'kash-market-clicked') {
-    console.log('Market opened', data.marketId); // thread embed only
+    console.log('Market opened', data.marketId);
   }
 });
 ```
 
-## Step 5: Build your own UI (optional)
+## Step 4: Build your own UI (optional)
 
 If you'd rather render markets yourself, read them from the JSON endpoints and add a "Predict on X" button with a [deep link](/developer-docs/public-embed-api/endpoints/market-twitter-link):
 
@@ -110,16 +94,15 @@ if (res.ok) {
 |---|---|---|
 | Single market | `100%` | 480 to 560px |
 | Thread | `100%` | 800 to 900px |
-| Organization | `100%` | 700 to 900px (scrolls inside the frame) |
 
 ## Troubleshooting
 
-- **The embed shows "not found".** Check the ID. Market and thread embeds need a UUID. The organization embed accepts a slug or a UUID.
+- **The embed shows "not found".** Check the ID. Market and thread embeds need a UUID.
 - **A thread embed shows no markets.** The thread has no live markets. Check with `GET /api/threads/{id}/markets`.
 - **The deep-link endpoint returns `400`.** The market is no longer accepting predictions, because it isn't `ACTIVE` or it has expired.
 
 <Note>
-Organizations and partners earn a share of trading fees on markets **they create**. Embeds are a good way to drive that activity. See [Kash for businesses](/for-businesses/overview) or email [partnerships@kash.bot](mailto:partnerships@kash.bot).
+Creators earn a share of trading fees on markets **they create**, wherever the trade happens. Embeds are a good way to drive that activity. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
 </Note>
 
 ## Next steps

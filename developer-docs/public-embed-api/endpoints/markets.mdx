@@ -33,14 +33,6 @@ GET https://app.kash.bot/api/markets
   A category slug, such as `football` or `business`. [`/api/markets/category-stats`](/developer-docs/public-embed-api/endpoints/market-category-stats) lists the slugs.
 </ParamField>
 
-<ParamField query="organizationId" type="string">
-  Only markets owned by this organization (UUID). If you also pass `partnerId`, you get markets that match either one.
-</ParamField>
-
-<ParamField query="partnerId" type="string">
-  Only markets created under this partner (UUID).
-</ParamField>
-
 <ParamField query="threadId" type="string">
   Only markets in this thread (UUID). `thread_id` is also accepted.
 </ParamField>
@@ -54,7 +46,7 @@ GET https://app.kash.bot/api/markets
 </ParamField>
 
 <ParamField query="creatorOwned" type="boolean" default="false">
-  When `true`, returns only markets launched by individual creators or by organizations other than Kash.
+  When `true`, returns only markets created by creators rather than by Kash.
 </ParamField>
 
 <ParamField query="fanTokenRedemption" type="string">
@@ -109,12 +101,12 @@ GET https://app.kash.bot/api/markets
     <ResponseField name="resolveTime" type="number | null">When the market was resolved, in seconds since the epoch</ResponseField>
     <ResponseField name="chainId" type="number">`9000001` (Solana) or `8453` (Base, older markets only)</ResponseField>
     <ResponseField name="contractAddress" type="string">On-chain market address (base58 on Solana, `0x` on Base)</ResponseField>
-    <ResponseField name="outcomeCount" type="integer">Number of outcomes (2 to 100)</ResponseField>
+    <ResponseField name="outcomeCount" type="integer">Number of outcomes</ResponseField>
     <ResponseField name="outcomes" type="object[]">
-      `{ outcomeIndex, tokenId, label, weight, shareSupply, probability, impliedChance }`. `impliedChance` is the displayed odds (0 to 1), and `probability` is set to the same value. `weight` and `shareSupply` are WAD strings.
+      `{ outcomeIndex, tokenId, label, weight, shareSupply, probability, impliedChance }`. `impliedChance` is the displayed implied probability (0 to 1), and `probability` is set to the same value. `weight` and `shareSupply` are WAD strings.
     </ResponseField>
-    <ResponseField name="oddsKnown" type="boolean">`false` when there is no price yet, so the odds are only a placeholder</ResponseField>
-    <ResponseField name="currentImpliedChance" type="number">Odds for outcome 0</ResponseField>
+    <ResponseField name="oddsKnown" type="boolean">`false` when there is no price yet, so the prices are only a placeholder</ResponseField>
+    <ResponseField name="currentImpliedChance" type="number">Implied probability of outcome 0</ResponseField>
     <ResponseField name="currentProbability" type="number">AMM marginal price for outcome 0. Not normalized, so show `currentImpliedChance` instead.</ResponseField>
     <ResponseField name="totalVolume" type="number">Lifetime volume in atomic USDC (6 decimals)</ResponseField>
     <ResponseField name="volume24h" type="number">Volume over the last 24 hours, in atomic USDC</ResponseField>
@@ -130,12 +122,9 @@ GET https://app.kash.bot/api/markets
     <ResponseField name="subCategoryLabel" type="string | null">Subcategory display name</ResponseField>
     <ResponseField name="supabaseImageUrl" type="string | null">HTTPS banner image URL</ResponseField>
     <ResponseField name="imageUrl" type="string | null">Image URI from the market metadata (may be `ipfs://`)</ResponseField>
-    <ResponseField name="organizationId" type="string | null">Owning organization</ResponseField>
-    <ResponseField name="organizationName" type="string | null">Owning organization's name</ResponseField>
-    <ResponseField name="organizationSlug" type="string | null">Owning organization's slug</ResponseField>
-    <ResponseField name="partnerId" type="string | null">Partner the market was created under</ResponseField>
-    <ResponseField name="partnerName" type="string | null">Partner's name</ResponseField>
-    <ResponseField name="partnerSlug" type="string | null">Partner's slug</ResponseField>
+    <ResponseField name="organizationId" type="string | null">ID of the account the market is listed under</ResponseField>
+    <ResponseField name="organizationName" type="string | null">That account's name</ResponseField>
+    <ResponseField name="organizationSlug" type="string | null">That account's slug</ResponseField>
     <ResponseField name="creator" type="string | null">Creator's display name</ResponseField>
     <ResponseField name="creatorUsername" type="string | null">Creator's username</ResponseField>
     <ResponseField name="creatorAvatarUrl" type="string | null">Creator's avatar</ResponseField>
@@ -171,8 +160,8 @@ const res = await fetch(`https://app.kash.bot/api/markets?${params}`);
 const { markets, pagination } = await res.json();
 
 for (const m of markets) {
-  const odds = m.outcomes.map((o) => `${o.label} ${(o.impliedChance * 100).toFixed(0)}%`);
-  console.log(m.title, odds.join(' / '));
+  const prices = m.outcomes.map((o) => `${o.label} ${(o.impliedChance * 100).toFixed(0)}%`);
+  console.log(m.title, prices.join(' / '));
 }
 ```
 
@@ -248,5 +237,5 @@ print(data["pagination"]["total"], "resolved markets")
 
 <CardGroup cols={2}>
   <Card title="GET /api/markets/:id" href="/developer-docs/public-embed-api/endpoints/market-detail">One market in full</Card>
-  <Card title="GET /api/markets/state" href="/developer-docs/public-embed-api/endpoints/markets-state">Refresh odds for many markets</Card>
+  <Card title="GET /api/markets/state" href="/developer-docs/public-embed-api/endpoints/markets-state">Refresh prices for many markets</Card>
 </CardGroup>

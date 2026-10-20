@@ -9,13 +9,13 @@ description: 'HTTP 409 — Wallet delegation not enabled'
 
 Kash cannot act on the wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
 
-Today this happens when the key is configured to trade from an **organization** smart account. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
+Today this happens when the key is configured to trade from a smart account other than the key owner's own. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
 
 Wallet delegation (your permission for Kash to sign trades on your behalf) is granted in the Kash app. If it has been withdrawn, trades accepted by the API fail at execution rather than returning this code synchronously; check the trade's status on `GET /v1/trades/{id}`.
 
 ## Why it happens
 
-- The key was issued to trade from an organization smart account.
+- The key was issued to trade from an account other than your own.
 - Wallet delegation was withdrawn in the Kash app, or onboarding skipped the delegation step.
 
 ## How to fix

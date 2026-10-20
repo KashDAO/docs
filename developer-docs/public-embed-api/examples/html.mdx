@@ -32,41 +32,6 @@ Each example is a complete page. Save it as an `.html` file and open it in a bro
 </html>
 ```
 
-## Every market from one organization
-
-```html organization.html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Our prediction markets</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-    iframe { width: 100%; height: 900px; border: 0; border-radius: 12px; }
-    @media (max-width: 768px) { iframe { height: 700px; } }
-  </style>
-</head>
-<body>
-  <iframe
-    src="https://app.kash.bot/o/kash/iframe"
-    loading="lazy"
-    allow="clipboard-write"
-    title="Kash prediction markets"
-  ></iframe>
-
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.origin !== 'https://app.kash.bot') return;
-      const { type, data } = event.data || {};
-      if (type === 'kash-iframe-ready') console.log('Loaded', data.marketCount, 'markets');
-      if (type === 'kash-open-twitter') window.open(data.url, '_blank', 'noopener');
-    });
-  </script>
-</body>
-</html>
-```
-
 ## Thread
 
 ```html thread.html
@@ -108,7 +73,7 @@ This page fetches live markets from the public API, renders its own cards, and g
 
   <script>
     const API = 'https://app.kash.bot/api';
-    const STAKE = 10; // whole USDC
+    const AMOUNT = 10; // whole USDC
 
     function usd(atomic) {
       return '$' + Math.round(Number(atomic) / 1e6).toLocaleString();
@@ -116,7 +81,7 @@ This page fetches live markets from the public API, renders its own cards, and g
 
     async function predict(marketId, outcomeIndex) {
       const tab = window.open('', '_blank'); // open now so popup blockers allow it
-      const res = await fetch(`${API}/markets/${marketId}/twitter-link?outcomeIndex=${outcomeIndex}&amount=${STAKE}`);
+      const res = await fetch(`${API}/markets/${marketId}/twitter-link?outcomeIndex=${outcomeIndex}&amount=${AMOUNT}`);
       const body = await res.json();
       if (!res.ok) { tab && tab.close(); alert(body.message); return; }
       if (tab) tab.location.href = body.twitterUrl;

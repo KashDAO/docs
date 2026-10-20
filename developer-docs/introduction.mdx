@@ -5,17 +5,17 @@ description: 'Build with Kash prediction markets'
 
 Welcome to the Kash developer documentation. Build trading bots and agents, trade directly against the on-chain markets, embed markets in your website, and read real-time market data.
 
-Kash markets run on **Solana**, and every balance, trade and payout is in **USDC**.
+Kash markets live on an open, permissionless protocol on **Solana**, and every balance, trade and redemption is in **USDC**. Kash provides an interface on top of that protocol.
 
 <Note>
-**Kash is non-custodial on every surface.** User funds sit in wallets the user controls. The surfaces below differ in **who orchestrates execution**, not in who holds the funds.
+**Kash is non-custodial on every surface.** Kash never holds custody of user funds: they sit in wallets the user owns and controls. The surfaces below differ in **who orchestrates execution**, not in who holds the funds.
 </Note>
 
 ## Pick your surface
 
 <CardGroup cols={2}>
   <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
-    Kash-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own Kash wallet under the trading permission they granted, and Kash builds the transaction and pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
+    Kash-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own embedded wallet under the trading permission they granted, and Kash builds the transaction and pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
   </Card>
   <Card title="Protocol SDK" icon="cube" href="/developer-docs/protocol-sdk/overview">
     Self-orchestrated access. Bring your own signer and RPC, and transactions never touch Kash servers. TypeScript and Python implementations, with cross-language parity.
@@ -30,7 +30,7 @@ Kash markets run on **Solana**, and every balance, trade and payout is in **USDC
 
 <Note>
 **Which one do I want?**
-- Want Kash to build, submit and pay for transactions from a user's Kash wallet? → **REST API**.
+- Want Kash to build, submit and pay for transactions from a user's own embedded wallet? → **REST API**.
 - Want to sign and submit transactions entirely with your own infrastructure? → **Protocol SDK**.
 - Want to script flows from a terminal or CI? → **CLI**.
 - Embedding markets in a website for people to view? → **Public Embed API**.
@@ -79,7 +79,7 @@ Use the [Public Embed API](/developer-docs/public-embed-api/overview) to put liv
   <Card title="Technical Support" icon="headset">
     Email [support@kash.bot](mailto:support@kash.bot) with technical questions.
   </Card>
-  <Card title="Partnership Inquiries" icon="handshake">
-    Contact [partnerships@kash.bot](mailto:partnerships@kash.bot) about white-labelling or revenue sharing.
+  <Card title="Community" icon="discord">
+    Ask other builders in the [Kash Discord](https://discord.com/invite/n9eumqjMPb).
   </Card>
 </CardGroup>

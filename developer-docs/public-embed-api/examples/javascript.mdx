@@ -40,14 +40,12 @@ export const kash = {
     get(`/markets/${id}/quote`, { outcomeIndex, action, amount: String(amountAtomic) }),
   twitterLink: (id, outcomeIndex, amount, locale) =>
     get(`/markets/${id}/twitter-link`, { outcomeIndex, amount, locale }),
-  organization: (id) => get(`/organizations/${id}`),
-  organizationMarkets: (id, params) => get(`/organizations/${id}/markets`, params),
   threads: (params) => get('/threads', params),
   threadMarkets: (id, params) => get(`/threads/${id}/markets`, params),
 };
 
-/** Odds as shown on Kash: one percentage per outcome. */
-export function formatOdds(market) {
+/** Implied probabilities as shown on Kash: one percentage per outcome. */
+export function formatPrices(market) {
   return market.outcomes.map((o) => ({
     label: o.label,
     percent: Math.round(o.impliedChance * 100),
@@ -67,7 +65,7 @@ export function formatUsdc(atomic) {
 ## List live markets
 
 ```javascript
-import { kash, formatOdds, formatUsdc } from './kash-embed-client.js';
+import { kash, formatPrices, formatUsdc } from './kash-embed-client.js';
 
 const { markets, pagination } = await kash.markets({
   status: 'active',
@@ -77,8 +75,8 @@ const { markets, pagination } = await kash.markets({
 });
 
 for (const m of markets) {
-  const odds = formatOdds(m).map((o) => `${o.label} ${o.percent}%`).join(' · ');
-  console.log(`${m.title} — ${odds} — ${formatUsdc(m.totalVolume)} volume`);
+  const prices = formatPrices(m).map((o) => `${o.label} ${o.percent}%`).join(' · ');
+  console.log(`${m.title} — ${prices} — ${formatUsdc(m.totalVolume)} volume`);
 }
 console.log(`${pagination.total} live markets`);
 ```
@@ -89,14 +87,14 @@ console.log(`${pagination.total} live markets`);
 const { markets } = await kash.markets({ search: 'champions league', status: 'all', limit: 20 });
 ```
 
-## Keep odds live
+## Keep prices live
 
 Load the cards once, then poll the state endpoint. It refreshes about every second, so polling every 5 to 10 seconds is plenty.
 
 ```javascript
 import { kash } from './kash-embed-client.js';
 
-function watchOdds(marketIds, onUpdate, intervalMs = 5000) {
+function watchPrices(marketIds, onUpdate, intervalMs = 5000) {
   let stopped = false;
   async function tick() {
     try {
@@ -113,7 +111,7 @@ function watchOdds(marketIds, onUpdate, intervalMs = 5000) {
   return () => { stopped = true; };
 }
 
-const stop = watchOdds(['93f1445c-912c-47b4-8065-d1ff5a6b8dfc'], (id, state) => {
+const stop = watchPrices(['93f1445c-912c-47b4-8065-d1ff5a6b8dfc'], (id, state) => {
   console.log(id, state.outcomes.map((o) => o.impliedChance));
 });
 ```
@@ -129,7 +127,7 @@ const { quote } = await kash.quote(
   usdc * 1_000_000 // atomic USDC
 );
 console.log(`$${usdc} buys ${quote.estimate?.tokensReceived?.toFixed(2)} tokens`);
-console.log(`Pays about $${quote.estimate?.payoutAtCurrentOddsUsdc?.toFixed(2)} if it wins at today's odds`);
+console.log(`Pays about $${quote.estimate?.payoutAtCurrentOddsUsdc?.toFixed(2)} if it wins at today's prices`);
 ```
 
 ## "Predict on X" buttons
@@ -160,15 +158,6 @@ document.querySelectorAll('[data-kash-market]').forEach((button) => {
 ```html
 <button data-kash-market="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" data-outcome="0">Yes · $10</button>
 <button data-kash-market="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" data-outcome="1">No · $10</button>
-```
-
-## Organization branding
-
-```javascript
-const { organization } = await kash.organization('6b617368-6277-6864-7800-000000000001');
-document.documentElement.style.setProperty('--brand', organization.colorPrimary);
-document.querySelector('#logo').src = organization.logoUrl;
-document.querySelector('#name').textContent = organization.displayName;
 ```
 
 ## Paginate through everything

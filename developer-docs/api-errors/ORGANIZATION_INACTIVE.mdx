@@ -7,20 +7,18 @@ description: 'HTTP 403 — Organization inactive'
 
 ## When it fires
 
-The API key is valid, not revoked and not expired, but the organization it belongs to is `suspended` or `cancelled`.
+The API key is valid, not revoked and not expired, but the account it belongs to is `suspended` or `cancelled`. The code name is historical; it applies to the account that owns the key.
 
 ## Why it happens
 
-- The organization was suspended (for example after an abuse report or an administrative action).
-- The organization's subscription was cancelled.
-
-Organizations in `trial` or `active` status are unaffected.
+- The account was suspended (for example after an abuse report).
+- The account was closed.
 
 ## How to fix
 
-- Contact Kash support to restore the organization. The key starts working again as soon as the organization is `trial` or `active`; it does not need to be reissued.
+- Contact [support@kash.bot](mailto:support@kash.bot). The key starts working again as soon as the account is active; it does not need to be reissued.
 
 ## Related codes
 
 - [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — the key itself was withdrawn
-- [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) — also 403, caused by scopes rather than the organization
+- [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) — also 403, caused by scopes rather than the account

@@ -1,6 +1,6 @@
 ---
 title: 'GET /api/markets/state'
-description: 'Live odds, volume and lifecycle for up to 200 markets in one request'
+description: 'Live prices, volume and lifecycle for up to 200 markets in one request'
 ---
 
 The batch version of [`GET /api/markets/:id/state`](/developer-docs/public-embed-api/endpoints/market-state). Use it to keep a grid of market cards up to date. Load the cards once from [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets), then poll this endpoint with their IDs.
@@ -41,7 +41,7 @@ curl "https://app.kash.bot/api/markets/state?ids=93f1445c-912c-47b4-8065-d1ff5a6
 ```
 
 ```javascript JavaScript
-async function refreshOdds(ids) {
+async function refreshPrices(ids) {
   const res = await fetch(`https://app.kash.bot/api/markets/state?ids=${ids.join(',')}`);
   const { markets } = await res.json();
   return new Map(markets.map((m) => [m.id, m]));

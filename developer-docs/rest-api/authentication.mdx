@@ -60,11 +60,11 @@ Each key has a tier, which sets its rate limit and spending caps. See [Rate limi
 | `free`       | Self-serve in the Kash app. |
 | `developer`  | On request to [support@kash.bot](mailto:support@kash.bot). |
 | `enterprise` | Issued by Kash. [Contact sales](mailto:sales@kash.bot). |
-| `mm`         | Market-maker tier, issued by Kash. [Contact partnerships](mailto:partnerships@kash.bot). |
+| `mm`         | Market-maker tier, issued by Kash. [Contact sales](mailto:sales@kash.bot). |
 
-## Organization status
+## Account status
 
-A key belongs to an organization. If that organization is suspended or cancelled, its keys are refused with `403 ORGANIZATION_INACTIVE`.
+A key belongs to the account that created it in the web app. If that account is suspended or closed, its keys are refused with `403 ORGANIZATION_INACTIVE`.
 
 ## IP allowlists
 
@@ -124,7 +124,7 @@ Keys can carry an expiry date; an expired key gets `401 API_KEY_EXPIRED`. API ke
 | 401    | `API_KEY_EXPIRED`           | Key past its expiry. |
 | 401    | `REQUEST_SIGNATURE_INVALID` | Signature present but invalid, or missing on a key that requires it. |
 | 403    | `INSUFFICIENT_SCOPE`        | Key lacks the route's scope. |
-| 403    | `ORGANIZATION_INACTIVE`     | The key's organization is suspended or cancelled. |
+| 403    | `ORGANIZATION_INACTIVE`     | The key's account is suspended or closed. |
 | 403    | `IP_NOT_ALLOWED`            | Source address not on the key's allowlist. |
 
 Failed authentication is counted per source address: **50 failures within 5 minutes** locks that address out for **15 minutes**, answered with `429 RATE_LIMIT_EXCEEDED` and `Retry-After: 900`.

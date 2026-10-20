@@ -1,9 +1,9 @@
 ---
 title: 'Build a trading bot'
-description: 'End-to-end: from an API key to a running bot that quotes, trades, verifies webhooks, manages positions, and claims winnings — with @kashdao/sdk.'
+description: 'End-to-end: from an API key to a running bot that quotes, trades, verifies webhooks, manages positions, and redeems resolved positions — with @kashdao/sdk.'
 ---
 
-This is the spine that ties the reference pages together. You'll build a bot that watches a market, places a sized trade on a signal, verifies webhook events, tracks its positions, and claims its winnings after the market resolves. Everything here runs against **staging** (`api-staging.kash.bot`, Solana devnet with simulated USDC). Going live is the same code with a live key against `api.kash.bot`, where trading runs on Solana mainnet.
+This is the spine that ties the reference pages together. You'll build a bot that watches a market, places a sized trade on a signal, verifies webhook events, tracks its positions, and redeems its winning positions after the market resolves. Everything here runs against **staging** (`api-staging.kash.bot`, Solana devnet with simulated USDC). Going live is the same code with a live key against `api.kash.bot`, where trading runs on Solana mainnet.
 
 <Note>
 Use the **[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript)** TypeScript client, not raw HTTP. It handles auth, retries, idempotency, typed errors, and webhook signature verification for you. Everything below is SDK-first.
@@ -20,7 +20,7 @@ A long-running loop that:
 3. Confirms the trade if it trips the high-value gate.
 4. Learns the outcome asynchronously via a signed webhook (or by polling).
 5. Tracks open positions.
-6. Redeems winnings once the market resolves.
+6. Redeems winning positions once the market resolves.
 
 ## 1. Prerequisites
 
@@ -147,7 +147,7 @@ const positions = await kash.portfolio.positions({ marketId: market.id }); // Po
 
 `positions()` returns an array, **not** a page — everything at once, filterable by `marketId`. Each position carries `shares` (WAD) and `costBasisAtomic` (USDC). For a long-running bot, `kash.portfolio.watchPositions()` yields the positions now and again whenever they change, backing off while nothing moves.
 
-## 8. Claim winnings (redeem)
+## 8. Redeem winning positions
 
 When a market resolves (or is cancelled), your winning outcome tokens stay in your account until you claim them. Nothing claims them for you. Create a redemption for each `(market, outcome)` you hold; the payout then settles on-chain asynchronously.
 

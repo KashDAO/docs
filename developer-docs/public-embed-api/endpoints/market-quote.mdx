@@ -3,7 +3,7 @@ title: 'GET /api/markets/:id/quote'
 description: 'Price a buy or a sell of one outcome before it is placed'
 ---
 
-Asks the market's AMM what a trade would return. You get the tokens a buy would receive, or the USDC a sell would release, the odds after the trade, and the protocol fee. Buy quotes also include an estimated payout. A quote is read-only and places nothing.
+Asks the market's AMM what a trade would return. You get the tokens a buy would receive, or the USDC a sell would release, the prices after the trade, and the protocol fee. Buy quotes also include an estimated payout. A quote is read-only and places nothing.
 
 ## Endpoint
 
@@ -47,7 +47,7 @@ GET https://app.kash.bot/api/markets/:id/quote
     <ResponseField name="impliedProbability" type="number">The outcome's marginal price after the trade (0 to 1)</ResponseField>
     <ResponseField name="protocolTradeFeeBps" type="number">Protocol fee in basis points (`100` is 1%)</ResponseField>
     <ResponseField name="estimate" type="object | null">
-      Payout estimate in whole USDC: `youPayUsdc`, `protocolFeeUsdc`, `netIntoAmmUsdc`, `tokensReceived`, `payoutAtCurrentOddsUsdc` (what the position pays if it wins and the odds stay where they are), `estimatedWinningsUsdc` and `snapshotPayoutUsdc` (the same value with a historical adjustment applied), `winningsUplift`, `winningsUpliftPercentile`, `impliedChanceAfter`, `effectiveBreakEvenChance` and `gasEstimateUsdc`. A promotional `promotionalEstimatedEarningsUsdc` string may also be present. It is display-only and does not change the trade. `estimate` is `null` when it can't be computed.
+      Payout estimate in whole USDC: `youPayUsdc`, `protocolFeeUsdc`, `netIntoAmmUsdc`, `tokensReceived`, `payoutAtCurrentOddsUsdc` (what the position pays if it wins and prices stay where they are), `estimatedWinningsUsdc` and `snapshotPayoutUsdc` (the same value with a historical adjustment applied), `winningsUplift`, `winningsUpliftPercentile`, `impliedChanceAfter`, `effectiveBreakEvenChance` and `gasEstimateUsdc`. A promotional `promotionalEstimatedEarningsUsdc` string may also be present. It is display-only and does not change the trade. `estimate` is `null` when it can't be computed.
     </ResponseField>
   </Expandable>
   <Expandable title="Quote (sell)">

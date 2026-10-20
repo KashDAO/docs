@@ -3,7 +3,7 @@ title: 'POST /api/twitter-links'
 description: 'Build X (Twitter) deep links for up to 50 market and outcome pairs in one request'
 ---
 
-Builds deep links in bulk, using each market's real outcome labels. One request can mix markets, outcomes and stakes. If one entry is invalid, it lands in `errors` and the rest of the batch is still returned.
+Builds deep links in bulk, using each market's real outcome labels. One request can mix markets, outcomes and amounts. If one entry is invalid, it lands in `errors` and the rest of the batch is still returned.
 
 <Warning>
 **Server-side only.** This endpoint is CSRF-protected. Each request needs the `csrf-token` cookie from `GET /api/csrf` and the same value in an `x-csrf-token` header. Browsers on other origins can't do that, because the cookie is `SameSite=Strict` and the API's wildcard CORS doesn't allow credentials. Call it from your backend. In a browser, call [`GET /api/markets/:id/twitter-link`](/developer-docs/public-embed-api/endpoints/market-twitter-link) once per market instead.
@@ -37,7 +37,7 @@ POST https://app.kash.bot/api/twitter-links
   <Expandable title="Entry">
     <ParamField body="marketId" type="string" required>Market UUID</ParamField>
     <ParamField body="outcomeIndex" type="integer" required>Outcome to back, from 0 to 99</ParamField>
-    <ParamField body="amount" type="number" required>Stake in whole USDC, from 1 to 10,000</ParamField>
+    <ParamField body="amount" type="number" required>Trade amount in whole USDC, from 1 to 10,000</ParamField>
     <ParamField body="outcomeLabel" type="string">Optional. It must be one of the market's own labels for this outcome, or the default name (`Yes`, `No` or `Outcome N`). If it isn't, the entry fails with `Outcome is not one of the market's`. Leave it out to use the market's label.</ParamField>
   </Expandable>
 </ParamField>
@@ -54,7 +54,7 @@ POST https://app.kash.bot/api/twitter-links
 
 <ResponseField name="_meta" type="object">`{ requestedAt, totalRequested, totalGenerated, totalErrors }`</ResponseField>
 
-Only verified markets that are `ACTIVE` or frozen, and not past their end time, get links. Each tweet mentions the X account of the organization that owns the market, or the Kash trading bot if the organization has none. These links don't quote the announcement tweet.
+Only verified markets that are `ACTIVE` or frozen, and not past their end time, get links. Each tweet mentions the X account that posts the market, or the Kash trading bot if there is none. These links don't quote the announcement tweet.
 
 ## Rate limit
 

@@ -42,7 +42,7 @@ GET https://app.kash.bot/api/threads/:id/markets
 ## Response
 
 <ResponseField name="markets" type="Market[]">
-  [Market objects](/developer-docs/public-embed-api/endpoints/markets#response), with one difference: `outcomes[].probability` is the AMM's raw marginal price and `oddsKnown` is not included. Show `outcomes[].impliedChance` as the odds.
+  [Market objects](/developer-docs/public-embed-api/endpoints/markets#response), with one difference: `outcomes[].probability` is the AMM's raw marginal price and `oddsKnown` is not included. Show `outcomes[].impliedChance` as the implied probability.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">`{ offset, limit, total, hasMore }`</ResponseField>

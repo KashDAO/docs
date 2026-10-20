@@ -22,7 +22,7 @@ All atomic-USDC amounts are decimal **strings** (6 decimals). A competition that
 | Field                 | Type              | Notes |
 | --------------------- | ----------------- | ----- |
 | `id`                  | uuid              | |
-| `organizationId`      | uuid              | The organization running it. |
+| `organizationId`      | uuid              | The account running it. |
 | `slug`, `name`, `summary`, `rules` | string | |
 | `bannerUrl`           | string \| null    | |
 | `state`               | enum              | `published`, `registration`, `running`, `claim_window`, `cancelled`, `scoring_frozen`, `settled`, `paid_out`, `closed`. |
@@ -74,7 +74,7 @@ Each item: `{ competitionId, entrantId, subjectType, groupId, userId, isCaller, 
 
 ## `POST /v1/competitions/{competitionId}/join`
 
-Creates an entry in `funding` with a zero stake. Joining does not pay: the entry becomes scoreable once its members have pooled the minimum entry fee through `/contribute`.
+Creates an entry in `funding` with nothing contributed yet. Joining does not pay: the entry becomes scoreable once its members have together contributed the required amount through `/contribute`.
 
 | Body field      | Type     | Notes |
 | --------------- | -------- | ----- |
@@ -89,12 +89,12 @@ Errors: `403 COMPETITION_NOT_GROUP_OWNER`, `409 COMPETITION_ALREADY_ENTERED` (fu
 
 ## `POST /v1/competitions/{competitionId}/contribute`
 
-Records your contribution to an entry's pooled fee. The contributing member is always you, never a body field. The entry moves to `joined`, and its roster is captured, the moment the pool reaches the minimum entry fee.
+Records your contribution to an entry. The contributing member is always you, never a body field. The entry moves to `joined`, and its roster is captured, the moment the pool reaches the minimum entry fee.
 
 | Body field      | Type     | Notes |
 | --------------- | -------- | ----- |
 | `entrantId`     | uuid, required | |
-| `amountAtomic`  | string, required | Integer string. Must meet the competition's minimum ticket. |
+| `amountAtomic`  | string, required | Integer string. Must meet the competition's minimum contribution. |
 | `payingAddress` | string, required | Solana or EVM address. |
 | `externalRef`   | string, required | The on-chain transfer id, 1 to 200 characters. This is the idempotency key for the money: repeating the same `externalRef` credits nothing. |
 
@@ -104,7 +104,7 @@ Errors: `400 COMPETITION_CONTRIBUTION_BELOW_MINIMUM`, `403 COMPETITION_NOT_ENTRY
 
 ## `POST /v1/competitions/{competitionId}/sponsor`
 
-Adds your organization's money to the prize pot. There is no sponsor address in the body: it is resolved from your API key's organization, and it is the address a cancelled competition's prefund can be reclaimed by. Only `onchain_escrow` and `sponsored` competitions accept sponsorship, and only before settlement.
+Adds funds to the competition's rewards. There is no sponsor address in the body: it is resolved from the account behind your API key, and it is the address a cancelled competition's prefund can be reclaimed by. Only `onchain_escrow` and `sponsored` competitions accept sponsorship, and only before settlement.
 
 | Body field     | Type   | Notes |
 | -------------- | ------ | ----- |

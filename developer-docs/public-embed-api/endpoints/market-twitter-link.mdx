@@ -3,7 +3,7 @@ title: 'GET /api/markets/:id/twitter-link'
 description: 'Build an X (Twitter) deep link that places a prediction on one market'
 ---
 
-Returns a `twitter.com/intent/tweet` URL with the tweet already written, for example `put $10 on Yes @kash_bot_trade`. A user who has linked their X account to Kash can post it, and the Kash trading bot reads the tweet and places the trade. Use it to build your own "Predict" buttons without an iframe.
+Returns a `twitter.com/intent/tweet` URL with the tweet already written: the outcome, the amount and the account to mention. A user who has connected their X account to Kash can post it, and the Kash trading bot reads the tweet and submits the trade from the user's own wallet. Use it to build your own "Predict" buttons without an iframe.
 
 ## Endpoint
 
@@ -24,7 +24,7 @@ GET https://app.kash.bot/api/markets/:id/twitter-link
 </ParamField>
 
 <ParamField query="amount" type="number" required>
-  The stake in whole USDC, from 1 to 10,000.
+  The trade amount in whole USDC, from 1 to 10,000.
 </ParamField>
 
 <ParamField query="locale" type="string">

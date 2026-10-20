@@ -11,9 +11,9 @@ description: 'HTTP 409 — Competition is not cancelled'
 
 ## Why it happens
 
-A refund returns a contributor's own stake, and a stake is only owed back once the competition is cancelled. Before that:
+A refund returns a contributor's own contribution, and a contribution is only owed back once the competition is cancelled. Before that:
 
-- A **running** competition still legitimately holds the stake; that is what entering paid for.
+- A **running** competition still legitimately holds the contribution; that is what entering paid for.
 - A **settled** competition pays out through the prize claim (`POST /v1/competitions/{competitionId}/claim`), not this endpoint.
 
 The check is enforced server-side for every refund, so this endpoint can never become a general withdrawal path on a live competition.

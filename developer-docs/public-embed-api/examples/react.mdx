@@ -10,16 +10,14 @@ These examples use React 18 or later and the browser `fetch`. They need no API k
 ```tsx KashEmbed.tsx
 type KashEmbedProps =
   | { kind: 'market'; id: string; height?: number }
-  | { kind: 'thread'; id: string; height?: number }
-  | { kind: 'organization'; id: string; height?: number }; // slug or UUID
+  | { kind: 'thread'; id: string; height?: number };
 
 const PATHS = {
   market: (id: string) => `/markets/${id}/iframe`,
   thread: (id: string) => `/threads/${id}/iframe`,
-  organization: (id: string) => `/o/${id}/iframe`,
 };
 
-const DEFAULT_HEIGHT = { market: 520, thread: 900, organization: 900 };
+const DEFAULT_HEIGHT = { market: 520, thread: 900 };
 
 export function KashEmbed({ kind, id, height }: KashEmbedProps) {
   return (
@@ -38,7 +36,7 @@ export function KashEmbed({ kind, id, height }: KashEmbedProps) {
 
 ```tsx
 <KashEmbed kind="market" id="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" />
-<KashEmbed kind="organization" id="kash" />
+<KashEmbed kind="thread" id="00000001-0000-4000-a000-000000000003" />
 ```
 
 ## Hook for iframe events
@@ -65,11 +63,11 @@ export function useKashEmbedEvents(onMessage: (msg: KashMessage) => void) {
 }
 ```
 
-## Custom market grid with live odds
+## Custom market grid with live prices
 
-This component builds its own grid from the JSON API. It loads an organization's markets once, refreshes the odds every 10 seconds from `/api/markets/state`, and adds a "Predict on X" button to each outcome.
+This component builds its own grid from the JSON API. It loads a thread's markets once, refreshes the prices every 10 seconds from `/api/markets/state`, and adds a "Predict on X" button to each outcome.
 
-```tsx OrgMarketGrid.tsx
+```tsx ThreadMarketGrid.tsx
 import { useEffect, useState } from 'react';
 
 const API = 'https://app.kash.bot/api';
@@ -85,19 +83,19 @@ async function getJson<T>(url: string): Promise<T> {
   return body as T;
 }
 
-export function OrgMarketGrid({ organizationId, amount = 10 }: { organizationId: string; amount?: number }) {
+export function ThreadMarketGrid({ threadId, amount = 10 }: { threadId: string; amount?: number }) {
   const [markets, setMarkets] = useState<Market[]>([]);
-  const [odds, setOdds] = useState<Record<string, number[]>>({});
+  const [prices, setPrices] = useState<Record<string, number[]>>({});
   const [error, setError] = useState<string | null>(null);
 
   // 1. Load the markets once.
   useEffect(() => {
-    getJson<{ markets: Market[] }>(`${API}/organizations/${organizationId}/markets?limit=24&sortBy=total_volume`)
+    getJson<{ markets: Market[] }>(`${API}/threads/${threadId}/markets?limit=24&sortBy=total_volume`)
       .then(({ markets }) => setMarkets(markets))
       .catch((e) => setError(e.message));
-  }, [organizationId]);
+  }, [threadId]);
 
-  // 2. Keep the odds live.
+  // 2. Keep the prices live.
   useEffect(() => {
     if (markets.length === 0) return;
     const ids = markets.map((m) => m.id).join(',');
@@ -105,7 +103,7 @@ export function OrgMarketGrid({ organizationId, amount = 10 }: { organizationId:
     const tick = async () => {
       try {
         const { markets: states } = await getJson<{ markets: MarketState[] }>(`${API}/markets/state?ids=${ids}`);
-        setOdds(Object.fromEntries(states.map((s) => [s.id, s.outcomes.map((o) => o.impliedChance)])));
+        setPrices(Object.fromEntries(states.map((s) => [s.id, s.outcomes.map((o) => o.impliedChance)])));
       } finally {
         timer = setTimeout(tick, 10_000);
       }
@@ -137,7 +135,7 @@ export function OrgMarketGrid({ organizationId, amount = 10 }: { organizationId:
             <h3>{m.title}</h3>
           </a>
           {m.outcomes.map((o) => {
-            const chance = odds[m.id]?.[o.outcomeIndex] ?? o.impliedChance;
+            const chance = prices[m.id]?.[o.outcomeIndex] ?? o.impliedChance;
             return (
               <button key={o.outcomeIndex} disabled={!m.tradable} onClick={() => predict(m.id, o.outcomeIndex)}>
                 {o.label} · {Math.round(chance * 100)}%
@@ -152,7 +150,7 @@ export function OrgMarketGrid({ organizationId, amount = 10 }: { organizationId:
 ```
 
 ```tsx
-<OrgMarketGrid organizationId="6b617368-6277-6864-7800-000000000001" amount={10} />
+<ThreadMarketGrid threadId="00000001-0000-4000-a000-000000000003" amount={10} />
 ```
 
 <Note>

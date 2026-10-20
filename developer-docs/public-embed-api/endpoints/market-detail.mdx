@@ -34,7 +34,7 @@ GET https://app.kash.bot/api/markets/:id
 ## Response
 
 <ResponseField name="market" type="Market">
-  A [market object](/developer-docs/public-embed-api/endpoints/markets#response). Odds are normalized as described there, and `oddsKnown` is included.
+  A [market object](/developer-docs/public-embed-api/endpoints/markets#response). Prices are normalized as described there, and `oddsKnown` is included.
 </ResponseField>
 
 <ResponseField name="priceHistory" type="object[]">
@@ -138,6 +138,6 @@ console.log(market.title, market.outcomes[0].impliedChance, priceHistory.length)
 ## Related
 
 <CardGroup cols={2}>
-  <Card title="GET /api/markets/:id/state" href="/developer-docs/public-embed-api/endpoints/market-state">Lightweight live odds</Card>
+  <Card title="GET /api/markets/:id/state" href="/developer-docs/public-embed-api/endpoints/market-state">Lightweight live prices</Card>
   <Card title="GET /api/markets/:id/quote" href="/developer-docs/public-embed-api/endpoints/market-quote">Price a trade</Card>
 </CardGroup>

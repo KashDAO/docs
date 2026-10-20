@@ -17,7 +17,7 @@ description: 'HTTP 400 — Outcome index invalid'
 
 ## How to fix
 
-- Fetch the market with `GET /v1/markets/{id}` and check `outcomes.length`. The valid range is `0` to `length - 1`. Markets can have from 2 to 100 outcomes.
+- Fetch the market with `GET /v1/markets/{id}` and check `outcomes.length`. The valid range is `0` to `length - 1`.
 - Map outcome labels to indices once when you fetch the market, then use the index throughout your code.
 
 ## Related codes

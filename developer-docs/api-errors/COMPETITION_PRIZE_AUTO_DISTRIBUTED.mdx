@@ -11,7 +11,7 @@ description: 'HTTP 409 — Competition prize auto-distributed'
 
 ## Why it happens
 
-The competition settles by automatic distribution, so there is nothing to claim: winnings arrive without a caller-initiated claim.
+The competition settles by automatic distribution, so there is nothing to claim: rewards arrive without a caller-initiated claim.
 
 This is a state conflict on the competition, not an authorization failure about you (that would be `403` [`COMPETITION_PRIZE_NOT_CLAIMABLE`](/developer-docs/api-errors/COMPETITION_PRIZE_NOT_CLAIMABLE)), so it is a permanent `409` and retrying will not help.
 
