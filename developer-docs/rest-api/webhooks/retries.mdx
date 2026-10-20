@@ -1,41 +1,34 @@
 ---
 title: 'Retries & Redelivery'
-description: 'Backoff schedule, terminal failure, and how to manually replay a webhook event.'
+description: 'How failed webhook deliveries are retried, when delivery stops, and how to replay an event.'
 ---
 
-The webhook delivery worker retries failed deliveries automatically. When that's not enough, you can manually replay any event for up to 30 days.
+## How each attempt is judged
 
-## Automatic retry behaviour
+| Your endpoint's answer | Result |
+| ---------------------- | ------ |
+| `2xx` | Delivered. No more attempts. |
+| `3xx` | Stopped. Redirects are not followed; register the final URL. |
+| `400`, `404`, `410`, `422` | Stopped. Kash reads these as "don't send me this event". |
+| Any other `4xx` (including `408` and `429`) | Retried. |
+| `5xx` | Retried. |
+| No answer within 10 seconds | Retried. |
+| Network or TLS error | Retried. |
 
-If your endpoint:
+A stopped event has `status: "failed"` and a `terminalFailureAt` time in `GET /v1/webhooks/events`.
 
-- **Returns `2xx`** → delivery succeeds. No retries.
-- **Returns `3xx`** → treated as misconfiguration (we don't follow redirects on webhooks). Retried as a transient failure.
-- **Returns `4xx` (except 408/429)** → treated as a **terminal client error** the customer must fix. Retries stop after one attempt; the event is marked terminally failed.
-- **Returns `408`, `429`, or any `5xx`** → retried with exponential backoff.
-- **Times out** (>10s) → retried.
-- **Network error** (TCP reset, DNS failure, TLS handshake failure) → retried.
+## Automatic retries
 
-### Retry schedule
+A retryable failure is attempted again about **2 minutes** later, up to **10 attempts in total**, so automatic delivery gives up roughly 20 minutes after the first attempt. Treat the timing as approximate.
 
-Failed deliveries are retried with **exponential backoff and jitter**: the first attempt fires immediately, early retries follow within seconds-to-minutes, and later gaps stretch to multiple hours — up to **10 attempts total over roughly 24 hours** from the originating event.
+Events for one API key are delivered in order, so a failing event holds back later events for the same key until it is delivered or its attempts run out. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
 
-After attempt 10 (or the ~24h ceiling), the delivery moves to the dead-letter queue and the event is marked `terminally failed` (`webhook_events.terminal_failure_at` is set). Automatic delivery stops; the event remains in the database for 30 days for manual replay.
-
-Delays are jittered to avoid herd retry storms — treat the schedule as approximate, not a contract.
-
-## Distributed circuit breaker
-
-Per-endpoint, not per-customer. If your URL has a high recent failure rate (5 consecutive failures, or >50% failures in the last 60s with at least 5 attempts), the circuit opens and we pause delivery for ~30 seconds before half-opening. This prevents one slow customer endpoint from starving the worker — other customers' deliveries are unaffected.
-
-When the circuit is open, queued events for the same URL are not lost — they're held in the SQS retry pipeline and resumed when the breaker closes.
+If your endpoint fails **5 times in a row**, delivery to it pauses for about **60 seconds** before a single trial attempt. Other customers' deliveries are not affected.
 
 ## Inspecting delivery state
 
-Every webhook event is queryable via `GET /v1/webhooks/events`:
-
 ```bash
-curl 'https://api.kash.bot/v1/webhooks/events?status=failed&limit=20' \
+curl 'https://api.kash.bot/v1/webhooks/events?status=failed,retrying&limit=20' \
   -H "X-API-Key: $KASH_API_KEY"
 ```
 
@@ -43,119 +36,76 @@ curl 'https://api.kash.bot/v1/webhooks/events?status=failed&limit=20' \
 {
   "data": [
     {
-      "id":              "evt_...",
-      "eventType":       "trade.completed",
-      "tradeRequestId":  "trade_...",
-      "emittedAt":       "2026-05-02T12:00:00.000Z",
-      "outboxEmittedAt": "2026-05-02T12:00:00.500Z",
-      "replayCount":     0,
-      "status":          "failed",
+      "id": "6f1c2a3b-9d0e-4f7a-8c1b-6e5d3f4a2c9b",
+      "eventType": "trade.completed",
+      "tradeRequestId": "11111111-1111-4111-8111-111111111111",
+      "emittedAt": "2026-10-20T12:00:00.000Z",
+      "outboxEmittedAt": "2026-10-20T12:00:00.400Z",
+      "replayCount": 0,
+      "status": "failed",
       "delivery": {
-        "attempts":          10,
-        "lastAttemptedAt":   "2026-05-03T11:42:18.000Z",
-        "lastDeliveredAt":   null,
-        "lastStatusCode":    503,
-        "lastFailureCode":   "http_5xx",
-        "lastErrorMessage":  "Upstream returned 503 Service Unavailable",
-        "terminalFailureAt": "2026-05-03T11:42:18.000Z"
+        "attempts": 1,
+        "lastAttemptedAt": "2026-10-20T12:00:01.000Z",
+        "lastDeliveredAt": null,
+        "lastStatusCode": 404,
+        "lastFailureCode": "terminal_client_error",
+        "lastErrorMessage": "Customer endpoint returned 404",
+        "terminalFailureAt": "2026-10-20T12:00:01.000Z"
       }
     }
   ],
-  "pagination": { "cursor": "...", "hasMore": true, "limit": 20 }
+  "pagination": { "cursor": null, "hasMore": false, "limit": 20 },
+  "_meta": { "requestId": "…", "timestamp": "…" }
 }
 ```
 
-Filter by status (`pending`, `delivered`, `failed`, `retrying`, `none`) and date range to narrow down. Cursor-paginated.
-
-The webapp's **Settings → Webhook Inspector** UI renders the same data with timeline visualisations.
+`status` filters: `none`, `pending`, `retrying`, `delivered`, `failed`, comma-separated. See [Webhook management](/developer-docs/rest-api/endpoints/webhooks).
 
 ## Manual redelivery
 
-After fixing your endpoint (or rotating its URL), replay individual events:
+After fixing your endpoint, replay an event:
 
 ```bash
-curl -X POST https://api.kash.bot/v1/webhooks/events/evt_8f3c2a1b/redeliver \
+curl -X POST https://api.kash.bot/v1/webhooks/events/6f1c2a3b-9d0e-4f7a-8c1b-6e5d3f4a2c9b/redeliver \
   -H "X-API-Key: $KASH_API_KEY"
 ```
 
-```json
-{
-  "event": {
-    "id":               "evt_8f3c2a1b",
-    "eventType":        "trade.completed",
-    "apiKeyId":         "...",
-    "tradeRequestId":   "...",
-    "emittedAt":        "2026-05-02T12:00:00.000Z",
-    "lastDeliveredAt":  null,
-    "deliveryAttempts": 10
-  },
-  "data":  { /* same as event */ },
-  "_meta": { "requestId": "...", "timestamp": "...", "message": "Webhook delivery enqueued for replay." }
-}
-```
+The answer is `202 Accepted` with the event. The replay:
 
-The replayed delivery uses the **same** `X-Kash-Event-Id` as the original, so a customer that already processed the first delivery treats the replay as a no-op (assuming proper dedupe). This is the whole point of the dedupe pattern: a manual replay can never produce a duplicate side effect.
+- carries the **same** event id and `X-Kash-Event-Id`, so a receiver that already processed the event treats it as a duplicate;
+- is signed with the key's **current** secret;
+- works on an event in any state, including one already delivered, which is handy for testing a handler with a real payload;
+- is itself retried like any delivery.
 
-### Replay amplification cap
+Each event can be replayed at most **5 times** (`429 WEBHOOK_REPLAY_LIMIT_REACHED` after that). There is no bulk replay: list the failed events and replay them one by one.
 
-Each event can be manually replayed at most **5 times** in total. Beyond that, `POST .../redeliver` returns `429 WEBHOOK_REPLAY_LIMIT_REACHED`. This bounds the cost of a runaway replay loop.
+## Testing locally
 
-If you genuinely need more, contact support — we can lift the cap on a per-event basis after auditing.
-
-### Replay scope
-
-- Manual replay works on **any** event status (failed, delivered, even successful — useful for testing your handler with a real payload).
-- The replay enqueues a **new** delivery attempt; it doesn't reset the original delivery's history.
-- Each replay is itself subject to the auto-retry schedule above.
-- Replays use the **current** webhook secret (not the one that signed the original delivery). If you've rotated, the new signature reflects the current secret.
-
-## Bulk operations
-
-The customer-facing API doesn't expose bulk redelivery — that's deliberate (amplification risk). For incident recovery (e.g. "all events for the last hour failed because my endpoint was down"), use `kash-admin webhooks bulk-redeliver` (admin CLI) which has additional safety guards.
-
-## Tracing a specific event
-
-The top-level `kash trace <correlationId>` CLI command pulls the curated event timeline for the trade behind a delivery — get the correlation id from the originating trade:
+The `kash` CLI can sign a payload the same way Kash does and POST it to your endpoint, without touching production data:
 
 ```bash
-kash trade status <trade-id> --json | jq -r '.correlationId'
-kash trace 33333333-3333-3333-3333-333333333333
+kash webhooks replay payload.json \
+  --target http://localhost:3000/webhooks/kash \
+  --secret "$KASH_WEBHOOK_SECRET"
 ```
 
-Output is the trade's end-to-end event chain (intent → funding → execution → webhook delivery). Useful for "why didn't this deliver?" investigations.
-
-## What survives 30 days
-
-- Events `succeeded` or with no failures: kept indefinitely for audit.
-- Events `terminally failed`: retained for 30 days, then archived to S3 (queryable via Athena, not via the API).
+Use `--timestamp-ms` to test your freshness check, and `kash webhooks verify` to check a signature offline. To trace the trade behind an event, pass its `correlationId` to `kash trace` or `GET /v1/traces/{correlationId}`.
 
 ## Common patterns
 
-### "I deployed a broken handler — how do I replay everything I missed?"
+### "My handler was broken for an hour"
 
-1. Roll back or fix the handler.
-2. List failed events from the deploy window: `GET /v1/webhooks/events?status=failed&from=...&limit=100`.
-3. Iterate the cursor-paginated response, calling `POST .../redeliver` on each id.
-4. Watch deliveries succeed via `GET /v1/webhooks/events?status=delivered&from=<retry-time>`.
-
-### "I want to test my handler against a real production payload"
-
-1. Find a known-good event id from `GET /v1/webhooks/events?status=delivered`.
-2. Point your test endpoint at a tunnel (e.g. `ngrok`).
-3. Update the key's `webhook_url` to the tunnel URL.
-4. `POST .../redeliver` on the chosen event id.
-5. Inspect what hits your handler.
-6. Restore the key's `webhook_url` when you're done.
-
-A safer alternative: use `kash webhooks replay <body-file> --target <url> --secret <s>` (CLI) to sign a locally captured (or synthetic) payload and POST it at your endpoint — no production data round-trip needed. Pair with `kash webhooks verify` to check signatures offline.
+1. Fix and redeploy the handler.
+2. List `GET /v1/webhooks/events?status=failed,retrying` and walk the cursor.
+3. `POST …/redeliver` each event id. Your deduplication makes this safe for events you did process.
 
 ## Next
 
 <CardGroup cols={2}>
-  <Card title="Verifying Signatures" icon="shield" href="/developer-docs/rest-api/webhooks/verifying">
+  <Card title="Verifying signatures" icon="shield" href="/developer-docs/rest-api/webhooks/verifying">
     Always verify before processing.
   </Card>
-  <Card title="Secret Rotation" icon="key" href="/developer-docs/rest-api/webhooks/secret-rotation">
-    Rotate without dropping mid-rotation deliveries.
+  <Card title="Secret rotation" icon="key" href="/developer-docs/rest-api/webhooks/secret-rotation">
+    Rotate without dropping deliveries.
   </Card>
 </CardGroup>
