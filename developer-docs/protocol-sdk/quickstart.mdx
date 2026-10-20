@@ -51,8 +51,9 @@ market account.
 const buy = await kash.markets.quoteBuy({ market: 5n, outcome: 0, amountUsdc: 5_000_000n });
 console.log(`${buy.tokensOutWad} WAD, fee ${buy.protocolFeeUsdc} atomic USDC`);
 
-// What would selling 1 token of outcome 0 pay?
-const sell = await kash.markets.quoteSell({ market: 5n, outcome: 0, tokensInWad: 10n ** 18n });
+// What would selling 0.1 token of outcome 1 pay? Only tokens traders hold can
+// be sold, so a sell quote larger than that throws KashValidationError (ExceedsSupply).
+const sell = await kash.markets.quoteSell({ market: 5n, outcome: 1, tokensInWad: 10n ** 17n });
 console.log(`${sell.amountOutUsdc} atomic USDC`);
 ```
 
