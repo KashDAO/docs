@@ -1,0 +1,71 @@
+---
+title: 'GET /api/organizations/:id/profile'
+description: 'Organization metadata plus market stats and follower count'
+---
+
+Returns the same fields as [`GET /api/organizations/:id`](/developer-docs/public-embed-api/endpoints/organization-detail), plus aggregate market stats and a follower count. Use it for a header such as "47 live markets · 9,985 traders".
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/organizations/:id/profile
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  Organization UUID.
+</ParamField>
+
+## Response
+
+<ResponseField name="organization" type="OrganizationProfile">
+  Every [organization field](/developer-docs/public-embed-api/endpoints/organization-detail#response), plus the following.
+
+  <Expandable title="Additional fields">
+    <ResponseField name="stats.totalMarkets" type="integer">Verified markets the organization owns or is the partner on</ResponseField>
+    <ResponseField name="stats.activeMarkets" type="integer">Of those, how many are `ACTIVE` and not yet expired</ResponseField>
+    <ResponseField name="stats.totalVolume" type="string">Lifetime volume across those markets, in atomic USDC (6 decimals)</ResponseField>
+    <ResponseField name="stats.totalTraders" type="integer">The sum of each market's trader count. A trader active in several markets is counted once per market.</ResponseField>
+    <ResponseField name="followerCount" type="integer">Number of Kash users following the organization</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="_meta" type="object">`{ requestedAt }`</ResponseField>
+
+## Caching and rate limit
+
+Cached for 5 minutes. Organization and partner reads group: 600 requests per minute per IP.
+
+## Example request
+
+```bash cURL
+curl "https://app.kash.bot/api/organizations/6b617368-6277-6864-7800-000000000001/profile"
+```
+
+## Example response
+
+```json 200
+{
+  "organization": {
+    "id": "6b617368-6277-6864-7800-000000000001",
+    "name": "Kash",
+    "slug": "kash",
+    "displayName": "Kash",
+    "tagline": "Prediction Markets for Everyone",
+    "description": null,
+    "websiteUrl": null,
+    "colorPrimary": "#FBD109",
+    "logoUrl": "https://…/logo.svg",
+    "status": "active",
+    "stats": {
+      "totalMarkets": 1386,
+      "activeMarkets": 47,
+      "totalVolume": "239667071263",
+      "totalTraders": 9985
+    },
+    "followerCount": 13
+  },
+  "_meta": { "requestedAt": "2026-10-20T17:40:48.830Z" }
+}
+```
