@@ -7,19 +7,18 @@ description: 'HTTP 404 — Redemptions not enabled'
 
 ## When it fires
 
-`POST /v1/redemptions` was called while self-service redemption is not enabled on the platform. Resolved markets are then paid out automatically, without any claim from you.
+`POST /v1/redemptions` was called in an environment where self-service redemption is not available. In that mode, winning positions in resolved markets are redeemed to holders' wallets automatically, without a claim.
 
 ## Why it happens
 
-- Self-service redemption has not been enabled in this environment. Markets are then paid out automatically at resolution.
-- The capability was switched off platform-wide.
+- Self-service redemption is not available in this environment, so winning positions are redeemed automatically at resolution.
 
-This is distinct from [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED), a temporary `503` that pauses the endpoint. `REDEMPTIONS_NOT_ENABLED` means the capability is not enabled at all, so retrying will not help.
+This is distinct from [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED), a temporary `503` that pauses the endpoint. `REDEMPTIONS_NOT_ENABLED` means the capability is not available in this environment, so retrying will not help.
 
 ## How to fix
 
 - Nothing to do as an integrator. Winning positions are still redeemed automatically once the market resolves; check `GET /v1/portfolio` for the settled balance.
-- If you believe self-service redemption should be enabled for your environment, contact Kash support.
+- If you expected self-service redemption to be available, contact Kash support.
 
 ## Related codes
 

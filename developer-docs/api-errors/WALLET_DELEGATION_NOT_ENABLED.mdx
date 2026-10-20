@@ -11,17 +11,17 @@ Kash cannot act on the wallet your API key is configured to trade from. Returned
 
 Today this happens when the key is configured to trade from a smart account other than the key owner's own. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
 
-Wallet delegation (your permission for Kash to sign trades on your behalf) is granted in the Kash app. If it has been withdrawn, trades accepted by the API fail at execution rather than returning this code synchronously; check the trade's status on `GET /v1/trades/{id}`.
+Wallet delegation (your permission for Kash's app to submit transactions from your wallet on your behalf) is granted in the Kash app, at the **Approve Kash** step. If it is missing, trades accepted by the API fail at execution rather than returning this code synchronously; check the trade's status on `GET /v1/trades/{id}`.
 
 ## Why it happens
 
 - The key was issued to trade from an account other than your own.
-- Wallet delegation was withdrawn in the Kash app, or onboarding skipped the delegation step.
+- The **Approve Kash** step was skipped during sign-in, or the app has asked for a fresh approval that hasn't been given yet.
 
 ## How to fix
 
 - Use a key configured to trade from your user account. Issue one in the Kash app (Settings → API Keys) or ask Kash support.
-- If delegation was withdrawn, re-enable it in the Kash app.
+- If delegation is missing, complete the **Approve Kash** step in the Kash app. It is shown again when you next trade there.
 
 ## Related codes
 

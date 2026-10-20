@@ -149,7 +149,7 @@ const positions = await kash.portfolio.positions({ marketId: market.id }); // Po
 
 ## 8. Redeem winning positions
 
-When a market resolves (or is cancelled), your winning outcome tokens stay in your account until you claim them. Nothing claims them for you. Create a redemption for each `(market, outcome)` you hold; the payout then settles on-chain asynchronously.
+When a market resolves (or is cancelled), your winning outcome tokens stay in your account until they are claimed. Create a redemption for each `(market, outcome)` you hold; the redemption is then submitted from your wallet and settles on-chain asynchronously.
 
 ```ts
 import { KashConflictError, KashNotFoundError } from '@kashdao/sdk';
