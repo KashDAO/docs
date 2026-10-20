@@ -39,7 +39,7 @@ Prediction markets are a great idea with a rough onboarding problem: wallets, ga
   </Accordion>
 
   <Accordion title="Non-custodial: your own wallet">
-    Markets live on an open, permissionless protocol on Solana, and Kash is an interface to it. Your USDC and positions stay in your own Solana wallet, Kash never holds custody of them, and you can export the private key from Settings at any time. Kash can submit trades you request only after you give your wallet permission.
+    Markets are created and traded on an open, permissionless protocol on Solana. Kash provides the interface and operates the automated market creation and resolution system. Your USDC and positions stay in your own Solana wallet, Kash never holds custody of them, and you can export the private key from Settings at any time. Kash can submit trades you request only after you give your wallet permission.
   </Accordion>
 
   <Accordion title="Transparent resolution and a refund path">
@@ -56,7 +56,7 @@ Prediction markets are a great idea with a rough onboarding problem: wallets, ga
 | **Custody** | Often held by the platform | Non-custodial: your own wallet; Kash never holds custody |
 | **Market structure** | Often binary only | Multiple outcomes per market |
 | **Where you trade** | One app | Web app and X |
-| **Stuck markets** | At the platform's discretion | Anyone can trigger a refund after the grace period |
+| **Stuck markets** | At the platform's discretion | Anyone can cancel an unresolved market after its resolution time, through the protocol |
 | **Fees** | Varies | A protocol fee on trades, shown before you confirm |
 
 The app always shows the exact fees before you confirm.

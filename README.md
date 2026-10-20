@@ -9,7 +9,7 @@ Public documentation for **Kash**, a social prediction market on Solana. This re
 
 ## About Kash
 
-Kash is an interface to an open, permissionless prediction-market protocol on Solana. Users trade multi-outcome markets in USDC in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Creators connect their X account in the web app and create markets by chatting with Kash AI.
+Markets on Kash are created and traded on an open, permissionless on-chain protocol on Solana. Kash provides the interface and operates the automated market creation and resolution system. Users trade multi-outcome markets in USDC in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Creators connect their X account in the web app and create markets by chatting with Kash AI.
 
 Key characteristics documented here:
 
