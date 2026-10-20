@@ -4,10 +4,6 @@ description: 'How the Kash Pythagorean AMM prices multi-outcome markets'
 icon: 'chart-mixed'
 ---
 
-<Note>
-Kash markets run on a custom automated market maker (AMM) — a deterministic, weighted Pythagorean scoring rule built for multi-outcome prediction markets. Every market has tradeable liquidity from the moment it's created, with no external liquidity providers required.
-</Note>
-
 <img
   style={{ borderRadius: '0.5rem' }}
   className="block dark:hidden"
@@ -21,64 +17,48 @@ Kash markets run on a custom automated market maker (AMM) — a deterministic, w
   alt="Hero Dark"
 />
 
-# What the AMM Does
+# What the AMM does
 
-Every Kash market holds a single USDC reserve that backs all of its outcomes. When you buy an outcome, your USDC (minus fees) goes into the reserve and the AMM mints outcome tokens to you along a fixed mathematical curve. When you sell, tokens are burned and USDC comes back out of the reserve.
+Every Kash market holds a single USDC pool that backs all of its outcomes. When you buy an outcome, your USDC (minus the protocol fee) goes into the pool and the AMM issues outcome shares to you along a fixed mathematical curve. When you sell, your shares are burned and USDC comes back out of the pool.
 
-The curve is purely deterministic — the same trade against the same market state always produces the same result. There are no order books, no counterparties to match with, and no social-signal or engagement inputs to the pricing. It's just math against the reserve.
+The curve is deterministic: the same trade against the same market state always produces the same result. There's no order book, no counterparty to match with, and no social or engagement input to pricing.
 
-# Why It's Built This Way
+# Why it's built this way
 
 <AccordionGroup>
-  <Accordion title="Multi-Outcome Native">
-    Most prediction market AMMs are designed around binary YES/NO pairs. The Kash curve prices any number of outcomes in one market — Kash markets use 2 to 8 outcomes, and the contracts support up to 100.
-
-    Each outcome has its own token supply and weight, and all outcomes share the same USDC reserve. The curve also supports **multi-winner** resolutions: if more than one outcome is declared a winner, all winning tokens share the reserve pro-rata.
+  <Accordion title="Multi-outcome native">
+    Most prediction market AMMs are designed around Yes/No pairs. The Kash curve prices any number of outcomes in one market, with every outcome drawing on the same pool. Each market has exactly one winning outcome.
   </Accordion>
 
-  <Accordion title="No External Liquidity Providers Needed">
-    A new market doesn't wait for anyone to deposit liquidity. It's seeded at creation by the **market creation fee**, which becomes the initial reserve and token supplies. Kash's vault system can allocate additional USDC to markets to deepen liquidity (public deposits open with the upcoming [Earn vault](/getting-started/features/earn)), but trading works from the first second either way.
+  <Accordion title="Liquidity from the first second">
+    A new market doesn't wait for liquidity providers. The creator's starting liquidity is converted into the market's pool and an equal starting position across every outcome, so prices begin even and trading works immediately.
   </Accordion>
 
-  <Accordion title="Implied Chance Pricing">
-    The headline percentage you see on a market card is the **implied chance** of each outcome. It's computed from how the market's capital is concentrated across outcomes, it always sums to 100%, and it equals the break-even probability for buying that outcome at the margin.
+  <Accordion title="Implied chance pricing">
+    The percentage shown for each outcome is its **implied chance**. It's computed from how the market's capital is concentrated across outcomes, and it always sums to 100%.
 
-    Implied chance is *not* a fixed token price. Kash outcome tokens don't "pay $1" — winning tokens redeem pro-rata against the market's reserve. That's why trade previews show an **estimated payout if this outcome wins** instead of a per-share dollar figure. See [Claiming Your Winnings](/getting-started/guides/winning) for how redemption works.
+    Implied chance is *not* a fixed share price. Kash shares don't "pay $1": winning shares redeem for a portion of the market's pool. That's why trade previews show an **estimated payout if this outcome wins** rather than a per-share dollar figure. See [Winning](/getting-started/guides/winning).
   </Accordion>
 
-  <Accordion title="Price Impact and Slippage">
-    Like any convex AMM curve, larger trades move the price more. Buying an outcome pushes its implied chance up as you buy, so a big order gets a progressively worse average rate than a small one — this is ordinary price impact, not a penalty or an anti-whale mechanism.
+  <Accordion title="Price impact and slippage protection">
+    Larger trades move the price more. Buying an outcome pushes its implied chance up as you buy, so a big order gets a progressively worse average rate than a small one. This is ordinary price impact, not a penalty.
 
-    Every trade preview shows exactly what you'll receive before you confirm, and every trade carries an on-chain minimum-output guard, so the transaction reverts rather than executing if the market moves against you between quote and execution.
+    Every trade preview shows what you'll receive before you confirm, and every trade carries an on-chain minimum-output guard: if the market moves against you between quote and execution, the trade fails instead of filling at a worse price.
   </Accordion>
 </AccordionGroup>
 
-# Seeding and Fees
+# Fees and the curve
 
-<Tabs>
-  <Tab title="How Markets Are Seeded">
-    **Creation fee becomes liquidity**
+- **Buys:** a 1% protocol fee is taken from your USDC before it enters the curve. The rest goes into the pool.
+- **Sells:** a 0.5% AMM sell fee **stays in the pool**, benefiting the remaining holders, and a 1% protocol fee is taken from your proceeds.
+- **Claims:** no protocol fee. A claim covers only its own small network fee.
 
-    When a market is created, the creation fee is converted into the market's initial reserve and outcome supplies, with implied chances starting from the market's configured weights. There is no bootstrap period.
+Protocol fees are kept separate from the pool, so they never distort the curve. See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.
 
-    Kash's vault system may additionally allocate USDC into markets as a market-making strategy — this deepens liquidity and reduces price impact for traders. Public vault deposits open with the upcoming [Earn vault](/getting-started/features/earn).
-  </Tab>
-
-  <Tab title="Where Fees Go">
-    **Buys** — a 1% protocol fee is taken from your USDC before it enters the curve. The rest goes into the market reserve.
-
-    **Sells** — two fees apply: a 1% AMM sell fee that **stays in the market reserve** (benefiting remaining token holders), and a 1% protocol fee taken from your payout.
-
-    **Redemption** — claiming winnings or refunds carries **no fee**. Neither fee ever distorts the curve itself: protocol fees are skimmed at the transfer layer and the invariant is unchanged.
-
-    See [Market Mechanics](/getting-started/features/market-mechanics) for the full fee schedule.
-  </Tab>
-</Tabs>
-
-# For the Curious: The Math
+# For the curious: the math
 
 <Accordion title="The Pythagorean invariant">
-  The AMM is a weighted Pythagorean scoring rule. For a market with reserve `R`, outcome supplies `s_i`, and static weights `a_i` (which sum to 1), define:
+  The AMM is a weighted Pythagorean scoring rule. For a market with pool `R`, outcome supplies `s_i` and equal weights `a_i = 1/n`, define:
 
   ```
   A = Σ a_i · s_i²        (weighted sum of squared supplies)
@@ -86,21 +66,19 @@ The curve is purely deterministic — the same trade against the same market sta
   c = R / N               (the curve invariant)
   ```
 
-  - **Buys and sells** move along this curve: the reserve and the supplies change together so that the trade is consistent with the invariant. The cost of pushing an outcome's supply up grows convexly — that's where price impact comes from.
-  - **Implied chance** for outcome `i` is its capital share: `q_i = a_i · s_i² / A`. These always sum to 100% and represent how the market's risk is concentrated.
-  - **Marginal prices** (the instantaneous token exchange rate, in USDC per token) are a different quantity from implied chance. They're shown in the app only as an advanced "AMM token rate" detail, because they are exchange rates, not probabilities.
-  - **Redemption** is pro-rata: when a market resolves, each winning token redeems for `R × tokens / (total winning supply)`. Cancelled markets snapshot each outcome's marginal price and refund at that frozen rate.
-
-  The full derivations, overflow bounds, and invariant tests are documented in the AMM contract repository for auditors and integrators.
+  - **Buys and sells** move along this curve: the pool and the supplies change together so the trade is consistent with the invariant. The cost of pushing an outcome's supply up grows convexly, which is where price impact comes from.
+  - **Implied chance** for outcome `i` is its capital share: `q_i = a_i · s_i² / A`. These always sum to 100%.
+  - **Marginal prices** (the instantaneous USDC-per-share rate, `R · a_i · s_i / A`) are a different quantity from implied chance. They are exchange rates, not probabilities.
+  - **Redemption** is pro-rata: when a market resolves, each winning share redeems for `R × shares / (total winning supply)`. A cancelled market snapshots each outcome's price and refunds at that frozen rate.
 </Accordion>
 
 <Tip>
-Because pricing is deterministic and fully on-chain, anyone can verify a quote independently — what you see in the trade preview is exactly what the contract will do.
+Because pricing is deterministic and on-chain, anyone can verify a quote independently. What you see in the trade preview is what the program will do.
 </Tip>
 
 ---
 
-# Learn More
+# Learn more
 
 <CardGroup cols={2}>
   <Card
@@ -108,7 +86,7 @@ Because pricing is deterministic and fully on-chain, anyone can verify a quote i
     icon="gears"
     href="/getting-started/features/market-mechanics"
   >
-    Market lifecycle, resolution, fees, and claims
+    Market lifecycle, resolution, fees and claims
   </Card>
   <Card
     title="Start Trading"
