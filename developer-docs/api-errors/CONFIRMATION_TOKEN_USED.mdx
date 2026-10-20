@@ -7,20 +7,20 @@ description: 'HTTP 409 — Confirmation token used'
 
 ## When it fires
 
-The token has already been redeemed. Confirmation tokens are **one-time use** — the first successful confirm clears the stored hash so a replay can't re-fire the trade.
+The confirmation token has already been redeemed. Tokens are **single-use**: the first successful confirm invalidates the token so a replay cannot submit the trade again.
 
 ## Why it happens
 
-- A retry layer that doesn't check the trade's status before re-confirming (most common).
-- Two parallel confirmation attempts from the same consumer (race condition in the caller).
-- A double-click in a human-in-the-loop UI.
+- A retry layer that re-confirms without checking the trade's status first (most common).
+- Two concurrent confirm calls from your side.
+- A double-click in an approval UI.
 
 ## How to fix
 
-- Check the trade's status via `GET /v1/trades/:id` — if it's anything past `pending_confirmation`, the confirm already succeeded.
-- Make your retry loop idempotent: poll trade status first, only confirm if `status === 'pending_confirmation'`.
-- For UI flows: disable the confirm button immediately on click to prevent double-submission.
+- Check the trade with `GET /v1/trades/{id}`. If its status is past `pending_confirmation`, the earlier confirm succeeded.
+- Make retries safe: read the trade's status first and only confirm while `status === 'pending_confirmation'`.
+- In UIs, disable the confirm button as soon as it is clicked.
 
 ## Related codes
 
-- [`TRADE_NOT_AWAITING_CONFIRMATION`](/developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION) — same outcome via different state-check path
+- [`TRADE_NOT_AWAITING_CONFIRMATION`](/developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION) — the same situation detected through the trade's status

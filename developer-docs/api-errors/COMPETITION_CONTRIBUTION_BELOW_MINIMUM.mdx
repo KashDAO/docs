@@ -1,0 +1,26 @@
+---
+title: 'COMPETITION_CONTRIBUTION_BELOW_MINIMUM'
+description: 'HTTP 400 — Contribution below minimum ticket'
+---
+
+**HTTP status:** 400 · **Title:** "Contribution below minimum ticket"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/contribute` was called with an `amountAtomic` below the competition's minimum ticket, or with an amount that is not a positive integer.
+
+## Why it happens
+
+A competition can set a minimum ticket: the smallest amount any single member may contribute. It stops one member paying for a whole group while the rest ride free. Everyone who will share in the winnings must put in at least the ticket.
+
+The `detail` field states the minimum for that competition.
+
+## How to fix
+
+- Contribute at least the competition's minimum ticket.
+- Send `amountAtomic` as an atomic USDC decimal **string** (6 decimals: `"40000000"` is 40 USDC), never a JSON number. A number silently loses precision above 2^53, and this value decides how a real prize is split.
+
+## Related codes
+
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the entry or competition is not accepting money
+- [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) — the body failed schema validation

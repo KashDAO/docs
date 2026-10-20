@@ -7,18 +7,18 @@ description: 'HTTP 409 — Confirmation expired'
 
 ## When it fires
 
-The confirmation token is past its `confirmation_expires_at`. High-value trades have a short confirmation window (60 seconds by default; configurable per-tier).
+`POST /v1/trades/{id}/confirm` was called after the trade's confirmation token expired. High-value trades must be confirmed within a short window: 60 seconds by default, with the exact deadline returned as `confirmation.expiresAt` in the create response.
 
 ## Why it happens
 
-- A human-in-the-loop confirmation flow took longer than the window allows.
-- A queue/worker latency between `POST /v1/trades` returning the token and the consumer calling confirm.
+- A human-in-the-loop approval took longer than the window allows.
+- Latency in your own pipeline between receiving the token from `POST /v1/trades` and calling confirm.
 
 ## How to fix
 
-- Tighten the consumer's confirm call — ideally fire it immediately after receiving the token.
-- For human-in-the-loop flows that need longer, request a per-key window extension (mm tier customers who pipeline trades through human review get longer windows).
-- The trade is automatically cancelled when the window expires — re-create it to retry.
+- Call confirm as soon as you receive the token.
+- If your approval flow genuinely needs longer, contact Kash support about your key's confirmation window.
+- An expired trade is not executed. Create a new trade to retry.
 
 ## Related codes
 

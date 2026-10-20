@@ -1,0 +1,24 @@
+---
+title: 'COMPETITION_SPONSOR_NO_SMART_ACCOUNT'
+description: 'HTTP 409 — Organization has no smart account'
+---
+
+**HTTP status:** 409 · **Title:** "Organization has no smart account"
+
+## When it fires
+
+`POST /v1/competitions/{competitionId}/sponsor` was called by an organization that has no smart account, so there is no address to sponsor from.
+
+## Why the address is not taken from the request
+
+A sponsorship prefund can be reclaimed: if the competition is cancelled, the money is paid back to the address the prefund came from. That address therefore decides who can withdraw it, so Kash derives it from the caller's organization rather than accepting it in the request body.
+
+## How to fix
+
+- Set up the organization's smart account, then retry.
+- Check that the API key belongs to the organization you mean to sponsor from. The sponsor is always the key's organization.
+
+## Related codes
+
+- [`COMPETITION_ENTRY_NOT_FUNDABLE`](/developer-docs/api-errors/COMPETITION_ENTRY_NOT_FUNDABLE) — the competition is not accepting money
+- [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) — the competition's chain does not support sponsorship in this environment

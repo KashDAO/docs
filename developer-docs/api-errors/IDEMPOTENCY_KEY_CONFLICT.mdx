@@ -7,22 +7,24 @@ description: 'HTTP 409 — Idempotency key conflict'
 
 ## When it fires
 
-The same `Idempotency-Key` was used for two requests with **different bodies**. The server refuses to either re-execute (would violate idempotency) or replay the cached response (would mislead the caller about which request "won").
+The same `Idempotency-Key` was used for two requests with **different bodies**. The server will neither execute the second request (that would break idempotency) nor replay the first response (that would mislead you about which request took effect).
 
 ## Why it happens
 
-- Most common: a retry layer regenerated the body on each attempt instead of capturing it once and replaying.
-- A bug in the caller that mutates the body in-place between the request being prepared and the request being sent.
-- Two distinct logical operations accidentally sharing a key (e.g., a global key generator that didn't account for concurrency).
+- Most common: a retry layer rebuilt the body on each attempt instead of capturing it once and replaying it.
+- A bug that mutates the body between preparing the request and sending it.
+- Two distinct operations accidentally sharing a key (for example, a key generator that is not safe under concurrency).
 
 ## How to fix
 
-- Pin the request body before generating the idempotency key. Either:
-  - Capture body + key together in your retry wrapper and re-send the exact pair on each attempt.
-  - Generate a fresh key per logical operation (one trade = one key).
-- For genuinely retryable bodies that legitimately change between attempts (e.g., updated timestamps), generate a fresh key per attempt — that's the contract.
+- Fix the body before generating the key, then either:
+  - capture body and key together in your retry wrapper and resend the exact pair on every attempt, or
+  - generate a fresh key per logical operation (one trade, one key).
+- If the body legitimately changes between attempts (for example an updated timestamp), it is a new operation: use a new key.
+
+See [Idempotency](/developer-docs/rest-api/idempotency).
 
 ## Related codes
 
-- [`CLIENT_REQUEST_ID_CONFLICT`](/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT) — analogous conflict, but on the body-level `clientRequestId` field rather than the HTTP header
-- [`IDEMPOTENCY_KEY_EXPIRED`](/developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED) — key valid earlier, now past TTL
+- [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) — same key and same body, but the first request has not finished
+- [`CLIENT_REQUEST_ID_CONFLICT`](/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT) — the same conflict on the body-level `clientRequestId` field

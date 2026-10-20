@@ -7,20 +7,19 @@ description: 'HTTP 400 — Validation failed'
 
 ## When it fires
 
-The request body failed Zod schema parse. One or more fields are missing, malformed, or out of range.
+The request body, path or query parameters failed validation: a field is missing, has the wrong type, or is out of range.
 
 ## Why it happens
 
-- Required field is missing or `null`.
-- Field has the wrong type (e.g., `amount` sent as a number instead of a string — we use string for arbitrary-precision USDC amounts).
-- Field violates a constraint (UUID format, enum value, min/max length).
-- An unknown extra field was sent — we accept extras (`.passthrough()`) so this is rarely the cause; if it is, you'll see it called out in `detail`.
+- A required field is missing or `null`.
+- A field has the wrong type, for example `amount` sent as a number instead of a string. Amounts are strings so they keep full precision.
+- A field violates a constraint (UUID format, enum value, length, or a USDC amount with more than 6 decimal places).
 
 ## How to fix
 
-- The `detail` field carries the path of the first offending field (e.g., `body.outcomeIndex must be a non-negative integer`).
-- Cross-reference with the OpenAPI spec at `https://api.kash.bot/v1/openapi.json` — every endpoint's request body is fully typed there.
-- If you're using the TS SDK, you'd have caught this client-side via `KashValidationError` before the request went out.
+- The `detail` field names the first offending field and the constraint it broke.
+- Check the request schema in the [Endpoint reference](/developer-docs/rest-api/endpoint-reference) or the OpenAPI document at `https://api.kash.bot/v1/openapi.json`.
+- The TypeScript SDK validates some request bodies before sending and raises `KashValidationError` client-side; server-side validation failures surface as the same class.
 
 ## Example
 
@@ -30,13 +29,13 @@ The request body failed Zod schema parse. One or more fields are missing, malfor
   "title": "Validation failed",
   "status": 400,
   "code": "VALIDATION_FAILED",
-  "detail": "body.amount must be a string matching ^[0-9]+(\\.[0-9]+)?$",
+  "detail": "amount '1.1234567' is not a valid USDC decimal string with up to 6 fractional digits.",
   "instance": "/v1/trades",
-  "requestId": "01HX-..."
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
 }
 ```
 
 ## Related codes
 
-- [`AMOUNT_TOO_LARGE`](/developer-docs/api-errors/AMOUNT_TOO_LARGE) — specific case for `amount` exceeding the per-trade cap
-- [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID) — specific case for invalid `outcomeIndex`
+- [`AMOUNT_TOO_LARGE`](/developer-docs/api-errors/AMOUNT_TOO_LARGE) — `amount` exceeds the platform-wide per-trade ceiling
+- [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID) — `outcomeIndex` is out of range for the market
