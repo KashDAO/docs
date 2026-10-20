@@ -27,7 +27,7 @@ export KASH_API="https://api-staging.kash.bot/v1"
 
 ## 3. List markets
 
-Send `X-Kash-Api-Version: 2026-08-19` on every request. Without it the API uses the older `2026-04-29` contract, which does not show Solana markets. See [API versions](/developer-docs/rest-api/overview#api-versions).
+The API serves `2026-08-19` by default. The examples send `X-Kash-Api-Version: 2026-08-19` to pin it, so a future default change cannot alter your integration. See [API versions](/developer-docs/rest-api/overview#api-versions).
 
 ```bash
 curl "$KASH_API/markets?status=ACTIVE&limit=5" \

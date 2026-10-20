@@ -13,7 +13,7 @@ description: 'List markets, read one market, quote a buy or sell, and read recen
 The dispute endpoints under `/v1/markets/{id}/disputes` are on the [Market disputes](/developer-docs/rest-api/endpoints/disputes) page.
 
 <Warning>
-**Send `X-Kash-Api-Version: 2026-08-19` to see Solana markets.** Production trading runs on Solana. On the default version, `2026-04-29`, Solana markets are left out of `GET /v1/markets`, and `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one. See [API versions](/developer-docs/rest-api/overview#api-versions).
+**Pinning `2026-04-29` hides Solana markets.** Production trading runs on Solana. The default version, `2026-08-19`, lists them. If you pin `2026-04-29`, Solana markets are left out of `GET /v1/markets`, and `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one. See [API versions](/developer-docs/rest-api/overview#api-versions).
 </Warning>
 
 ## The market resource
@@ -63,7 +63,7 @@ Returns one market with its outcomes.
 
 Response `200`: `{ market: Market, data: Market, _meta }`.
 
-Errors: `404 MARKET_NOT_FOUND`, and `400 CHAIN_NOT_SUPPORTED` for a Solana market on version `2026-04-29`.
+Errors: `404 MARKET_NOT_FOUND`, and `400 CHAIN_NOT_SUPPORTED` for a Solana market when you pin version `2026-04-29`.
 
 ## `GET /v1/markets/{id}/quote`
 
@@ -103,7 +103,7 @@ Response `200`:
 
 A sell quote carries `tokensIn`, `usdcOut` and `grossRelease` in place of `amountIn` and `tokensOut`. All big numbers are decimal strings. `effectivePrice` and `impliedProbability` are plain numbers for convenience. Responses carry `Cache-Control: public, max-age=10`.
 
-Errors: `400 OUTCOME_INDEX_INVALID`, `404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE` (a market cancelled on chain, or a Solana market whose on-chain state is no longer active), `422 MARKET_NOT_QUOTABLE` (the market contract refused to price the request), and `400 CHAIN_NOT_SUPPORTED` for a Solana market on version `2026-04-29`.
+Errors: `400 OUTCOME_INDEX_INVALID`, `404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE` (a market cancelled on chain, or a Solana market whose on-chain state is no longer active), `422 MARKET_NOT_QUOTABLE` (the market contract refused to price the request), and `400 CHAIN_NOT_SUPPORTED` for a Solana market when you pin version `2026-04-29`.
 
 A quote is a read, so a market past its freeze deadline can still be quoted. Check `market.tradeable` before you trade.
 

@@ -10,7 +10,7 @@ description: 'Create a trade, confirm a high-value trade, list your trades and r
 | `GET`  | `/v1/trades`               | `trades:read`  | read             |                 |
 | `GET`  | `/v1/trades/{id}`          | `trades:read`  | read             |                 |
 
-A trade is executed from the smart account of the user who owns the API key. Trades work on both API versions. On `2026-08-19` the trade resource also carries `chainRef`, and `txHash` is returned for every chain; on `2026-04-29` a Solana trade's `txHash` is `null`.
+A trade is executed from the smart account of the user who owns the API key. Trades work on both API versions. On `2026-08-19` the trade resource also carries `chainRef`, and `txHash` is returned for every chain; on a pinned `2026-04-29` a Solana trade's `txHash` is `null`.
 
 ## The trade resource
 

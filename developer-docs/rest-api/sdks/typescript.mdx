@@ -297,10 +297,10 @@ The API supports two versions:
 
 | Version | Behaviour |
 | --- | --- |
-| `2026-08-19` (SDK default) | Every market carries `chainRef`; `chainId` only on EVM markets. Solana markets are listed and quotable. Trade `txHash` is the base58 Solana signature for Solana trades. |
-| `2026-04-29` (server default when no header is sent) | Solana markets are left out of `markets.list()`; `markets.get()` and quotes answer `400 CHAIN_NOT_SUPPORTED` for a Solana market. `txHash` is `null` for non-EVM trades. |
+| `2026-08-19` (SDK and server default) | Every market carries `chainRef`; `chainId` only on EVM markets. Solana markets are listed and quotable. Trade `txHash` is the base58 Solana signature for Solana trades. |
+| `2026-04-29` (served only when pinned) | Solana markets are left out of `markets.list()`; `markets.get()` and quotes answer `400 CHAIN_NOT_SUPPORTED` for a Solana market. `txHash` is `null` for non-EVM trades. |
 
-Because production trading is on Solana, keep the SDK default unless you have a specific reason not to. An unsupported value returns `410 API_VERSION_UNSUPPORTED` with the accepted list in the body's `supported` member (`err.extensions?.supported` on the thrown error). Responses carry the server's version in `X-API-Version`, plus `Sunset` / `Deprecation` headers when a version is winding down; the `onResponse` hook surfaces both.
+Because production trading is on Solana, keep the SDK default unless you have a specific reason not to. An unsupported value returns `410 API_VERSION_UNSUPPORTED` with the accepted list in the body's `supported` member (`err.extensions?.supported` on the thrown error). Responses carry the version that served the request in `X-API-Version`, plus `Sunset` / `Deprecation` headers when a version is winding down; the `onResponse` hook surfaces both.
 
 The SDK also sends a `User-Agent` of the form `@kashdao/sdk/<version> (<runtime>)` (exported as `USER_AGENT`), with your `userAgentSuffix` appended.
 

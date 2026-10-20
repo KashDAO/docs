@@ -57,12 +57,12 @@ The URL is versioned (`/v1/`). Within v1, you pick a contract date with the `X-K
 
 | `X-Kash-Api-Version` | Behaviour |
 | -------------------- | --------- |
-| `2026-08-19` | **Recommended.** Every market, quote and trade carries `chainRef` (for example `solana:mainnet-beta`), Solana markets are listed and readable, and a trade's `txHash` is returned for every chain. The TypeScript SDK sends this version by default. |
-| `2026-04-29` | The default when you send no header. Serves EVM markets only: Solana markets are left out of `GET /v1/markets`, `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one, and a Solana trade's `txHash` is `null`. |
+| `2026-08-19` | **The default when you send no header.** Every market, quote and trade carries `chainRef` (for example `solana:mainnet-beta`), Solana markets are listed and readable, and a trade's `txHash` is returned for every chain. The TypeScript SDK sends this version too. |
+| `2026-04-29` | Served only when you pin it. Legacy contract that cannot describe Solana: Solana markets are left out of `GET /v1/markets`, `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one, and a Solana trade's `txHash` is `null`. |
 
-Because production trading is on Solana, **send `X-Kash-Api-Version: 2026-08-19` on every request.** Any other value is refused with `410 API_VERSION_UNSUPPORTED`, whose body lists the `supported` versions.
+Sending no header is the same as sending `2026-08-19`. Pin a date if you want your integration to stay on one contract. Any other value is refused with `410 API_VERSION_UNSUPPORTED`, whose body lists the `supported` versions.
 
-Responses carry `X-API-Version`, the server's default contract date (`2026-04-29`), whatever you requested. Webhook deliveries always use `2026-08-19`. When a version is scheduled for removal, responses also carry `Sunset` and `Deprecation` headers (RFC 8594).
+Responses carry `X-API-Version`, the contract date that served the request: your pinned value, or `2026-08-19` when you sent no header. Webhook deliveries always use `2026-08-19`. When a version is scheduled for removal, responses also carry `Sunset` and `Deprecation` headers (RFC 8594).
 
 ## Design principles
 

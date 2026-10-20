@@ -12,7 +12,7 @@ The market exists but does not accept trades right now. The reason is in `detail
 - `POST /v1/trades` and `POST /v1/trades/{id}/confirm` return it for every reason below, on both API versions.
 - `GET /v1/markets/{id}/quote` returns it for a market cancelled on-chain, and for a Solana market whose on-chain state is no longer active (for example resolved). A quote is a read, so a market past its freeze deadline can still be quoted, with `market.tradeable: false` in the response.
 - `GET /v1/markets/{id}/quote` also returns it for a market that has no on-chain address yet and so cannot be quoted at all.
-- **Solana markets need `X-Kash-Api-Version: 2026-08-19`.** On `2026-04-29`, a Solana market's detail and quote return [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) (400) whatever its state, which says nothing about whether it is tradeable.
+- **Pinning `2026-04-29` hides Solana markets.** On that pinned version, a Solana market's detail and quote return [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) (400) whatever its state, which says nothing about whether it is tradeable.
 
 ## Why it happens
 

@@ -11,8 +11,8 @@ Your request sent an `X-Kash-Api-Version` header whose value is not a supported 
 
 | Version      | Notes                                                                                           |
 | ------------ | ----------------------------------------------------------------------------------------------- |
-| `2026-04-29` | The default, used when no header is sent                                                         |
-| `2026-08-19` | Adds chain-neutral market fields (`chainRef`, `tradeable`, `notTradeableReason`). Required for Solana markets |
+| `2026-08-19` | The default, used when no header is sent. Carries chain-neutral market fields (`chainRef`, `tradeable`, `notTradeableReason`) and describes Solana markets |
+| `2026-04-29` | Legacy contract, served only when pinned. Cannot describe Solana markets                       |
 
 Anything else (a typo, a future date, or a version past its sunset) returns this error.
 
@@ -22,7 +22,7 @@ Anything else (a typo, a future date, or a version past its sunset) returns this
 
 ## Why it happens
 
-- **A typo in the pin**, for example `2026-04-30` instead of `2026-04-29`.
+- **A typo in the pin**, for example `2026-08-20` instead of `2026-08-19`.
 - **A pin to a retired version** that has passed its sunset window.
 - **A pin to a future version** the API has not shipped yet.
 - **A multi-valued header**: a proxy appended a second `X-Kash-Api-Version` value and the API will not silently pick one.
@@ -37,12 +37,12 @@ The problem body carries three extra top-level members: `requested` (what you se
   "title": "API version unsupported",
   "status": 410,
   "code": "API_VERSION_UNSUPPORTED",
-  "detail": "Requested API version '2099-01-01' is not supported. Send no header to use the current default (2026-04-29), or pick a value from the 'supported' list.",
+  "detail": "Requested API version '2099-01-01' is not supported. Send no header to use the current default (2026-08-19), or pick a value from the 'supported' list.",
   "instance": "/v1/markets",
   "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H",
   "requested": "2099-01-01",
-  "supported": ["2026-04-29", "2026-08-19"],
-  "current": "2026-04-29"
+  "supported": ["2026-08-19", "2026-04-29"],
+  "current": "2026-08-19"
 }
 ```
 
@@ -54,8 +54,8 @@ When a version is scheduled for retirement, responses to requests pinned to it c
 
 ## Best practice
 
-Pin only when you need to: for example, pin `2026-08-19` if you trade Solana markets or read `tradeable`. Within a version, Kash makes only additive, non-breaking changes.
+Pin when you want your integration to stay on one contract. Pinning `2026-04-29` hides Solana markets, so pin `2026-08-19` if you pin at all. Within a version, Kash makes only additive, non-breaking changes.
 
 ## Related codes
 
-- [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) — what a Solana market returns on `2026-04-29`
+- [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) — what a Solana market returns when a client pins `2026-04-29`
