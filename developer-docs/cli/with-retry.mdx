@@ -24,4 +24,4 @@ kash with-retry <command...> [options]
 | `--max-attempts <n>` | maximum total attempts including the first (default 5) |
 | `--initial-delay-ms <n>` | starting backoff when the envelope has no retryAfterMs (default 1000) |
 | `--max-delay-ms <n>` | cap on the per-attempt wait (default 30000) |
-| `--retry-without-json` | retry even when the inner command did not emit --json (no envelope to discriminate terminal from transient — opt in if you trust the inner command failed transiently) |
+| `--retry-without-json` | retry even when the inner command did not emit `--json` (no envelope to discriminate terminal from transient — opt in if you trust the inner command failed transiently) |

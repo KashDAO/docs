@@ -93,7 +93,7 @@ Use `--timestamp-ms` to test your freshness check, and `kash webhooks verify` to
 
 ## Common patterns
 
-### "My handler was broken for an hour"
+### “My handler was broken for an hour”
 
 1. Fix and redeploy the handler.
 2. List `GET /v1/webhooks/events?status=failed,retrying` and walk the cursor.

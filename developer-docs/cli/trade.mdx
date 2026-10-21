@@ -30,7 +30,7 @@ Buy outcome tokens for a market.
 | `-o, --outcome <index>` | outcome index (0-based) |
 | `-a, --amount <usdc>` | USDC amount as a decimal (max 6 fractional digits) |
 | `--wait` | block until the trade reaches a terminal state |
-| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global `--timeout-ms` (per-HTTP-request) |
 | `--poll-interval-ms, --poll-interval <ms>` | wait poll interval in milliseconds (default 2000) |
 | `--idempotency-key <key>` | sets the Idempotency-Key HTTP header |
 | `--auto-idempotency-key` | auto-generate an Idempotency-Key (UUID v4) and surface it in the response |
@@ -52,7 +52,7 @@ Sell outcome tokens back to the market (Kash-orchestrated / hosted-API flow).
 | `-o, --outcome <index>` | outcome index (0-based) |
 | `-a, --amount <usdc>` | target USDC to receive (decimal, max 6 fractional digits) — NOT tokens-in. Use `kash quote sell --tokens <n>` if you have a tokens-in figure and want a USDC quote first. |
 | `--wait` | block until the trade reaches a terminal state |
-| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--wait-timeout-ms, --timeout <ms>` | wait timeout in milliseconds (default 60000) — distinct from the global `--timeout-ms` (per-HTTP-request) |
 | `--poll-interval-ms, --poll-interval <ms>` | wait poll interval in milliseconds (default 2000) |
 | `--idempotency-key <key>` | sets the Idempotency-Key HTTP header |
 | `--auto-idempotency-key` | auto-generate an Idempotency-Key (UUID v4) and surface it in the response |
@@ -61,7 +61,7 @@ Sell outcome tokens back to the market (Kash-orchestrated / hosted-API flow).
 
 ### `kash trade status`
 
-Show the status of a trade. Use --poll to block until terminal.
+Show the status of a trade. Use `--poll` to block until terminal.
 
 **Arguments**
 
@@ -72,7 +72,7 @@ Show the status of a trade. Use --poll to block until terminal.
 | Flag | Description |
 | --- | --- |
 | `--poll` | poll until the trade reaches a terminal state |
-| `--wait-timeout-ms, --timeout <ms>` | poll timeout in milliseconds (default 60000) — distinct from the global --timeout-ms (per-HTTP-request) |
+| `--wait-timeout-ms, --timeout <ms>` | poll timeout in milliseconds (default 60000) — distinct from the global `--timeout-ms` (per-HTTP-request) |
 | `--poll-interval-ms, --poll-interval <ms>` | poll interval in milliseconds (default 2000) |
 
 ### `kash trade list`
@@ -83,12 +83,12 @@ List your trades.
 
 | Flag | Description |
 | --- | --- |
-| `-s, --status <status...>` | status filter; repeat or comma-separate (e.g. --status pending --status executing \| --status pending,executing) |
+| `-s, --status <status...>` | status filter; repeat or comma-separate (e.g. `--status` pending `--status` executing \| `--status` pending,executing) |
 | `-m, --market <id>` | filter by market id |
 | `-l, --limit <n>` | page size (1-100) |
 | `-c, --cursor <cursor>` | pagination cursor |
-| `-a, --all` | walk every page (use with --json for export) |
-| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies --all |
+| `-a, --all` | walk every page (use with `--json` for export) |
+| `--ndjson` | stream results as newline-delimited JSON (one record per line); implies `--all` |
 
 ### `kash trade confirm`
 

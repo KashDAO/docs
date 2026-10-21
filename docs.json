@@ -431,6 +431,10 @@
     {
       "source": "/getting-started/ecosystem/competitions-and-tournaments",
       "destination": "/getting-started/ecosystem/incentives-and-rewards"
+    },
+    {
+      "source": "/getting-started/ecosystem/tokenomics",
+      "destination": "/getting-started/ecosystem/incentives-and-rewards"
     }
   ]
 }
