@@ -1,9 +1,9 @@
 ---
 title: 'GET /api/markets'
-description: 'List all available prediction markets with filtering and pagination'
+description: 'List, filter and search prediction markets'
 ---
 
-Fetches a paginated list of all available prediction markets with optional filtering.
+Returns a page of verified markets. With no parameters you get active markets, newest first.
 
 ## Endpoint
 
@@ -11,411 +11,224 @@ Fetches a paginated list of all available prediction markets with optional filte
 GET https://app.kash.bot/api/markets
 ```
 
-## Query Parameters
+## Query parameters
 
 <ParamField query="status" type="string" default="active">
-  Filter by market status: `active`, `resolved`, `cancelled`, `paused`, `refunded`, `all`. Defaults to `active`, so resolved markets are excluded unless you request them. Use `all` to fetch the full active + resolved set in one pass.
+  `active`, `resolved` or `all`. `active` includes markets that have passed their end time but are still waiting to resolve. `all` returns every market. `cancelled`, `paused` and `refunded` are accepted but currently return the same set as `active`.
 </ParamField>
 
-<ParamField query="active" type="boolean">
-  Convenience filter that overrides `status` when present: `active=true` returns active markets, `active=false` returns resolved markets. Omit to keep the `status` default.
+<ParamField query="active" type="string">
+  `true`/`1` or `false`/`0`. A shortcut that overrides `status`: `true` returns active markets and `false` returns resolved markets.
 </ParamField>
 
-<ParamField query="resolvedAfter" type="number">
-  Epoch-second lower bound on resolution time. Applies when the result set includes resolved markets (`active=false`, `status=resolved`, or `status=all`) — use it to slice a large resolved archive by date.
+<ParamField query="tradableOnly" type="boolean" default="false">
+  Applies to the active set only. When `true`, frozen and expired markets are left out, so every result can still be traded.
 </ParamField>
 
-<ParamField query="resolvedBefore" type="number">
-  Epoch-second upper bound on resolution time. Applies when the result set includes resolved markets (`active=false`, `status=resolved`, or `status=all`).
+<ParamField query="search" type="string">
+  Matches against market titles and descriptions. Every word must match. 1 to 120 characters.
 </ParamField>
 
 <ParamField query="category" type="string">
-  Filter by category (e.g., `politics`, `crypto`, `sports`)
+  A category slug, such as `football` or `business`. [`/api/markets/category-stats`](/developer-docs/public-embed-api/endpoints/market-category-stats) lists the slugs.
 </ParamField>
 
 <ParamField query="threadId" type="string">
-  Filter to only markets in a specific thread (UUID). Also accepts `thread_id` for backward compatibility.
-</ParamField>
-
-<ParamField query="organizationId" type="string">
-  Filter to markets belonging to a specific organization (UUID)
-</ParamField>
-
-<ParamField query="partnerId" type="string">
-  Filter to markets belonging to a specific partner (UUID)
+  Only markets in this thread (UUID). `thread_id` is also accepted.
 </ParamField>
 
 <ParamField query="chapterId" type="string">
-  Filter to markets in a specific chapter
+  Only markets in this chapter.
 </ParamField>
 
-<ParamField query="limit" type="number" default="50">
-  Maximum number of results per page (max: 100)
+<ParamField query="ids" type="string">
+  A comma-separated list of up to 100 market UUIDs.
 </ParamField>
 
-<ParamField query="offset" type="number" default="0">
-  Pagination offset for fetching subsequent pages
+<ParamField query="creatorOwned" type="boolean" default="false">
+  When `true`, returns only markets created by creators rather than by Kash.
+</ParamField>
+
+<ParamField query="fanTokenRedemption" type="string">
+  `true` or `false`. Filters on whether the market has an active fan-token redemption option.
+</ParamField>
+
+<ParamField query="resolvedAfter" type="integer">
+  Earliest resolution time, in epoch seconds. Use it with `status=resolved` or `status=all`.
+</ParamField>
+
+<ParamField query="resolvedBefore" type="integer">
+  Latest resolution time, in epoch seconds.
 </ParamField>
 
 <ParamField query="sortBy" type="string" default="created_at">
-  Field to sort by: `created_at`, `total_volume`, `current_probability`, `title`, `end_time`
+  `created_at`, `total_volume`, `current_probability`, `current_implied_chance`, `title` or `end_time`.
 </ParamField>
 
 <ParamField query="sortOrder" type="string" default="desc">
-  Sort direction: `asc`, `desc`
+  `asc` or `desc`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="100">
+  1 to 500.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  0 to 10,000.
 </ParamField>
 
 ## Response
 
-<ResponseField name="markets" type="array">
-  Array of market objects
-  
-  <Expandable title="Market Object">
-    <ResponseField name="id" type="string">
-      Unique market identifier
+<ResponseField name="markets" type="Market[]">
+  Each market object has the fields below. Markets carry more fields than this list, but those extra fields are internal and may change.
+
+  <Expandable title="Market">
+    <ResponseField name="id" type="string">Market UUID</ResponseField>
+    <ResponseField name="title" type="string">The market question. `question` holds the same value.</ResponseField>
+    <ResponseField name="description" type="string | null">Longer description</ResponseField>
+    <ResponseField name="resolutionCriteria" type="string | null">How the market settles</ResponseField>
+    <ResponseField name="resolutionSources" type="object[]">`{ name, url, imageUrl }` for each source used to settle the market</ResponseField>
+    <ResponseField name="links" type="object[]">`{ title, url, linkType, displayOrder }`: related links</ResponseField>
+    <ResponseField name="status" type="string">`UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED` or `CANCELLED`</ResponseField>
+    <ResponseField name="tradable" type="boolean">`true` while trading is open</ResponseField>
+    <ResponseField name="frozen" type="boolean">`true` once trading has stopped but the market hasn't resolved yet</ResponseField>
+    <ResponseField name="isResolved" type="boolean">`true` once the market is resolved</ResponseField>
+    <ResponseField name="winningOutcomeIndex" type="integer | null">The winning outcome, once resolved</ResponseField>
+    <ResponseField name="cancelledAt" type="string | null">Set if the market was cancelled</ResponseField>
+    <ResponseField name="endTime" type="number">End of the market, in **milliseconds** since the epoch</ResponseField>
+    <ResponseField name="expiresAt" type="number">End of the market, in seconds since the epoch</ResponseField>
+    <ResponseField name="freezeAt" type="number | null">When trading stops, in seconds since the epoch</ResponseField>
+    <ResponseField name="resolveTime" type="number | null">When the market was resolved, in seconds since the epoch</ResponseField>
+    <ResponseField name="chainId" type="number">`9000001` (Solana) or `8453` (Base, older markets only)</ResponseField>
+    <ResponseField name="contractAddress" type="string">On-chain market address (base58 on Solana, `0x` on Base)</ResponseField>
+    <ResponseField name="outcomeCount" type="integer">Number of outcomes</ResponseField>
+    <ResponseField name="outcomes" type="object[]">
+      `{ outcomeIndex, tokenId, label, weight, shareSupply, probability, impliedChance }`. `impliedChance` is the displayed implied probability (0 to 1), and `probability` is set to the same value. `weight` and `shareSupply` are WAD strings.
     </ResponseField>
-    <ResponseField name="question" type="string">
-      Market question
-    </ResponseField>
-    <ResponseField name="description" type="string">
-      Market description (optional)
-    </ResponseField>
-    <ResponseField name="probability" type="number">
-      Current YES probability (0-1)
-    </ResponseField>
-    <ResponseField name="yesPrice" type="number">
-      Current YES share price
-    </ResponseField>
-    <ResponseField name="noPrice" type="number">
-      Current NO share price
-    </ResponseField>
-    <ResponseField name="totalVolume" type="number">
-      Total trading volume in cents
-    </ResponseField>
-    <ResponseField name="tradeCount" type="number">
-      Number of trades
-    </ResponseField>
-    <ResponseField name="status" type="string">
-      Market status: `OPEN`, `FROZEN`, `RESOLVED`, `CANCELLED`
-    </ResponseField>
-    <ResponseField name="endTime" type="number">
-      Market end time (Unix timestamp in milliseconds)
-    </ResponseField>
-    <ResponseField name="category" type="string">
-      Market category
-    </ResponseField>
-    <ResponseField name="createdAt" type="string">
-      ISO 8601 timestamp of market creation
-    </ResponseField>
-    <ResponseField name="sourceTweetUrl" type="string">
-      URL of the original market tweet (for quote tweets)
-    </ResponseField>
+    <ResponseField name="priceKnown" type="boolean">`false` when there is no price yet, so the prices are only a placeholder</ResponseField>
+    <ResponseField name="currentImpliedChance" type="number">Implied probability of outcome 0</ResponseField>
+    <ResponseField name="currentProbability" type="number">AMM marginal price for outcome 0. Not normalized, so show `currentImpliedChance` instead.</ResponseField>
+    <ResponseField name="totalVolume" type="number">Lifetime volume in atomic USDC (6 decimals)</ResponseField>
+    <ResponseField name="volume24h" type="number">Volume over the last 24 hours, in atomic USDC</ResponseField>
+    <ResponseField name="seedAmountAtomic" type="string">Opening liquidity in atomic USDC</ResponseField>
+    <ResponseField name="tradeCount" type="integer">Number of trades</ResponseField>
+    <ResponseField name="participantCount" type="integer">Number of distinct traders</ResponseField>
+    <ResponseField name="tradingFee" type="number">Trading fee as a fraction of the trade amount</ResponseField>
+    <ResponseField name="minTrade" type="number">Smallest trade, in atomic USDC</ResponseField>
+    <ResponseField name="maxTrade" type="number">Largest trade, in atomic USDC</ResponseField>
+    <ResponseField name="category" type="string | null">Category slug</ResponseField>
+    <ResponseField name="categoryLabel" type="string | null">Category display name</ResponseField>
+    <ResponseField name="subCategory" type="string | null">Subcategory slug</ResponseField>
+    <ResponseField name="subCategoryLabel" type="string | null">Subcategory display name</ResponseField>
+    <ResponseField name="bannerImageUrl" type="string | null">HTTPS banner image URL</ResponseField>
+    <ResponseField name="imageUrl" type="string | null">Image URI from the market metadata (may be `ipfs://`)</ResponseField>
+    <ResponseField name="creator" type="string | null">Creator's display name</ResponseField>
+    <ResponseField name="creatorUsername" type="string | null">Creator's username</ResponseField>
+    <ResponseField name="creatorAvatarUrl" type="string | null">Creator's avatar</ResponseField>
+    <ResponseField name="sourceTweetUrl" type="string | null">The tweet that announced the market</ResponseField>
+    <ResponseField name="marketBotHandle" type="string | null">The X handle that trade tweets for this market should mention</ResponseField>
+    <ResponseField name="createdAt" type="string">When the market was created</ResponseField>
   </Expandable>
 </ResponseField>
 
-<ResponseField name="pagination" type="object">
-  Pagination metadata
-  
-  <Expandable title="Pagination Object">
-    <ResponseField name="offset" type="number">
-      Current offset
-    </ResponseField>
-    <ResponseField name="limit" type="number">
-      Results per page
-    </ResponseField>
-    <ResponseField name="total" type="number">
-      Total number of matching markets
-    </ResponseField>
-    <ResponseField name="hasMore" type="boolean">
-      Whether more results are available
-    </ResponseField>
-  </Expandable>
-</ResponseField>
+<ResponseField name="pagination" type="object">`{ offset, limit, total, hasMore }`</ResponseField>
 
-## Rate Limit
+<ResponseField name="_meta" type="object">`{ requestedAt, cached, computed }`</ResponseField>
 
-<Info>
-**100 requests per minute** per IP address
-</Info>
+## Rate limit
 
-## Example Request
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
+
+## Example request
 
 <CodeGroup>
 ```bash cURL
-curl "https://app.kash.bot/api/markets?status=active&limit=10&sortBy=total_volume&sortOrder=desc"
+curl "https://app.kash.bot/api/markets?status=active&tradableOnly=true&sortBy=total_volume&limit=10"
 ```
 
 ```javascript JavaScript
-const response = await fetch(
-  'https://app.kash.bot/api/markets?status=active&limit=10'
-);
-const data = await response.json();
-console.log(`Found ${data.markets.length} active markets`);
+const params = new URLSearchParams({
+  status: 'active',
+  tradableOnly: 'true',
+  sortBy: 'total_volume',
+  limit: '10',
+});
+const res = await fetch(`https://app.kash.bot/api/markets?${params}`);
+const { markets, pagination } = await res.json();
+
+for (const m of markets) {
+  const prices = m.outcomes.map((o) => `${o.label} ${(o.impliedChance * 100).toFixed(0)}%`);
+  console.log(m.title, prices.join(' / '));
+}
 ```
 
 ```python Python
 import requests
 
-response = requests.get(
-    'https://app.kash.bot/api/markets',
-    params={'status': 'active', 'limit': 10}
+res = requests.get(
+    "https://app.kash.bot/api/markets",
+    params={"status": "resolved", "resolvedAfter": 1790000000, "limit": 50},
 )
-data = response.json()
-print(f"Found {len(data['markets'])} active markets")
+data = res.json()
+print(data["pagination"]["total"], "resolved markets")
 ```
 </CodeGroup>
 
-## Example Response
+## Example response
 
-```json 200 - Success
+```json 200 (trimmed)
 {
   "markets": [
     {
-      "id": "market-abc123",
-      "question": "Will BTC hit $100k by end of 2025?",
-      "description": "Resolves YES if Bitcoin reaches $100,000 USD on any major exchange",
-      "probability": 0.72,
-      "yesPrice": 0.72,
-      "noPrice": 0.28,
-      "totalVolume": 1250000,
-      "tradeCount": 450,
-      "status": "OPEN",
-      "endTime": 1735689600000,
-      "category": "crypto",
-      "createdAt": "2024-01-01T00:00:00Z",
-      "sourceTweetUrl": "https://twitter.com/kash_bot/status/123..."
+      "id": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+      "title": "Will Ousmane Dembélé score against FC Barcelona?",
+      "question": "Will Ousmane Dembélé score against FC Barcelona?",
+      "status": "ACTIVE",
+      "tradable": true,
+      "frozen": false,
+      "isResolved": false,
+      "chainId": 9000001,
+      "contractAddress": "HGiuo13ea68p3BphxamZSyHzqo8HYnUJutFFqyrbfA7C",
+      "endTime": 1792530000000,
+      "expiresAt": 1792530000,
+      "freezeAt": 1792526400,
+      "outcomeCount": 2,
+      "outcomes": [
+        { "outcomeIndex": 0, "tokenId": 60928, "label": "Yes", "weight": "500000000000000000", "shareSupply": "26053103461967827528", "probability": 0.279436651, "impliedChance": 0.279436651 },
+        { "outcomeIndex": 1, "tokenId": 60929, "label": "No", "weight": "500000000000000000", "shareSupply": "41836357394017945260", "probability": 0.7205633489, "impliedChance": 0.7205633489 }
+      ],
+      "priceKnown": true,
+      "currentImpliedChance": 0.279436651,
+      "totalVolume": 35000000,
+      "seedAmountAtomic": "20000000",
+      "tradeCount": 4,
+      "participantCount": 4,
+      "category": "football",
+      "categoryLabel": "Football",
+      "marketBotHandle": "hot_takefc",
+      "sourceTweetUrl": "https://x.com/hot_takefc/status/2112339123369394597"
     }
   ],
-  "pagination": {
-    "offset": 0,
-    "limit": 10,
-    "total": 156,
-    "hasMore": true
-  }
+  "pagination": { "offset": 0, "limit": 10, "total": 47, "hasMore": true },
+  "_meta": { "requestedAt": "2026-10-20T17:41:08.698Z", "cached": false, "computed": false }
 }
 ```
 
----
-
-# GET /api/markets/trending
-
-Get trending markets based on recent activity and momentum.
-
-## Endpoint
-
-```
-GET https://app.kash.bot/api/markets/trending
-```
-
-## Query Parameters
-
-<ParamField query="timeframe" type="string" default="24h">
-  Trending timeframe: `1h`, `24h`, `7d`
-</ParamField>
-
-<ParamField query="limit" type="number" default="50">
-  Maximum results (max: 200)
-</ParamField>
-
-<ParamField query="category" type="string">
-  Filter by category
-</ParamField>
-
-## Rate Limit
-
-<Info>
-**100 requests per minute** per IP address
-</Info>
-
-## Example Request
-
-```bash cURL
-curl "https://app.kash.bot/api/markets/trending?timeframe=24h&limit=5"
-```
-
-## Example Response
-
-```json 200 - Success
+```json 400
 {
-  "markets": [
-    {
-      "id": "market-xyz789",
-      "question": "Will ETH flip BTC this year?",
-      "probability": 0.15,
-      "totalVolume": 890000,
-      "tradeCount": 234,
-      "trendingScore": 95.4,
-      "trendingRank": 1,
-      "recentMetrics": {
-        "tradeCount": 45,
-        "volume": 125000,
-        "uniqueTraders": 28
-      }
-    }
+  "error": "ValidationError",
+  "message": "Invalid query parameters",
+  "code": "VALIDATION_ERROR",
+  "details": [
+    { "origin": "number", "code": "too_big", "maximum": 500, "inclusive": true, "path": ["limit"], "message": "Too big: expected number to be <=500" }
   ],
-  "timeframe": {
-    "trending": "24h"
-  }
+  "timestamp": "2026-10-20T17:52:15.345Z"
 }
 ```
 
----
-
-# GET /api/markets/featured
-
-Get featured high-volume markets curated by Kash.
-
-## Endpoint
-
-```
-GET https://app.kash.bot/api/markets/featured
-```
-
-## Rate Limit
-
-<Info>
-**100 requests per minute** per IP address
-</Info>
-
-## Example Request
-
-```bash cURL
-curl "https://app.kash.bot/api/markets/featured"
-```
-
-## Example Response
-
-```json 200 - Success
-{
-  "markets": [
-    {
-      "id": "market-featured-1",
-      "question": "Who will win the 2024 Presidential Election?",
-      "probability": 0.52,
-      "totalVolume": 5600000,
-      "tradeCount": 1250,
-      "featured": true
-    }
-  ],
-  "_meta": {
-    "count": 6
-  }
-}
-```
-
----
-
-## Common Use Cases
-
-### Fetch high-volume markets
-
-```bash
-curl "https://app.kash.bot/api/markets?sortBy=total_volume&sortOrder=desc&limit=10"
-```
-
-### Filter by category
-
-```bash
-curl "https://app.kash.bot/api/markets?category=crypto&status=active"
-```
-
-### Fetch the full set (active + resolved) in one pass
-
-The endpoint returns only active markets by default. Pass `status=all` to include resolved markets, then page through with `offset`/`limit` (`pagination.total` and `pagination.hasMore` tell you when to stop).
-
-```bash
-curl "https://app.kash.bot/api/markets?status=all&limit=500"
-```
-
-### Fetch only resolved markets
-
-```bash
-# active=false is equivalent to status=resolved
-curl "https://app.kash.bot/api/markets?active=false&limit=100"
-```
-
-### Slice the resolved archive by date
-
-`resolvedAfter`/`resolvedBefore` are epoch seconds, applied to each market's resolution time — handy for analysing a large resolved set without pulling it all at once.
-
-```bash
-curl "https://app.kash.bot/api/markets?active=false&resolvedAfter=1782345600&resolvedBefore=1782432000"
-```
-
-### Get markets from a specific thread
-
-```bash
-curl "https://app.kash.bot/api/markets?threadId=abc123-def456"
-```
-
-### Get markets for an organization
-
-```bash
-curl "https://app.kash.bot/api/markets?organizationId=550e8400-e29b-41d4-a716-446655440000"
-```
-
-<Tip>
-To show **only your organization's markets** on your own site, you can also use the dedicated [`GET /api/organizations/:id/markets`](/developer-docs/public-embed-api/endpoints/organization-markets) endpoint, or drop in the [organization iframe](/developer-docs/public-embed-api/guides/organization-iframe) for a ready-made branded grid.
-</Tip>
-
-### Get markets for a partner
-
-```bash
-curl "https://app.kash.bot/api/markets?partnerId=6ba7b810-9dad-11d1-80b4-00c04fd430c8"
-```
-
-### Get markets in a specific chapter
-
-```bash
-curl "https://app.kash.bot/api/markets?chapterId=ch-group-stage"
-```
-
-### Build a dynamic market feed
-
-```javascript
-async function fetchMarketFeed() {
-  // Get trending markets
-  const trendingRes = await fetch('https://app.kash.bot/api/markets/trending?limit=5');
-  const trending = await trendingRes.json();
-  
-  // Get featured markets
-  const featuredRes = await fetch('https://app.kash.bot/api/markets/featured');
-  const featured = await featuredRes.json();
-  
-  // Combine and dedupe
-  const allMarkets = [...featured.markets, ...trending.markets];
-  const uniqueMarkets = allMarkets.filter((m, i, arr) => 
-    arr.findIndex(x => x.id === m.id) === i
-  );
-  
-  return uniqueMarkets;
-}
-```
-
----
-
-## Related Endpoints
+## Related
 
 <CardGroup cols={2}>
-  <Card title="GET /api/organizations/:id/markets" href="/developer-docs/public-embed-api/endpoints/organization-markets">
-    List a single organization's markets (scoped sub-resource)
-  </Card>
-  <Card title="Embedding Organization Iframes" href="/developer-docs/public-embed-api/guides/organization-iframe">
-    Drop your markets onto your site with one iframe
-  </Card>
-  <Card title="GET /api/organizations/:id" href="/developer-docs/public-embed-api/endpoints/organization-detail">
-    Get organization metadata for filtering
-  </Card>
-  <Card title="GET /api/partners/:id" href="/developer-docs/public-embed-api/endpoints/partner-detail">
-    Get partner metadata for filtering
-  </Card>
-  <Card title="GET /api/threads/:id/chapters" href="/developer-docs/public-embed-api/endpoints/thread-chapters">
-    List chapters to filter markets by
-  </Card>
-  <Card title="GET /api/threads" href="/developer-docs/public-embed-api/endpoints/threads">
-    List all threads
-  </Card>
+  <Card title="GET /api/markets/:id" href="/developer-docs/public-embed-api/endpoints/market-detail">One market in full</Card>
+  <Card title="GET /api/markets/state" href="/developer-docs/public-embed-api/endpoints/markets-state">Refresh prices for many markets</Card>
 </CardGroup>
-
-
-

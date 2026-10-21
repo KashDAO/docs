@@ -4,10 +4,6 @@ description: 'The ways you can trade on Kash'
 icon: 'chart-line'
 ---
 
-<Note>
-Kash trading is straightforward: buy and sell outcome tokens against the AMM in the webapp, or — if you opt in — trade by tweeting. Everything settles in USDC on Base, gas-free.
-</Note>
-
 <img
   style={{ borderRadius: '0.5rem' }}
   className="block dark:hidden"
@@ -21,95 +17,74 @@ Kash trading is straightforward: buy and sell outcome tokens against the AMM in 
   alt="Hero Dark"
 />
 
-# Trading in the Webapp
+# Trading in the web app
 
-The primary way to trade is at [app.kash.bot](https://app.kash.bot): open any market, pick an outcome, enter an amount, and confirm.
+Open any market at [app.kash.bot](https://app.kash.bot), pick an outcome, enter an amount and confirm.
 
 <AccordionGroup>
   <Accordion title="Buying">
-    Tap an outcome (e.g. **Buy Yes**) and enter your USDC amount. Before you confirm, the quote shows exactly what you're getting:
+    Tap an outcome and enter your USDC amount. Before you confirm, the ticket shows:
 
-    - **You pay** — your USDC in, with the 1% protocol fee broken out
-    - **You receive** — the number of outcome tokens minted to you
-    - **Estimated payout if this outcome wins** — what those tokens would redeem for against the market reserve, based on the post-trade state
-    - The market's **implied chance** after your trade
+    - **The fees**, including the protocol fee and any network fee
+    - **The shares** you'll receive
+    - **Estimated payout if this outcome wins**, based on the market after your trade
 
-    Larger trades move the price more (ordinary AMM price impact), and every trade has on-chain slippage protection — it reverts rather than filling worse than your quoted minimum.
+    Larger trades move the price more, and every trade has on-chain slippage protection.
   </Accordion>
 
   <Accordion title="Selling">
-    You can exit any position before the market freezes. The sell quote shows the gross AMM release, the 1% AMM sell fee (which stays in the market's reserve), the 1% protocol fee, and the **net USDC you receive**. Use it to lock in profits or cut losses without waiting for resolution.
+    You can exit any position before trading closes. The sell quote shows the sell fee (which stays in the market's pool), the protocol fee and the **net USDC you receive**.
   </Accordion>
 
-  <Accordion title="Outcome Tokens (ERC-1155)">
-    Positions are real on-chain assets: each market issues its outcomes as **ERC-1155 tokens** (one contract, a token ID per outcome), held by your own smart account. They are not fixed "$1 if it wins" shares — winning tokens redeem pro-rata against the market's reserve, which is what the estimated-payout figure previews. Details in [Market Mechanics](/getting-started/features/market-mechanics).
+  <Accordion title="Network fee on web trades">
+    Kash pays the Solana network fee for every trade. On web trades, a small network fee in USDC may be added to cover it, and the ticket shows it before you confirm. Trades placed on X skip it.
   </Accordion>
 </AccordionGroup>
 
-# Tweet Trading (Opt-In)
+# Trading on X
 
-Kash's companion X (Twitter) integration lets trading happen where the conversation is.
+Reply to a market's post on X, or quote it, and mention **@kash_bot_trade** with your amount and outcome, such as `buy $25 of Yes`. The trade executes from your own wallet and the bot replies with a confirmation. See [Trading on X](/getting-started/features/trading-on-x).
 
-<Tabs>
-  <Tab title="How It Works">
-    Tweet-based trades are parsed from the text of your tweet — for example replying to a market posted by **Kash's dedicated trading account** with your side and amount. The trading account's handle cycles over time; the current one is always linked from the [@kash_bot](https://x.com/kash_bot) profile. Kash reads the intent, executes the trade from your smart account, and confirms.
+# Copy trading
 
-    Tweet trading is **opt-in**: connect and authorize your X account in **Settings → Trading bot** in the webapp. You can disconnect at any time, which revokes Kash's access to your account — your existing positions stay tradeable in the app.
-  </Tab>
+Mirror another trader automatically. From a trader's profile, start copying and set:
 
-  <Tab title="Broadcasting Your Own Markets">
-    If you create a market, the trading bot can broadcast it **from your own X handle**, and your followers can reply to trade on it. The bot is torn down automatically when your market ends. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
-  </Tab>
-</Tabs>
+- **Size per trade:** how much to spend each time they buy
+- **Total budget:** the most you want to spend in total
 
-<Warning>
-There are no X direct-message (DM) trading commands — trading via X works through public tweets with the opt-in trading bot only.
-</Warning>
+When they sell, you sell the same share of your copied position. Every copied or skipped trade is recorded with its reason, and you can pause, reset or stop copying from **Settings → Copy trading**. Your copies show in the Portfolio **Copying** tab.
 
-# Parlays
+# Trading through the API
 
-The [parlay builder](/getting-started/features/parlays) lets you back several crypto markets at once — pick **up or down** on each coin (BTC, ETH, SOL, and more), set your stake, and place the whole slip together.
+Bots and agents can trade programmatically with an API key from **Settings → API keys**. Each key has scoped permissions and its own spending controls. See the [Developer Docs](/developer-docs/introduction).
 
-<Note>
-Today, each leg of a parlay executes as an **independent trade** — one pick can win even if another loses. True single-ticket parlays, where all picks must hit for a combined payout, are coming soon.
-</Note>
-
-# Portfolio Management
+# Portfolio management
 
 <AccordionGroup>
   <Accordion title="Positions and P&L">
-    Your [Portfolio](/getting-started/guides/winning) shows all open positions with live values and unrealized P&L, plus a history of resolved and closed positions with realized P&L. From any open position you can add to it or sell out of it.
+    **Portfolio** shows your balance, every open position with its current value and P&L, your bookmarks, the traders you copy, and your full transaction and withdrawal history.
   </Accordion>
-
-  <Accordion title="Claiming Winnings">
-    When a market resolves (or is cancelled), your payout becomes claimable directly from your portfolio — **Claim winnings** or **Claim refund**. Redemption executes from your own smart account; there is no redemption fee. On mainnet, claims may net a small gas cost in USDC out of the payout.
+  <Accordion title="Claiming">
+    When a market resolves, winning positions appear under **Claimable**. Claim one at a time or all at once. Refunds from cancelled markets are claimed the same way. See [Redeeming positions](/getting-started/guides/winning).
+  </Accordion>
+  <Accordion title="Sharing">
+    Turn a position into a P&L card and post it to X, download it, or copy a link.
   </Accordion>
 </AccordionGroup>
 
-# What Powers It
-
-- **Base network** — low-cost L2 execution
-- **USDC** — the single trading and settlement currency
-- **ERC-4337 smart accounts** — sponsored gas, so you never need ETH; session-key delegation means no wallet popup for every trade
-- **Deterministic AMM** — every quote is verifiable on-chain; see the [Custom AMM](/getting-started/features/custom-amm) page
-
-<Tip>
-Kash intentionally keeps the trading surface simple: market buys and sells against the AMM. There are no limit orders, leverage, or margin products — your maximum loss is always what you put in.
-</Tip>
-
 <CardGroup cols={2}>
   <Card
-    title="Parlays"
-    icon="layer-group"
-    href="/getting-started/features/parlays"
+    title="Trading on X"
+    icon="x-twitter"
+    href="/getting-started/features/trading-on-x"
   >
-    Multi-leg crypto up/down slips
+    Trade by replying on X
   </Card>
   <Card
-    title="Natural Language"
-    icon="comment"
-    href="/getting-started/features/natural-language"
+    title="Market Mechanics"
+    icon="gears"
+    href="/getting-started/features/market-mechanics"
   >
-    Create and trade with plain English
+    How markets trade and resolve
   </Card>
 </CardGroup>

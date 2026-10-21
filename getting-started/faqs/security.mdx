@@ -17,163 +17,84 @@ icon: 'shield'
   alt="Hero Dark"
 />
 
-# How Custody Works
+# How custody works
 
 <AccordionGroup>
   <Accordion title="Who controls my funds?">
-    **You Do — Kash Is Self-Custodial**
+    Your USDC and positions sit in **your own embedded Solana wallet**, set up when you sign up. Kash is a non-custodial interface: it never holds custody of user funds and doesn't pool them. Trades and redemptions move USDC directly between your wallet and the on-chain market. You can export your wallet's private key at any time.
+  </Accordion>
 
-    Here's the actual model:
-
-    - When you sign up, a **Privy-powered embedded wallet** (a standard EOA) is created for you
-    - That wallet is the signer for an **ERC-4337 smart account** — the smart account is what holds your funds
-    - Only your wallet can authorize transactions from your smart account
-    - **Kash cannot withdraw your funds.** The platform prepares transactions; they execute only under permissions you authorize
-
-    **Proof of control:** you can **export your wallet key from Settings** at any time and use the wallet entirely outside of Kash.
+  <Accordion title="What can Kash do with my wallet?">
+    When you sign in, the **Approve Kash** step asks you to give Kash's app permission to submit transactions from your wallet on your behalf. Kash uses it to submit the trades and claims you request, in the app, on X, through copy trading or with an API key, without a signing prompt each time. Withdrawals to outside addresses are confirmed by you in the app, and transfers to other Kash users are sent only when you send them.
   </Accordion>
 
   <Accordion title="Is there a seed phrase? How does recovery work?">
-    **No Seed Phrase to Manage**
-
-    - Your embedded wallet is secured by Privy's infrastructure and unlocked by your login — there's no 12-word phrase to write down or lose
-    - **Recovery:** regain access through your login method (X, Google, email, or wallet) plus your **recovery email** if you've set one in Settings
-    - **Independent backup:** exporting your key from Settings gives you access to your wallet no matter what happens to your Kash login
-
-    **Set up now:** add a recovery email in Settings and enable 2FA on the account you log in with.
+    There's no seed phrase. Access is tied to your sign-in methods, and you can add a recovery email or passkey in **Settings → Account → Recovery methods**. For an independent backup, export your private key from **Settings → Account → Wallet backup**.
   </Accordion>
 
-  <Accordion title="How secure is the Kash platform?">
-    **Security Model**
-
-    - **Self-custodial wallets:** you control your funds; Kash can't withdraw them — trades execute only under permissions you authorize
-    - **ERC-4337 smart accounts:** your funds live in an audited account-abstraction smart account on Base
-    - **Privy wallet infrastructure:** enterprise-grade embedded wallet security
-    - **Base network:** built on an established Ethereum Layer 2
-    - **Gasless transactions:** gas is sponsored via a paymaster, so you never handle ETH for gas
-    - **Multisig-secured contracts:** privileged protocol actions require multi-party approval
-
-    **Audits:** security audits of Kash smart contracts are conducted. For audit or security questions, contact **security@kash.bot**.
+  <Accordion title="How are markets secured?">
+    Markets live on a decentralized, permissionless protocol on Solana that anyone can use directly, so every trade and settlement is recorded on-chain. Outcomes are determined by Kash's automated resolution system from each market's published sources and rules, and go through a dispute window before they settle.
   </Accordion>
 </AccordionGroup>
 
-# Account Security Best Practices
+# Account security best practices
 
 <AccordionGroup>
   <Accordion title="How do I secure my Kash account?">
-    **Security Checklist**
-
-    **Login security (most important):**
-    - Enable 2FA on the X or Google account you sign in with
-    - Use a strong, unique password on your login provider
-    - Add a **recovery email** in Kash Settings
-
-    **Platform hygiene:**
-    - Always verify the **app.kash.bot** domain before signing in
-    - Only trust the verified **@kash_bot** account on X — and only trust a trading account that @kash_bot itself links to
-    - Review your transaction history and notifications regularly
-
-    **Key export safety:**
-    - If you export your wallet key, store it offline and securely
-    - Never share your exported key with anyone — including anyone claiming to be Kash support
+    - Turn on two-factor authentication with your sign-in provider (X, Google, Telegram, Discord or your email account)
+    - Add a recovery email or passkey, and link more than one sign-in method
+    - Only sign in at **app.kash.bot**
+    - Never share login codes or your exported private key
   </Accordion>
 
   <Accordion title="What should I do if I suspect unauthorized access?">
-    **Immediate Response**
-
-    1. **Secure your login provider:** change the password and enable 2FA on the X/Google/email account you use to sign in
-    2. **Contact support:** email **support@kash.bot** with your account details, timestamps, and screenshots
-    3. **Review activity:** check your transaction history and wallet on [basescan.org](https://basescan.org)
-    4. **Document evidence:** capture screenshots of any suspicious activity
-
-    For suspected platform vulnerabilities (rather than account compromise), email **security@kash.bot**.
+    1. Secure the account you sign in with: change its password and review its active sessions
+    2. Sign in to Kash and check **Portfolio → Transactions** and **Withdrawals**
+    3. If you still control the account, consider moving your funds to a wallet you control
+    4. Contact [support@kash.bot](mailto:support@kash.bot) straight away
   </Accordion>
 
   <Accordion title="What happens if I lose my device?">
-    **Device Loss Recovery**
-
-    1. From another device, change the password on your login provider (X/Google/email) and enable 2FA
-    2. Sign in to [app.kash.bot](https://app.kash.bot) from the new device — your wallet, balances, and history are restored automatically after authentication
-    3. Monitor your account for unauthorized activity and contact support@kash.bot if anything looks wrong
-
-    Your funds live on-chain in your smart account — losing a device doesn't put them at risk as long as your login remains secure.
+    Your wallet isn't stored only on your device. Sign in on a new device with any linked method. Then secure the lost device's accounts (email, X, Google) with your provider.
   </Accordion>
 </AccordionGroup>
 
-# Common Security Concerns
+# Common security concerns
 
 <AccordionGroup>
-  <Accordion title="Can Kash access my funds?">
-    **No.**
-
-    - **What Kash can do:** prepare transactions for your approval, sponsor gas, resolve markets, and execute payouts to your own smart account
-    - **What Kash cannot do:** move your funds without your authorization, see or use your exported key, or freeze your wallet
-
-    If the platform disappeared tomorrow, you could export your key from Settings and access your smart account directly on-chain.
-  </Accordion>
-
-  <Accordion title="How do I identify phishing attempts?">
-    **Recognizing and Avoiding Scams**
-
-    **Red flags:**
-    - Anyone asking for your password, exported key, or a "wallet validation"
-    - Lookalike accounts imitating @kash_bot or Kash's trading account, or DMs from either — the real accounts never DM you first; only trust a trading account linked from the verified @kash_bot profile
-    - Lookalike domains — the only official domains are **kash.bot** (marketing site) and **app.kash.bot** (the app)
-    - **Token scams:** Kash has **not launched a token**; anyone selling "$KASH" is a scammer
-    - Urgent demands for immediate action
-
-    **If you encounter phishing:**
-    - Don't click links or provide information
-    - Report the account to X and email support@kash.bot
-    - Warn the community in [Discord](https://discord.com/invite/n9eumqjMPb)
+  <Accordion title="How do I spot phishing?">
+    - The app is only at **app.kash.bot**, and the docs at **docs.kash.bot**
+    - Kash will never DM you asking for your private key, a login code or a "verification" deposit
+    - Kash has not launched a token. Any "$KASH" presale or airdrop is a scam
+    - The official X accounts are [@kash_bot](https://x.com/kash_bot) and [@kash_bot_trade](https://x.com/kash_bot_trade)
   </Accordion>
 
   <Accordion title="Who can use Kash?">
-    **Eligibility and Geo-Blocking**
-
-    - **18+ only:** you must be at least 18 years old (or the legal age in your jurisdiction)
-    - **Geo-blocking:** access from OFAC-sanctioned regions is blocked
-    - Compliance restrictions are enforced at the platform level and updated as regulations change
-
-    See the [Legal FAQ](/getting-started/faqs/legal) for details.
+    Availability, eligibility and any verification requirements are set out in the [Terms of Use](https://kash.bot/terms-of-use). See also [Legal](/getting-started/faqs/legal).
   </Accordion>
 </AccordionGroup>
 
-# Reporting Security Issues
+# Reporting security issues
 
 <AccordionGroup>
   <Accordion title="How do I report a vulnerability?">
-    **Responsible Disclosure**
-
-    - Email **security@kash.bot** with a detailed description, reproduction steps, and impact assessment
-    - Please allow time for the team to review before any public disclosure
-    - Smart contract vulnerabilities are in scope for the protocol bug bounty — see the [Bug Bounty page](/getting-started/ecosystem/bug-bounty-program)
-
-    **Do not** test vulnerabilities against other users' funds or post exploits publicly.
+    Email [support@kash.bot](mailto:support@kash.bot) with **"Security report"** in the subject. Include what you found, how to reproduce it and its impact. Please don't disclose it publicly until we've had a chance to fix it, test only against your own account, and never against other users' funds or data.
   </Accordion>
 </AccordionGroup>
 
-<Warning>
-Security is a shared responsibility. Kash provides self-custodial infrastructure, but you must protect your login account and never share credentials or exported keys with anyone.
-</Warning>
-
-<Tip>
-Three things cover most of your risk: 2FA on your login provider, a recovery email in Settings, and never sharing your exported key.
-</Tip>
-
 <CardGroup cols={2}>
   <Card
-    title="Account Security"
+    title="Account"
     icon="user"
     href="/getting-started/faqs/account"
   >
-    Learn about account protection
+    Account and recovery
   </Card>
   <Card
-    title="Bug Bounty"
-    icon="bug"
-    href="/getting-started/ecosystem/bug-bounty-program"
+    title="Support"
+    icon="headset"
+    href="/getting-started/faqs/support"
   >
-    Report security issues
+    Get help
   </Card>
 </CardGroup>

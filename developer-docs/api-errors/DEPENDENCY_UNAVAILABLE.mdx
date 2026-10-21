@@ -3,27 +3,28 @@ title: 'DEPENDENCY_UNAVAILABLE'
 description: 'HTTP 503 — Service unavailable'
 ---
 
-**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** 30s
+**HTTP status:** 503 · **Title:** "Service unavailable" · **Retry-After:** computed per response
 
 ## When it fires
 
-A required external dependency (Postgres, Secrets Manager, Redis, blockchain RPC) is unreachable, and the route can't degrade further.
+A service the endpoint depends on (for example Kash's database or a blockchain RPC provider) could not be reached, and the endpoint cannot answer without it. Almost every endpoint can return it.
 
-Distinct from [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) (which is "we don't know what happened") and [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) (which is "ops disabled this on purpose").
+It is distinct from [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) ("something unexpected happened") and from [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) ("Kash disabled this on purpose").
 
 ## Why it happens
 
-- Transient infrastructure blip (most common — clears in seconds).
-- Sustained dependency outage (visible on `status.kash.bot`).
-- A rare cascade where one dependency degraded and another can't compensate.
+- A transient infrastructure blip (most common; clears in seconds).
+- A sustained outage of a dependency that Kash is already working on.
 
 ## How to fix
 
-- Honour `Retry-After: 30` and back off with jitter. Most occurrences resolve within one retry.
-- If retries keep failing past 5 minutes, check the status page.
-- The TS SDK handles this automatically (`KashServerError`, retried with backoff up to its retry budget).
+- Honour `Retry-After` and back off with jitter. Most occurrences clear within one retry.
+- The TypeScript SDK raises this as `KashServerError` and retries it automatically within its retry budget.
+- Retry writes with the same `Idempotency-Key` so a retry cannot execute twice. See [Idempotency](/developer-docs/rest-api/idempotency).
+- If retries keep failing for more than a few minutes, contact Kash support with a `requestId`.
 
 ## Related codes
 
-- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — ops-driven, not infra-driven
+- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — API trading temporarily unavailable
+- [`MARKET_NOT_QUOTABLE`](/developer-docs/api-errors/MARKET_NOT_QUOTABLE) — the chain was read and refused the quote (not retryable)
 - [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT), [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR)

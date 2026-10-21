@@ -7,20 +7,22 @@ description: 'HTTP 400 — Idempotency key format invalid'
 
 ## When it fires
 
-`Idempotency-Key` header contains a character outside the allowed set: `[A-Za-z0-9_\-:.]`.
+The `Idempotency-Key` header contains a character outside the allowed set `[A-Za-z0-9_\-:.]` (letters, digits, underscore, hyphen, colon, period).
 
 ## Why it happens
 
-- The key contained whitespace, a slash, or a non-ASCII character.
-- Control characters (newlines, NULs) sneaked in from a copy-paste.
-- An emoji or Unicode separator accidentally landed in the key.
+- The key contains whitespace, a slash or a non-ASCII character.
+- Control characters (newlines, NULs) slipped in from a copy-paste.
+- An emoji or Unicode separator ended up in the key.
 
-The strict allowlist exists because the value flows through structured logs, Redis keys, and PG rows — non-printable / control characters could poison log shippers or downstream systems that key on the value.
+The allowlist is strict so that keys are always safe to log, store and compare.
 
 ## How to fix
 
-- Stick to UUIDs (`crypto.randomUUID()` in Node, `uuidgen` in shell) — they're always conforming.
-- If you must derive the key from external input, sanitise: `key.replace(/[^A-Za-z0-9_\-:.]/g, '')` then check it's still unique.
+- Use UUIDs (`crypto.randomUUID()` in Node, `uuidgen` in a shell). They always conform.
+- If you must derive the key from external input, sanitise it, for example `key.replace(/[^A-Za-z0-9_\-:.]/g, '')`, then check it is still unique.
+
+See [Idempotency](/developer-docs/rest-api/idempotency).
 
 ## Related codes
 

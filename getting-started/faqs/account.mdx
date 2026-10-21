@@ -17,139 +17,62 @@ icon: 'user'
   alt="Hero Dark"
 />
 
-# Account Creation and Setup
+# Account creation and setup
 
 <AccordionGroup>
   <Accordion title="How do I create a Kash account?">
-    **Sign In With the Method You Prefer**
-
-    Go to [app.kash.bot](https://app.kash.bot) and sign in with any of the supported login methods (powered by Privy):
-
-    - **X (Twitter)** account
-    - **Google** account
-    - **Email** (one-time code, no password to remember)
-    - **External wallet** you already own
-
-    **What happens on signup:**
-    - A self-custodial wallet and smart account are created for you automatically
-    - No seed phrase to write down
-    - No identity documents required to get started
-
-    **Recommended next step:** add a **recovery email** in Settings so you can regain access if you ever lose your primary login method.
+    Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose X, Google, email, Telegram or Discord. Your account and your own embedded Solana wallet are set up automatically, with no seed phrase. See [Creating an Account](/getting-started/guides/creating-an-account).
   </Accordion>
 
-  <Accordion title="Can I have multiple accounts?">
-    **One Account Per Person**
-
-    - Multiple accounts per person are not permitted
-    - Account sharing is prohibited
-    - Each account has its own unique wallet, history, and reputation
-
-    **Why:** one-account-per-person keeps markets, leaderboards, competitions, and referral rewards fair, and prevents manipulation.
-
-    Accounts cannot be merged, and funds cannot be transferred between accounts.
+  <Accordion title="Why does my wallet ask for trading permission?">
+    This permission, given at the **Approve Kash** step, lets Kash's app submit the trades you ask for, in the app, on X or through copy trading, from your own wallet without a signing prompt each time. Without it, trading isn't possible. Your funds stay in your wallet, Kash never holds custody of them, and withdrawals to outside addresses are confirmed by you in the app.
   </Accordion>
 
-  <Accordion title="How do I access my account?">
-    **Access Methods**
+  <Accordion title="Can I link more than one sign-in method?">
+    Yes. In **Settings → Account → Recovery methods** you can link X, Google, Discord, Telegram, email and a passkey. Linking more than one means losing one doesn't lock you out.
+  </Accordion>
 
-    - **Webapp:** visit [app.kash.bot](https://app.kash.bot) and sign in — works on desktop and mobile browsers, and you can install it as an app (PWA) on your phone
-    - **Tweet trading (optional):** after authorizing your X account in **Settings → Trading bot**, you can also trade by tweeting at **Kash's dedicated trading account** — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile
-
-    Your login method (X, Google, email, or wallet) is your key — there's no separate Kash password.
+  <Accordion title="Do I need to connect X?">
+    Only to create markets, to trade from X, or to announce your markets from your X account. Browsing and trading in the web app work without it.
   </Accordion>
 </AccordionGroup>
 
-# Account Security and Recovery
+# Recovery and security
 
 <AccordionGroup>
   <Accordion title="What if I lose access to my login method?">
-    **Recovery Options**
-
-    - **Recovery email:** if you've set a recovery email in Settings, you can use it to regain access to your account — set it up now if you haven't
-    - **Primary login recovery:** regaining access to your X/Google/email account through that provider restores your Kash access
-    - **Key export:** you can export your wallet key from Settings at any time, giving you an independent backup of access to your funds
-
-    **Prevention checklist:**
-    - Add a recovery email in Settings
-    - Enable 2FA on the account you use to log in (X or Google)
-    - Consider exporting and securely storing your wallet key
+    Sign in with another linked method, your recovery email or your passkey. If none of those work, contact [support@kash.bot](mailto:support@kash.bot) from an email address linked to your account.
   </Accordion>
 
   <Accordion title="How do I secure my account?">
-    **Security Best Practices**
+    - Turn on two-factor authentication with your sign-in provider
+    - Add a recovery email or passkey
+    - Never share login codes or your exported private key
 
-    **Login security:**
-    - Enable two-factor authentication on your X or Google account
-    - Use a strong, unique password on your login provider
-    - Add a recovery email in Kash Settings
-
-    **Platform security:**
-    - Always verify you're on the **app.kash.bot** domain before signing in
-    - Kash will never ask for your password or exported key
-    - Review your transaction history regularly
-
-    **Wallet model:**
-    - Your funds are held in your own smart account, controlled by a Privy-powered embedded wallet that only you can authorize
-    - Kash cannot withdraw your funds; trades execute only under permissions you authorize
-    - See the [Security FAQ](/getting-started/faqs/security) for the full custody model
+    See [Security](/getting-started/faqs/security).
   </Accordion>
 
   <Accordion title="Can I export my wallet or account data?">
-    **Yes — Your Wallet Is Yours**
-
-    - **Key export:** export your embedded wallet's key from **Settings** to use your wallet outside of Kash
-    - **Transaction history:** all trading activity is recorded on the Base blockchain and viewable on [basescan.org](https://basescan.org)
-    - **In-app history:** the Portfolio page shows your positions, trades, and claims
-
-    **Privacy note:** blockchain activity is public. Your on-chain trades are visible to anyone who knows your wallet address.
+    - **Wallet:** **Settings → Account → Wallet backup** exports your Solana private key, so you can import it into a compatible Solana wallet.
+    - **Data:** **Settings → Account → Export my data** downloads your account data as a file.
   </Accordion>
 </AccordionGroup>
 
-# Account Management
+# Account management
 
 <AccordionGroup>
-  <Accordion title="How do I update my profile and settings?">
-    **Profile Management**
-
-    - Profile details sync from the account you signed in with
-    - Settings (language, theme, notifications, privacy, API keys, trading bot) live in **Settings** on the webapp — see the [Settings FAQ](/getting-started/faqs/settings)
-    - Adding or changing your recovery email is also done in Settings
+  <Accordion title="How do I update my profile?">
+    Your public title, theme and language are in **Settings**. Your display name comes from your sign-in provider. If you signed up with email only, you can edit it in Settings.
   </Accordion>
 
   <Accordion title="Can I delete my account?">
-    **Account Deletion via Support**
-
-    To delete your account, contact **support@kash.bot** from the email associated with your account (or include your account details).
-
-    **Before you request deletion:**
-    - **Withdraw your funds** — move your balance to an external wallet or off-ramp first
-    - **Consider exporting your key** so you retain access to the wallet independently
-
-    **What can't be deleted:**
-    - On-chain transaction history is permanent and public — blockchain records cannot be erased
-    - Deletion removes your Kash account and platform data, not the public blockchain record
+    Yes. Go to **Settings → Account → Delete account** and type `DELETE` to confirm. Your profile is anonymized and your personal data removed, while trading and financial records are kept as required for compliance. Withdraw your balance first. If self-service deletion is unavailable, the page offers an email request to [support@kash.bot](mailto:support@kash.bot) instead.
   </Accordion>
 
   <Accordion title="How do I get help?">
-    **Support Channels**
-
-    - **Email:** support@kash.bot
-    - **In-app feedback widget:** report a bug or share an idea (with screenshots) directly from the webapp
-    - **Discord:** [community support](https://discord.com/invite/n9eumqjMPb)
-    - **Help center:** [docs.kash.bot](https://docs.kash.bot)
-
-    See the [Support FAQ](/getting-started/faqs/support) for details.
+    Send feedback from the info button in the app (signed-in reports open a support chat in **Messages**), email [support@kash.bot](mailto:support@kash.bot), or ask in [Discord](https://discord.com/invite/n9eumqjMPb). See [Support](/getting-started/faqs/support).
   </Accordion>
 </AccordionGroup>
-
-<Warning>
-Protect the account you use to sign in to Kash — it controls your wallet. Enable 2FA on your login provider and add a recovery email in Settings.
-</Warning>
-
-<Tip>
-Your trading activity is recorded on the Base blockchain and is publicly visible. Consider the privacy implications before participating in prediction markets.
-</Tip>
 
 <CardGroup cols={2}>
   <Card
@@ -157,13 +80,13 @@ Your trading activity is recorded on the Base blockchain and is publicly visible
     icon="shield"
     href="/getting-started/faqs/security"
   >
-    Learn about account security
+    Keep your account safe
   </Card>
   <Card
     title="Settings"
     icon="gear"
     href="/getting-started/faqs/settings"
   >
-    Configure your account
+    Every setting explained
   </Card>
 </CardGroup>

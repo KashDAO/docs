@@ -7,29 +7,32 @@ description: 'HTTP 403 — Insufficient scope'
 
 ## When it fires
 
-The key authenticated successfully but lacks one of the scopes the route requires.
+The key authenticated successfully but does not carry the scope the endpoint requires.
 
 ## Why it happens
 
-- The key was issued with a narrower scope set than the route needs (e.g., a `markets:read` key calling `POST /v1/trades` which requires `trades:write`).
-- A new endpoint was added that requires a scope your existing key doesn't carry.
+- The key was issued with a narrower set of scopes than the endpoint needs, for example a `markets:read` key calling `POST /v1/trades`, which requires `trades:write`.
+- A newer endpoint requires a scope your existing key does not carry.
 
 ## How to fix
 
-- Look up the route's required scopes in `apps/public-api/README.md` → Authentication → Scopes table.
-- Issue a new key with the needed scopes (or revoke + re-issue with a broader scope set).
-- Principle of least privilege: don't add scopes you don't actually need — narrow keys reduce blast radius if leaked.
+- Check the endpoint's required scope in the table below or in the [Endpoint reference](/developer-docs/rest-api/endpoint-reference).
+- Issue a key with the scopes you need (or revoke the old one and issue a replacement).
+- Follow least privilege: don't add scopes you don't need. A narrow key limits the damage if it leaks.
 
-| Scope             | Routes                                                |
-| ----------------- | ----------------------------------------------------- |
-| `markets:read`    | `GET /v1/markets*`, `GET /v1/markets/:id/predictions` |
-| `markets:quote`   | `GET /v1/markets/:id/quote`                           |
-| `trades:read`     | `GET /v1/trades(/:id)`                                |
-| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/:id/confirm`      |
-| `portfolio:read`  | `GET /v1/portfolio*`                                  |
-| `webhooks:manage` | webhook URL/secret rotation, replay endpoint          |
-| `auth:manage`     | self-service key CRUD                                 |
+| Scope             | Endpoints                                                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/:id`, `GET /v1/markets/:id/predictions`, `GET /v1/markets/:id/disputes` |
+| `markets:quote`   | `GET /v1/markets/:id/quote`                                                                                                                                                                 |
+| `trades:read`     | `GET /v1/trades`, `GET /v1/trades/:id`, `GET /v1/traces/:correlationId`                                                                                                                     |
+| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/:id/confirm`, `POST /v1/redemptions`, `POST /v1/markets/:id/disputes` |
+| `portfolio:read`  | `GET /v1/portfolio`, `GET /v1/portfolio/positions`                                                                                                                                          |
+| `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/:eventId/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate`                                                                  |
+| `auth:manage`     | `GET /v1/account/usage`                                                                                                                                                                     |
+
+See [Authentication](/developer-docs/rest-api/authentication) for how scopes are assigned.
 
 ## Related codes
 
-- [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED) — also 403, but driven by IP allowlist rather than scope
+- [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED) — also 403, caused by the key's IP allowlist rather than its scopes
+- [`ORGANIZATION_INACTIVE`](/developer-docs/api-errors/ORGANIZATION_INACTIVE) — also 403, caused by the key's account

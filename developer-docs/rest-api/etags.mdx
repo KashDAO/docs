@@ -1,124 +1,73 @@
 ---
 title: 'ETags & Caching'
-description: 'If-None-Match short-circuits — skip re-downloading unchanged data cheaply.'
+description: 'Conditional requests with If-None-Match: skip re-downloading unchanged data.'
 ---
 
-Every response from `api.kash.bot` carries an `ETag` header — a content-derived hash of the response body. Send it back on the next request as `If-None-Match` and the server short-circuits with `304 Not Modified` (and an empty body) when nothing changed.
+Successful `GET` responses carry an `ETag` header. Send it back as `If-None-Match` and, if nothing has changed, the API answers `304 Not Modified` with no body.
 
-## Why this matters
+## How it works
 
-A `304` response:
+1. Make the request and keep the `ETag`:
 
-- Is **fast** — the server doesn't reserialize the body or hit the database for the result.
-- Is **small** — empty body, just the headers.
-- **Counts toward your rate limit** for accounting, but the cost is much lower per request.
+   ```bash
+   curl -i https://api.kash.bot/v1/portfolio/positions -H "X-API-Key: $KASH_API_KEY"
+   # HTTP/1.1 200 OK
+   # ETag: W/"…"
+   # Cache-Control: private, no-cache
+   ```
 
-For polling workloads (portfolio, trade status, market list), this is the difference between paying for new data and paying for "is there new data?".
+2. Send it back on the next poll:
 
-## How to use it
+   ```bash
+   curl -i https://api.kash.bot/v1/portfolio/positions \
+     -H "X-API-Key: $KASH_API_KEY" \
+     -H 'If-None-Match: W/"…"'
+   # HTTP/1.1 304 Not Modified   (no body: reuse what you have)
+   # or
+   # HTTP/1.1 200 OK             (new body and a new ETag)
+   ```
 
-### 1. Capture the ETag from your first response
+On `304`, keep using your previous body. On `200`, replace it and keep the new ETag. `If-None-Match` accepts a comma-separated list of tags or `*`, and compares weakly, so echo back exactly what you received.
 
-```bash
-curl -i https://api.kash.bot/v1/portfolio \
-  -H "X-API-Key: $KASH_API_KEY"
+## Two kinds of ETag
 
-# HTTP/1.1 200 OK
-# ETag: "W/\"a1b2c3d4...\""
-# Content-Type: application/json
-# ...
-# { "portfolio": {...}, "data": {...}, "_meta": {...} }
-```
+| Route | ETag | What a `304` saves |
+| ----- | ---- | ------------------ |
+| `GET /v1/portfolio/positions` | **Weak** (`W/"…"`), derived from a fingerprint of your positions. | The server checks the fingerprint and answers `304` before running the positions query. Cheap for both sides. |
+| Every other `GET` | **Strong** (`"…"`), a hash of the response body ignoring the per-request `_meta.requestId` and `_meta.timestamp`. | The body on the wire. The server still builds the response to compute the hash. |
 
-### 2. Send it back on the next request
+Error responses carry no ETag. `POST` routes don't use ETags; use [idempotency](/developer-docs/rest-api/idempotency) instead.
 
-```bash
-curl -i https://api.kash.bot/v1/portfolio \
-  -H "X-API-Key: $KASH_API_KEY" \
-  -H 'If-None-Match: W/"a1b2c3d4..."'
+## Rate limits
 
-# If unchanged:
-# HTTP/1.1 304 Not Modified
-# ETag: "W/\"a1b2c3d4...\""
-# (empty body)
-
-# If changed:
-# HTTP/1.1 200 OK
-# ETag: "W/\"e5f6g7h8...\""   ← new ETag
-# { "portfolio": { /* updated */ }, ... }
-```
-
-When you get `304`, **reuse your last response body**. When you get `200`, replace it (and capture the new ETag).
-
-## TypeScript SDK
-
-The SDK does this transparently — pass `--ifNoneMatch` (or set the per-call header) and it handles the 304 path:
-
-```ts
-let etag: string | undefined;
-let portfolio: PortfolioSummary;
-
-// Initial fetch
-const first = await kash.portfolio.get();
-portfolio = first;
-etag = first._meta?.etag; // pulled from response headers
-
-// Subsequent poll
-try {
-  const next = await kash.portfolio.get({ ifNoneMatch: etag });
-  portfolio = next;
-  etag = next._meta?.etag;
-} catch (err) {
-  if (err instanceof KashNotModifiedError) {
-    // Nothing changed; keep using `portfolio`.
-  } else {
-    throw err;
-  }
-}
-```
+A `304` still counts as one request against your [rate limit](/developer-docs/rest-api/rate-limits). Conditional requests save bandwidth and work, not quota. If you need to watch trades closely, [webhooks](/developer-docs/rest-api/webhooks/overview) cost no quota at all.
 
 ## Where ETags help most
 
-| Endpoint                        | Polling pattern                                    | ETag value                                                |
-| ------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| `GET /v1/portfolio`             | Refresh balance every N seconds                    | High — balance only moves on trades you initiated.        |
-| `GET /v1/trades/{id}`           | Wait for completion                                | High — trade is mostly idle until status flips.           |
-| `GET /v1/markets/{id}`          | Watch a single market                              | Medium — moves on every trade against it.                 |
-| `GET /v1/markets`               | Refresh a market list                              | Medium — depends on filter and traffic.                   |
-| `GET /v1/markets/{id}/quote`    | Live price ticker                                  | Low — every quote re-runs RPC. Cache client-side instead. |
-| `GET /v1/markets/{id}/predictions` | Recent-trades feed                              | Low — append-only, almost always changes.                 |
+| Endpoint | Pattern | Benefit |
+| -------- | ------- | ------- |
+| `GET /v1/portfolio/positions` | Poll your positions | High: positions change only when your trades settle. |
+| `GET /v1/trades/{id}` | Wait for a trade to finish | High until the status changes. |
+| `GET /v1/markets/{id}` | Watch one market | Medium: probabilities move with every trade. |
+| `GET /v1/markets/{id}/quote` | Live pricing | Low. Use its `Cache-Control: public, max-age=10` instead. |
+| `GET /v1/markets/{id}/predictions` | Recent trades | Low: the feed changes constantly. Use the cursor. |
 
-For high-cardinality append-only feeds (predictions, webhook events), pagination + a stable cursor is a better strategy than ETag.
+The TypeScript SDK sends `If-None-Match` for you when polling positions.
 
-## ETag format
+## `Cache-Control`
 
-We use **weak ETags** (the `W/` prefix). Weak ETags compare equal even if byte-level encoding differs (e.g. JSON whitespace). The server may serve different exact bytes for the same logical state — what matters is whether the *resource* changed.
-
-```
-ETag: W/"a1b2c3d4e5f6"
-```
-
-Don't try to parse the inner string. Treat it as opaque.
-
-## Caching with ETags + `Cache-Control`
-
-The `GET /v1/markets/{id}/quote` endpoint also sets a small public `Cache-Control: public, max-age=10`. This lets a CDN or local cache serve the quote for up to 10 seconds without hitting our backend at all. Combine with ETag for the post-cache revalidation path.
-
-For private routes (everything authenticated), responses use `Cache-Control: private, no-cache` — your CDN won't serve them to other tenants, but you can still cache client-side using ETags as the freshness key.
-
-## What ETags don't do
-
-- **They don't skip rate limit accounting entirely.** A `304` still costs one request from your quota, just dramatically less work for the server. (If you need to poll harder, see if a webhook-driven design works for you.)
-- **They don't survive across keys.** ETags are computed per (route, query, key). Don't share them between keys.
-- **They don't apply to write paths.** `POST` and `PATCH` requests don't benefit from ETags; use [Idempotency-Key](/developer-docs/rest-api/idempotency) instead.
+- `GET /v1/portfolio/positions`: `private, no-cache` (cache it yourself, revalidate every time).
+- `GET /v1/markets/{id}/quote`: `public, max-age=10`.
+- `/v1/openapi.json` and `/v1/docs`: `public, max-age=60, stale-while-revalidate=300`.
+- `/v1/health`, `/v1/ready` and the webhook-secret rotation response: `no-store`.
 
 ## Next
 
 <CardGroup cols={2}>
   <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
-    The push-based alternative to polling. Real-time delivery, no quota cost.
+    Push instead of polling.
   </Card>
-  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
-    The full interactive spec at `/v1/docs`.
+  <Card title="Endpoint reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    Every endpoint and its reference page.
   </Card>
 </CardGroup>

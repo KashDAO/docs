@@ -1,144 +1,165 @@
 ---
 title: 'Public Embed API Overview'
-description: 'Embed prediction markets on your website with the Kash Public Embed API'
+description: 'Embed Kash prediction markets on your website with iframes, public read endpoints and X (Twitter) deep links'
 ---
 
-The Kash Public Embed API enables anyone to embed prediction markets and threads on their website. All embeds are read-only and anonymous — users are directed to app.kash.bot to trade (or to X, via optional tweet deep links).
+The Public Embed API lets anyone show Kash prediction markets on their own website. It has three parts:
 
-## Key Features
+- **Iframe embeds.** Drop-in widgets for a single market or a thread of markets.
+- **Public read endpoints.** JSON endpoints for threads and markets, which you can call from a browser on any origin.
+- **X (Twitter) deep links.** Ready-made `twitter.com/intent/tweet` URLs. When a user posts one, the Kash trading bot reads it and places their prediction. This only works for users who have connected their X account to Kash. The trade is submitted from the user's own wallet.
+
+Everything here is read-only and anonymous. To trade, users either post a deep-link tweet or open the market on [app.kash.bot](https://app.kash.bot).
 
 <CardGroup cols={2}>
-  <Card title="Iframe Embeds" icon="window">
-    Embed complete threads with a 20-tile market heatmap grid or single market cards
+  <Card title="Iframe embeds" icon="window" href="/developer-docs/public-embed-api/guides/thread-iframe">
+    Market and thread widgets
   </Card>
-  <Card title="Twitter Deep Links" icon="x-twitter">
-    Generate Twitter URLs that let users place predictions via tweet (requires the user's opt-in trading bot authorization)
+  <Card title="X deep links" icon="x-twitter" href="/developer-docs/public-embed-api/endpoints/market-twitter-link">
+    Tweet links that place predictions
   </Card>
-  <Card title="REST API" icon="code">
-    Public API endpoints to fetch threads, markets, and real-time data
+  <Card title="Read endpoints" icon="code" href="/developer-docs/public-embed-api/endpoints/markets">
+    Threads and markets
   </Card>
-  <Card title="Zero Setup" icon="bolt">
-    No authentication required - just copy the code and start embedding
+  <Card title="No API key" icon="bolt" href="/developer-docs/public-embed-api/quickstart">
+    No sign-up and no authentication
   </Card>
 </CardGroup>
 
----
-
-## API Endpoint Groups
-
-### Thread Endpoints
-Fetch and display prediction market threads (collections of related markets):
-- **GET /api/threads** - List all available threads
-- **GET /api/threads/:id** - Get details for a specific thread
-- **GET /api/threads/:id/markets** - Get all markets within a thread
-
-### Market Endpoints
-Discover and filter individual prediction markets:
-- **GET /api/markets** - List markets with filtering and pagination
-- **GET /api/markets/:id** - Get detailed info for a specific market
-- **GET /api/markets/trending** - Get trending markets by recent activity
-- **GET /api/markets/featured** - Get curated high-volume markets
-
-### Twitter Deep Link Endpoints
-Generate Twitter intent URLs for predictions (no iframe needed):
-- **GET /api/markets/:id/twitter-link** - Generate link for a single market
-- **GET /api/threads/:id/twitter-links** - Generate links for all markets in a thread
-- **POST /api/twitter-links** - Batch generate links for multiple markets
-
----
-
-## Quick Start
-
-Get started in under 5 minutes:
-
-```html HTML
-<iframe
-  src="https://app.kash.bot/threads/{threadId}/iframe?source=your-site"
-  width="100%"
-  height="900"
-  frameborder="0"
-  allow="clipboard-write"
-  title="Kash Prediction Markets"
-></iframe>
-```
-
-Replace `{threadId}` with an actual thread ID from our [thread list API](/developer-docs/public-embed-api/endpoints/threads).
-
-## Use Cases
-
-### News & Media Sites
-Embed live prediction markets alongside news articles to drive engagement and provide readers with real-time sentiment data.
-
-### Financial Platforms
-Integrate market probabilities into your financial dashboards and analysis tools.
-
-### Community Forums
-Add prediction markets to discussion threads for interactive forecasting.
-
-### Educational Platforms
-Use markets as teaching tools for economics, statistics, and decision-making courses.
-
-## Authentication
-
-The Public Embed API is **completely public** and requires **no authentication**. All endpoints are rate-limited by IP address to ensure fair usage.
-
-## Rate Limits
-
-| Endpoint Type | Limit |
-|--------------|-------|
-| GET /api/threads | 50 req/min per IP |
-| GET /api/threads/{id} | 100 req/min per IP |
-| GET /api/threads/{id}/markets | 100 req/min per IP |
-| GET /api/threads/{id}/twitter-links | 100 req/min per IP |
-| GET /api/markets | 100 req/min per IP |
-| GET /api/markets/{id} | 100 req/min per IP |
-| GET /api/markets/{id}/twitter-link | 100 req/min per IP |
-| GET /api/markets/trending | 100 req/min per IP |
-| GET /api/markets/featured | 100 req/min per IP |
-| POST /api/twitter-links | 100 req/min per IP |
-| POST /api/embeds/* | 200 req/min per IP |
-
-Rate limit information is included in response headers:
-```
-X-RateLimit-Limit: 50
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1704067260000
-```
-
 ## Base URL
 
-All API requests should be made to:
 ```
 https://app.kash.bot/api
 ```
 
-Iframe embeds use these URL patterns:
+Iframe embeds use these page URLs:
+
 ```
-Thread embed: https://app.kash.bot/threads/{threadId}/iframe
-Market embed: https://app.kash.bot/markets/{marketId}/iframe
+Market:        https://app.kash.bot/markets/{marketId}/iframe
+Thread:        https://app.kash.bot/threads/{threadId}/iframe
 ```
+
+## Endpoints
+
+### Threads
+
+A **thread** is a curated collection of related markets.
+
+| Method | Path | Description |
+|---|---|---|
+| GET | [`/api/threads`](/developer-docs/public-embed-api/endpoints/threads) | List threads |
+| GET | [`/api/threads/:id`](/developer-docs/public-embed-api/endpoints/thread-detail) | One thread |
+| GET | [`/api/threads/:id/markets`](/developer-docs/public-embed-api/endpoints/thread-markets) | Markets in a thread |
+
+### Markets
+
+| Method | Path | Description |
+|---|---|---|
+| GET | [`/api/markets`](/developer-docs/public-embed-api/endpoints/markets) | List, filter and search markets |
+| GET | [`/api/markets/:id`](/developer-docs/public-embed-api/endpoints/market-detail) | One market, optionally with price history and trades |
+| GET | [`/api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state) | Live prices and volume for up to 200 markets |
+| GET | [`/api/markets/:id/state`](/developer-docs/public-embed-api/endpoints/market-state) | Live prices and volume for one market |
+| GET | [`/api/markets/:id/quote`](/developer-docs/public-embed-api/endpoints/market-quote) | Price quote for a buy or a sell |
+| GET | [`/api/markets/:id/leaderboard`](/developer-docs/public-embed-api/endpoints/market-leaderboard) | Positions in one market, ranked by size |
+| GET | [`/api/markets/participants`](/developer-docs/public-embed-api/endpoints/market-participants) | Participant avatars for up to 50 markets |
+| GET | [`/api/markets/category-stats`](/developer-docs/public-embed-api/endpoints/market-category-stats) | Market counts and volume per category |
+
+### X (Twitter) deep links
+
+| Method | Path | Description |
+|---|---|---|
+| GET | [`/api/markets/:id/twitter-link`](/developer-docs/public-embed-api/endpoints/market-twitter-link) | A deep link for one outcome of one market |
+| GET | [`/api/threads/:id/twitter-links`](/developer-docs/public-embed-api/endpoints/thread-twitter-links) | Deep links for every open market in a thread |
+| POST | [`/api/twitter-links`](/developer-docs/public-embed-api/endpoints/twitter-links-batch) | Deep links for up to 50 market and outcome pairs (server-side only) |
+
+## Authentication and CORS
+
+No API key is needed. Every `GET` endpoint above returns `Access-Control-Allow-Origin: *`, so you can call it with `fetch` from any web page. Because the origin is a wildcard, browsers do not send cookies, so make requests without credentials.
+
+`POST /api/twitter-links` is the one exception. It requires a CSRF token, so you can call it from a server but not from a browser on another origin. Its page explains how.
+
+## IDs
+
+All IDs are UUIDs. An ID that is not a valid UUID returns `400 VALIDATION_ERROR`, and a valid UUID that matches nothing returns `404 NOT_FOUND`.
+
+## Units and chains
+
+- **USDC amounts** such as `totalVolume` and `seedAmountAtomic` are atomic units with 6 decimals, so `35000000` is 35 USDC. Some fields return these as numbers and others as strings. Each endpoint page says which.
+- **Outcome-token amounts** such as `shareSupply`, and AMM values, are WAD strings with 18 decimals.
+- **Timestamps.** `endTime` is milliseconds since the epoch. `expiresAt`, `freezeAt` and `resolveTime` are seconds since the epoch. Other timestamps are ISO 8601 or Postgres timestamp strings.
+- **Chains.** New markets run on Solana, with `chainId` `9000001` and base58 `contractAddress` values. Earlier markets ran on Base, with `chainId` `8453` and `0x` addresses. Those older markets still appear in resolved results while Base is phased out.
+
+## Prices and implied probability
+
+Show `outcomes[].impliedChance` (or `currentImpliedChance` for the first outcome) as each outcome's market-implied probability. On `/api/markets`, `/api/markets/:id` and the state endpoints, each outcome's `probability` is set to the same value as its `impliedChance`, and `priceKnown` is `false` when there is no price yet. The thread-markets list returns the AMM's raw marginal `probability` instead, so read `impliedChance` there too.
+
+## Pagination
+
+List endpoints take `limit` and `offset` and return:
+
+```json
+"pagination": { "offset": 0, "limit": 20, "total": 49, "hasMore": true }
+```
+
+`offset` goes up to 10,000. The maximum `limit` differs by endpoint.
+
+## Rate limits
+
+Limits apply per IP address. Endpoints in the same group share one budget. Read the current values from the `X-RateLimit-*` headers.
+
+| Group | Endpoints |
+|---|---|
+| Market reads | `/api/markets`, `/api/markets/:id`, `/quote`, `/twitter-link`, `/api/markets/category-stats`, `/api/markets/participants`, `/api/threads/:id/twitter-links` |
+| Market state | `/api/markets/state`, `/api/markets/:id/state` |
+| Leaderboards | `/api/markets/:id/leaderboard` |
+| Thread list | `/api/threads` |
+| Thread detail | `/api/threads/:id` |
+| Thread markets | `/api/threads/:id/markets` |
+| Batch deep links | `POST /api/twitter-links` |
+
+Some responses are served from a cache before the limit is checked, and those don't count. Responses the CDN can't cache carry `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` (a Unix time in milliseconds).
+
+When you go over a limit, you get `429` with a `Retry-After` header:
+
+```json
+{
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded. Please try again later.",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "details": { "retryAfter": 42 },
+  "timestamp": "2026-10-20T17:40:53.081Z"
+}
+```
+
+## Errors
+
+Errors use one envelope:
+
+```json
+{
+  "error": "NotFoundError",
+  "message": "Thread '00000000-0000-4000-8000-000000000000' not found",
+  "code": "NOT_FOUND",
+  "timestamp": "2026-10-20T17:40:53.349Z"
+}
+```
+
+| Status | `code` | When |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | A malformed ID, parameter or body. `details` lists each problem. |
+| 403 | `CSRF_TOKEN_MISSING` / `CSRF_TOKEN_INVALID` | `POST /api/twitter-links` was called without a valid CSRF token |
+| 404 | `NOT_FOUND` | The resource doesn't exist |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit reached |
+| 500 | `INTERNAL_ERROR` | Unexpected server error. The body includes an `errorId`. |
+| 503 | `SERVICE_UNAVAILABLE` | Temporarily unavailable. Retry after the `Retry-After` header. |
 
 ## Support
 
 <CardGroup cols={2}>
-  <Card title="Technical Support" icon="headset">
-    Email us at [dev@kash.bot](mailto:dev@kash.bot) for technical questions
+  <Card title="Technical support" icon="headset">
+    Email [dev@kash.bot](mailto:dev@kash.bot)
   </Card>
-  <Card title="Partnership Inquiries" icon="handshake">
-    Contact [partnerships@kash.bot](mailto:partnerships@kash.bot) for revenue sharing details
-  </Card>
-</CardGroup>
-
-## Next Steps
-
-<CardGroup cols={3}>
-  <Card title="Quickstart Guide" icon="rocket" href="/developer-docs/public-embed-api/quickstart">
-    Get your first embed running in 5 minutes
-  </Card>
-  <Card title="API Reference" icon="book" href="/developer-docs/public-embed-api/endpoints/threads">
-    Browse all available API endpoints
-  </Card>
-  <Card title="Code Examples" icon="code" href="/developer-docs/public-embed-api/examples/html">
-    View complete integration examples
+  <Card title="Community" icon="discord">
+    Ask other builders in the [Kash Discord](https://discord.com/invite/n9eumqjMPb)
   </Card>
 </CardGroup>

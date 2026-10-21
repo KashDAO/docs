@@ -1,0 +1,165 @@
+---
+title: 'Quickstart'
+description: 'Read, quote, buy, sell and redeem on the Kash market program on Solana with kashdao-protocol-sdk.'
+---
+
+This walkthrough reads a market on Solana mainnet-beta, quotes it, then
+trades from a local keypair. Steps 1 and 2 need no wallet or funds.
+
+## Prerequisites
+
+- Python 3.10 or later.
+- A Solana mainnet-beta RPC endpoint. The public endpoint works for
+  reads; use a dedicated provider for trading.
+- For steps 3 to 5: a keypair holding **USDC** (in its associated token
+  account) and a little **SOL** for transaction fees and, on a first buy,
+  the position account's rent.
+
+```bash
+pip install kashdao-protocol-sdk
+```
+
+## 1. Read a market
+
+```python
+import asyncio
+import os
+
+from kashdao_protocol_sdk import create_solana_client
+
+
+async def main() -> None:
+    async with create_solana_client(rpc_url=os.environ["SOLANA_RPC_URL"]) as kash:  # mainnet-beta
+        config = await kash.protocol.config()
+        print(f"protocol fee {config.default_protocol_fee_bps} bps")
+
+        # By numeric market id, or by the market account address
+        # (the REST API's `contractAddress` for a Solana market).
+        market = await kash.markets.get(5)
+        print(market.status, market.num_outcomes)
+        for k, p in enumerate(market.probabilities_wad):
+            print(f"outcome {k}: {p / 10**16:.2f}%")
+
+
+asyncio.run(main())
+```
+
+## 2. Quote
+
+```python
+# What would 5 USDC of outcome 0 buy?
+buy = await kash.markets.quote_buy(market=5, outcome=0, amount_usdc=5_000_000)
+print(f"{buy.tokens_out_wad} WAD, fee {buy.protocol_fee_usdc} atomic USDC")
+
+# What would selling 0.1 token of outcome 1 pay? Only tokens traders hold can
+# be sold, so a sell quote larger than that raises KashValidationError (ExceedsSupply).
+sell = await kash.markets.quote_sell(market=5, outcome=1, tokens_in_wad=10**17)
+print(f"{sell.amount_out_usdc} atomic USDC")
+```
+
+## 3. Buy and sell
+
+```python
+from solders.keypair import Keypair
+
+from kashdao_protocol_sdk import keypair_signer
+
+keypair = Keypair.from_base58_string(os.environ["SOLANA_SECRET_KEY"])
+# or, for a solana-keygen JSON file's byte array:
+# keypair = Keypair.from_bytes(bytes(json.loads(...)))
+signer = keypair_signer(keypair)
+
+print(f"USDC: {await kash.account.usdc_balance(keypair.pubkey())} (atomic)")
+
+# Buy 1 USDC of outcome 0, accepting at most 1% below the quote.
+# The first buy also opens the position account in the same transaction.
+bought = await kash.trades.buy(
+    market=5,
+    outcome=0,
+    amount_usdc=1_000_000,
+    max_slippage_bps=100,
+    signer=signer,
+    compute_unit_price_micro_lamports=10_000,  # optional priority fee
+)
+print(f"bought: {bought.signature} (floor {bought.plan.min_tokens_out_wad} WAD)")
+
+# Sell the whole position back.
+position = await kash.account.position(market=5, outcome=0, owner=keypair.pubkey())
+sold = await kash.trades.sell(
+    market=5,
+    outcome=0,
+    tokens_in_wad=position.balance_wad,
+    max_slippage_bps=100,
+    signer=signer,
+)
+print(f"sold: {sold.signature} for at least {sold.plan.min_amount_out_usdc} atomic USDC")
+```
+
+## 4. Build, simulate, then send
+
+```python
+plan = await kash.trades.build_buy(
+    market=5,
+    outcome=0,
+    amount_usdc=1_000_000,
+    max_slippage_bps=100,
+    trader=keypair.pubkey(),
+)
+simulation = await kash.trades.simulate(plan, payer=keypair.pubkey())
+if simulation.error is not None:
+    raise SystemExit(f"refused: {simulation.error.name or simulation.error.raw}")
+
+result = await kash.trades.send(plan, signer=signer)
+print(result.signature)
+```
+
+## 5. Redeem and close
+
+```python
+market = await kash.markets.get(5)
+redeem = kash.trades.redeem if market.status == "resolved" else kash.trades.redeem_cancelled
+
+# amount_wad defaults to the whole position. A losing outcome pays zero.
+redeemed = await redeem(market=5, outcome=0, max_slippage_bps=50, signer=signer)
+print(f"redeemed: {redeemed.signature}")
+
+closed = await kash.trades.close_position(market=5, outcome=0, signer=signer)
+print(f"rent returned to {closed.plan.rent_recipient}")
+```
+
+The rent goes back to whoever funded the position account, which can
+differ from the owner who signs.
+
+## Handling errors
+
+```python
+from kashdao_protocol_sdk import (
+    KashSimulationRevertedError,
+    KashTransactionExpiredError,
+    KashTransactionOutcomeUnknownError,
+    KashValidationError,
+)
+
+try:
+    await kash.trades.buy(
+        market=5, outcome=0, amount_usdc=1_000_000, max_slippage_bps=100, signer=signer
+    )
+except KashValidationError as err:
+    print(f"refused before signing: {err.program_error or err}")
+except KashSimulationRevertedError as err:
+    print(f"preflight refused: {(err.context or {}).get('program_error') or err}")
+except KashTransactionOutcomeUnknownError as err:
+    # May have landed: look the signature up before retrying.
+    print(f"outcome unknown: {err.signature}")
+except KashTransactionExpiredError:
+    pass  # did not land: safe to rebuild with a fresh quote and resend
+```
+
+See [Error handling](/developer-docs/protocol-sdk/error-handling) for the
+full table; the Python classes and codes are the same.
+
+## Next
+
+<Card title="Runnable examples" icon="github" href="https://github.com/KashDAO/protocol-sdk-python/tree/main/examples/solana">
+  Read-and-quote, buy-and-sell, and redeem-and-close scripts.
+</Card>

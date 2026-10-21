@@ -1,85 +1,102 @@
 ---
 title: 'Protocol SDK — overview'
-description: '@kashdao/protocol-sdk — non-custodial TypeScript SDK for the on-chain Kash protocol. BYO RPC, signer, bundler.'
+description: '@kashdao/protocol-sdk — non-custodial TypeScript SDK for the Kash market program on Solana. Bring your own RPC and signer.'
 ---
 
-`@kashdao/protocol-sdk` is the **direct-to-chain** SDK for Kash. It
-talks to the Kash protocol contracts on Base — no Kash backend,
-no Kash REST API in the trade path, no Kash-controlled keys, no
-Kash-sponsored gas. Trade execution is end-to-end self-custodied.
+`@kashdao/protocol-sdk` is the **direct-to-chain** TypeScript SDK for
+Kash. Its `@kashdao/protocol-sdk/solana` entry point talks straight to
+the Kash market program on Solana mainnet-beta: no Kash backend and no
+REST API in the trade path, no Kash-held keys, no Kash-sponsored fees.
 
-If you'd like a hosted, API-key-authed integration (typical retail
-flow, fastest time to first trade), use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript)
-instead. This page is for builders who run their own signing
-infrastructure (market makers, AI agents, on-chain UIs).
+If you want a hosted, API-key-authed integration (the fastest path to a
+first trade), use the [REST API](/developer-docs/rest-api/overview) and
+[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) instead. This
+SDK is for builders who run their own signing infrastructure: market
+makers, trading bots, AI agents and on-chain UIs.
 
-## Trust model — zero custody, zero Kash dependency
+## Trust model
 
-The package never holds keys, never signs transactions, never
-sponsors gas, and never reaches Kash-hosted infrastructure.
-Everything required to use it lives on the consumer's side: their
-RPC URL, their signer, (optionally) their bundler URL, their funded
-address. Kash sees only what hits the public chain.
-
-This is by design — the SDK is a strict library, not a service.
-Code review for an audit only needs to verify what `@kashdao/protocol-sdk`
-imports (today: `viem`, `zod`) and what it sends out
-(`eth_sendRawTransaction` to your RPC; `eth_sendUserOperation` to
-your bundler). No phone-home. No telemetry.
-
-## Two trading modes — pick one
-
-The SDK supports both wallet models the protocol allows.
-
-| Mode                              | Factory                    | Best for                                                                                                                                                  |
-| --------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **EOA** (vanilla EIP-1559)        | `createEoaClient`          | Market makers with existing tx-signing infra (web3signer, Fireblocks-direct, AWS-KMS, ethers/viem wallet). No bundler. Lowest per-trade overhead.         |
-| **Smart Account** (ERC-4337 v0.7) | `createSmartAccountClient` | Self-custody UIs, AI-agent runners, retail-adjacent integrators that benefit from gasless onboarding via paymaster, social recovery, or session keys.    |
-
-Both modes are first-class peers. Both share the same on-chain read
-surface. Both preserve the zero-custody trust story. You can use
-one or both side-by-side.
-
-## Supported chains
-
-| Chain        | Chain ID | Status                                                              |
-| ------------ | -------- | ------------------------------------------------------------------- |
-| Base mainnet | 8453     | ⏳ Pre-deploy — `KashChainError(CHAIN_NOT_DEPLOYED)` until launch   |
-| Base Sepolia | 84532    | ✅ Live                                                             |
-| Custom chain | any      | ✅ Via `customChain: CustomChain(...)` (Anvil / forks / dev)        |
-
-Custom chains are an explicit escape hatch — supply your own chain
-id, RPC URL, and contract address bundle. The static registry is
-bypassed; Anvil deployments with non-canonical EntryPoint addresses
-keep working.
+The package never holds keys, never sponsors fees and never contacts
+Kash-hosted infrastructure. You bring the RPC endpoint (or a
+`Connection`), the signer and the funded wallet. It builds
+`TransactionInstruction`s for the market program, asks your signer to
+sign, and sends through your RPC. Kash sees only what lands on chain.
 
 ## Install
 
 ```bash
-pnpm add @kashdao/protocol-sdk viem
-# or: npm install @kashdao/protocol-sdk viem
+npm install @kashdao/protocol-sdk @solana/web3.js @coral-xyz/anchor @solana/spl-token bn.js
 ```
 
-`viem` is a **peer dependency** — bring your own. The SDK accepts
-any `viem@^2.45.0` you have in your tree (so it doesn't drag a
-duplicate `viem` into your bundler).
+The four Solana packages are peer dependencies, so the SDK uses the
+versions already in your tree (`@solana/web3.js` ^1.98, `@coral-xyz/anchor`
+^0.32.1, `@solana/spl-token` ^0.4.9, `bn.js` ^5.2.1). Requires Node.js 22
+or later.
+
+## Supported clusters
+
+| Cluster          | `cluster`        | Market program                                 | USDC mint                                      |
+| ---------------- | ---------------- | ---------------------------------------------- | ---------------------------------------------- |
+| **mainnet-beta** | `'mainnet-beta'` | `Jr8Bd8efPfNYHW65vZrVzeLbYkzy1oo3QB3i8cYdDcy`  | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| devnet           | `'devnet'`       | `J3tSyyhaeokZc9VnogXR9anQMeA9FjKn8fnnjrLTkuN5` | `6xNqPRTd9V71N8KBp1X3x87rEA2sLiLsDqU7gQ4MuwBe` (test stand-in) |
+
+`mainnet-beta` is the default. `getSolanaDeployment(cluster)` returns the
+addresses, and `createSolanaClient({ cluster: { programId, usdcMint } })`
+targets an unlisted deployment such as a local validator.
+
+## Client surface
+
+`createSolanaClient({ connection })` (or `{ rpcUrl }`) returns a client
+with four namespaces:
+
+| Method                                                                                                                | What it does                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `markets.get(ref)`                                                                                                    | Decoded market: status (`active` / `frozen` / `resolved` / `cancelled`), prices, probabilities  |
+| `markets.quoteBuy` / `quoteSell` / `quoteRedeem`                                                                      | Exact quotes from the program's own integer curve                                                |
+| `account.position` / `positions` / `usdcBalance`                                                                      | Position balances and the wallet's USDC balance                                                  |
+| `protocol.config` / `template` / `templates`                                                                          | Program config and market templates                                   |
+| `trades.buildBuy` / `buildSell` / `buildRedeem` / `buildRedeemCancelled` / `buildOpenPosition` / `buildClosePosition` | A plan: the instructions plus the bounds they encode                                             |
+| `trades.simulate(plan, { payer })` / `trades.send(plan, { signer })`                                                  | Simulate unsigned, or sign, send and confirm                                                     |
+| `trades.buy` / `sell` / `redeem` / `redeemCancelled` / `openPosition` / `closePosition`                               | Build and send in one call, with the signer as trader                                            |
+
+The low-level instruction builders (`buyInstruction`, `sellInstruction`,
+`redeemInstruction`, …) and PDA derivations (`kashMarketPdas`) are
+exported too, for composing your own transactions.
+
+## Key concepts
+
+- **Market references.** A market is named by its numeric id (`12n`) or
+  its market account address. The REST API's `contractAddress` for a
+  Solana market is that account address, so you can pass it straight
+  to `markets.get`.
+- **Amounts.** USDC is an atomic `bigint` with 6 decimals
+  (`1_000_000n` = 1 USDC). Outcome balances are a WAD `bigint` with 18
+  decimals (`10n ** 18n` = 1 token).
+- **Positions are not SPL tokens.** The program keeps each position as a
+  balance in a position account (one per market, owner and outcome).
+  `buildBuy` opens that account in the same transaction when it is
+  missing, and `closePosition` reclaims its rent once it is empty.
+- **Slippage is mandatory.** Every trade takes `maxSlippageBps` (a floor
+  derived from a fresh quote) or an explicit floor
+  (`minTokensOutWad` / `minAmountOutUsdc`).
+- **Signers.** `keypairSigner(keypair)` for bots and scripts;
+  `walletAdapterSigner(wallet)` for `@solana/wallet-adapter`, Phantom or
+  any wallet exposing `publicKey` and `signTransaction`. Pass `feePayer`
+  to sponsor fees and rent from a second signer.
 
 ## Where to next
 
 <CardGroup cols={2}>
-  <Card title="Quickstart — EOA mode" icon="key" href="/developer-docs/protocol-sdk/quickstart-eoa">
-    Vanilla EIP-1559 from a plain wallet. The canonical path for market makers.
-  </Card>
-  <Card title="Quickstart — Smart-account mode" icon="cube" href="/developer-docs/protocol-sdk/quickstart-smart-account">
-    ERC-4337 v0.7 with a bundler. The canonical path for AA stacks.
+  <Card title="Quickstart" icon="rocket" href="/developer-docs/protocol-sdk/quickstart">
+    Read a market, quote it, then buy, sell and redeem from a keypair.
   </Card>
   <Card title="Error handling" icon="circle-exclamation" href="/developer-docs/protocol-sdk/error-handling">
-    Typed error hierarchy, retry policies, decoded revert hints.
-  </Card>
-  <Card title="Cross-language parity" icon="arrow-right-arrow-left" href="/developer-docs/protocol-sdk/cross-language-parity">
-    How this SDK stays byte-equal with `kashdao-protocol-sdk` (Python). A position opened via either SDK can be closed via the other.
+    Typed errors, retry semantics, and what to do when a send's outcome is unknown.
   </Card>
   <Card title="Python SDK" icon="python" href="/developer-docs/protocol-sdk-python/overview">
-    Same protocol, same trust model, Python instead of TypeScript. The canonical Hummingbot integration path.
+    The same program and trust model, in Python.
+  </Card>
+  <Card title="Source" icon="github" href="https://github.com/KashDAO/protocol-sdk-typescript">
+    `KashDAO/protocol-sdk-typescript` on GitHub, with runnable examples.
   </Card>
 </CardGroup>

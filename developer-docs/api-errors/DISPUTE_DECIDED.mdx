@@ -1,0 +1,23 @@
+---
+title: 'DISPUTE_DECIDED'
+description: 'HTTP 409 — Dispute already decided'
+---
+
+**HTTP status:** 409 · **Title:** "Dispute already decided"
+
+## When it fires
+
+`POST /v1/markets/{id}/disputes` was called for a market whose disputes have already been reviewed. When a proposal is disputed, Kash's automated resolution system reviews the dispute against the market's published sources and rules, and the market settles on the result. Once that review is complete the market is settled, and every later filing on the market is refused.
+
+## Why it happens
+
+- Another user disputed the proposal, and the review completed before your filing arrived.
+
+## How to fix
+
+- There is nothing to retry: the market has settled, and a retry is refused the same way.
+- Follow the settlement through `GET /v1/markets/{id}`. If you filed a dispute before the review completed, its outcome (`status`, `reviewedAt`, `reviewNote`) is on `GET /v1/markets/{id}/disputes`.
+
+## Related codes
+
+- [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), [`DISPUTE_ALREADY_FILED`](/developer-docs/api-errors/DISPUTE_ALREADY_FILED), [`MARKET_NOT_DISPUTABLE`](/developer-docs/api-errors/MARKET_NOT_DISPUTABLE)

@@ -7,17 +7,17 @@ description: 'HTTP 400 — Outcome index invalid'
 
 ## When it fires
 
-`outcomeIndex` is greater than or equal to the market's outcome count, or negative.
+`outcomeIndex` is negative, or greater than or equal to the market's number of outcomes. Returned by `POST /v1/trades`, `GET /v1/markets/{id}/quote` and `POST /v1/redemptions`.
 
 ## Why it happens
 
-- You hard-coded `outcomeIndex: 1` (assuming a binary market) and pointed at a multi-outcome market.
-- Off-by-one: the field is **zero-indexed** — first outcome is `0`, not `1`.
-- A bug computed the index from a label without bounds-checking.
+- You hard-coded `outcomeIndex: 1` assuming a binary market and pointed it at a market with a different shape.
+- Off by one: the field is **zero-indexed**. The first outcome is `0`, not `1`.
+- The index was computed from a label without a bounds check.
 
 ## How to fix
 
-- Look up the market via `GET /v1/markets/:id` and check `outcomes.length` — valid range is `[0, length - 1]`.
+- Fetch the market with `GET /v1/markets/{id}` and check `outcomes.length`. The valid range is `0` to `length - 1`.
 - Map outcome labels to indices once when you fetch the market, then use the index throughout your code.
 
 ## Related codes

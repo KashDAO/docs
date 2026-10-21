@@ -17,109 +17,68 @@ icon: 'gear'
   alt="Hero Dark"
 />
 
-# Settings Overview
+# Settings overview
 
 <AccordionGroup>
   <Accordion title="What settings are available?">
-    **Settings on app.kash.bot**
-
-    Open **Settings** in the webapp to manage:
-
-    - **Language:** English, Spanish, Portuguese, Russian, and Chinese
-    - **Theme:** light and dark mode
-    - **Notifications:** in-app and browser/device push preferences
-    - **Privacy:** control your data and profile visibility
-    - **API keys:** create and manage keys for the [Kash API](https://docs.kash.bot)
-    - **Trading bot:** authorize your X account for tweet-based trading
-
-    Changes take effect immediately and persist across your sessions and devices.
+    | Page | What you can do |
+    |---|---|
+    | **General** | Choose your public title, theme (light, dark or system) and language |
+    | **Account** | See your wallet, manage recovery methods, back up your wallet key, set cookie preferences, export your data, sign out or delete your account |
+    | **Notifications** | Push notifications, notification types, price alerts and installing the app |
+    | **X bot** | Connect your own X account to announce your markets and let followers trade in replies |
+    | **Market creation** | Defaults for your market announcements: format, launch and resolution posts, and channels |
+    | **API keys** | Create and revoke keys for the Kash API, with scoped permissions and spending controls |
+    | **Copy trading** | Manage the traders you copy: size, budget, pause or stop |
+    | **Distribution** | Connect your Discord and Telegram channels so your new markets are announced there |
   </Accordion>
 
   <Accordion title="How do I change the language or theme?">
-    **Display Preferences**
-
-    - **Language:** pick from English, Spanish, Portuguese, Russian, or Chinese in Settings — the interface updates instantly
-    - **Theme:** switch between light and dark mode
-
-    Your choice is saved to your account, so it follows you across devices.
+    In **Settings → General**. Choose from the available languages, and set the theme to light, dark or your system's setting.
   </Accordion>
 
-  <Accordion title="How do I manage notifications?">
-    **Settings → Notifications**
-
-    - Toggle **in-app** notifications for the notification center
-    - Enable **browser / device push** to get alerts even when the tab is closed — your browser will ask for permission
-    - **iOS:** install app.kash.bot as a PWA (Share → Add to Home Screen) to receive push notifications on iPhone
-
-    See the [Notifications FAQ](/getting-started/faqs/notifications) for the available categories.
+  <Accordion title="How do I control who can message me?">
+    In Settings, choose whether **everyone** or only **mutual followers** can send you messages.
   </Accordion>
 
-  <Accordion title="How do I set up tweet trading?">
-    **Settings → Trading Bot**
-
-    Tweet-based trading is opt-in:
-
-    1. Open **Settings → Trading bot**
-    2. Authorize your X account
-    3. Once connected, you can place trades by tweeting at **Kash's dedicated trading account** — the current handle is linked from the [@kash_bot](https://x.com/kash_bot) profile
-
-    You can revoke the authorization at any time from the same page.
+  <Accordion title="How do I trade from X?">
+    Connect your X account (sign in with X, or connect it from **Settings → Account**), then reply to a market's post and mention @kash_bot_trade. No extra setting is needed. See [Trading on X](/getting-started/features/trading-on-x). The **X bot** page is a different thing: it posts *your* markets from *your* X account.
   </Accordion>
 
   <Accordion title="How do I manage API keys?">
-    **Settings → API Keys**
-
-    - Create API keys for programmatic access to your account
-    - Copy the key at creation time — treat it like a password
-    - Revoke keys you no longer use
-
-    See the [Developer Docs](https://docs.kash.bot) for authentication, scopes, and rate limits.
+    In **Settings → API keys**. Each key has scoped permissions, its own spending controls and an optional webhook URL, and you can revoke a key at any time. See the [Developer Docs](/developer-docs/introduction).
   </Accordion>
 
   <Accordion title="What privacy controls do I have?">
-    **Privacy Settings**
-
-    - Manage your data and profile visibility from **Settings → Privacy**
-    - Keep in mind that on-chain activity is inherently public: trades from your wallet are visible on the Base blockchain regardless of in-app settings
+    - Accept or reject analytics cookies in **Settings → Account**
+    - Choose who can message you
+    - Export your data, or delete your account
   </Accordion>
 </AccordionGroup>
 
-# Account-Level Settings
+# Account-level settings
 
 <AccordionGroup>
-  <Accordion title="How do I add a recovery email?">
-    Add or update your recovery email in **Settings**. This is your safety net if you lose access to your primary login method — set it up early. See the [Account FAQ](/getting-started/faqs/account) for the full recovery picture.
+  <Accordion title="How do I add a recovery method?">
+    **Settings → Account → Recovery methods.** Add a recovery email or a passkey, and link or unlink sign-in methods.
   </Accordion>
 
   <Accordion title="How do I export my wallet key?">
-    You can export your embedded wallet's key from **Settings**. This gives you independent access to your smart account outside of Kash. Store it securely and never share it — see the [Security FAQ](/getting-started/faqs/security).
+    **Settings → Account → Wallet backup.** Confirm the security checklist, and your Solana private key is shown in a secure window. You can import it into a compatible Solana wallet. Kash never sees your private key. Store it offline and never share it.
   </Accordion>
 </AccordionGroup>
 
-# Troubleshooting Settings
+# Troubleshooting settings
 
 <AccordionGroup>
   <Accordion title="Why aren't my settings saving?">
-    **Quick Fixes**
-
-    1. **Refresh** the page and try again
-    2. **Clear cache** and cookies for app.kash.bot
-    3. **Try another browser** to rule out extensions or compatibility issues
-    4. **Check your connection** — settings save to your account and need a stable connection
-
-    Still stuck? Use the in-app feedback widget to report a bug (attach a screenshot), or email **support@kash.bot**.
+    Refresh the page and try again, and make sure you're still signed in. If it keeps happening, report it from the info button in the app.
   </Accordion>
 
   <Accordion title="Why aren't push notifications working?">
-    - Confirm push is enabled in **Settings → Notifications**
-    - Check that your browser/OS allows notifications from app.kash.bot
-    - On iOS, push only works from the installed PWA — add app.kash.bot to your home screen first
+    Check that push is on in **Settings → Notifications**, that your browser allows notifications for app.kash.bot, and on iPhone or iPad that you've added Kash to your home screen and enabled push from the installed app.
   </Accordion>
 </AccordionGroup>
-
-<Tip>
-Most preferences live in one place: **Settings** on app.kash.bot. Language, theme, notifications, privacy, API keys, and the trading bot are all managed there.
-</Tip>
 
 <CardGroup cols={2}>
   <Card
@@ -127,7 +86,7 @@ Most preferences live in one place: **Settings** on app.kash.bot. Language, them
     icon="shield"
     href="/getting-started/faqs/security"
   >
-    Learn about security settings
+    Protect your account
   </Card>
   <Card
     title="Account Management"

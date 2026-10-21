@@ -1,23 +1,24 @@
 ---
 title: 'Authentication'
-description: 'API keys, scopes, IP allowlists, and key rotation.'
+description: 'API keys, scopes, tiers, IP allowlists, request signing and key rotation.'
 ---
 
-Every data route on `api.kash.bot` requires an API key. The only unauthenticated endpoints are the infra-meta routes: `/v1/health`, `/v1/ready`, `/v1/openapi.json`, `/v1/docs`.
+Every data route on `api.kash.bot` requires an API key. Only `/v1/health`, `/v1/ready`, `/v1/openapi.json` and `/v1/docs` are open.
 
 ## The `X-API-Key` header
 
-Pass your key on every request as the `X-API-Key` header:
+Send your key on every request as `X-API-Key`. Send exactly one: a request with two `X-API-Key` headers is refused.
 
 ```bash
 curl https://api.kash.bot/v1/markets \
-  -H "X-API-Key: kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  -H "X-API-Key: kash_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+  -H "X-Kash-Api-Version: 2026-08-19"
 ```
 
-Keys are issued via the webapp's **Settings → API Keys** page or the admin CLI.
+Keys are issued in the Kash app under **Settings → API Keys**. The plaintext is shown once. A user can hold at most **5 active keys**.
 
 <Tip>
-With [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) you don't set the header yourself — construct the client with your key and it authenticates every request (and auto-routes to staging for a `kash_test_*` key, production for `kash_live_*`):
+With [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) you don't set headers yourself. Construct the client with your key and it authenticates every request; a `kash_test_` key goes to staging and a `kash_live_` key to production.
 
 ```ts
 import { KashClient } from '@kashdao/sdk';
@@ -28,127 +29,113 @@ const kash = new KashClient({ apiKey: process.env.KASH_API_KEY! });
 ## Key format
 
 ```
-kash_live_<32 base62 chars>   # production
-kash_test_<32 base62 chars>   # staging
+kash_live_<32 base62 characters>   # production
+kash_test_<32 base62 characters>   # staging
 ```
 
-The 32-character random suffix gives roughly 190 bits of entropy. The prefix is informational — the server validates the full key against a stored HMAC under a server-side pepper. **Never log or commit the plaintext.**
+The server stores only a keyed hash of each key, never the plaintext. **Never log or commit a key.**
 
 ## Scopes
 
-A scope is a coarse-grained permission. Every endpoint declares the scope(s) it requires. The `requireScope` middleware fails closed with `403 INSUFFICIENT_SCOPE` when a key lacks one.
+Each key carries a set of scopes, and each route requires one. A key without the route's scope gets `403 INSUFFICIENT_SCOPE`.
 
-| Scope            | What it grants                                                           |
-| ---------------- | ------------------------------------------------------------------------ |
-| `markets:read`   | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` |
-| `markets:quote`  | `GET /v1/markets/{id}/quote`                                             |
-| `portfolio:read` | `GET /v1/portfolio`, `GET /v1/portfolio/positions`                       |
-| `trades:read`    | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{id}`           |
-| `trades:write`   | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`                        |
-| `webhooks:manage`| `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{id}/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate` |
-| `auth:manage`    | `GET /v1/account/usage`                                                 |
+| Scope             | Routes |
+| ----------------- | ------ |
+| `markets:read`    | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` and `GET /v1/markets/{id}/disputes` |
+| `markets:quote`   | `GET /v1/markets/{id}/quote` |
+| `portfolio:read`  | `GET /v1/portfolio`, `GET /v1/portfolio/positions` |
+| `trades:read`     | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` |
+| `trades:write`    | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions` and `POST /v1/markets/{id}/disputes` |
+| `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{eventId}/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate` |
+| `auth:manage`     | `GET /v1/account/usage` |
 
-<Tip>
-**Default scopes by tier.** Self-served `free` and `developer` keys default to `markets:read`, `markets:quote`, `portfolio:read`. Admin-issued `enterprise` and `mm` keys add `trades:read`, `trades:write`. You can override at issuance — request the scopes that match your use case, no more.
-</Tip>
+A key created without an explicit scope list gets `markets:read`, `markets:quote` and `portfolio:read`. Choose the scopes you need when you create the key, and no more: a read-only analytics key should never carry `trades:write`.
 
 ## Tiers
 
-Each key has a tier that governs default rate limits and spending caps. See **[Rate Limits](/developer-docs/rest-api/rate-limits)** for per-tier quotas.
+Each key has a tier, which sets its rate limit and spending caps. See [Rate limits](/developer-docs/rest-api/rate-limits) for the numbers.
 
-| Tier         | How issued                | Notes                                                              |
-| ------------ | ------------------------- | ------------------------------------------------------------------ |
-| `free`       | Self-serve via webapp     | Conservative caps. Default for new accounts.                       |
-| `developer`  | Self-serve, paid          | Higher rate limit and per-trade caps.                              |
-| `enterprise` | Admin-issued (contractual)| Custom rate limit. Required for governance-thresholded operations. |
-| `mm`         | Admin-issued only         | Market-maker tier. High caps. Discretionary review required.       |
+| Tier         | How to get it |
+| ------------ | ------------- |
+| `free`       | Self-serve in the Kash app. |
+| `developer`  | On request to [support@kash.bot](mailto:support@kash.bot). |
+| `enterprise` | Issued by Kash. [Contact sales](mailto:sales@kash.bot). |
+| `mm`         | Market-maker tier, issued by Kash. [Contact sales](mailto:sales@kash.bot). |
 
-Reach out to [partnerships@kash.bot](mailto:partnerships@kash.bot) for `enterprise` or `mm` keys.
+## Account status
+
+A key belongs to the account that created it in the web app. If that account is suspended or closed, its keys are refused with `403 ORGANIZATION_INACTIVE`.
 
 ## IP allowlists
 
-Optional per-key. When set, requests from any IP not in the list fail closed with `403 IP_NOT_ALLOWED` *before* the route handler runs.
-
-Format: comma-separated IPv4/IPv6 addresses or CIDR ranges. Set in the webapp UI or via the admin CLI at issuance time.
+Optional, per key. When a key has an allowlist, a request from any other address is refused with `403 IP_NOT_ALLOWED` before the route runs. Entries are IPv4 or IPv6 addresses or CIDR ranges:
 
 ```
-10.0.0.0/8,2001:db8::/32,203.0.113.45
+203.0.113.45, 198.51.100.0/24, 2001:db8::/32
 ```
 
-We strongly recommend setting an allowlist for production keys. It collapses an entire class of "key was leaked from a logfile" incidents.
+Set it on the key in the Kash app. We strongly recommend an allowlist for production keys.
 
-## Key rotation
+## Request signing (optional)
 
-API keys do not expire automatically. Rotate them when:
-
-- A team member with access leaves
-- A key may have been logged or committed to a repo
-- You're tightening security posture before a major release
-
-To rotate:
-
-1. Issue a new key in the webapp.
-2. Roll it out to your services.
-3. Verify the new key is in use (check `/v1/account/usage` — request counts on the old key should be zero).
-4. Revoke the old key in the webapp.
-
-There is no automated dual-validity overlap window for API keys; the rotation is sequential. (Webhook *secrets* do have a 7-day rotation overlap — see **[Secret Rotation](/developer-docs/rest-api/webhooks/secret-rotation)**.)
-
-## Body signing for `trades:write` (optional, hardened)
-
-For write routes like `POST /v1/trades`, you can opt into HMAC-signed request bodies as a defence-in-depth layer against captured-request replay and in-flight tampering. Send the signature in `X-Kash-Signature` using the same Stripe-style header format as our webhook signatures:
+You can sign requests with an HMAC as a defence against tampering and replay of a captured request. Send `X-Kash-Signature` (exactly one) in the same format as webhook signatures:
 
 ```
 X-Kash-Signature: t=<unix-ms>,v1=<hex-hmac-sha256>
 ```
 
-- **Signing secret = your API key plaintext** (the same value you send in `X-API-Key`). No separate signing secret is issued — this is *not* the key's `webhook_secret`.
-- **Canonical input** is `<unix-ms-timestamp>.<METHOD>.<path>.<raw-body>` — the timestamp from `t=`, the HTTP method uppercased, the URL pathname **without the query string** (query params aren't signed because intermediaries often re-order them), and the exact raw body bytes you send.
-- **Algorithm**: HMAC-SHA256, hex-encoded.
-- **Timestamp tolerance**: ±5 minutes. Older or newer timestamps are rejected.
+- **Secret:** your API key plaintext, the value you send in `X-API-Key`.
+- **Signed input:** `<t>.<METHOD>.<path>.<raw-body>`: the timestamp from `t=`, the HTTP method in upper case, the URL path **without** the query string, and the exact body bytes (empty for a `GET`).
+- **Algorithm:** HMAC-SHA256, hex-encoded. Several `v1=` values are accepted; one must match.
+- **Tolerance:** the timestamp must be within 5 minutes of the server's clock.
 
 ```ts
 import { createHmac } from 'node:crypto';
 
-const ts = Date.now();                       // unix milliseconds
+const ts = Date.now();
 const canonical = `${ts}.POST./v1/trades.${rawBody}`;
-const sig = createHmac('sha256', apiKeyPlaintext).update(canonical).digest('hex');
-// Header: X-Kash-Signature: t=<ts>,v1=<sig>
+const sig = createHmac('sha256', apiKey).update(canonical).digest('hex');
+// X-Kash-Signature: t=${ts},v1=${sig}
 ```
 
-If the header is present, the server MUST be able to verify it — a mismatch, a malformed header, or a stale timestamp is rejected with `401 REQUEST_SIGNATURE_INVALID`. If absent, the route still works (the API key is the canonical authentication). Multiple comma-separated `v1=` values are accepted (for graceful scheme rotation later). Use body signing when your threat model includes a compromised TLS-terminating proxy or leaky request logs.
+A present signature must verify: a mismatch, a malformed header or a stale timestamp is `401 REQUEST_SIGNATURE_INVALID`. Signing applies to every authenticated route. It is optional unless your key has been set to **require** signing, in which case an unsigned request is also refused with `401 REQUEST_SIGNATURE_INVALID`.
+
+Because the signing secret is the key itself, signing protects body integrity and limits the replay window of a captured request. It does not protect you against a stolen key.
+
+## Key rotation
+
+Rotate a key when someone with access leaves, when a key may have been logged or committed, or as routine hygiene:
+
+1. Create a new key in the Kash app.
+2. Roll it out to your services.
+3. Confirm the old key has gone quiet (`GET /v1/account/usage` with the old key shows no new trades).
+4. Revoke the old key. Revocation takes effect immediately (`401 API_KEY_REVOKED`).
+
+Keys can carry an expiry date; an expired key gets `401 API_KEY_EXPIRED`. API keys have no overlap window. Webhook *secrets* do: see [Secret rotation](/developer-docs/rest-api/webhooks/secret-rotation).
 
 ## Auth failures
 
-| Status | `code`                | Meaning                                                       |
-| ------ | --------------------- | ------------------------------------------------------------- |
-| 401    | `API_KEY_MISSING`     | No `X-API-Key` header.                                        |
-| 401    | `API_KEY_MALFORMED`   | Header present but not a well-formed key.                     |
-| 401    | `API_KEY_INVALID`     | Key not recognised, or HMAC mismatch.                         |
-| 401    | `API_KEY_REVOKED`     | Key was found but has been revoked.                           |
-| 401    | `API_KEY_EXPIRED`     | Key is past its `expires_at` timestamp.                       |
-| 403    | `INSUFFICIENT_SCOPE`  | Key is valid but doesn't carry the scope this route requires. |
-| 403    | `IP_NOT_ALLOWED`      | Source IP not in this key's allowlist.                        |
-| 401    | `REQUEST_SIGNATURE_INVALID` | Body-signing was opted into and failed verification.   |
+| Status | `code`                      | Meaning |
+| ------ | --------------------------- | ------- |
+| 401    | `API_KEY_MISSING`           | No `X-API-Key` header. |
+| 401    | `API_KEY_MALFORMED`         | Not a well-formed Kash key. |
+| 401    | `API_KEY_INVALID`           | Key not recognised. |
+| 401    | `API_KEY_REVOKED`           | Key revoked. |
+| 401    | `API_KEY_EXPIRED`           | Key past its expiry. |
+| 401    | `REQUEST_SIGNATURE_INVALID` | Signature present but invalid, or missing on a key that requires it. |
+| 403    | `INSUFFICIENT_SCOPE`        | Key lacks the route's scope. |
+| 403    | `ORGANIZATION_INACTIVE`     | The key's account is suspended or closed. |
+| 403    | `IP_NOT_ALLOWED`            | Source address not on the key's allowlist. |
 
-All auth failures return RFC 7807 [`application/problem+json`](/developer-docs/rest-api/errors) and are written to the per-key audit log. Repeated failures from the same source trigger the per-IP brute-force lockout.
-
-## Inspecting auth state
-
-The `GET /v1/account/usage` endpoint returns telemetry for the *calling* key — including 24h auth-failure and rate-limit-rejection counts. Useful for spotting key misuse early.
-
-```bash
-curl https://api.kash.bot/v1/account/usage \
-  -H "X-API-Key: $KASH_API_KEY"
-```
+Failed authentication is counted per source address: too many failures in a short window lock that address out for a period, answered with `429 RATE_LIMIT_EXCEEDED` and a `Retry-After` header.
 
 ## Next
 
 <CardGroup cols={2}>
-  <Card title="Rate Limits" icon="gauge" href="/developer-docs/rest-api/rate-limits">
-    Per-tier quotas, the `X-RateLimit-*` headers, and 429 handling.
+  <Card title="Rate limits" icon="gauge" href="/developer-docs/rest-api/rate-limits">
+    Per-tier quotas, the `X-RateLimit-*` headers and 429 handling.
   </Card>
   <Card title="Errors" icon="circle-exclamation" href="/developer-docs/rest-api/errors">
-    RFC 7807 error format and the full error code catalog.
+    The RFC 7807 error format and the code catalogue.
   </Card>
 </CardGroup>

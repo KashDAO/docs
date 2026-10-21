@@ -1,69 +1,62 @@
 ---
 title: 'Quickstart'
-description: 'Get a key, place your first trade, and receive your first webhook in under 5 minutes.'
+description: 'Get a key, quote a market, place your first trade and receive your first webhook.'
 ---
 
-This guide walks you end-to-end against the **staging** environment (`api-staging.kash.bot`, Base Sepolia). Going live afterwards is the same flow against `api.kash.bot`.
+This guide runs against **staging** (`api-staging.kash.bot`, Solana devnet). Going live is the same flow against `api.kash.bot` with a `kash_live_` key.
 
 ## 1. Create a Kash account
 
-If you don't have one already, sign up at [staging.kash.bot](https://staging.kash.bot). The staging webapp is the human-facing front door; you'll use it to create the account that owns your API keys.
+Sign up at [staging.kash.bot](https://staging.kash.bot). The account you create owns your API keys and the smart account your trades run from.
 
-## 2. Generate an API key
+## 2. Create an API key
 
-In the webapp:
+In the app, open **Settings → API Keys** and create a key:
 
-1. Go to **Settings → API Keys**.
-2. Click **Create key**.
-3. Give it a name (e.g. `local dev`) and select the scopes you need:
-   - `markets:read` — read market detail & list (granted by default on every tier)
-   - `markets:quote` — fetch on-chain price quotes
-   - `portfolio:read` — read your own positions
-   - `trades:read` — list and inspect your trades
-   - `trades:write` — place trades and confirm high-value ones
-   - `webhooks:manage` — list events, redeliver, rotate the webhook secret
-4. (Optional) Set an IP allowlist if you'll always call from a known set of addresses.
-5. (Optional) Set a `webhook_url` if you want trade-lifecycle events POSTed to your endpoint.
+1. Name it (for example `local dev`).
+2. Choose its scopes. For this guide: `markets:read`, `markets:quote`, `trades:read` and `trades:write`. See [scopes](/developer-docs/rest-api/authentication#scopes).
+3. Optionally set an IP allowlist.
+4. Optionally set a webhook URL to receive trade events (step 7).
 
-The plaintext key is shown **once**. Capture it immediately:
+The key is shown **once**:
 
 ```bash
 export KASH_API_KEY="kash_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export KASH_API="https://api-staging.kash.bot/v1"
 ```
 
-The `kash_test_` prefix marks staging keys; production keys use `kash_live_`.
+## 3. List markets
 
-<Tip>
-Key issuance happens in the webapp's **Settings → API Keys** page — the CLI can't issue keys. Once you have one, store it in the CLI with `kash auth set-key` so every `kash` command picks it up. See the [CLI guide](/developer-docs/cli/overview).
-</Tip>
-
-## 3. Make your first request
+The API serves `2026-08-19` by default. The examples send `X-Kash-Api-Version: 2026-08-19` to pin it, so a future default change cannot alter your integration. See [API versions](/developer-docs/rest-api/overview#api-versions).
 
 ```bash
-curl https://api-staging.kash.bot/v1/markets?limit=5 \
-  -H "X-API-Key: $KASH_API_KEY"
+curl "$KASH_API/markets?status=ACTIVE&limit=5" \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19"
 ```
 
-You should get back a `200 OK` with a page of markets.
-
-If you get `403 INSUFFICIENT_SCOPE`, your key is missing `markets:read`. If you get `429`, you've hit your tier's rate limit — the response includes `X-RateLimit-Reset` and `Retry-After`.
+Pick a market whose `tradeable` is `true`. `403 INSUFFICIENT_SCOPE` means the key lacks `markets:read`; `429` means you hit your rate limit (see `Retry-After`).
 
 ## 4. Get a quote
 
 ```bash
-MARKET_ID="<paste a market id from step 3>"
+MARKET_ID="<a market id from step 3>"
 
-curl "https://api-staging.kash.bot/v1/markets/${MARKET_ID}/quote?outcomeIndex=0&action=buy&amount=10000000" \
-  -H "X-API-Key: $KASH_API_KEY"
+curl "$KASH_API/markets/$MARKET_ID/quote?outcomeIndex=0&action=buy&amount=10000000" \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19"
 ```
 
-The `amount` here is in **atomic USDC** (`10000000` = 10 USDC). The response carries the expected `tokensOut`, the post-trade pool state, and an `effectivePrice` convenience number.
+The quote `amount` is in **atomic USDC** (`10000000` is 10 USDC). The response gives `quote.tokensOut` (outcome tokens, 18 decimals), `quote.effectivePrice` and `quote.impliedProbability`, plus `market.tradeable`.
 
-## 5. Place your first trade
+## 5. Place a trade
+
+Your smart account needs USDC for a buy.
 
 ```bash
-curl -X POST https://api-staging.kash.bot/v1/trades \
+curl -X POST "$KASH_API/trades" \
   -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $(uuidgen)" \
   -d '{
@@ -71,113 +64,108 @@ curl -X POST https://api-staging.kash.bot/v1/trades \
     "outcomeIndex": 0,
     "amount": "10",
     "side": "buy",
-    "metadata": { "strategy": "first-trade", "source": "quickstart" }
+    "metadata": { "source": "quickstart" }
   }'
 ```
 
-Note: `amount` in the trade body is a **decimal string** of USDC (`"10"` = 10 USDC), distinct from the atomic-units amount used by the quote endpoint.
-
-You'll get back a `201 Created`:
+The trade `amount` is a **decimal USDC string** (`"10"` is 10 USDC), unlike the atomic amount in the quote. The answer is `201 Created`:
 
 ```json
 {
-  "trade": { "id": "...", "status": "pending", ... },
-  "data": { "id": "...", "status": "pending", ... },
-  "_meta": { "requestId": "...", "timestamp": "...", "idempotent": false }
+  "trade": { "id": "…", "status": "pending", "correlationId": "…", "chainRef": "solana:devnet", "txHash": null, "…": "…" },
+  "data":  { "…": "same as trade" },
+  "_meta": { "requestId": "…", "timestamp": "…", "idempotent": false }
 }
 ```
 
-The trade's `status` field tracks the lifecycle: `pending → validating → executing → completed` (or `failed`/`rejected`).
+The status moves `pending → validating → executing → completed`, or ends in `failed` or `rejected`.
 
-## 6. Watch the trade complete
-
-The simplest way is to poll:
+## 6. Watch it complete
 
 ```bash
 TRADE_ID="<the id from step 5>"
 
-curl https://api-staging.kash.bot/v1/trades/$TRADE_ID \
-  -H "X-API-Key: $KASH_API_KEY"
+curl "$KASH_API/trades/$TRADE_ID" \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19"
 ```
 
-You'll see the status transition to `completed` with a `txHash` and `tokensOut` populated.
-
-The better way is to receive a webhook — see step 7.
+When it completes, `txHash` holds the Solana transaction signature and `tokensOut` the tokens received. Rather than polling, use a webhook.
 
 ## 7. Receive a webhook
 
-If you set a `webhook_url` on the key in step 2, the **trade.completed** event was already POSTed to your endpoint. The body looks like:
+If the key has a webhook URL, a `trade.completed` event was POSTed to it:
 
 ```json
 {
-  "id": "evt_uuid",
+  "id": "…",
   "type": "trade.completed",
-  "apiVersion": "2026-04-29",
-  "createdAt": "2026-05-02T12:34:56.789Z",
+  "apiVersion": "2026-08-19",
+  "createdAt": "…",
   "data": {
-    "tradeId": "trade_uuid",
-    "marketId": "market_uuid",
+    "tradeId": "…",
+    "marketId": "…",
+    "chainRef": "solana:devnet",
     "outcomeIndex": 0,
     "amount": "10",
     "side": "buy",
     "status": "completed",
-    "txHash": "0x...",
-    "tokensOut": "23734012471176000000",
-    "metadata": { "strategy": "first-trade", "source": "quickstart" }
+    "txHash": "5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW",
+    "tokensOut": "18734012471176000000",
+    "metadata": { "source": "quickstart" }
   }
 }
 ```
 
-The headers carry the signature so you can verify the request:
+With these headers:
 
 ```
-X-Kash-Signature: t=1730000000000,v1=<hex-hmac-sha256>
-X-Kash-Event-Id:  evt_uuid
-X-Kash-Api-Version: 2026-04-29
+X-Kash-Signature:   t=1792000000000,v1=<hex-hmac-sha256>
+X-Kash-Event-Id:    <same as the body id>
+X-Kash-Event-Type:  trade.completed
+X-Kash-Api-Version: 2026-08-19
 ```
 
-See **[Verifying webhook signatures](/developer-docs/rest-api/webhooks/verifying)** for the verification recipe (one-line constant change from any Stripe library).
+Always verify the signature before acting on an event. See [Verifying signatures](/developer-docs/rest-api/webhooks/verifying).
 
-## 8. (Optional) Use the SDK
+## 8. Use the SDK
 
-The TypeScript SDK gives you typed everything — including a one-line `constructEvent` for webhook verification:
+The TypeScript SDK handles headers, versions, retries, idempotency and webhook verification:
 
 ```bash
-pnpm add @kashdao/sdk
+npm install @kashdao/sdk
 ```
 
 ```ts
 import { KashClient } from '@kashdao/sdk';
 
-const kash = new KashClient({
-  apiKey: process.env.KASH_API_KEY!,
-  baseUrl: 'https://api-staging.kash.bot/v1',
-});
+// A kash_test_ key is routed to staging automatically.
+const kash = new KashClient({ apiKey: process.env.KASH_API_KEY! });
 
 const trade = await kash.trades.create({
   marketId,
   outcomeIndex: 0,
   amount: '10',
   side: 'buy',
-  metadata: { strategy: 'first-trade' },
-}, { idempotencyKey: crypto.randomUUID() });
+  metadata: { source: 'quickstart' },
+});
 
 const final = await kash.trades.waitForCompletion(trade.id);
 console.log(final.status, final.txHash);
 ```
 
-Full SDK reference: **[TypeScript SDK](/developer-docs/rest-api/sdks/typescript)**.
+Full reference: [TypeScript SDK](/developer-docs/rest-api/sdks/typescript).
 
 ## What next?
 
 <CardGroup cols={3}>
-  <Card title="Authentication" icon="key" href="/developer-docs/rest-api/authentication">
-    Scopes, IP allowlists, and key rotation.
+  <Card title="Build a trading bot" icon="robot" href="/developer-docs/rest-api/trading-bot">
+    An end-to-end bot with the SDK.
   </Card>
   <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
-    Set up a verified, retried webhook endpoint.
+    A verified, deduplicated receiver.
   </Card>
   <Card title="Idempotency" icon="rotate" href="/developer-docs/rest-api/idempotency">
-    Safely retry trade creation without duplicates.
+    Retry trades without duplicates.
   </Card>
 </CardGroup>

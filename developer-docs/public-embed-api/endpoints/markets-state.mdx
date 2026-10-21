@@ -1,0 +1,86 @@
+---
+title: 'GET /api/markets/state'
+description: 'Live prices, volume and lifecycle for up to 200 markets in one request'
+---
+
+The batch version of [`GET /api/markets/:id/state`](/developer-docs/public-embed-api/endpoints/market-state). Use it to keep a grid of market cards up to date. Load the cards once from [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets), then poll this endpoint with their IDs.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/state?ids=:id1,:id2
+```
+
+## Query parameters
+
+<ParamField query="ids" type="string" required>
+  A comma-separated list of 1 to 200 market UUIDs. More than 200 IDs, or any malformed ID, returns `400`.
+</ParamField>
+
+## Response
+
+<ResponseField name="markets" type="MarketState[]">
+  One [MarketState](/developer-docs/public-embed-api/endpoints/market-state#response) for each market found. IDs that match no market are left out without an error, so match results by `id`.
+</ResponseField>
+
+<ResponseField name="asOf" type="string">Server time of the read (ISO 8601)</ResponseField>
+
+## Caching
+
+`Cache-Control: public, s-maxage=1, max-age=0, must-revalidate`.
+
+## Rate limit
+
+Market state group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
+
+## Example request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/markets/state?ids=93f1445c-912c-47b4-8065-d1ff5a6b8dfc,0b7d5a4e-2c1f-4e8a-9d3b-6f1e2a7c9d40"
+```
+
+```javascript JavaScript
+async function refreshPrices(ids) {
+  const res = await fetch(`https://app.kash.bot/api/markets/state?ids=${ids.join(',')}`);
+  const { markets } = await res.json();
+  return new Map(markets.map((m) => [m.id, m]));
+}
+```
+</CodeGroup>
+
+## Example response
+
+```json 200 (one market shown)
+{
+  "markets": [
+    {
+      "id": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+      "asOf": "2026-10-20T17:43:31.029Z",
+      "lifecycle": { "status": "ACTIVE", "endTime": 1792530000, "freezeAt": 1792526400, "resolvedAt": null, "winningOutcomeIndex": null, "updatedAt": "2026-10-20T16:06:51.435Z" },
+      "totalVolume": 35000000,
+      "seedAmountAtomic": 20000000,
+      "tradeCount": 4,
+      "participantCount": 4,
+      "currentProbability": 0.279436651,
+      "currentImpliedChance": 0.279436651,
+      "lastActivityAt": "2026-10-20 16:06:51.435382+00",
+      "outcomes": [
+        { "outcomeIndex": 0, "probability": 0.279436651, "impliedChance": 0.279436651, "shareSupply": "26053103461967827528" },
+        { "outcomeIndex": 1, "probability": 0.7205633489, "impliedChance": 0.7205633489, "shareSupply": "41836357394017945260" }
+      ]
+    }
+  ],
+  "asOf": "2026-10-20T17:43:31.029Z"
+}
+```
+
+```json 400
+{
+  "error": "ValidationError",
+  "message": "Invalid query parameters",
+  "code": "VALIDATION_ERROR",
+  "details": [{ "expected": "string", "code": "invalid_type", "path": ["ids"], "message": "Invalid input: expected string, received undefined" }],
+  "timestamp": "2026-10-20T17:53:20.640Z"
+}
+```

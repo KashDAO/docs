@@ -1,541 +1,194 @@
 ---
 title: 'React Examples'
-description: 'Production-ready React components for embedding Kash prediction markets'
+description: 'React components for Kash iframes and a custom market grid'
 ---
 
-Complete React component examples for embedding Kash prediction markets with TypeScript support and hooks.
+These examples use React 18 or later and the browser `fetch`. They need no API key and no Kash SDK.
 
----
+## Iframe component
 
-## Basic Embed Component
+```tsx KashEmbed.tsx
+type KashEmbedProps =
+  | { kind: 'market'; id: string; height?: number }
+  | { kind: 'thread'; id: string; height?: number };
 
-Simple reusable thread embed component:
+const PATHS = {
+  market: (id: string) => `/markets/${id}/iframe`,
+  thread: (id: string) => `/threads/${id}/iframe`,
+};
 
-```typescript
-// components/KashEmbed.tsx
-import { useEffect, useRef, useState } from 'react';
+const DEFAULT_HEIGHT = { market: 520, thread: 900 };
 
-interface KashEmbedProps {
-  threadId: string;
-  source?: string;
-  height?: number;
-  className?: string;
-  onReady?: (data: { threadId: string; marketCount: number; totalVolume: number }) => void;
-  onMarketClick?: (data: { threadId: string; marketId: string }) => void;
-}
-
-export function KashEmbed({
-  threadId,
-  source = 'my-site',
-  height = 900,
-  className = '',
-  onReady,
-  onMarketClick,
-}: KashEmbedProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    function handleMessage(event: MessageEvent) {
-      if (event.origin !== 'https://app.kash.bot') return;
-
-      const { type, data } = event.data;
-
-      switch (type) {
-        case 'kash-iframe-ready':
-          onReady?.(data);
-          break;
-        case 'kash-market-clicked':
-          onMarketClick?.(data);
-          break;
-      }
-    }
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [onReady, onMarketClick]);
-
-  const embedUrl = `https://app.kash.bot/threads/${threadId}/iframe?source=${encodeURIComponent(source)}`;
-
+export function KashEmbed({ kind, id, height }: KashEmbedProps) {
   return (
     <iframe
-      ref={iframeRef}
-      src={embedUrl}
+      src={`https://app.kash.bot${PATHS[kind](encodeURIComponent(id))}`}
       width="100%"
-      height={height}
-      frameBorder="0"
-      className={className}
-      title="Kash prediction markets"
+      height={height ?? DEFAULT_HEIGHT[kind]}
       loading="lazy"
       allow="clipboard-write"
+      title="Kash prediction markets"
+      style={{ border: 0, borderRadius: 12 }}
     />
   );
 }
 ```
 
-**Usage:**
-
 ```tsx
-import { KashEmbed } from '@/components/KashEmbed';
-
-export default function MarketsPage() {
-  return (
-    <div className="container">
-      <h1>2024 Election Markets</h1>
-      <KashEmbed
-        threadId="abc123"
-        source="my-website"
-        height={900}
-        onReady={(data) => console.log(`Loaded ${data.marketCount} markets`)}
-        onMarketClick={(data) => console.log(`Clicked: ${data.marketId}`)}
-      />
-    </div>
-  );
-}
+<KashEmbed kind="market" id="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" />
+<KashEmbed kind="thread" id="00000001-0000-4000-a000-000000000003" />
 ```
 
----
+## Hook for iframe events
 
-## Custom Hook for Embed Events
+```tsx useKashEmbedEvents.ts
+import { useEffect } from 'react';
 
-Reusable hook for listening to embed events:
+type KashMessage = { type: string; data: Record<string, unknown> };
 
-```typescript
-// hooks/useKashEmbed.ts
-import { useEffect, useState, useRef, useCallback } from 'react';
-
-interface EmbedReadyData {
-  threadId: string;
-  marketCount: number;
-  totalVolume: number;
-}
-
-interface MarketClickData {
-  threadId: string;
-  marketId: string;
-}
-
-interface UseKashEmbedOptions {
-  onReady?: (data: EmbedReadyData) => void;
-  onMarketClick?: (data: MarketClickData) => void;
-}
-
-export function useKashEmbed(options: UseKashEmbedOptions = {}) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [marketCount, setMarketCount] = useState<number | null>(null);
-
+export function useKashEmbedEvents(onMessage: (msg: KashMessage) => void) {
   useEffect(() => {
-    function handleMessage(event: MessageEvent) {
+    function handle(event: MessageEvent) {
       if (event.origin !== 'https://app.kash.bot') return;
-
-      const { type, data } = event.data;
-
-      switch (type) {
-        case 'kash-iframe-ready':
-          setIsReady(true);
-          setMarketCount(data.marketCount);
-          options.onReady?.(data);
-          break;
-        case 'kash-market-clicked':
-          options.onMarketClick?.(data);
-          break;
+      const msg = event.data as KashMessage | undefined;
+      if (!msg || typeof msg.type !== 'string' || !msg.type.startsWith('kash-')) return;
+      if (msg.type === 'kash-open-twitter' && typeof msg.data?.url === 'string') {
+        window.open(msg.data.url, '_blank', 'noopener');
       }
+      onMessage(msg);
     }
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [options.onReady, options.onMarketClick]);
-
-  return {
-    iframeRef,
-    isReady,
-    marketCount,
-  };
+    window.addEventListener('message', handle);
+    return () => window.removeEventListener('message', handle);
+  }, [onMessage]);
 }
 ```
 
-**Usage:**
+## Custom market grid with live prices
 
-```tsx
-import { useKashEmbed } from '@/hooks/useKashEmbed';
+This component builds its own grid from the JSON API. It loads a thread's markets once, refreshes the prices every 10 seconds from `/api/markets/state`, and adds a "Predict on X" button to each outcome.
 
-export function MarketsWidget({ threadId }: { threadId: string }) {
-  const { iframeRef, isReady, marketCount } = useKashEmbed({
-    onReady: (data) => {
-      console.log(`Loaded ${data.marketCount} markets`);
-    },
-    onMarketClick: (data) => {
-      console.log(`Market clicked: ${data.marketId}`);
-    },
-  });
+```tsx ThreadMarketGrid.tsx
+import { useEffect, useState } from 'react';
 
-  return (
-    <div>
-      <div className="status">
-        {isReady 
-          ? `✅ ${marketCount} markets loaded` 
-          : 'Loading...'}
-      </div>
-      
-      <iframe
-        ref={iframeRef}
-        src={`https://app.kash.bot/threads/${threadId}/iframe?source=my-site`}
-        width="100%"
-        height={900}
-        frameBorder="0"
-      />
-    </div>
-  );
-}
-```
+const API = 'https://app.kash.bot/api';
 
----
+type Outcome = { outcomeIndex: number; label: string; impliedChance: number };
+type Market = { id: string; title: string; status: string; tradable: boolean; outcomes: Outcome[] };
+type MarketState = { id: string; outcomes: { outcomeIndex: number; impliedChance: number }[] };
 
-## Responsive Sidebar Widget
-
-Compact widget component:
-
-```typescript
-// components/MarketWidget.tsx
-import { useState } from 'react';
-import { useKashEmbed } from '@/hooks/useKashEmbed';
-
-interface MarketWidgetProps {
-  threadId: string;
-  title: string;
+async function getJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  const body = await res.json();
+  if (!res.ok) throw new Error(body?.message ?? `HTTP ${res.status}`);
+  return body as T;
 }
 
-export function MarketWidget({ threadId, title }: MarketWidgetProps) {
-  const [status, setStatus] = useState('Loading...');
+export function ThreadMarketGrid({ threadId, amount = 10 }: { threadId: string; amount?: number }) {
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [prices, setPrices] = useState<Record<string, number[]>>({});
+  const [error, setError] = useState<string | null>(null);
 
-  const { iframeRef, isReady, marketCount } = useKashEmbed({
-    onReady: (data) => {
-      setStatus(`${data.marketCount} markets`);
-    },
-  });
-
-  return (
-    <div className="market-widget">
-      <div className="widget-header">
-        <h3 className="widget-title">📊 {title}</h3>
-        <span className="widget-badge">{status}</span>
-      </div>
-
-      <iframe
-        ref={iframeRef}
-        src={`https://app.kash.bot/threads/${threadId}/iframe?source=my-site`}
-        width="100%"
-        height={400}
-        frameBorder="0"
-        className="widget-iframe"
-      />
-
-      <style jsx>{`
-        .market-widget {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-          max-width: 350px;
-        }
-
-        .widget-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 12px;
-        }
-
-        .widget-title {
-          font-size: 18px;
-          font-weight: 600;
-          margin: 0;
-        }
-
-        .widget-badge {
-          background: #dbeafe;
-          color: #1e40af;
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .widget-iframe {
-          border-radius: 8px;
-          border: 0;
-        }
-      `}</style>
-    </div>
-  );
-}
-```
-
----
-
-## Multi-Thread Dashboard
-
-Display multiple threads with dynamic loading:
-
-```typescript
-// components/MarketDashboard.tsx
-import { useState, useEffect } from 'react';
-import { KashEmbed } from './KashEmbed';
-
-interface Thread {
-  id: string;
-  title: string;
-  category: string;
-  marketCount: number;
-}
-
-export function MarketDashboard() {
-  const [threads, setThreads] = useState<Thread[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  // 1. Load the markets once.
   useEffect(() => {
-    async function fetchThreads() {
+    getJson<{ markets: Market[] }>(`${API}/threads/${threadId}/markets?limit=24&sortBy=total_volume`)
+      .then(({ markets }) => setMarkets(markets))
+      .catch((e) => setError(e.message));
+  }, [threadId]);
+
+  // 2. Keep the prices live.
+  useEffect(() => {
+    if (markets.length === 0) return;
+    const ids = markets.map((m) => m.id).join(',');
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = async () => {
       try {
-        const response = await fetch(
-          'https://app.kash.bot/api/threads?status=active&limit=6'
-        );
-        const data = await response.json();
-        setThreads(data.threads);
-      } catch (error) {
-        console.error('Failed to fetch threads:', error);
+        const { markets: states } = await getJson<{ markets: MarketState[] }>(`${API}/markets/state?ids=${ids}`);
+        setPrices(Object.fromEntries(states.map((s) => [s.id, s.outcomes.map((o) => o.impliedChance)])));
       } finally {
-        setLoading(false);
+        timer = setTimeout(tick, 10_000);
       }
+    };
+    tick();
+    return () => clearTimeout(timer);
+  }, [markets]);
+
+  async function predict(marketId: string, outcomeIndex: number) {
+    const tab = window.open('', '_blank'); // open synchronously so popup blockers allow it
+    try {
+      const { twitterUrl } = await getJson<{ twitterUrl: string }>(
+        `${API}/markets/${marketId}/twitter-link?outcomeIndex=${outcomeIndex}&amount=${amount}`
+      );
+      if (tab) tab.location.href = twitterUrl;
+    } catch (e) {
+      tab?.close();
+      alert((e as Error).message);
     }
-
-    fetchThreads();
-  }, []);
-
-  if (loading) {
-    return <div className="loading">Loading threads...</div>;
   }
 
+  if (error) return <p>Could not load markets: {error}</p>;
+
   return (
-    <div className="dashboard">
-      <h1>Market Dashboard</h1>
-
-      <div className="thread-grid">
-        {threads.map((thread) => (
-          <div key={thread.id} className="thread-card">
-            <div className="thread-header">
-              <h2>{thread.title}</h2>
-              <span className="thread-category">{thread.category}</span>
-            </div>
-
-            <KashEmbed
-              threadId={thread.id}
-              height={500}
-              onReady={(data) => {
-                console.log(`Thread ${thread.id}: ${data.marketCount} markets`);
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      <style jsx>{`
-        .dashboard {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .thread-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-          gap: 20px;
-          margin-top: 20px;
-        }
-
-        .thread-card {
-          background: white;
-          border-radius: 8px;
-          padding: 16px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .thread-header {
-          margin-bottom: 12px;
-        }
-
-        .thread-header h2 {
-          font-size: 18px;
-          margin: 0 0 4px 0;
-        }
-
-        .thread-category {
-          font-size: 13px;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-      `}</style>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+      {markets.map((m) => (
+        <article key={m.id} style={{ border: '1px solid #333', borderRadius: 12, padding: 16 }}>
+          <a href={`https://app.kash.bot/markets/${m.id}`} target="_blank" rel="noopener noreferrer">
+            <h3>{m.title}</h3>
+          </a>
+          {m.outcomes.map((o) => {
+            const chance = prices[m.id]?.[o.outcomeIndex] ?? o.impliedChance;
+            return (
+              <button key={o.outcomeIndex} disabled={!m.tradable} onClick={() => predict(m.id, o.outcomeIndex)}>
+                {o.label} · {Math.round(chance * 100)}%
+              </button>
+            );
+          })}
+        </article>
+      ))}
     </div>
   );
 }
 ```
-
----
-
-## Error Boundary Wrapper
-
-Graceful error handling:
-
-```typescript
-// components/EmbedErrorBoundary.tsx
-import React, { Component, ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
-
-interface State {
-  hasError: boolean;
-  error?: Error;
-}
-
-export class EmbedErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Embed error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback || (
-          <div className="error-container">
-            <h3>Failed to load markets</h3>
-            <p>Please try refreshing the page.</p>
-            <button onClick={() => this.setState({ hasError: false })}>
-              Retry
-            </button>
-          </div>
-        )
-      );
-    }
-
-    return this.props.children;
-  }
-}
-```
-
-**Usage:**
 
 ```tsx
-<EmbedErrorBoundary>
-  <KashEmbed threadId="abc123" />
-</EmbedErrorBoundary>
+<ThreadMarketGrid threadId="00000001-0000-4000-a000-000000000003" amount={10} />
 ```
 
----
+<Note>
+The deep-link endpoint writes outcomes beyond the first two as `Outcome N` in the tweet. For markets with more than two outcomes, link to the market page instead, or build the links server-side with [`POST /api/twitter-links`](/developer-docs/public-embed-api/endpoints/twitter-links-batch), which uses the real labels.
+</Note>
 
-## SSR-Safe Embed (Next.js)
+## Next.js (App Router)
 
-Server-side rendering compatible component:
+The iframe is plain HTML, so it renders on the server with no client code. To fetch data, call the API from a Server Component and let Next cache it:
 
-```typescript
-// components/SSRSafeEmbed.tsx
-import dynamic from 'next/dynamic';
+```tsx app/markets/page.tsx
+export const revalidate = 30;
 
-const KashEmbedClient = dynamic(
-  () => import('./KashEmbed').then((mod) => mod.KashEmbed),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="embed-skeleton">
-        <div className="skeleton-header" />
-        <div className="skeleton-card" />
-        <div className="skeleton-card" />
-        <div className="skeleton-card" />
-      </div>
-    ),
-  }
-);
-
-export function SSRSafeEmbed(props: any) {
-  return <KashEmbedClient {...props} />;
-}
-```
-
----
-
-## Complete Page Example
-
-Full Next.js page with all features:
-
-```typescript
-// app/markets/page.tsx
-'use client';
-
-import { useState } from 'react';
-import { useKashEmbed } from '@/hooks/useKashEmbed';
-import { EmbedErrorBoundary } from '@/components/EmbedErrorBoundary';
-
-export default function MarketsPage() {
-  const [status, setStatus] = useState('Loading markets...');
-
-  const { iframeRef, isReady, marketCount } = useKashEmbed({
-    onReady: (data) => {
-      setStatus(`✅ Loaded ${data.marketCount} markets`);
-    },
-    onMarketClick: (data) => {
-      setStatus(`👆 Clicked: ${data.marketId}`);
-    },
+export default async function MarketsPage() {
+  const res = await fetch('https://app.kash.bot/api/markets?status=active&tradableOnly=true&limit=12', {
+    next: { revalidate: 30 },
   });
+  const { markets } = await res.json();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Prediction Markets</h1>
-        <p className="text-gray-600">
-          Live probabilities on politics, sports, and current events
-        </p>
-      </header>
-
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
-        {status}
-      </div>
-
-      <EmbedErrorBoundary>
-        <iframe
-          ref={iframeRef}
-          src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
-          width="100%"
-          height={900}
-          frameBorder="0"
-          className="rounded-lg border border-gray-200 shadow-sm"
-          title="Prediction markets"
-        />
-      </EmbedErrorBoundary>
-    </div>
+    <ul>
+      {markets.map((m: { id: string; title: string }) => (
+        <li key={m.id}>
+          <a href={`https://app.kash.bot/markets/${m.id}`}>{m.title}</a>
+        </li>
+      ))}
+    </ul>
   );
 }
 ```
 
----
-
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
-  <Card title="HTML Examples" href="/developer-docs/public-embed-api/examples/html">
-    Vanilla JavaScript implementations
+  <Card title="JavaScript examples" href="/developer-docs/public-embed-api/examples/javascript">
+    A framework-free client
   </Card>
-  <Card title="Iframe Guide" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Complete iframe embedding guide
+  <Card title="HTML examples" href="/developer-docs/public-embed-api/examples/html">
+    Copy-paste pages
   </Card>
 </CardGroup>

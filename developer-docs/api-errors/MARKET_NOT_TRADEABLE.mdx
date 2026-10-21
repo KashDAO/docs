@@ -7,20 +7,31 @@ description: 'HTTP 409 — Market not tradeable'
 
 ## When it fires
 
-The market exists but is in a state that doesn't accept trades — typically `FROZEN` (admin paused trading) or `RESOLVED` (outcome decided, only redemptions allowed).
+The market exists but does not accept trades right now. The reason is in `detail`.
+
+- `POST /v1/trades` and `POST /v1/trades/{id}/confirm` return it for every reason below, on both API versions.
+- `GET /v1/markets/{id}/quote` returns it for a market cancelled on-chain, and for a Solana market whose on-chain state is no longer active (for example resolved). A quote is a read, so a market past its freeze deadline can still be quoted, with `market.tradeable: false` in the response.
+- `GET /v1/markets/{id}/quote` also returns it for a market that has no on-chain address yet and so cannot be quoted at all.
+- **Pinning `2026-04-29` hides Solana markets.** On that pinned version, a Solana market's detail and quote return [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) (400) whatever its state, which says nothing about whether it is tradeable.
 
 ## Why it happens
 
-- Market reached its `resolve_time` and froze automatically.
-- An admin froze the market manually (e.g., pending an oracle dispute).
-- The market was resolved between your quote call and your trade call.
+The reasons, in the order they are checked. On `2026-08-19`, each one is published on the market itself as `notTradeableReason`:
+
+| `notTradeableReason` | Meaning                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `resolved`           | The outcome is final. Winning positions are redeemable.                                     |
+| `cancelled`          | The market was cancelled on-chain. Positions are refundable through `POST /v1/redemptions`. |
+| `inactive`           | The market's status is not one that trades (for example, not yet seeded).                   |
+| `frozen`             | The market's freeze deadline (`freezeAt`) has passed. Trading has closed.                   |
+
+`status` alone does not show `cancelled` or `frozen`: it stays `ACTIVE` for both. The market may also have changed between your quote and your trade.
 
 ## How to fix
 
-- Check the market's current `status` via `GET /v1/markets/:id` before retrying.
-- If the market was just resolved, your existing positions are still redeemable (handled automatically by the payout pipeline) — you don't need to do anything.
-- For freeze-then-resume scenarios, retry once the market reopens; subscribe to the `market.resumed` webhook (when streaming lands) to know exactly when.
+- Read `tradeable` on the market (`GET /v1/markets/{id}`, `GET /v1/markets`, or the `market` object in a quote) before submitting. It is computed by the same rule that returns this error, so `tradeable: false` means a trade would be refused.
+- `resolved`, `cancelled` and `frozen` are final, so retrying the same trade will not succeed. Choose another market, or redeem your position when the reason is `resolved` or `cancelled`.
 
 ## Related codes
 
-- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND), [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID)
+- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND), [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID), [`MARKET_NOT_QUOTABLE`](/developer-docs/api-errors/MARKET_NOT_QUOTABLE)

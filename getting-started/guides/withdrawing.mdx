@@ -1,12 +1,8 @@
 ---
 title: 'Withdrawing'
-description: 'How to withdraw your winnings and funds'
+description: 'How to move USDC out of your wallet'
 icon: 'arrow-left'
 ---
-
-<Note>
-Your funds, your control — withdraw your USDC to any external wallet anytime. Withdrawals are processed automatically and typically complete within minutes.
-</Note>
 
 <img
   style={{ borderRadius: '0.5rem' }}
@@ -23,110 +19,73 @@ Your funds, your control — withdraw your USDC to any external wallet anytime. 
 
 # Withdrawal overview
 
-Withdrawals are always in **USDC**, sent from your Kash smart wallet to any external address you choose. You can withdraw to Base directly, or have Kash bridge your USDC to another supported network.
-
-**Supported destination networks:**
-
-- **Base** (fastest — no bridging needed)
-- **Ethereum**
-- **Arbitrum**
-- **Optimism**
-- **Polygon**
-
-Withdrawals to networks other than Base are bridged automatically — you just enter the destination address and pick the network. Cross-chain withdrawals take a little longer and may include bridging costs, which are shown in the quote before you confirm.
-
-<Note>
-Kash also supports cashing out to fiat through Kash's third-party payment providers — look for the cash-out option in the withdrawal flow. Fees and limits are always shown before you confirm.
-</Note>
-
-## Withdrawal limits
-
-| Limit | Value |
-|---|---|
-| Minimum per transaction | $1 |
-| Maximum per transaction | $25,000 |
-| Daily maximum | $10,000 |
-| Weekly maximum | $50,000 |
-| Withdrawals per hour | 5 |
-
-Limits are current as of publication — the app always shows live limits before you confirm.
-
-## How processing works
-
-Withdrawals are processed **asynchronously**: your request is validated instantly, then queued and executed on-chain automatically — no manual approval step.
-
-1. **Pending** — request validated and queued
-2. **Processing** — transaction being executed on-chain
-3. **Confirming** — waiting for blockchain confirmation
-4. **Completed** — funds arrived at your destination address
-
-Most withdrawals typically complete within minutes. Cross-chain withdrawals can take roughly 10–15 minutes depending on the destination network.
+Your balance is USDC on Solana in your own wallet, and you can withdraw it at any time. There are no lock-ups, and you don't need SOL to pay the network fee.
 
 # How to withdraw
 
 <Steps>
   <Step title="Open the withdrawal flow">
-    Sign in at [app.kash.bot](https://app.kash.bot), open your wallet, and choose **Withdraw**.
+    On [app.kash.bot](https://app.kash.bot), open your wallet or Portfolio and choose **Withdraw**.
   </Step>
   <Step title="Enter the details">
-    - Enter the amount (or select your full available balance)
-    - Paste the destination address
-    - Choose the destination network — make sure the address you're sending to supports that network
+    Enter the amount and the destination: an external wallet or an exchange deposit address. The withdrawal checkout may also let you receive on another network. Choose carefully and match the network your destination expects.
   </Step>
   <Step title="Review and confirm">
-    Double-check the address, network, and amount. For cross-chain withdrawals, review the bridging quote before confirming.
+    Check the amount, destination, network and any fees, then confirm.
   </Step>
   <Step title="Track the status">
-    The app shows live progress until the withdrawal completes, including the transaction hash so you can verify it on a block explorer.
+    You can follow the status in the app and in **Portfolio → Withdrawals**.
   </Step>
 </Steps>
 
+<Note>
+If a withdrawal is interrupted, it clears automatically and you can try again.
+</Note>
+
 ## Withdrawing to an exchange
 
-You can withdraw directly to a centralized exchange (Binance, Kraken, OKX, and others):
-
-1. In your exchange account, open **USDC deposits** and select a network that both the exchange and Kash support (Base is usually fastest)
-2. Copy the exchange's deposit address
-3. Withdraw from Kash to that address, on that exact network
-4. Exchanges may take a few extra minutes to credit the deposit after it confirms on-chain
+1. Find your **USDC deposit address** on the exchange and check which network it expects.
+2. Paste the address into the Kash withdrawal flow and select the **matching network**.
+3. Confirm, and allow time for the exchange to credit you.
 
 <Warning>
-Always verify the destination address and network before confirming. Blockchain transactions are final — funds sent to a wrong address or unsupported network cannot be recovered.
+Sending to an address on the wrong network, or to an address that doesn't accept USDC, can result in permanent loss. When in doubt, send a small test amount first.
 </Warning>
+
+## Sending USDC to another Kash user
+
+You can send USDC to another Kash user from a chat in **Messages**. If you can message someone, you can pay them. A small network fee may be added, and the app shows it before you confirm.
 
 ## Security best practices
 
-- **Double-check destination addresses** — there is no undo
-- **Match the network** — the destination must support the network you selected
-- **Start with a small test amount** when withdrawing to a new address
-- **Keep transaction records** for tax and tracking purposes
+- Double-check every address before confirming
+- Use addresses you control, and save the ones you use often
+- Kash will never ask you to send funds to "verify" your account
 
 # Troubleshooting
 
-If your withdrawal doesn't arrive:
-
-1. **Check the status** in the app — it updates as the withdrawal progresses
-2. **Look up the transaction hash** on a block explorer for the destination network
-3. **Allow extra time** for cross-chain withdrawals and exchange crediting
-4. **Contact support** at support@kash.bot with the withdrawal details if something looks stuck
-
-<Tip>
-Your funds are always yours. Kash provides the prediction platform, but you keep full control over deposits and withdrawals.
-</Tip>
+<AccordionGroup>
+  <Accordion title="My withdrawal is taking longer than expected">
+    Check its status in **Portfolio → Withdrawals**. Exchange credits can take longer than the on-chain transfer itself. If it still looks stuck, contact [support@kash.bot](mailto:support@kash.bot) with the amount, destination and time.
+  </Accordion>
+  <Accordion title="I sent to the wrong address">
+    On-chain transfers can't be reversed. If you sent to an exchange on the wrong network, contact that exchange's support, as they can sometimes recover it.
+  </Accordion>
+</AccordionGroup>
 
 <CardGroup cols={2}>
   <Card
-    title="Winning & payouts"
-    icon="trophy-star"
+    title="Redeeming positions"
+    icon="trophy"
     href="/getting-started/guides/winning"
   >
-    Understand winnings and payouts
+    How resolved positions are redeemed
   </Card>
   <Card
     title="Depositing funds"
     icon="arrow-right"
     href="/getting-started/guides/depositing"
   >
-    Fund your wallet to start predicting
+    Add USDC to your wallet
   </Card>
 </CardGroup>

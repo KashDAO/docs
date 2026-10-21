@@ -7,21 +7,21 @@ description: 'HTTP 409 — Confirmation token invalid'
 
 ## When it fires
 
-The token you sent in `POST /v1/trades/:id/confirm` doesn't match the stored hash for that trade.
+The token sent to `POST /v1/trades/{id}/confirm` does not match the token issued for that trade.
 
 ## Why it happens
 
-- Wrong trade id — the token is one-time and tied to a specific trade.
-- Token was truncated or modified in transit/storage.
-- Replay against a different trade than the one that issued the token.
+- Wrong trade id: each token is single-use and tied to one trade.
+- The token was truncated or altered in transit or storage.
+- The token was sent against a different trade from the one that issued it.
 
-The token plaintext is **never persisted server-side** — only the HMAC. We compare your candidate via `timingSafeEqual` to prevent per-byte timing attacks.
+Kash never stores the token itself, only a keyed hash of it, and compares in constant time.
 
 ## How to fix
 
-- Re-confirm that the trade id in the URL matches the trade id from the create response.
-- Capture the token verbatim from `confirmation.token` in the create response — the SDK does this automatically; raw HTTP callers must preserve case and length (43 chars, base64url).
-- If you've lost the token (only shown once in the create response), the trade can't be confirmed — wait for it to auto-expire and re-create.
+- Check that the trade id in the URL matches the `id` from the create response.
+- Copy the token exactly from `confirmation.token` in the create response. The TypeScript SDK does this for you; raw HTTP callers must preserve its case and full length.
+- If you lost the token (it is only returned once), the trade cannot be confirmed. Let it expire and create a new one.
 
 ## Related codes
 

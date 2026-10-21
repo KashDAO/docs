@@ -1,0 +1,35 @@
+---
+title: 'TRADE_ADMISSION_BUSY'
+description: 'HTTP 503 — Trading busy'
+---
+
+**HTTP status:** 503 · **Title:** "Trading busy" · **Retry-After:** computed per response
+
+## When it fires
+
+`POST /v1/trades` (or `POST /v1/trades/{id}/confirm`) while Kash is working through a trading backlog: the
+oldest queued trade work has waited longer than your key's tier tolerates. Kash refuses new trades at the door rather than
+accepting them and letting them expire in the queue.
+
+**Nothing was placed.** The request was refused before anything was written, so retrying it, with the same
+`Idempotency-Key` or `clientRequestId`, is a fresh attempt and never a duplicate. This is system-wide and transient;
+it says nothing about your account.
+
+Higher tiers tolerate a longer backlog before being refused, so `enterprise` and `mm` keys keep trading through a
+short surge that already turns `free` and `developer` keys away.
+
+## Response body
+
+In addition to the standard fields, the problem body carries a top-level `queueAgeSeconds` member: the age of the oldest queued trade work when you were refused.
+
+## How to fix
+
+- **Honour `Retry-After`.** The TypeScript SDK retries 503 responses automatically and honours `Retry-After`.
+- Don't treat it as an outage of your integration: read endpoints are unaffected, and trades
+  already accepted still execute.
+
+## Related codes
+
+- [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) — 429, your own account has too many
+  trades in flight
+- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — 503, API trading temporarily unavailable

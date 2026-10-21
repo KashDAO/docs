@@ -7,20 +7,22 @@ description: 'HTTP 401 — API key expired'
 
 ## When it fires
 
-The key has a non-null `expires_at` and the current time is past it.
+The key has an expiry date and the current time is past it.
 
 ## Why it happens
 
-- You requested a time-limited key at issuance (recommended for CI keys, contractor access, demos).
-- An operator set an expiry on a long-lived key during a security review.
-- The key is unchanged; only the wall clock moved.
+- The key was issued with an expiry (recommended for CI keys, contractor access and demos).
+- An expiry was set on a long-lived key during a security review.
+- Nothing about the key changed; the clock simply passed its expiry.
 
 ## How to fix
 
-- Issue a new key via Settings → API Keys (self-service, free/developer tiers) or `kash-admin api-keys issue` (mm/enterprise tiers).
-- For automated rotation, schedule a rotation job that issues + activates the new key 24 h before the old one expires.
-- The new key will have a different `id` and prefix; update every consumer.
+- Issue a new key from the Kash app (Settings → API Keys), or contact Kash support if your keys are managed for you.
+- For automated rotation, issue and roll out the replacement key well before (for example 24 hours before) the old one expires.
+- The new key has a different id and prefix, so update every consumer.
+
+See [Authentication](/developer-docs/rest-api/authentication) for key management.
 
 ## Related codes
 
-- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — explicit operator action, distinct from time-based expiry
+- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — the key was withdrawn explicitly, not by time

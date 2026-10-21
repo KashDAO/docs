@@ -7,37 +7,33 @@ description: 'HTTP 409 — Spending limit exceeded'
 
 ## When it fires
 
-The trade would exceed one of the API key's spending caps:
+`POST /v1/trades` was called with an `amount` above your API key's **per-trade limit**. The `detail` field states the amount and the limit.
 
-- `per_trade_limit_usdc` — single-trade maximum
-- `daily_spend_limit_usdc` — rolling 24-hour cumulative maximum across all trades
+Your key also has a **daily spending limit** (rolling 24 hours, across all trades). That limit is checked after the trade is accepted: a trade that would exceed it is accepted with `202` and then ends as `rejected`, visible on `GET /v1/trades/{id}` and in trade webhooks, rather than returning this code synchronously.
 
-The `detail` field specifies which cap fired and by how much.
+Your key's tier sets both limits, and individual keys can be configured with lower ones. The `detail` field states the limit that applied.
 
 ## Why it happens
 
-- A bot iteration that computed a larger order than expected (e.g., signal scaling factor was off).
-- Cumulative drift over a busy day finally pushed a moderate trade over the daily cap.
-- The cap was lowered (by you or an admin) since you last designed your sizing logic.
+- A bot computed a larger order than intended (for example a sizing factor was off).
+- The key's limit was lowered since you designed your sizing logic.
 
 ## How to fix
 
-- Inspect your key's caps in Settings → API Keys → Edit.
-- For per-trade overruns: split the trade into smaller chunks under the cap.
-- For daily overruns: wait for the rolling window to clear, or upgrade your tier (see "How to raise the cap" below).
-- Programmatically: every key's caps are returned in the issuance response — cache them so your client knows the headroom.
+- For a per-trade overrun, split the order into smaller trades under the limit.
+- For daily rejections, wait for the rolling window to clear or move to a higher tier.
+- Keep your client's sizing logic aware of your key's limits.
 
-## How to raise the cap
+## How to raise the limit
 
-The cap is set by your API key's tier. See [Rate limits](/developer-docs/rest-api/rate-limits) for the full tier matrix and rationale, then:
+Limits follow your key's tier. See [Rate limits](/developer-docs/rest-api/rate-limits), then:
 
-- **`free` → `developer`** (10× headroom — $1k → $10k daily, $500 → $2.5k per-trade): email [support@kash.bot](mailto:support@kash.bot) for early access. Self-serve upgrades are planned.
-- **`developer` → `enterprise`** ($100k daily, $25k per-trade, custom rate limit): [contact sales](mailto:sales@kash.bot) — pricing is contractual.
-- **MM-tier counterparty terms** ($1M daily, $50k per-trade): [contact partnerships](mailto:partnerships@kash.bot) — KYB and ToS attestation required; this is a relationship, not a price tier.
+- **`free` → `developer`**: email [support@kash.bot](mailto:support@kash.bot).
+- **`enterprise`** or **`mm`**: [contact sales](mailto:sales@kash.bot).
 
-The caps are not punitive — they exist for blast-radius and AMM-stability reasons. When you outgrow your tier, the cap is the signal to upgrade, not a problem to work around.
+The limits are not punitive. They bound the damage a leaked key or runaway bot can do, and protect market liquidity. When you outgrow your tier, the limit is the signal to upgrade, not something to work around.
 
 ## Related codes
 
-- [`AMOUNT_TOO_LARGE`](/developer-docs/api-errors/AMOUNT_TOO_LARGE) — platform-wide cap, separate from your key's caps
-- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) — wallet balance too low (different failure surface)
+- [`AMOUNT_TOO_LARGE`](/developer-docs/api-errors/AMOUNT_TOO_LARGE) — platform-wide ceiling, separate from your key's limits
+- [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) — too many unfinished trades, not too much spend

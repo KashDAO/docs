@@ -7,19 +7,19 @@ description: 'HTTP 400 — Amount too large'
 
 ## When it fires
 
-`amount` exceeds `MAX_USDC_PER_TRADE`. This is a defence-in-depth check distinct from your key's per-trade and daily spending limits — it catches obvious mistakes regardless of your tier.
+`amount` on `POST /v1/trades` exceeds the platform-wide per-trade ceiling. This safety net is separate from your key's per-trade and daily spending limits and applies whatever your tier.
 
 ## Why it happens
 
-The most common cause is a **decimal-place mistake**: passing `1000000000000000000` ("1 USDC in 18-decimal atomic units") instead of `1` ("1 USDC in human units"). The public API takes amounts in **human units** (the same string a person would type), not 18-decimal atomic units.
+Almost always a **units mistake**: an amount in atomic units, such as `1000000` (1 USDC in 6-decimal units) or `1000000000000000000` (1 in 18-decimal units), sent where the API expects a human-readable USDC value such as `"1"`.
 
 ## How to fix
 
-- Pass `amount` as a string of the human-unit USDC value: `"100"`, `"0.50"`, `"2500"`.
-- If you have an atomic value, divide by 10^6 (USDC is 6 decimals on-chain, but our API normalises to "USDC the user thinks about").
-- For sustained high-value flows above `MAX_USDC_PER_TRADE`, request a tier upgrade — your key's `per_trade_limit_usdc` can be raised, but the absolute cap is a platform-level safety net.
+- Send `amount` as a string holding the USDC value a person would type: `"100"`, `"0.50"`, `"2500"`. Up to 6 decimal places are allowed.
+- If you hold an atomic USDC value, divide by 10^6 first.
+- Your key's own per-trade limit is lower than this ceiling; see [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) for how to raise it.
 
 ## Related codes
 
-- [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) — your key's per-trade or daily limit, separate from the platform cap
-- [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) — generic validation failure
+- [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) — your key's per-trade limit, separate from the platform ceiling
+- [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) — the amount is not a valid USDC decimal string

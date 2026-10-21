@@ -7,21 +7,22 @@ description: 'HTTP 401 — API key revoked'
 
 ## When it fires
 
-The key is well-formed and recognised, but its `revoked_at` column is set. The auth middleware fails closed.
+The key is well formed and recognised, but it has been revoked.
 
 ## Why it happens
 
-- A user (you or a teammate) explicitly revoked the key via Settings → API Keys → Revoke.
-- An operator revoked the key via `kash-admin api-keys revoke <id>` (e.g., suspected leak).
-- A security automation revoked it (e.g., per-key velocity anomaly tripped a kill switch).
+- You or a teammate revoked it in the Kash app (Settings → API Keys → Revoke).
+- Kash revoked it, for example after a suspected leak.
+- Automated security controls revoked it after anomalous activity.
 
 ## How to fix
 
-- If revocation was unintentional, ask the operator who ran it (the audit log records who/when/why).
-- If revocation was intentional and you need to keep working, **issue a new key**. Revoked keys cannot be un-revoked — that's the security property.
-- Update every place the old key was stored (env vars, secret stores, CI configs) before the new key goes live.
+- If the revocation was unexpected, contact Kash support. Every revocation is recorded with who, when and why.
+- If you need to keep working, **issue a new key**. A revoked key cannot be reinstated; that is the security property.
+- Update every place the old key was stored (environment variables, secret stores, CI configuration) when you roll out the new one.
 
 ## Related codes
 
-- [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) — key was deleted, not revoked
-- [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) — key reached its `expires_at` (no operator action)
+- [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) — the key was deleted, not revoked
+- [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) — the key reached its expiry date
+- [`ORGANIZATION_INACTIVE`](/developer-docs/api-errors/ORGANIZATION_INACTIVE) — the key is fine but its account is suspended or cancelled

@@ -1,6 +1,6 @@
 ---
 title: Where do I use Kash?
-description: "The app.kash.bot webapp is the product — with tweet-trading, embeds, and an API alongside it"
+description: "On the web at app.kash.bot, on X with @kash_bot_trade, in embeds, and through the API"
 icon: "location-dot"
 ---
 
@@ -17,41 +17,45 @@ icon: "location-dot"
   alt="Hero Dark"
 />
 
-## The webapp — app.kash.bot
+## The web app: app.kash.bot
 
-**[app.kash.bot](https://app.kash.bot)** is where everything happens:
+**[app.kash.bot](https://app.kash.bot)** is where you manage everything:
 
-- Browse, search, and trade markets
-- Track positions and claim winnings in your [Portfolio](/getting-started/guides/winning)
-- Deposit and withdraw USDC
-- Explore [threads](/getting-started/features/threads), [parlays](/getting-started/features/parlays), the [World Cup hub](/getting-started/features/world-cup), and the upcoming [Earn vault](/getting-started/features/earn)
-- Chat, leaderboards, groups, and achievements
+- Browse, search and trade markets
+- Connect your X account and create your own markets with Kash AI
+- Track positions and redeem winning ones in your [Portfolio](/getting-started/guides/winning)
+- Add and withdraw USDC
+- Chat with other traders, follow creators, climb the leaderboard and earn XP
 
-It works on desktop and mobile browsers — no download required.
+It works in desktop and mobile browsers, and you can install it to your home screen as an app.
 
-## Trading from X (Twitter) — opt-in
+## On X (Twitter)
 
-If you enable the trading bot in **Settings → Trading bot**, you can place trades by tweeting at **Kash's dedicated trading account** with a market link and your position — the current handle is always linked from the [@kash_bot](https://x.com/kash_bot) profile. The bot processes the tweet and executes the trade from your Kash account.
+Kash markets are posted on X, and you can trade them right there. Reply to a market's post (or quote it) and mention **[@kash_bot_trade](https://x.com/kash_bot_trade)** with your amount and outcome. You can also DM the bot to check your balance, portfolio and prices. See [Trading on X](/getting-started/features/trading-on-x).
 
 <Warning>
-Tweet-trading is optional and off by default. Always verify the trading account you're interacting with is the one linked from the official **@kash_bot** profile, and manage everything else — deposits, withdrawals, claims — in the webapp.
+Kash's official accounts are [@kash_bot](https://x.com/kash_bot) for news and [@kash_bot_trade](https://x.com/kash_bot_trade) for trading. Creators can also post markets from their own accounts, and each market's post tells you which account to mention. Kash will never DM you asking for your private key.
 </Warning>
 
-## Embedded on partner sites
+## Inside Telegram and Discord
 
-Organizations and partners can embed Kash markets and threads as iframes on their own sites, and run branded market pages for their communities. See [For Businesses](/for-businesses/overview).
+You can open Kash inside Telegram and Discord and sign in with that account. Creators can also connect their own Discord and Telegram channels so new markets are announced there.
+
+## Embedded on other sites
+
+Any site can embed live Kash markets with the no-key [Public Embed API](/developer-docs/public-embed-api/overview).
 
 ## For developers
 
-Kash has a public REST API, CLI, and SDKs (TypeScript and Python) for building on top of the platform — from market data to programmatic trading. Start at the [Developer Docs](/developer-docs/introduction).
+Kash has a public REST API, SDKs and a CLI for building on the platform, from market data to programmatic trading. Start at the [Developer Docs](/developer-docs/introduction).
 
 ---
 
 ## Availability
 
-- **24/7** — markets trade around the clock
-- **Global**, subject to regulatory restrictions: users in blocked jurisdictions cannot access the platform
-- Built on **Base** (an Ethereum L2), so all activity is verifiable on-chain
+- **24/7:** markets trade around the clock.
+- **Not available everywhere:** availability, eligibility and any verification requirements are set out in the [Terms of Use](https://kash.bot/terms-of-use).
+- **On-chain:** markets live on an open, permissionless protocol on Solana, and trades settle there, so activity is verifiable. Kash never holds custody of your funds.
 
 <CardGroup cols={2}>
   <Card

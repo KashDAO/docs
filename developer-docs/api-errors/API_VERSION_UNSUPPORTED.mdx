@@ -7,40 +7,29 @@ description: 'HTTP 410 — API version unsupported'
 
 ## When it fires
 
-Your request sent an `X-Kash-Api-Version` header whose value is not in
-`SUPPORTED_PUBLIC_API_VERSIONS`. The runtime accepts only
-date-string values that the API has actively published as a supported
-contract version. Unrecognized values — typos, future-dated guesses,
-versions long past their sunset window — return this error.
+Your request sent an `X-Kash-Api-Version` header whose value is not a supported API version. The API currently supports:
+
+| Version      | Notes                                                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| `2026-08-19` | The default, used when no header is sent. Carries chain-neutral market fields (`chainRef`, `tradeable`, `notTradeableReason`) and describes Solana markets |
+| `2026-04-29` | Legacy contract, served only when pinned. Cannot describe Solana markets                       |
+
+Anything else (a typo, a future date, or a version past its sunset) returns this error.
 
 ## Why 410?
 
-`410 Gone` is the right semantic: the version was either once
-accepted (an old date past its 12-month deprecation window) or never
-has been (a typo, a future date). Either way, sending the request
-again with the same value will not succeed. `400` would imply the
-client could fix syntax and retry without changing the value — which
-is not the case here. `406 Not Acceptable` is closer but is reserved
-for content-type negotiation.
+`410 Gone` fits: the version was either accepted once and has been retired, or never existed. Either way, resending the same value will not succeed. `400` would suggest a syntax problem you could fix without changing the value, and `406 Not Acceptable` is reserved for content-type negotiation.
 
 ## Why it happens
 
-- **Typo in the pin** — sent `2026-04-30` when the canonical version
-  is `2026-04-29`.
-- **Pinned to a sunsetted version** — the date you pinned against
-  passed its 12-month `Sunset` window and was removed from the
-  supported set.
-- **Pinned to a future version** — your client was upgraded with a
-  version pin that the production API hasn't shipped yet (canary
-  drift between client release and server deploy).
-- **Multi-valued header confusion** — a load balancer or proxy
-  appended a second `X-Kash-Api-Version` value (`,`-joined) and the
-  runtime correctly refuses to silently pick one.
+- **A typo in the pin**, for example `2026-08-20` instead of `2026-08-19`.
+- **A pin to a retired version** that has passed its sunset window.
+- **A pin to a future version** the API has not shipped yet.
+- **A multi-valued header**: a proxy appended a second `X-Kash-Api-Version` value and the API will not silently pick one.
 
 ## How to recover
 
-The response body's `metadata.supported` field carries the full list
-of accepted versions, in canonical-default-first order:
+The problem body carries three extra top-level members: `requested` (what you sent), `supported` (every accepted version, default first) and `current` (the default):
 
 ```json
 {
@@ -48,52 +37,25 @@ of accepted versions, in canonical-default-first order:
   "title": "API version unsupported",
   "status": 410,
   "code": "API_VERSION_UNSUPPORTED",
-  "detail": "Requested API version '2099-01-01' is not supported. Send no header to use the current default (2026-04-29), or pick a value from the 'supported' list.",
+  "detail": "Requested API version '2099-01-01' is not supported. Send no header to use the current default (2026-08-19), or pick a value from the 'supported' list.",
   "instance": "/v1/markets",
   "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H",
   "requested": "2099-01-01",
-  "supported": ["2026-04-29"],
-  "current": "2026-04-29"
+  "supported": ["2026-08-19", "2026-04-29"],
+  "current": "2026-08-19"
 }
 ```
 
-Pick a value from `supported` and resend the request. The simplest
-recovery is to **drop the header** entirely and let the runtime
-default to `current` — that's the recommended consumer mode unless
-you have a specific reason to pin.
+Pick a value from `supported` and resend. The simplest recovery is to **drop the header** and use the default, unless you need a newer version's fields.
 
-## Migration policy
+## Deprecation
 
-When the API ships a new version, the previous version stays in
-`SUPPORTED_PUBLIC_API_VERSIONS` for **12 months** (per AD-15 / RFC
-8594). During that window, every response from the deprecated
-version carries `Sunset: <date>` and `Deprecation: true` headers so
-your monitoring can flag the impending expiry well before it hits.
-
-If you're seeing this error on a date that is older than 12 months
-since its `Sunset` was advertised, that's working as intended — it's
-time to update the pin.
+When a version is scheduled for retirement, responses to requests pinned to it carry `Deprecation` and `Sunset` headers well in advance, so your monitoring can flag it before the version stops working. The TypeScript SDK exposes these on errors as `err.deprecation`.
 
 ## Best practice
 
-Don't pin if you don't have to. The default contract (no header)
-runs against the current `PUBLIC_API_VERSION`, and we promise
-additive, non-breaking changes within a date version. Pin only when
-you're locking down a release for compliance or contract-test
-reasons.
+Pin when you want your integration to stay on one contract. Pinning `2026-04-29` hides Solana markets, so pin `2026-08-19` if you pin at all. Within a version, Kash makes only additive, non-breaking changes.
 
-If you do pin, follow the registry: read
-`https://api.kash.bot/v1/openapi.json` (or the live OpenAPI route)
-and let your client library auto-select the highest version it
-recognises.
+## Related codes
 
-## See also
-
-- `apps/public-api/src/plugins/api-version.ts` — the negotiation
-  plugin source.
-- `packages/constants/src/public-api-version.ts` — the canonical
-  registry.
-- `apps/public-api/openapi/index.json` — the snapshot index, listing
-  every published version.
-- `docs/runbooks/hmac-algorithm-rotation.md` — example of a version
-  bump driven by a security event.
+- [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) — what a Solana market returns when a client pins `2026-04-29`

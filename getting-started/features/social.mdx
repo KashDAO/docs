@@ -1,12 +1,8 @@
 ---
 title: 'Social Interface'
-description: 'Chat, follow, compete, and share — prediction markets are better together'
+description: 'Chat, follow, copy and share: prediction markets are better together'
 icon: 'share-nodes'
 ---
-
-<Note>
-Every Kash market is a conversation as much as a trade. The app has real-time chat on every market and thread, feeds from people you follow, groups, leaderboards, achievements, and one-tap sharing to X.
-</Note>
 
 <img
   style={{ borderRadius: '0.5rem' }}
@@ -21,65 +17,61 @@ Every Kash market is a conversation as much as a trade. The app has real-time ch
   alt="Hero Dark"
 />
 
-# Talk About It: Chat Rooms
+# Talk about it
 
-Every market and every [thread](/getting-started/features/threads) has its own real-time chat room, right next to the price chart.
+<AccordionGroup>
+  <Accordion title="Live market chat">
+    Markets and [threads](/getting-started/features/threads) have a live chat next to the prices, where you can see who's online, reply and react.
+  </Accordion>
 
-- **Live discussion** — messages appear instantly; see who's online and who's typing
-- **Reactions** — react to messages with emoji
-- **Always in context** — the chat sits beside the market on desktop and opens as a drawer on mobile, so the debate and the odds stay on one screen
+  <Accordion title="Messages">
+    **Chat** is your inbox for private conversations with creators, traders and friends. You can share markets into a conversation and send USDC to the person you're chatting with. Choose who can message you (everyone, or mutual followers only) in Settings.
+  </Accordion>
+</AccordionGroup>
 
-# Follow, Feeds, and Groups
+# Follow and discover
 
 <AccordionGroup>
   <Accordion title="Following">
-    Follow other traders to keep up with what they're predicting. Your feed surfaces activity from people you follow, and the **For You** tab personalizes market discovery based on your interests and activity.
-  </Accordion>
-
-  <Accordion title="Groups">
-    Join groups to trade and talk with your people — a shared space for a community's markets and conversation.
+    Follow traders and creators. The **Following** tab on the home page shows their activity: markets they create, predictions they make and their results.
   </Accordion>
 
   <Accordion title="Profiles">
-    Every user has a public profile with their prediction stats and realized P&L. Your track record is your reputation — built on results, not claims.
+    Every user has a public profile with their prediction stats, P&L and achievements. Your track record is your reputation.
+  </Accordion>
+
+  <Accordion title="Copy trading">
+    Like someone's calls? Copy them. You choose the size per trade and a total budget, and their buys and sells are mirrored from your own wallet. See [Trading Options](/getting-started/features/trading-options).
   </Accordion>
 </AccordionGroup>
 
-# Compete: Leaderboards, Competitions, and Achievements
+# Leaderboards and XP
 
 <Tabs>
-  <Tab title="Leaderboards">
-    The [Community](https://app.kash.bot/community) page ranks traders by realized P&L, volume, win rate, and streak — see where you stand, browse top players, and jump to anyone's profile.
+  <Tab title="Leaderboard">
+    The **Community** page ranks traders by P&L, volume and win rate, with a separate **Top XP** view. Share your rank straight from the page.
   </Tab>
 
-  <Tab title="Competitions">
-    During competition periods, leaderboards switch to **competition mode**: rankings by competition points with dedicated Winners and Losers boards. Big events get their own hubs — like the [World Cup 2026 hub](/getting-started/features/world-cup) with schedules, knockout brackets, and outright markets.
-  </Tab>
-
-  <Tab title="Achievements">
-    Earn achievements for milestones across trading, accuracy, and participation. They live on your profile as a permanent record of what you've done on the platform.
+  <Tab title="XP and achievements">
+    Earn XP and level up by holding qualifying predictions to settlement, and unlock achievements across trading, accuracy, streaks, market creation and sharing. See [Rewards](/getting-started/ecosystem/incentives-and-rewards).
   </Tab>
 </Tabs>
 
-# Share It: X Integration and Embeds
+# Share it
 
 <AccordionGroup>
-  <Accordion title="Share Any Market to X">
-    Every market and thread has a share button: copy a link, post to X, or quote the tweet a market is based on. Kash generates the prediction tweet for you — one tap from a position to a post.
+  <Accordion title="Share markets and results">
+    Every market has share links for X, Telegram and Discord. Turn a position into a P&L card ("called it on Kash") and post it to X, download it or copy a link. Profiles, leaderboard ranks and achievements have shareable cards too.
   </Accordion>
 
-  <Accordion title="Trade Where You Talk">
-    With the opt-in trading bot (**Settings → Trading bot**), you can trade by replying to market tweets, and broadcast markets you create from your own X handle so your followers can trade them. See [Trading Options](/getting-started/features/trading-options).
+  <Accordion title="Trade where you talk">
+    Trade by replying to market posts on X, and announce the markets you create from your own X account so your followers can trade them. See [Trading on X](/getting-started/features/trading-on-x).
   </Accordion>
 
-  <Accordion title="Embed Markets Anywhere">
-    Markets and threads can be embedded as iframes on any website — a live market card or a full thread heatmap, with real odds and trade buttons. Publishers and communities use embeds to bring prediction markets to their own audience. See [For Businesses](/for-businesses/overview).
+  <Accordion title="Embed markets anywhere">
+    Markets can be embedded on any website as a live card, so communities can bring prediction markets to their own audience. See the [Public Embed API](/developer-docs/public-embed-api/overview).
   </Accordion>
 </AccordionGroup>
-
-<Tip>
-The social loop is simple: find a market in your feed, argue about it in the chat, put your prediction on the line, and share the result. Your wins (and your reasoning) build a track record everyone can see.
-</Tip>
 
 <CardGroup cols={2}>
   <Card
@@ -87,11 +79,11 @@ The social loop is simple: find a market in your feed, argue about it in the cha
     icon="layer-group"
     href="/getting-started/features/threads"
   >
-    Curated collections of related markets
+    Related markets on one page
   </Card>
   <Card
     title="Start Predicting"
-    icon="comment-dots"
+    icon="crystal-ball"
     href="/getting-started/guides/predicting"
   >
     Place your first prediction

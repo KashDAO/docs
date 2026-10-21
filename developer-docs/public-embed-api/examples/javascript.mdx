@@ -1,598 +1,201 @@
 ---
-title: 'JavaScript Advanced Patterns'
-description: 'Advanced JavaScript patterns, utilities, and best practices for Kash embeds'
+title: 'JavaScript Examples'
+description: 'A small client for the Kash Public Embed API in plain JavaScript'
 ---
 
-Production-ready JavaScript patterns, utilities, and advanced techniques for building robust Kash embed integrations.
+Plain JavaScript that runs in any modern browser or in Node.js 18 and later. No API key or dependencies are needed.
 
----
+## A minimal client
 
-## Embed Manager Class
+```javascript kash-embed-client.js
+const KASH_API = 'https://app.kash.bot/api';
 
-Reusable class for managing embed lifecycle:
-
-```javascript
-// EmbedManager.js
-class KashEmbedManager {
-  constructor(config) {
-    this.config = {
-      threadId: config.threadId,
-      containerId: config.containerId,
-      source: config.source || window.location.hostname,
-      height: config.height || 900,
-      onReady: config.onReady || null,
-      onMarketClick: config.onMarketClick || null,
-      onError: config.onError || null,
-    };
-
-    this.iframe = null;
-    this.isReady = false;
-    this.messageHandler = this.handleMessage.bind(this);
-  }
-
-  // Initialize embed
-  init() {
-    const container = document.getElementById(this.config.containerId);
-    if (!container) {
-      console.error(`Container ${this.config.containerId} not found`);
-      return;
-    }
-
-    // Create iframe
-    this.iframe = document.createElement('iframe');
-    this.iframe.src = this.buildEmbedUrl();
-    this.iframe.width = '100%';
-    this.iframe.height = this.config.height;
-    this.iframe.frameBorder = '0';
-    this.iframe.setAttribute('loading', 'lazy');
-    this.iframe.setAttribute('allow', 'clipboard-write');
-    this.iframe.setAttribute('title', 'Kash prediction markets');
-
-    container.appendChild(this.iframe);
-
-    // Listen for messages
-    window.addEventListener('message', this.messageHandler);
-  }
-
-  // Build embed URL
-  buildEmbedUrl() {
-    const url = new URL(
-      `https://app.kash.bot/threads/${this.config.threadId}/iframe`
-    );
-    url.searchParams.set('source', this.config.source);
-    return url.toString();
-  }
-
-  // Handle messages from iframe
-  handleMessage(event) {
-    if (event.origin !== 'https://app.kash.bot') return;
-
-    const { type, data } = event.data;
-
-    switch (type) {
-      case 'kash-iframe-ready':
-        this.isReady = true;
-        this.config.onReady?.(data);
-        break;
-
-      case 'kash-market-clicked':
-        this.config.onMarketClick?.(data);
-        break;
-    }
-  }
-
-  // Clean up
-  destroy() {
-    window.removeEventListener('message', this.messageHandler);
-    if (this.iframe && this.iframe.parentNode) {
-      this.iframe.parentNode.removeChild(this.iframe);
-    }
-    this.iframe = null;
-    this.isReady = false;
+export class KashApiError extends Error {
+  constructor(status, body) {
+    super(body?.message ?? `HTTP ${status}`);
+    this.status = status;
+    this.code = body?.code;
+    this.details = body?.details;
+    this.retryAfter = body?.details?.retryAfter;
   }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = KashEmbedManager;
+async function get(path, params = {}) {
+  const query = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null)
+  );
+  const qs = query.toString();
+  const url = `${KASH_API}${path}${qs ? `?${qs}` : ''}`;
+  const res = await fetch(url);
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new KashApiError(res.status, body);
+  return body;
+}
+
+export const kash = {
+  markets: (params) => get('/markets', params),
+  market: (id, params) => get(`/markets/${id}`, params),
+  marketsState: (ids) => get('/markets/state', { ids: ids.join(',') }),
+  quote: (id, outcomeIndex, action, amountAtomic) =>
+    get(`/markets/${id}/quote`, { outcomeIndex, action, amount: String(amountAtomic) }),
+  twitterLink: (id, outcomeIndex, amount, locale) =>
+    get(`/markets/${id}/twitter-link`, { outcomeIndex, amount, locale }),
+  threads: (params) => get('/threads', params),
+  threadMarkets: (id, params) => get(`/threads/${id}/markets`, params),
+};
+
+/** Implied probabilities as shown on Kash: one percentage per outcome. */
+export function formatPrices(market) {
+  return market.outcomes.map((o) => ({
+    label: o.label,
+    percent: Math.round(o.impliedChance * 100),
+  }));
+}
+
+/** Atomic USDC (6 decimals) to a display string. */
+export function formatUsdc(atomic) {
+  return (Number(atomic) / 1_000_000).toLocaleString(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  });
 }
 ```
 
-**Usage:**
+## List live markets
 
 ```javascript
-const embed = new KashEmbedManager({
-  threadId: 'abc123',
-  containerId: 'kash-embed-container',
-  source: 'my-website',
-  height: 900,
-  onReady: (data) => {
-    console.log(`Loaded ${data.marketCount} markets`);
-  },
-  onMarketClick: (data) => {
-    console.log(`Market clicked: ${data.marketId}`);
-  },
+import { kash, formatPrices, formatUsdc } from './kash-embed-client.js';
+
+const { markets, pagination } = await kash.markets({
+  status: 'active',
+  tradableOnly: true,
+  sortBy: 'total_volume',
+  limit: 10,
 });
 
-embed.init();
-
-// Clean up when done
-embed.destroy();
+for (const m of markets) {
+  const prices = formatPrices(m).map((o) => `${o.label} ${o.percent}%`).join(' · ');
+  console.log(`${m.title} — ${prices} — ${formatUsdc(m.totalVolume)} volume`);
+}
+console.log(`${pagination.total} live markets`);
 ```
 
----
-
-## Retry Logic Utility
-
-Robust retry mechanism with exponential backoff for API calls:
+## Search
 
 ```javascript
-// RetryUtil.js
-async function fetchWithRetry(url, options = {}, retryConfig = {}) {
-  const {
-    maxRetries = 3,
-    baseDelay = 1000,
-    maxDelay = 10000,
-    backoffFactor = 2,
-    retryableStatuses = [408, 429, 500, 502, 503, 504],
-  } = retryConfig;
+const { markets } = await kash.markets({ search: 'champions league', status: 'all', limit: 20 });
+```
 
-  let lastError;
+## Keep prices live
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+Load the cards once, then poll the state endpoint. It refreshes about every second, so polling every 5 to 10 seconds is plenty.
+
+```javascript
+import { kash } from './kash-embed-client.js';
+
+function watchPrices(marketIds, onUpdate, intervalMs = 5000) {
+  let stopped = false;
+  async function tick() {
     try {
-      const response = await fetch(url, options);
-
-      // Success
-      if (response.ok) {
-        return response;
+      const { markets } = await kash.marketsState(marketIds); // up to 200 ids
+      for (const state of markets) onUpdate(state.id, state);
+    } catch (err) {
+      if (err.status === 429 && err.retryAfter) {
+        await new Promise((r) => setTimeout(r, err.retryAfter * 1000));
       }
-
-      // Don't retry non-retryable status codes
-      if (!retryableStatuses.includes(response.status)) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      // Rate limit - use Retry-After header
-      if (response.status === 429) {
-        const retryAfter =
-          parseInt(response.headers.get('Retry-After'), 10) || baseDelay / 1000;
-        const delay = Math.min(retryAfter * 1000, maxDelay);
-
-        console.warn(`Rate limited. Retrying after ${delay}ms`);
-        await sleep(delay);
-        continue;
-      }
-
-      // For other errors, use exponential backoff
-      lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
-    } catch (error) {
-      lastError = error;
     }
-
-    // Don't delay after last attempt
-    if (attempt < maxRetries) {
-      const delay = Math.min(baseDelay * Math.pow(backoffFactor, attempt), maxDelay);
-      console.warn(`Attempt ${attempt + 1}/${maxRetries} failed. Retrying after ${delay}ms`);
-      await sleep(delay);
-    }
+    if (!stopped) setTimeout(tick, intervalMs);
   }
-
-  throw new Error(`Failed after ${maxRetries} retries: ${lastError.message}`);
+  tick();
+  return () => { stopped = true; };
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const stop = watchPrices(['93f1445c-912c-47b4-8065-d1ff5a6b8dfc'], (id, state) => {
+  console.log(id, state.outcomes.map((o) => o.impliedChance));
+});
 ```
 
-**Usage:**
+## Price a trade
 
 ```javascript
-try {
-  const response = await fetchWithRetry(
-    'https://app.kash.bot/api/threads?status=active',
-    {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    },
-    {
-      maxRetries: 3,
-      baseDelay: 1000,
-      backoffFactor: 2,
+const usdc = 25;
+const { quote } = await kash.quote(
+  '93f1445c-912c-47b4-8065-d1ff5a6b8dfc',
+  0,
+  'buy',
+  usdc * 1_000_000 // atomic USDC
+);
+console.log(`$${usdc} buys ${quote.estimate?.tokensReceived?.toFixed(2)} tokens`);
+console.log(`Pays about $${quote.estimate?.payoutAtCurrentPriceUsdc?.toFixed(2)} if it wins at today's prices`);
+```
+
+## "Predict on X" buttons
+
+```javascript
+import { kash, KashApiError } from './kash-embed-client.js';
+
+async function predictOnX(marketId, outcomeIndex, amount) {
+  try {
+    const { twitterUrl } = await kash.twitterLink(marketId, outcomeIndex, amount);
+    window.open(twitterUrl, '_blank', 'noopener');
+  } catch (err) {
+    if (err instanceof KashApiError && err.status === 400) {
+      alert(err.message); // e.g. "This market is no longer accepting predictions"
+    } else {
+      throw err;
     }
+  }
+}
+
+document.querySelectorAll('[data-kash-market]').forEach((button) => {
+  button.addEventListener('click', () =>
+    predictOnX(button.dataset.kashMarket, Number(button.dataset.outcome), 10)
   );
-
-  const data = await response.json();
-  console.log('Threads:', data.threads);
-} catch (error) {
-  console.error('Failed to fetch threads:', error);
-}
+});
 ```
-
----
-
-## Lazy Load Utility
-
-Load embeds only when visible using IntersectionObserver:
-
-```javascript
-// LazyLoadEmbeds.js
-class LazyEmbedLoader {
-  constructor(config = {}) {
-    this.config = {
-      root: config.root || null,
-      rootMargin: config.rootMargin || '50px',
-      threshold: config.threshold || 0.1,
-    };
-
-    this.observer = new IntersectionObserver(
-      this.handleIntersection.bind(this),
-      this.config
-    );
-
-    this.embeds = new Map();
-  }
-
-  // Register embed for lazy loading
-  register(element, embedConfig) {
-    this.embeds.set(element, embedConfig);
-    this.observer.observe(element);
-  }
-
-  // Handle intersection
-  handleIntersection(entries) {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const element = entry.target;
-        const config = this.embeds.get(element);
-
-        if (config) {
-          this.loadEmbed(element, config);
-          this.observer.unobserve(element);
-          this.embeds.delete(element);
-        }
-      }
-    });
-  }
-
-  // Load embed
-  loadEmbed(container, config) {
-    const iframe = document.createElement('iframe');
-    const url = new URL(`https://app.kash.bot/threads/${config.threadId}/iframe`);
-
-    if (config.source) url.searchParams.set('source', config.source);
-
-    iframe.src = url.toString();
-    iframe.width = '100%';
-    iframe.height = config.height || 900;
-    iframe.frameBorder = '0';
-    iframe.setAttribute('title', 'Kash prediction markets');
-    iframe.setAttribute('allow', 'clipboard-write');
-
-    container.innerHTML = '';
-    container.appendChild(iframe);
-
-    console.log(`Lazy loaded embed: ${config.threadId}`);
-  }
-
-  // Destroy observer
-  destroy() {
-    this.observer.disconnect();
-    this.embeds.clear();
-  }
-}
-```
-
-**Usage:**
 
 ```html
-<div class="lazy-embed-container" data-thread-id="abc123"></div>
-<div class="lazy-embed-container" data-thread-id="def456"></div>
-<div class="lazy-embed-container" data-thread-id="ghi789"></div>
-
-<script>
-  const loader = new LazyEmbedLoader({
-    rootMargin: '100px', // Load 100px before entering viewport
-    threshold: 0.1,
-  });
-
-  document.querySelectorAll('.lazy-embed-container').forEach((container) => {
-    loader.register(container, {
-      threadId: container.dataset.threadId,
-      source: 'my-website',
-      height: 900,
-    });
-  });
-</script>
+<button data-kash-market="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" data-outcome="0">Yes · $10</button>
+<button data-kash-market="93f1445c-912c-47b4-8065-d1ff5a6b8dfc" data-outcome="1">No · $10</button>
 ```
 
----
-
-## Event Aggregator
-
-Centralized event handling for multiple embeds:
+## Paginate through everything
 
 ```javascript
-// EventAggregator.js
-class EmbedEventAggregator {
-  constructor() {
-    this.handlers = new Map();
-    this.embedMap = new Map(); // iframe -> embedId mapping
-
-    window.addEventListener('message', this.handleMessage.bind(this));
+async function* allMarkets(params) {
+  let offset = 0;
+  while (true) {
+    const page = await kash.markets({ ...params, limit: 500, offset });
+    yield* page.markets;
+    if (!page.pagination.hasMore) return;
+    offset += page.markets.length;
   }
+}
 
-  // Register embed
-  registerEmbed(iframe, embedId) {
-    this.embedMap.set(iframe, embedId);
-  }
-
-  // Register event handler
-  on(embedId, eventType, handler) {
-    const key = `${embedId}:${eventType}`;
-
-    if (!this.handlers.has(key)) {
-      this.handlers.set(key, []);
-    }
-
-    this.handlers.get(key).push(handler);
-  }
-
-  // Remove event handler
-  off(embedId, eventType, handler) {
-    const key = `${embedId}:${eventType}`;
-    const handlers = this.handlers.get(key);
-
-    if (handlers) {
-      const index = handlers.indexOf(handler);
-      if (index !== -1) {
-        handlers.splice(index, 1);
-      }
-    }
-  }
-
-  // Handle message
-  handleMessage(event) {
-    if (event.origin !== 'https://app.kash.bot') return;
-
-    const { type, data } = event.data;
-
-    // Find which embed sent this message
-    let embedId = null;
-    for (const [iframe, id] of this.embedMap.entries()) {
-      if (iframe.contentWindow === event.source) {
-        embedId = id;
-        break;
-      }
-    }
-
-    if (!embedId) return;
-
-    // Trigger handlers
-    const key = `${embedId}:${type}`;
-    const handlers = this.handlers.get(key);
-
-    if (handlers) {
-      handlers.forEach((handler) => {
-        try {
-          handler(data);
-        } catch (error) {
-          console.error('Handler error:', error);
-        }
-      });
-    }
-
-    // Trigger wildcard handlers
-    const wildcardKey = `${embedId}:*`;
-    const wildcardHandlers = this.handlers.get(wildcardKey);
-
-    if (wildcardHandlers) {
-      wildcardHandlers.forEach((handler) => {
-        try {
-          handler(type, data);
-        } catch (error) {
-          console.error('Wildcard handler error:', error);
-        }
-      });
-    }
-  }
-
-  // Unregister embed
-  unregisterEmbed(iframe) {
-    this.embedMap.delete(iframe);
-  }
+for await (const m of allMarkets({ status: 'resolved' })) {
+  // offset is capped at 10,000. To go further back, narrow by resolvedAfter / resolvedBefore
 }
 ```
 
-**Usage:**
+## Listen to iframe events
 
 ```javascript
-const aggregator = new EmbedEventAggregator();
-
-// Setup embeds
-const iframe1 = document.getElementById('embed-1');
-const iframe2 = document.getElementById('embed-2');
-
-aggregator.registerEmbed(iframe1, 'embed-1');
-aggregator.registerEmbed(iframe2, 'embed-2');
-
-// Listen to specific embed events
-aggregator.on('embed-1', 'kash-iframe-ready', (data) => {
-  console.log('Embed 1 ready:', data.marketCount, 'markets');
-});
-
-aggregator.on('embed-2', 'kash-market-clicked', (data) => {
-  console.log('Embed 2 market click:', data.marketId);
-});
-
-// Listen to all events from embed
-aggregator.on('embed-1', '*', (eventType, data) => {
-  console.log(`Embed 1 event: ${eventType}`, data);
-});
-```
-
----
-
-## Performance Monitor
-
-Track embed performance metrics:
-
-```javascript
-// PerformanceMonitor.js
-class EmbedPerformanceMonitor {
-  constructor(embedId) {
-    this.embedId = embedId;
-    this.metrics = {
-      loadTime: null,
-      interactionCount: 0,
-      errors: [],
-    };
-
-    this.startTime = performance.now();
-  }
-
-  // Mark embed as loaded
-  markLoaded() {
-    this.metrics.loadTime = performance.now() - this.startTime;
-    console.log(`Embed ${this.embedId} loaded in ${this.metrics.loadTime.toFixed(2)}ms`);
-  }
-
-  // Track interaction
-  trackInteraction() {
-    this.metrics.interactionCount++;
-  }
-
-  // Track error
-  trackError(error) {
-    this.metrics.errors.push({
-      message: error.message,
-      timestamp: Date.now(),
-    });
-  }
-
-  // Get metrics summary
-  getSummary() {
-    return {
-      embedId: this.embedId,
-      loadTime: this.metrics.loadTime,
-      interactionCount: this.metrics.interactionCount,
-      errorCount: this.metrics.errors.length,
-    };
-  }
-}
-```
-
-**Usage:**
-
-```javascript
-const monitor = new EmbedPerformanceMonitor('embed-123');
-
 window.addEventListener('message', (event) => {
   if (event.origin !== 'https://app.kash.bot') return;
-
-  switch (event.data.type) {
-    case 'kash-iframe-ready':
-      monitor.markLoaded();
-      break;
-
-    case 'kash-market-clicked':
-      monitor.trackInteraction();
-      break;
-  }
-});
-
-// Log metrics on page unload
-window.addEventListener('beforeunload', () => {
-  console.log('Embed metrics:', monitor.getSummary());
+  const { type, data } = event.data ?? {};
+  if (type === 'kash-open-twitter') window.open(data.url, '_blank', 'noopener');
+  if (type === 'kash-iframe-ready') console.log('ready', data);
 });
 ```
 
----
-
-## State Manager
-
-Manage embed state across page lifecycle:
-
-```javascript
-// StateManager.js
-class EmbedStateManager {
-  constructor(storageKey = 'kash_embed_state') {
-    this.storageKey = storageKey;
-    this.state = this.loadState();
-  }
-
-  // Load state from localStorage
-  loadState() {
-    try {
-      const stored = localStorage.getItem(this.storageKey);
-      return stored ? JSON.parse(stored) : {};
-    } catch (error) {
-      console.error('Failed to load state:', error);
-      return {};
-    }
-  }
-
-  // Save state to localStorage
-  saveState() {
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.state));
-    } catch (error) {
-      console.error('Failed to save state:', error);
-    }
-  }
-
-  // Set embed state
-  setEmbedState(embedId, key, value) {
-    if (!this.state[embedId]) {
-      this.state[embedId] = {};
-    }
-
-    this.state[embedId][key] = value;
-    this.saveState();
-  }
-
-  // Get embed state
-  getEmbedState(embedId, key, defaultValue = null) {
-    return this.state[embedId]?.[key] ?? defaultValue;
-  }
-
-  // Clear embed state
-  clearEmbedState(embedId) {
-    delete this.state[embedId];
-    this.saveState();
-  }
-
-  // Clear all state
-  clearAllState() {
-    this.state = {};
-    this.saveState();
-  }
-}
-```
-
-**Usage:**
-
-```javascript
-const stateManager = new EmbedStateManager();
-
-// Save visited markets
-stateManager.setEmbedState('embed-1', 'visitedMarkets', ['market-1', 'market-2']);
-
-// Restore on page load
-const visitedMarkets = stateManager.getEmbedState('embed-1', 'visitedMarkets', []);
-console.log('Previously visited:', visitedMarkets);
-```
-
----
-
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
-  <Card title="HTML Examples" href="/developer-docs/public-embed-api/examples/html">
-    Vanilla JavaScript implementations
+  <Card title="React examples" href="/developer-docs/public-embed-api/examples/react">
+    Components and hooks
   </Card>
-  <Card title="React Examples" href="/developer-docs/public-embed-api/examples/react">
-    React components and hooks
+  <Card title="API overview" href="/developer-docs/public-embed-api/overview">
+    Endpoints, limits and errors
   </Card>
 </CardGroup>

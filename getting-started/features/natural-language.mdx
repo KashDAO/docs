@@ -1,12 +1,8 @@
 ---
-title: 'Natural Language'
-description: 'Create and trade markets with plain English'
+title: 'Kash AI'
+description: 'Create markets by chatting, and talk to Kash in plain language on X'
 icon: 'comment'
 ---
-
-<Note>
-You don't need to learn a trading interface to use Kash. The market creation flow drafts a full market from a one-line prompt, tweet trading parses the text of your tweets, and the in-app Ask Kash assistant answers questions as you go.
-</Note>
 
 <img
   style={{ borderRadius: '0.5rem' }}
@@ -21,51 +17,42 @@ You don't need to learn a trading interface to use Kash. The market creation flo
   alt="Hero Dark"
 />
 
-# Create Markets from a Prompt
+# Create markets by chatting
 
-The webapp's market creation flow is a conversation, not a form. You describe your prediction in plain English — *"Will BTC hit $100k today?"* — and the assistant drafts the rest with sensible defaults.
+Market creation on Kash is a conversation with **Kash AI**, not a form. You describe your prediction in plain language, for example *"Will BTC close above $100k on Friday?"*, and the assistant drafts a complete market.
 
 <Steps>
   <Step title="Describe your prediction">
-    Type (or dictate — voice input is supported) what you want the market to be about. The assistant drafts the title, description, duration, resolution rules, category, and outcomes for you.
+    Connect your X account, open **Launch** in the web app and type your idea, or use voice input. Not sure what to create? The Launch page also suggests trending market ideas.
+  </Step>
+
+  <Step title="Kash AI researches and drafts">
+    The assistant searches the web, reads sources, checks the deadline and looks for similar existing markets. It then drafts the question, outcomes, resolution and trading close times, resolution rules, primary and fallback sources, category and a cover image.
   </Step>
 
   <Step title="Refine by chatting">
-    Keep talking to change anything: *"Change the deadline to Friday"*, *"Change the outcomes to…"*, *"Update the resolution sources"*. The preview updates as you go. You can pick between binary (yes/no) and multi-option markets with 2–8 outcomes, attach reference links, live data feeds, and a cover image.
+    Ask for any change: *"Change the resolution time to Friday 6pm UTC"*, *"Add an outcome for a draw"*, *"Use the league's official site as the source"*. Tap a fact in the draft to pre-fill an edit, and undo the last change if you don't like it. **Ready checks** flag anything that would block the launch.
   </Step>
 
-  <Step title="Review and publish">
-    When the summary looks right, say "create" or hit publish. Markets go through review before going live, and the creation fee (currently 20 USDC) is only charged once your market is approved and published.
+  <Step title="Submit">
+    When the draft is ready, submit it. You pay to create the market from your own funds, at least $20, and the market is yours. Every market is reviewed automatically before it goes live, and you can follow each step (reviewing, collecting the launch amount, publishing, confirming it's live) in the same chat.
   </Step>
 </Steps>
 
+See [Creating Opportunities](/getting-started/guides/creating-opportunities) for costs, limits and what happens after launch.
+
 <Note>
-Market creation is rolling out gradually — it's currently available to approved accounts, with access expanding over time so that anyone will be able to submit a market. See [Creating Opportunities](/getting-started/guides/creating-opportunities) for the full flow.
+Kash AI creates markets in the web app only. It drafts the market but doesn't determine the outcome. Outcomes are determined by Kash's automated resolution system from the market's published sources and rules.
 </Note>
 
-# Trade by Tweeting
+# Talk to Kash on X
 
-With the opt-in trading bot connected (**Settings → Trading bot** in the webapp), Kash parses the text of your tweets to place trades — reply to a market tweet with your side and amount, and the trade executes from your smart account.
+Kash also understands plain language on X:
 
-If you create a market, the bot can also broadcast it from your own X handle so your followers can trade it by replying. More detail in [Trading Options](/getting-started/features/trading-options).
+- **Trade by replying.** Reply to a market's post, or quote it, and mention **@kash_bot_trade** with something like `buy $20 of Yes`. Kash works out the outcome and amount, submits the trade from your own wallet and replies with a confirmation. You can also ask for the current prices, the time left or your P&L on that market.
+- **Ask in a DM.** Message the bot to check your balance, portfolio, P&L, trade history or pending trades, ask for prices, or discover markets. You trade by replying to market posts, not in DMs.
 
-<Warning>
-There are no conversational DM commands. Kash does not process direct messages for trading, balance checks, withdrawals, or market creation — natural-language interaction happens in the webapp creation flow and via public tweets with the opt-in bot.
-</Warning>
-
-# Ask Kash: The In-App Assistant
-
-The webapp includes **Ask Kash**, an assistant for getting help — not for trading. Use it for:
-
-- **How-to questions** — how markets, fees, claims, and features work
-- **Tutorials** — replay the onboarding walkthrough at any time
-- **Feedback** — report bugs or send ideas to the team
-- **Settings help** — like switching your language
-- **Market ideas** — brainstorm what to create or trade
-
-<Tip>
-The pattern across all three surfaces is the same: you say what you mean, and Kash handles the structured details — market parameters, trade execution, or the right help article — behind the scenes.
-</Tip>
+Replies come back in your language. See [Trading on X](/getting-started/features/trading-on-x).
 
 <CardGroup cols={2}>
   <Card
@@ -73,13 +60,13 @@ The pattern across all three surfaces is the same: you say what you mean, and Ka
     icon="wand-magic-sparkles"
     href="/getting-started/guides/creating-opportunities"
   >
-    From prompt to published market
+    From prompt to live market
   </Card>
   <Card
-    title="Trading Options"
-    icon="chart-line"
-    href="/getting-started/features/trading-options"
+    title="Trading on X"
+    icon="x-twitter"
+    href="/getting-started/features/trading-on-x"
   >
-    All the ways to trade
+    Trade without leaving X
   </Card>
 </CardGroup>

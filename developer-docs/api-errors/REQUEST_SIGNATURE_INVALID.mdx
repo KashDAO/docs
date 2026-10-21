@@ -7,26 +7,29 @@ description: 'HTTP 401 — Request signature invalid'
 
 ## When it fires
 
-`X-Kash-Signature` was present but did not verify against the API key plaintext over the canonical signing input `${ts}.${method}.${path}.${body}`.
+Either:
 
-Signing is **opt-in**: requests without `X-Kash-Signature` skip this check entirely. Once present, it MUST verify.
+- an `X-Kash-Signature` header was sent and did not verify, or
+- the key is configured to **require** signed requests and the request carried no `X-Kash-Signature` header.
+
+For keys that don't require signing, signing is opt-in: a request without `X-Kash-Signature` skips the check. Once the header is present, it must verify.
 
 ## Why it happens
 
-- The body was modified in transit (a transparent proxy that re-encoded JSON, an HTTP client that renormalised whitespace).
-- The timestamp is outside the ±5 min tolerance (clock skew).
-- The signature was computed over the wrong input — common mistake: signing the URL instead of the path-only, or omitting the leading slash on `path`.
-- The wrong secret was used (e.g., the `webhook_secret` instead of the API key plaintext).
+- The body changed in transit (a proxy re-encoded the JSON, or an HTTP client normalised whitespace).
+- The timestamp is outside the ±5 minute tolerance (clock skew).
+- The signature was computed over the wrong input. Common mistakes: signing the full URL instead of the path, or omitting the leading slash.
+- The wrong secret was used, for example your webhook secret instead of the API key.
 
 ## How to fix
 
-- Canonical input format: `${unixMillis}.${UPPERCASE_METHOD}.${pathWithLeadingSlash}.${rawBody}` (raw body bytes, not re-serialised JSON).
-- Key the HMAC with the API key plaintext (the same value as `X-API-Key`).
+- Signing input: `${unixMillis}.${UPPERCASE_METHOD}.${pathWithLeadingSlash}.${rawBody}`. Use the raw body bytes you send, not re-serialised JSON. The path excludes the query string.
+- Key the HMAC-SHA256 with the API key itself (the same value you send in `X-API-Key`).
 - Header format: `X-Kash-Signature: t=<unixMillis>,v1=<hexHmacSha256>`.
-- Sync your clock — NTP. If you're consistently 6+ minutes off, fix the host clock.
-- Check the `signatureReason` extension field on the problem response — it pinpoints which check failed (`stale`, `mismatch`, `malformed`).
+- Keep your clock in sync (NTP).
+- Read the `detail` field. It says which check failed: a malformed header, a missing `v1` value, a timestamp outside the tolerance, or a signature that does not match.
 
-See `apps/public-api/README.md` § Optional request body signing for the full reference.
+See [Authentication](/developer-docs/rest-api/authentication) for the full request-signing reference.
 
 ## Related codes
 

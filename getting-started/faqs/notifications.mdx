@@ -20,47 +20,32 @@ icon: 'bell'
 # Notifications
 
 <AccordionGroup>
-  <Accordion title="What types of notifications does Kash send?">
-    **Notification Categories**
-
-    - **Trades:** confirmations and updates for your trades
-    - **Market updates:** resolutions, freezes, and status changes for markets you're in
-    - **Payouts & claims:** when winnings or refunds become claimable, and when payouts complete
-    - **Account:** account-related activity and security events
-    - **Vault:** updates on your Earn vault deposits and redemptions (once Earn launches)
-    - **Kash announcements:** platform news and feature updates
-
-    Notifications link to the relevant market or page so you can act on them directly.
+  <Accordion title="What notifications does Kash send?">
+    Kash notifies you about the things that affect your account and markets, including:
+    - **Market results:** markets you hold have resolved or been cancelled, and positions or refunds are ready to claim
+    - **Trading:** your trades and copy trades
+    - **New markets** and **market announcements**
+    - **Deposits**, withdrawals and transfers
+    - **Price alerts** you've set
+    - **Direct messages**
+    - **Social and achievements:** new followers, unlocked achievements
   </Accordion>
 
   <Accordion title="Where can I receive notifications?">
-    **Delivery Channels**
+    - **In the app:** the **Notifications** page, with filters by type
+    - **Push notifications** to your browser or device
 
-    - **In-app:** the notification center in the webapp at [app.kash.bot](https://app.kash.bot)
-    - **Browser / device push:** enable push notifications in **Settings → Notifications** to get alerts even when the tab is closed
-    - **iOS:** install app.kash.bot as a PWA (Share → Add to Home Screen) to receive push notifications on iPhone
-
-    **Tweet trading:** if you trade by tweeting at **Kash's dedicated trading account** (the current handle is linked from [@kash_bot](https://x.com/kash_bot)), the bot replies to your tweet with the trade result. Neither @kash_bot nor the trading account ever DMs or @mentions you first — they only respond to your interactions, and DMs are not a notification or support channel.
+    Kash doesn't send notification emails, and bot replies on X are trade confirmations rather than notifications.
   </Accordion>
 
   <Accordion title="How do I manage my notification preferences?">
-    **Settings → Notifications**
+    Go to **Settings → Notifications**. Turn push on or off, and choose which types to receive: market results, new markets, deposits, price alerts, market announcements and direct messages. You can also manage your price alerts there.
+  </Accordion>
 
-    - Toggle in-app and push delivery independently
-    - Choose which categories you want to receive
-    - Grant your browser or device permission when prompted to enable push
-
-    If push notifications aren't arriving, check that your browser/OS allows notifications from app.kash.bot, and on iOS make sure you're using the installed PWA.
+  <Accordion title="How do I get push notifications on my phone?">
+    Install Kash as an app from **Settings → Notifications → Install app**. On iPhone and iPad, add Kash to your home screen first, then enable push from the installed app.
   </Accordion>
 </AccordionGroup>
-
-<Warning>
-Kash will never DM you first or ask for credentials in a notification. Be cautious with links from unknown sources and verify you're on app.kash.bot.
-</Warning>
-
-<Tip>
-Enable push notifications to hear the moment a market you're in resolves — winnings become claimable as soon as resolution lands.
-</Tip>
 
 <CardGroup cols={2}>
   <Card
@@ -68,13 +53,13 @@ Enable push notifications to hear the moment a market you're in resolves — win
     icon="gear"
     href="/getting-started/faqs/settings"
   >
-    Configure your preferences
+    Every setting explained
   </Card>
   <Card
     title="Support"
     icon="headset"
     href="/getting-started/faqs/support"
   >
-    Get help and support
+    Get help
   </Card>
 </CardGroup>

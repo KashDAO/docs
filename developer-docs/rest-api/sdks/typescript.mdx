@@ -1,9 +1,9 @@
 ---
 title: 'TypeScript SDK'
-description: '@kashdao/sdk — typed everything. Trades, markets, portfolios, webhooks, retries, idempotency.'
+description: '@kashdao/sdk — typed client for the Kash REST API. Markets, quotes, trades, redemptions, portfolio, webhooks, retries, idempotency.'
 ---
 
-The `@kashdao/sdk` package is a hand-written TypeScript client for the REST API. It's the recommended way to integrate from any TS/JS runtime — Node 22+, modern browsers, Deno, Bun, or Cloudflare Workers.
+The `@kashdao/sdk` package is the official TypeScript client for the REST API. It's the recommended way to integrate from any TS/JS runtime: Node 22+, modern browsers, Deno, Bun, Cloudflare Workers or Vercel Edge. It uses native `fetch` and has one runtime dependency (Zod).
 
 ```bash
 pnpm add @kashdao/sdk
@@ -18,23 +18,70 @@ pnpm add @kashdao/sdk
 import { KashClient } from '@kashdao/sdk';
 
 const kash = new KashClient({
-  apiKey:  process.env.KASH_API_KEY!,                        // 'kash_live_...' or 'kash_test_...'
-  baseUrl: 'https://api.kash.bot/v1',                        // staging: https://api-staging.kash.bot/v1
-  timeoutMs: 10_000,                                         // optional, default 30s
-  maxRetries: 3,                                             // optional, default 3 (with exp backoff + jitter)
-  webhookSecret: process.env.KASH_WEBHOOK_SECRET,            // optional, only needed for constructEvent
+  apiKey: process.env.KASH_API_KEY!,     // 'kash_live_...' or 'kash_test_...'
+  // Everything below is optional:
+  timeoutMs: 30_000,                     // per request, default 30s
+  maxRetries: 3,                         // default 3, exponential backoff + jitter
+  userAgentSuffix: 'acme-trader/1.4.2',  // appended to the User-Agent
 });
 ```
 
-The client is a thin façade over typed sub-clients: `kash.markets`, `kash.trades`, `kash.portfolio`, `kash.webhooks`, `kash.account`, `kash.traces`.
+`new KashClient()` with no arguments reads `KASH_API_KEY` (and `KASH_BASE_URL`) from the environment where a `process.env` exists.
+
+**Base URL selection.** You normally don't set `baseUrl`. It resolves in this order:
+
+1. an explicit `baseUrl` option;
+2. the `KASH_BASE_URL` environment variable;
+3. the key prefix: `kash_test_*` → `https://api-staging.kash.bot/v1` (Solana devnet, simulated USDC), `kash_live_*` → `https://api.kash.bot/v1`;
+4. otherwise production, `https://api.kash.bot/v1`.
+
+Both URLs are exported as `PRODUCTION_BASE_URL` and `STAGING_BASE_URL`. The key is validated against `kash_(live|test)_` plus 32 alphanumerics at construction, so pasting a `whsec_...` webhook secret by mistake throws `KashConfigurationError` immediately.
+
+Other options: `retryBaseDelayMs` (default 200), `retryMaxDelayMs` (default 10 000), `retryAfterMaxMs` (default 60 000: a server `Retry-After` longer than this surfaces the error instead of sleeping), `headers` (extra default headers such as `traceparent`), `fetch` (custom implementation), `hooks`, `conditionalRequests` (default `true`, see below), `conditionalCacheMaxEntries` (default 256) and `apiVersion`.
+
+The client exposes typed sub-clients: `kash.markets`, `kash.quotes`, `kash.trades`, `kash.redemptions`, `kash.portfolio`, `kash.webhooks`, `kash.account` and `kash.traces`. `kash.healthCheck()` checks connectivity and never throws; it returns `{ ok, latencyMs, status?, version?, requestId? }`.
+
+## Read markets
+
+```ts
+const page = await kash.markets.list({ status: 'ACTIVE', limit: 50 });
+const market = await kash.markets.get(page.data[0].id);
+
+// Recent trades against a market, newest first:
+const feed = await kash.markets.predictions(market.id, { side: 'buy', outcomeIndex: 0 });
+```
+
+Market `status` is one of `UNSEEDED`, `ACTIVE`, `RESOLVED` or `ABANDONED`. Every market carries `chainRef` (for example `solana:mainnet-beta`); `chainId` is present only on EVM markets. Production trading runs on Solana. Use `parseChainRef` / `tryParseChainRef` to get a typed view of `chainRef`.
+
+## Get a quote
+
+Quotes are split into `buy` and `sell` so you can't pass the wrong unit to the wrong side. USDC amounts are **atomic, 6 decimals**; outcome-token amounts are **WAD, 18 decimals**. Both accept a string or a `bigint`.
+
+```ts
+const buy = await kash.quotes.buy({
+  marketId:         market.id,
+  outcomeIndex:     0,
+  amountUsdcAtomic: 10_000_000n,           // 10 USDC
+});
+console.log(buy.tokensOut, buy.effectivePrice, buy.impliedProbability);
+
+const sell = await kash.quotes.sell({
+  marketId:     market.id,
+  outcomeIndex: 0,
+  tokensInWad:  '1000000000000000000',     // 1 outcome token
+});
+console.log(sell.usdcOut);
+```
+
+Each quote also carries the post-trade state (`pAfter`, `qAfter`, `reserveAfter`) and an embedded `market` summary.
 
 ## Place a trade
 
 ```ts
 const trade = await kash.trades.create({
-  marketId:     '11111111-1111-4111-8111-111111111111',
+  marketId:     market.id,
   outcomeIndex: 0,
-  amount:       '100',
+  amount:       '100',                     // USDC decimal string, up to 6 fractional digits
   side:         'buy',
   metadata:     { strategy: 'momentum-v2', cohort: 'beta' },
 }, { idempotencyKey: crypto.randomUUID() });
@@ -42,46 +89,66 @@ const trade = await kash.trades.create({
 console.log(trade.id, trade.status, trade.idempotent);
 
 if (trade.confirmation) {
-  // High-value gate hit — confirm with the one-time token
+  // High-value gate hit. The token is returned once and expires 60 seconds after issue.
   await kash.trades.confirm(trade.id, { token: trade.confirmation.token });
 }
 
-// Wait for the on-chain result (polls + respects rate limits)
+// Poll until completed / failed / rejected
 const final = await kash.trades.waitForCompletion(trade.id, {
-  pollIntervalMs: 1000,
-  timeoutMs:      60_000,
+  pollIntervalMs: 2_000,                   // default 2s
+  timeoutMs:      60_000,                  // default 60s
 });
 
 console.log(final.status, final.txHash, final.tokensOut);
 ```
 
+On API version `2026-08-19` (the SDK default), `txHash` on a Solana trade is the base58 transaction signature. `waitForCompletion` refuses a trade that is still `pending_confirmation` with a `KashConflictError`; confirm it first. Type guards such as `isCompletedTrade`, `isTerminalTrade` and `isAwaitingConfirmation` narrow a `TradeResource` by status.
+
+**Idempotency.** Every POST the SDK sends carries an `Idempotency-Key`. If you don't pass one, the SDK generates one per call, so its own retries can never duplicate a write. Pass your own key when *your* code may retry the same logical order across calls.
+
+## Redeem a settled position
+
+When a market resolves (or is cancelled), winning tokens stay in your account until you redeem them. One call redeems one `(market, outcome)` position:
+
+```ts
+const redemption = await kash.redemptions.create({ marketId: market.id, outcomeIndex: 0 });
+console.log(redemption.kind, redemption.sharesWad, redemption.status, redemption.idempotent);
+```
+
+Requires the `trades:write` scope. The request is accepted synchronously and the payout executes asynchronously. Calling it again for a position that already has a request returns that request with `idempotent: true`. A position that can't be redeemed throws `KashConflictError` with code `POSITION_NOT_CLAIMABLE`.
+
+## Portfolio
+
+```ts
+const summary   = await kash.portfolio.get();                            // { smartAccountAddress, activePositions, totalCostBasisAtomic }
+const positions = await kash.portfolio.positions({ marketId: market.id }); // PositionResource[], not paginated
+
+// Yield positions now, then again whenever they change:
+const controller = new AbortController();
+for await (const current of kash.portfolio.watchPositions({ signal: controller.signal })) {
+  rebalance(current);
+}
+```
+
+`watchPositions` polls with conditional GETs and backs off while nothing changes (`minIntervalMs` 5 000, `maxIntervalMs` 60 000, `backoffFactor` 2 by default). With `conditionalRequests` on, the client sends `If-None-Match` on repeat GETs and resolves a `304 Not Modified` from its in-memory copy.
+
 ## Pagination — async iteration
 
-Every list method returns a `Page<T>` that's both the first page and an `AsyncIterable<T>`:
+List methods (`markets.list`, `markets.predictions`, `trades.list`, `webhooks.list`) return a `Page<T>` that's both the first page and an `AsyncIterable<T>`:
 
 ```ts
 const page = await kash.trades.list({ limit: 25, status: 'completed' });
 
 // First page only
-console.log(page.data.length, page.pagination.hasMore);
+console.log(page.data.length, page.hasMore, page.nextCursor);
 
 // Or walk every trade across every page
 for await (const trade of page) {
   console.log(trade.id, trade.txHash);
 }
-```
 
-## Get a quote
-
-```ts
-const quote = await kash.markets.quote({
-  marketId:     '...',
-  outcomeIndex: 0,
-  action:       'buy',
-  amount:       '10000000',  // atomic USDC (10 USDC)
-});
-
-console.log(quote.tokensOut, quote.effectivePrice, quote.impliedProbability);
+// Or step manually
+const next = await page.getNextPage(); // Page<T> | null
 ```
 
 ## Verify a webhook
@@ -90,52 +157,59 @@ console.log(quote.tokensOut, quote.effectivePrice, quote.impliedProbability);
 import express from 'express';
 
 app.post('/webhooks/kash',
-  express.raw({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),   // verify against the RAW body
   async (req, res) => {
+    let event;
     try {
-      const event = await kash.webhooks.constructEvent(
+      event = await kash.webhooks.constructEvent(
         req.body.toString('utf8'),
-        req.header('x-kash-signature')!,
+        req.header('x-kash-signature') ?? '',
         process.env.KASH_WEBHOOK_SECRET!
       );
-
-      switch (event.type) {
-        case 'trade.completed':
-          // event.data is fully typed (TradeCompletedPayload)
-          await onTradeCompleted(event.data);
-          break;
-        case 'trade.failed':
-          await onTradeFailed(event.data);
-          break;
-        case 'trade.confirmation-required':
-          await onConfirmationRequired(event.data);
-          break;
-      }
-      res.sendStatus(200);
     } catch (err) {
-      // KashWebhookSignatureError on bad signature, expired, malformed
-      res.sendStatus(401);
+      // KashWebhookSignatureError: bad, expired or malformed signature
+      return res.sendStatus(400);
     }
+
+    switch (event.type) {
+      case 'trade.completed':
+        await onTradeCompleted(event.data);    // typed: TradeCompletedPayload
+        break;
+      case 'trade.failed':
+      case 'trade.rejected':
+        await onTradeFailed(event.data);       // carries errorCode + errorMessage
+        break;
+      case 'trade.confirmation-required':
+        await onConfirmationRequired(event.data);
+        break;
+    }
+    res.sendStatus(200);
   }
 );
 ```
 
+`constructEvent(body, signatureHeader, secret, opts?)` checks the `X-Kash-Signature` HMAC and a 5-minute timestamp tolerance (override with `opts.toleranceMs`), accepts any matching `v1=` entry during a secret-rotation overlap, then parses the envelope `{ id, type, apiVersion, createdAt, data }`. `verifySignature` runs the same check and returns `{ valid: true }` or `{ valid: false, reason }` without parsing. It throws `KashConfigurationError` for an empty secret and `KashValidationError` for a body that verifies but isn't a known event.
+
+Webhook management: `kash.webhooks.list({ status, limit, cursor })`, `kash.webhooks.redeliver(eventId)` and `kash.webhooks.rotateSecret()` (returns `{ secret, rotatedAt, previousRetainedUntil }`, the new secret shown once). These need the `webhooks:manage` scope.
+
 ## Typed errors
 
-Every error is a typed subclass of `KashError`:
+Every error is a subclass of `KashError`:
 
 ```ts
 import {
   KashError,
   KashAuthenticationError,    // 401
-  KashAuthorizationError,     // 403
-  KashConflictError,          // 409
+  KashAuthorizationError,     // 403 (INSUFFICIENT_SCOPE, IP_NOT_ALLOWED)
   KashNotFoundError,          // 404
+  KashConflictError,          // 409, and 410 for an expired idempotency key
   KashRateLimitError,         // 429
-  KashServerError,            // 5xx
+  KashMaintenanceError,       // 503 temporarily unavailable (API_TRADE_PROCESSING_HALTED, ROUTE_DISABLED)
+  KashServerError,            // other 5xx
+  KashValidationError,        // 400 / 422, or a response that failed schema validation
   KashNetworkError,
   KashTimeoutError,
-  KashValidationError,
+  KashAbortedError,           // your AbortSignal fired
   KashWebhookSignatureError,
   KashConfigurationError,
 } from '@kashdao/sdk';
@@ -144,57 +218,59 @@ try {
   await kash.trades.create(body);
 } catch (err) {
   if (err instanceof KashRateLimitError) {
-    console.log(`Backoff for ${err.retryAfterSeconds}s`);
+    console.log(`Back off for ${err.retryAfterSeconds ?? 1}s`);
   } else if (err instanceof KashAuthorizationError && err.code === 'INSUFFICIENT_SCOPE') {
     console.log('Re-issue the key with trades:write');
   } else if (KashError.isKashError(err)) {
-    // Cross-realm-safe brand check (works across worker postMessage boundaries)
-    console.log(err.code, err.requestId);
+    // Cross-realm-safe brand check (works across worker / iframe boundaries)
+    console.log(err.code, err.statusCode, err.requestId);
   } else {
     throw err;
   }
 }
 ```
 
+`retryAfterSeconds` (on `KashRateLimitError`, `KashServerError` and `KashMaintenanceError`) is `undefined` when the server sent no `Retry-After`. `KashValidationError` and `KashConfigurationError` expose `issues`. The SDK retries 429, 5xx, network errors and timeouts on its own, up to `maxRetries`.
+
 ## Lifecycle hooks
 
-Tap into every request, response, retry, and error for logging or observability:
+Tap into every request, response, retry and error for logging or observability. The SDK never logs by itself.
 
 ```ts
 const kash = new KashClient({
   apiKey,
   hooks: {
-    onRequest:  (e) => log.info('kash.request', { method: e.method, url: e.url, attempt: e.attempt }),
-    onResponse: (e) => log.info('kash.response', { status: e.status, durationMs: e.durationMs }),
-    onRetry:    (e) => log.warn('kash.retry', { attempt: e.attempt, reason: e.reason }),
-    onError:    (e) => log.error('kash.error', { code: e.code, attempt: e.attempt }),
+    onRequest:  (e) => log.info('kash.request',  { method: e.method, url: e.url, attempt: e.attempt }),
+    onResponse: (e) => log.info('kash.response', { status: e.status, durationMs: e.durationMs, rateLimit: e.rateLimit }),
+    onRetry:    (e) => log.warn('kash.retry',    { attempt: e.attempt, reason: e.reason, delayMs: e.delayMs }),
+    onError:    (e) => log.error('kash.error',   { code: e.code, status: e.status, attempt: e.attempt }),
   },
 });
 ```
 
-A throwing hook never breaks the request — exceptions are swallowed and the call proceeds. Hooks are safe to add for telemetry without thinking about resilience.
+`onResponse` also carries `requestId`, `apiVersion` (the server's `X-API-Version`), `idempotentReplay`, `notModified` and `deprecation` (parsed `Sunset` / `Deprecation` / `Link rel="sunset"` headers, or `null`).
 
 ## Cloning a client
 
-`withConfig` returns a new client with overridden fields. Useful for tenant switching or per-request key swaps:
+`withConfig` returns a new client with overridden fields. Useful for switching between API keys or per-scope timeouts:
 
 ```ts
-const tenantA = new KashClient({ apiKey: 'kash_live_AAAA...' });
-const tenantB = tenantA.withConfig({ apiKey: 'kash_live_BBBB...' });
-// tenantA and tenantB are independent — same baseUrl, different keys
+const readOnly = new KashClient({ apiKey: process.env.KASH_READ_KEY! });
+const trading  = readOnly.withConfig({ apiKey: process.env.KASH_TRADE_KEY! });
+const slow     = readOnly.withConfig({ timeoutMs: 120_000 });
 ```
 
-`withConfig` re-validates — passing an invalid override throws `KashConfigurationError`.
+`withConfig` re-validates, so an invalid override throws `KashConfigurationError`. Per-call overrides (`timeoutMs`, `maxRetries`, `signal`, `headers`) can also be passed as the last argument of any method.
 
 ## Mock client for tests
 
-`@kashdao/sdk/testing` exports a fake client with realistic default fixtures:
+`@kashdao/sdk/testing` exports an in-memory mock client (no network, no retries) with wire-shape-valid default fixtures:
 
 ```ts
 import { createMockKashClient, DEFAULT_TRADE } from '@kashdao/sdk/testing';
 
 const mock = createMockKashClient({
-  // Override specific methods
+  // Override specific methods; everything else returns a default
   trades: {
     create: async () => ({ ...DEFAULT_TRADE, status: 'pending', idempotent: false }),
   },
@@ -204,47 +280,50 @@ const mock = createMockKashClient({
 const result = await yourTradingBot.run(mock);
 ```
 
-The defaults pass the wire-shape contract tests, so they're indistinguishable from real production responses for downstream consumers.
+Fixtures exported alongside it include `DEFAULT_MARKET`, `DEFAULT_TRADE`, `DEFAULT_COMPLETED_TRADE`, `DEFAULT_QUOTE_BUY`, `DEFAULT_QUOTE_SELL`, `DEFAULT_REDEMPTION`, `DEFAULT_POSITION` and `DEFAULT_PORTFOLIO_SUMMARY`.
 
-## Versioning
+## API versions
 
-The SDK follows SemVer. The `KashError` shape, public method signatures, and exported types are SemVer-stable. Internals (private fields, pagination tokens, transport details) are not — pin to a major version range in `package.json`.
-
-The SDK auto-includes a `User-Agent` header identifying its version, so we can correlate API logs with SDK versions when investigating issues.
-
-### Pin against a specific API contract version
-
-Send the `X-Kash-Api-Version` request header to lock your integration against a specific contract date. The SDK can be configured to send it on every request:
+The SDK sends `X-Kash-Api-Version` on every request. It defaults to `2026-08-19` (exported as `SDK_API_VERSION`), and you can override it:
 
 ```ts
 const kash = new KashClient({
-  apiKey:    process.env.KASH_API_KEY!,
-  apiVersion: '2026-04-29', // optional; omits the header (server defaults) when not set
+  apiKey:     process.env.KASH_API_KEY!,
+  apiVersion: '2026-04-29',
 });
 ```
 
-Server response carries `X-API-Version` (the canonical version) plus `Sunset` / `Deprecation` headers when your pinned version is winding down (12-month deprecation window per RFC 8594). The SDK's `onResponse` hook surfaces both — wire it into your monitoring to flag deprecations early. Pinning to an unknown date returns `410 API_VERSION_UNSUPPORTED` with the supported list in `metadata.supported`.
+The API supports two versions:
 
-## Quality gates
+| Version | Behaviour |
+| --- | --- |
+| `2026-08-19` (SDK and server default) | Every market carries `chainRef`; `chainId` only on EVM markets. Solana markets are listed and quotable. Trade `txHash` is the base58 Solana signature for Solana trades. |
+| `2026-04-29` (served only when pinned) | Solana markets are left out of `markets.list()`; `markets.get()` and quotes answer `400 CHAIN_NOT_SUPPORTED` for a Solana market. `txHash` is `null` for non-EVM trades. |
 
-The SDK ships with strict quality gates that are part of the public contract:
+Because production trading is on Solana, keep the SDK default unless you have a specific reason not to. An unsupported value returns `410 API_VERSION_UNSUPPORTED` with the accepted list in the body's `supported` member (`err.extensions?.supported` on the thrown error). Responses carry the version that served the request in `X-API-Version`, plus `Sunset` / `Deprecation` headers when a version is winding down; the `onResponse` hook surfaces both.
 
-- **Bundle size budgets** — main entry ≤ 24 KB gzipped, `/testing` subpath ≤ 8 KB. Enforced at publish time via `size-limit`.
-- **Static type tests** — `pnpm test:types` runs vitest's typecheck mode against `tests/types/public-types.test-d.ts`. The public TypeScript surface is locked: any change to a public type's shape fails compilation, forcing a deliberate CHANGELOG + version bump.
-- **Public-barrel snapshot** — `tests/unit/barrel-snapshot.test.ts` pins the exact set of exported names. Accidental removals fail the build.
-- **Wire-shape contract** — `tests/contract/wire-shape.test.ts` asserts every resource schema matches canonical fixtures. Ships to the public mirror.
+The SDK also sends a `User-Agent` of the form `@kashdao/sdk/<version> (<runtime>)` (exported as `USER_AGENT`), with your `userAgentSuffix` appended.
 
-## Source & changelog
+## Versioning and bundle size
+
+The SDK is pre-1.0 (`0.x`): a minor version may include breaking changes, so pin a minor range in `package.json`. Each release is held to a `size-limit` budget, measured excluding Zod: 24 KB for the main entry and 8 KB for `@kashdao/sdk/testing`.
+
+## Source
 
 - npm: [`@kashdao/sdk`](https://www.npmjs.com/package/@kashdao/sdk)
-- GitHub: [`KashDAO/sdk-typescript`](https://github.com/KashDAO/sdk-typescript) (public mirror)
-- Changelog: [`CHANGELOG.md`](https://github.com/KashDAO/sdk-typescript/blob/main/CHANGELOG.md)
-- Versioned OpenAPI snapshots: the live spec is served at [`api.kash.bot/v1/openapi.json`](https://api.kash.bot/v1/openapi.json); historical pinned versions are listed at [`api.kash.bot/v1/openapi/index.json`](https://api.kash.bot/v1/openapi/index.json) — pin against a specific date for reproducible code generation.
-- Issues / discussions: [github.com/KashDAO/sdk-typescript/issues](https://github.com/KashDAO/sdk-typescript/issues)
+- GitHub: [`KashDAO/sdk-typescript`](https://github.com/KashDAO/sdk-typescript) (issues: [github.com/KashDAO/sdk-typescript/issues](https://github.com/KashDAO/sdk-typescript/issues))
+- OpenAPI spec: [`api.kash.bot/v1/openapi.json`](https://api.kash.bot/v1/openapi.json), with an interactive explorer at [`api.kash.bot/v1/docs`](https://api.kash.bot/v1/docs).
+
+<Note>
+Market disputes (`/v1/markets/{id}/disputes`) are served by the API but are not wrapped by the SDK. Call those endpoints directly with your `X-API-Key`.
+</Note>
 
 ## Next
 
 <CardGroup cols={2}>
+  <Card title="Build a trading bot" icon="robot" href="/developer-docs/rest-api/trading-bot">
+    End-to-end walkthrough using this SDK.
+  </Card>
   <Card title="CLI" icon="terminal" href="/developer-docs/cli/overview">
     `kash` — the command-line interface. Same primitives, scripting-friendly.
   </Card>

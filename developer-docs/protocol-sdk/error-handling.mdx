@@ -1,121 +1,96 @@
 ---
 title: 'Error handling'
-description: 'Typed error hierarchy, retry semantics, decoded revert hints. Same shape across both modes and the Python SDK.'
+description: 'Typed errors, retry semantics and unknown-outcome handling for @kashdao/protocol-sdk on Solana.'
 ---
 
-Every error in `@kashdao/protocol-sdk` inherits from
-`KashProtocolError` and carries a stable `code`, structured
-`context`, plus `isRetryable` / `isOperational` flags. The hierarchy
-mirrors the Python SDK exactly — same class names, same
-string-valued `ErrorCode` constants — so a cross-language deployment
-can branch on the error class without parsing strings.
+Every error the SDK throws extends `KashProtocolError` and carries a
+stable string `code` (see the exported `ErrorCode`), structured
+`context`, and `isRetryable` / `isOperational` flags. The Python SDK
+uses the same class names and codes.
 
-## The 6 named subclasses
+## Error classes
 
-| Class                          | When it fires                                                                                                | Retryable?                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| `KashConfigError`              | Construction-time validation failure (invalid chain id, bad RPC URL, malformed signer)                       | **No** — never retry config errors    |
-| `KashChainError`               | Chain or RPC-side failure (RPC unreachable, reorg-suspected receipt loss, gas estimate failed)               | Sometimes — check `isRetryable`       |
-| `KashBundlerError`             | Bundler RPC-side failure (Pimlico/Alchemy/Flashbots returned an error)                                       | Sometimes — check `isRetryable`       |
-| `KashSignerError`              | Signer-side failure (signature rejected, MFA timeout, hardware-wallet disconnect, stale tx/UserOp)           | **Always no** — re-prompting MFA is a footgun |
-| `KashSimulationRevertedError`  | Pre-flight `eth_call` would revert (slippage exceeded, insufficient allowance, market state changed)         | **No** — input issue, not retryable   |
-| `KashAbortedError`             | Caller's `AbortSignal` fired                                                                                  | **No** — abort was deliberate         |
+| Class                                | When it fires                                                                                                   | Retryable?                 |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `KashConfigError`                    | Invalid client config (`INVALID_CONFIG`) or a cluster with no Kash deployment (`UNSUPPORTED_CHAIN`)            | No                         |
+| `KashValidationError`                | Bad input, or a trade the program would refuse, caught before signing. `programError` names the program error   | No                         |
+| `KashSimulationRevertedError`        | The RPC's preflight simulation refused the transaction. `context.programError` names the program error          | No                         |
+| `KashChainError`                     | RPC or on-chain failure. `code` says which (see below)                                                          | Check `isRetryable`        |
+| `KashTransactionExpiredError`        | `TX_EXPIRED`: the blockhash expired and a status check found no trace of the signature, so it did not land      | Yes: rebuild and resend    |
+| `KashTransactionOutcomeUnknownError` | `WAIT_RECEIPT_FAILED`: the transaction **may have landed**                                                       | **No**: look it up first   |
+| `KashSignerError`                    | The signer failed or cannot sign (e.g. `SIGNER_UNSUPPORTED` for a disconnected wallet)                          | No                         |
 
-## Canonical exception-handling shape
+Refusals checked before signing include `InvalidState` (market not
+active) and a frozen market.
+
+## Sending: which failures are safe to retry
+
+| Outcome                                                        | Error                                         | What to do                                    |
+| -------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------- |
+| Preflight simulation refused                                   | `KashSimulationRevertedError`                 | Fix the input (amount, slippage, market)      |
+| RPC refused the send before forwarding it                      | `KashChainError` `TX_SEND_FAILED` (retryable) | Rebuild and resend                            |
+| Blockhash expired and the transaction did not land             | `KashTransactionExpiredError` (retryable)     | Rebuild with a fresh quote and resend         |
+| Landed and failed on chain                                     | `KashChainError` `TX_REVERTED`                | Inspect `context.programError`                |
+| Anything else: timeout, HTTP error (429 included), unreadable confirmation | `KashTransactionOutcomeUnknownError` | Look up `signature` before doing anything    |
+
+Every error raised after signing carries the transaction signature
+(`context.signature`, and `.signature` on the two transaction error
+classes), computed before the send.
+
+<Warning>
+`WAIT_RECEIPT_FAILED` is deliberately **not** retryable. Rebuilding takes a
+fresh blockhash, which makes a new transaction; if the first one landed,
+sending both doubles the trade. Check the signature's status first.
+</Warning>
+
+## Canonical handling
+
+Use the static `is()` guards rather than `instanceof`; they work across
+module copies and bundles.
 
 ```ts
 import {
-  KashConfigError,
+  ErrorCode,
   KashChainError,
-  KashBundlerError,
-  KashSignerError,
   KashSimulationRevertedError,
-  KashAbortedError,
-} from '@kashdao/protocol-sdk';
+  KashTransactionExpiredError,
+  KashTransactionOutcomeUnknownError,
+  KashValidationError,
+} from '@kashdao/protocol-sdk/solana';
 
 try {
-  await client.trades.send.buy(MARKET, params);
+  await kash.trades.buy({ market: 5n, outcome: 0, amountUsdc: 1_000_000n, maxSlippageBps: 100, signer });
 } catch (err) {
-  if (err instanceof KashSimulationRevertedError) {
-    // `context.revertReason` holds the decoded custom error name when known.
-    // `actionableRevertHint(err)` turns it into a user-facing suggestion.
-    console.error('would revert:', err.context?.revertReason ?? err.message);
-    // Update slippage / amount / market and try again.
-    return;
-  }
-  if (err instanceof KashSignerError) {
-    // ALWAYS non-retryable. Surface to the user as a sign-required UI step.
-    console.error('signer failed:', err.code, err.message);
-    return;
-  }
-  if (err instanceof KashChainError && err.isRetryable) {
-    // Retry with backoff; cap attempts.
-    return retryWithBackoff(() => client.trades.send.buy(MARKET, params));
-  }
-  if (err instanceof KashConfigError) {
-    // Never retryable. Fix the code.
+  if (KashValidationError.is(err)) {
+    // Refused before signing: nothing was sent.
+    console.error('refused:', err.programError ?? err.message);
+  } else if (KashSimulationRevertedError.is(err)) {
+    console.error('preflight refused:', err.context?.['programError'] ?? err.message);
+  } else if (KashTransactionOutcomeUnknownError.is(err)) {
+    // May have landed. Look the signature up before retrying.
+    console.error('outcome unknown:', err.signature);
+  } else if (KashTransactionExpiredError.is(err)) {
+    // Did not land. Safe to rebuild with a fresh quote and resend.
+  } else if (KashChainError.is(err) && err.code === ErrorCode.TX_SEND_FAILED) {
+    // The RPC refused it before forwarding. Safe to resend.
+  } else {
     throw err;
   }
-  if (err instanceof KashAbortedError) {
-    // Caller's AbortSignal fired. Don't auto-retry.
-    return;
-  }
-  throw err;
 }
 ```
 
-## Decoded revert hints
+## Reads
 
-`KashSimulationRevertedError` exposes the decoded reason on
-`err.context?.revertReason`. The exported helpers
-`decodeMarketRevert(...)` and `actionableRevertHint(err)` turn
-Market/EntryPoint custom errors into readable strings. Today's
-catalogue includes:
+A position or token account that does not exist reads as a balance of
+zero, because the program creates neither until there is something to
+hold. A market, config or template that does not exist is an error
+(`ACCOUNT_NOT_FOUND`), and an account owned by a different program
+(wrong cluster or program id) is `ACCOUNT_OWNER_MISMATCH`. An RPC failure
+is a retryable `KashChainError`, never a zero.
 
-- `SlippageExceeded(actualOut, minOut)` — your `maxSlippageBps`
-  was tighter than the market could meet.
-- `InsufficientAllowance(spender, owner, current, required)` — you
-  haven't approved enough USDC for the spender; call
-  `client.trades.send.approve` first.
-- `MarketFrozen` — the market is frozen pending resolution; trades
-  rejected.
-- `OutcomeOutOfRange(supplied, max)` — your `outcome` index is
-  ≥ the market's outcome count.
+## `isOperational` and `isRetryable`
 
-Unknown custom errors fall through to `.message` with the raw
-4-byte selector for debugging.
-
-## `isOperational` vs `isRetryable`
-
-`isOperational: true` means the error is a known, expected failure
-mode — the consumer's input or the chain's state is the cause, and
-the SDK is not internally broken. `isOperational: false` would
-indicate an SDK bug; you should never see this — file an issue.
-
-`isRetryable: true` means a fresh attempt MIGHT succeed without
-fixing inputs (e.g., the RPC was overloaded). `isRetryable: false`
-means a retry will deterministically fail.
-
-These flags are independent. A `KashSimulationRevertedError` is
-operational (input issue) but not retryable (slippage won't
-spontaneously recover).
-
-## Cross-realm identification
-
-Every Kash error carries a cross-realm brand
-(`Symbol.for('@kashdao/protocol-sdk/error')`). When you have an
-SDK loaded in two realms (e.g., a Web Worker + main thread) the
-`instanceof` check still works because it falls back to brand
-detection. This is how the SDK survives bundler de-duplication
-across module graphs.
-
-## See also
-
-<CardGroup cols={2}>
-  <Card title="Cross-language parity" icon="arrow-right-arrow-left" href="/developer-docs/protocol-sdk/cross-language-parity">
-    Error class names and codes match the Python SDK exactly.
-  </Card>
-  <Card title="ErrorCode source" icon="github" href="https://github.com/KashDAO/protocol-sdk-typescript/blob/main/src/shared/error-codes.ts">
-    The full `ErrorCode` enum on the public mirror.
-  </Card>
-</CardGroup>
+`isOperational: true` means a known failure mode: the input or the
+chain state is the cause. `isRetryable: true` means a fresh attempt may
+succeed without changing the input. The flags are independent: a
+simulation refusal is operational but not retryable.

@@ -1,9 +1,9 @@
 ---
 title: 'GET /api/threads'
-description: 'List all available prediction market threads'
+description: 'List prediction market threads'
 ---
 
-Fetches a paginated list of all available prediction market threads.
+A thread is a curated collection of related markets with its own start and end time. This endpoint lists threads across the whole platform.
 
 ## Endpoint
 
@@ -11,278 +11,113 @@ Fetches a paginated list of all available prediction market threads.
 GET https://app.kash.bot/api/threads
 ```
 
-## Query Parameters
+## Query parameters
 
 <ParamField query="status" type="string" default="active">
-  Filter by thread status (derived from the thread's start/end times). Options: `active`, `upcoming`, `closed`, `all`
+  `active` returns threads whose start time has passed and whose end time hasn't. `upcoming` returns threads that haven't started. `closed` returns threads that have ended. A thread without both a start and an end time is never `active`. `all` is accepted but currently returns the same set as `active`.
 </ParamField>
 
-<ParamField query="category" type="string">
-  Filter by category (e.g., `politics`, `crypto`, `sports`)
-</ParamField>
-
-<ParamField query="tags" type="string">
-  Comma-separated list of tags to filter by (e.g., `election,2024`)
-</ParamField>
-
-<ParamField query="limit" type="number" default="20">
-  Maximum number of results per page (max: 100)
-</ParamField>
-
-<ParamField query="offset" type="number" default="0">
-  Pagination offset for fetching subsequent pages
+<ParamField query="ownedBy" type="string">
+  Only threads created by this user (UUID).
 </ParamField>
 
 <ParamField query="sortBy" type="string" default="created_at">
-  Field to sort by. Options: `created_at`, `start_time`, `total_volume`
+  `created_at`, `start_time` or `total_volume`.
 </ParamField>
 
 <ParamField query="sortOrder" type="string" default="desc">
-  Sort direction. Options: `asc`, `desc`
+  `asc` or `desc`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="100">
+  1 to 500.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  0 to 10,000.
 </ParamField>
 
 ## Response
 
-<ResponseField name="threads" type="array">
-  Array of thread objects
-
-  <Expandable title="Thread Object">
-    <ResponseField name="id" type="string">
-      Unique thread identifier
-    </ResponseField>
-
-    <ResponseField name="title" type="string">
-      Thread title
-    </ResponseField>
-
-    <ResponseField name="description" type="string">
-      Thread description (optional)
-    </ResponseField>
-
-    <ResponseField name="totalVolume" type="number">
-      Total trading volume across all markets in cents
-    </ResponseField>
-
-    <ResponseField name="marketCount" type="number">
-      Number of markets in this thread
-    </ResponseField>
-
-    <ResponseField name="participantCount" type="number">
-      Number of unique participants
-    </ResponseField>
-
-    <ResponseField name="startTime" type="number">
-      Thread start time (Unix timestamp in seconds)
-    </ResponseField>
-
-    <ResponseField name="endTime" type="number">
-      Thread end time (Unix timestamp in seconds)
-    </ResponseField>
-
-    <ResponseField name="status" type="string">
-      Current status (derived from start/end times): `active`, `upcoming`, `closed`
-    </ResponseField>
-
-    <ResponseField name="category" type="string">
-      Thread category
-    </ResponseField>
-
-    <ResponseField name="tags" type="array">
-      Array of tag strings
-    </ResponseField>
-
-    <ResponseField name="createdAt" type="string">
-      ISO 8601 timestamp of thread creation
-    </ResponseField>
-
-    <ResponseField name="updatedAt" type="string">
-      ISO 8601 timestamp of last update
-    </ResponseField>
+<ResponseField name="threads" type="Thread[]">
+  <Expandable title="Thread">
+    <ResponseField name="id" type="string">Thread UUID</ResponseField>
+    <ResponseField name="title" type="string">Title</ResponseField>
+    <ResponseField name="description" type="string">Description (`""` if none)</ResponseField>
+    <ResponseField name="image" type="string">Image URL (`""` if none)</ResponseField>
+    <ResponseField name="backgroundImage" type="string">Background image URL, when set</ResponseField>
+    <ResponseField name="status" type="string">`upcoming`, `active` or `completed`</ResponseField>
+    <ResponseField name="isActive" type="boolean">`true` when `status` is `active`</ResponseField>
+    <ResponseField name="startTime" type="string">ISO 8601, when set</ResponseField>
+    <ResponseField name="endTime" type="string">ISO 8601. If the thread has no end time, this is the time of the request.</ResponseField>
+    <ResponseField name="marketCount" type="integer">Number of markets</ResponseField>
+    <ResponseField name="totalVolume" type="number">Volume across the thread's markets, in atomic USDC</ResponseField>
+    <ResponseField name="participantCount" type="integer">Number of distinct traders</ResponseField>
+    <ResponseField name="category" type="string">Category ID, when set</ResponseField>
+    <ResponseField name="topUsers" type="array">Always empty</ResponseField>
+    <ResponseField name="createdAt" type="string">ISO 8601</ResponseField>
+    <ResponseField name="updatedAt" type="string">ISO 8601</ResponseField>
   </Expandable>
 </ResponseField>
 
-<ResponseField name="pagination" type="object">
-  Pagination metadata
+<ResponseField name="pagination" type="object">`{ offset, limit, total, hasMore }`</ResponseField>
 
-  <Expandable title="Pagination Object">
-    <ResponseField name="offset" type="number">
-      Current offset
-    </ResponseField>
+<ResponseField name="_meta" type="object">`{ requestedAt, transformed, dataSource, filters }`. `filters` repeats the query you sent.</ResponseField>
 
-    <ResponseField name="limit" type="number">
-      Results per page
-    </ResponseField>
+## Caching and rate limit
 
-    <ResponseField name="total" type="number">
-      Total number of matching threads
-    </ResponseField>
+Thread list group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
-    <ResponseField name="hasMore" type="boolean">
-      Whether more results are available
-    </ResponseField>
-  </Expandable>
-</ResponseField>
-
-## Rate Limit
-
-<Info>
-**50 requests per minute** per IP address
-</Info>
-
-## Example Request
+## Example request
 
 <CodeGroup>
 ```bash cURL
-curl "https://app.kash.bot/api/threads?status=active&limit=10&sortBy=total_volume&sortOrder=desc"
+curl "https://app.kash.bot/api/threads?status=upcoming&sortBy=start_time&sortOrder=asc&limit=10"
 ```
 
 ```javascript JavaScript
-const response = await fetch(
-  'https://app.kash.bot/api/threads?status=active&limit=10'
-);
-const data = await response.json();
-console.log(`Found ${data.threads.length} active threads`);
-```
-
-```python Python
-import requests
-
-response = requests.get(
-    'https://app.kash.bot/api/threads',
-    params={'status': 'active', 'limit': 10}
-)
-data = response.json()
-print(f"Found {len(data['threads'])} active threads")
+const res = await fetch('https://app.kash.bot/api/threads?status=active&limit=20');
+const { threads, pagination } = await res.json();
+threads.forEach((t) => console.log(t.title, t.marketCount));
 ```
 </CodeGroup>
 
-## Example Response
+## Example response
 
-```json 200 - Success
+```json 200
 {
   "threads": [
     {
-      "id": "abc123-def456",
-      "title": "2024 Election Predictions",
-      "description": "Markets for the 2024 US Presidential Election",
-      "totalVolume": 1250000,
+      "id": "00000001-0000-4000-a000-000000000003",
+      "title": "Soccer & World Football",
+      "description": "",
+      "image": "",
+      "status": "active",
+      "isActive": true,
+      "startTime": "2026-10-01T00:00:00.000Z",
+      "endTime": "2026-12-31T23:59:59.000Z",
       "marketCount": 12,
-      "participantCount": 342,
-      "startTime": 1704067200,
-      "endTime": 1735689600,
-      "status": "active",
-      "category": "politics",
-      "tags": ["election", "politics", "2024"],
-      "createdAt": "2024-01-01T00:00:00Z",
-      "updatedAt": "2024-01-15T12:30:00Z"
-    },
-    {
-      "id": "xyz789-abc123",
-      "title": "Crypto Price Predictions 2024",
-      "description": "Will Bitcoin reach $100k?",
-      "totalVolume": 980000,
-      "marketCount": 8,
-      "participantCount": 256,
-      "startTime": 1704067200,
-      "endTime": 1735689600,
-      "status": "active",
-      "category": "crypto",
-      "tags": ["bitcoin", "crypto", "2024"],
-      "createdAt": "2024-01-05T00:00:00Z",
-      "updatedAt": "2024-01-16T08:15:00Z"
+      "totalVolume": 1250000000,
+      "participantCount": 210,
+      "category": "cc727321-5211-44a1-9d14-0c267e12073c",
+      "topUsers": [],
+      "createdAt": "2026-06-08T00:41:00.855Z",
+      "updatedAt": "2026-06-08T00:41:00.855Z"
     }
   ],
-  "pagination": {
-    "offset": 0,
-    "limit": 10,
-    "total": 25,
-    "hasMore": true
-  },
+  "pagination": { "offset": 0, "limit": 20, "total": 1, "hasMore": false },
   "_meta": {
-    "authenticated": false,
-    "requestedAt": "2024-01-16T12:00:00Z"
+    "requestedAt": "2026-10-20T17:40:22.978Z",
+    "transformed": true,
+    "dataSource": "drizzle",
+    "filters": { "status": "active", "sortBy": "created_at", "sortOrder": "desc", "limit": 20, "offset": 0 }
   }
 }
 ```
 
-```json 400 - Bad Request
-{
-  "error": "Invalid query parameters",
-  "message": "limit must be between 1 and 100",
-  "code": "INVALID_REQUEST"
-}
-```
-
-```json 429 - Rate Limit Exceeded
-{
-  "error": "Too many requests",
-  "message": "Rate limit of 50 requests per minute exceeded",
-  "code": "RATE_LIMIT_EXCEEDED",
-  "retryAfter": 45
-}
-```
-
-## Response Headers
-
-All responses include rate limit headers:
-
-```
-X-RateLimit-Limit: 50
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1704067260000
-Access-Control-Allow-Origin: *
-```
-
-## Common Use Cases
-
-### Fetch active threads with high volume
-
-```bash
-curl "https://app.kash.bot/api/threads?status=active&sortBy=total_volume&sortOrder=desc&limit=5"
-```
-
-### Filter by category and tags
-
-```bash
-curl "https://app.kash.bot/api/threads?category=politics&tags=election,2024"
-```
-
-### Paginate through all threads
-
-```javascript
-async function fetchAllThreads() {
-  let allThreads = [];
-  let offset = 0;
-  let hasMore = true;
-
-  while (hasMore) {
-    const response = await fetch(
-      `https://app.kash.bot/api/threads?limit=100&offset=${offset}`
-    );
-    const data = await response.json();
-
-    allThreads = allThreads.concat(data.threads);
-    hasMore = data.pagination.hasMore;
-    offset += 100;
-  }
-
-  return allThreads;
-}
-```
-
-## Related Endpoints
+## Related
 
 <CardGroup cols={2}>
-  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">
-    Get details for a specific thread
-  </Card>
-  <Card title="GET /api/threads/:id/markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">
-    Get all markets in a thread
-  </Card>
-  <Card title="GET /api/threads/:id/chapters" href="/developer-docs/public-embed-api/endpoints/thread-chapters">
-    List chapters within a thread
-  </Card>
-  <Card title="GET /api/organizations/:id/threads" href="/developer-docs/public-embed-api/endpoints/organization-threads">
-    List threads for an organization
-  </Card>
+  <Card title="GET /api/threads/:id" href="/developer-docs/public-embed-api/endpoints/thread-detail">One thread</Card>
+  <Card title="GET /api/threads/:id/markets" href="/developer-docs/public-embed-api/endpoints/thread-markets">A thread's markets</Card>
 </CardGroup>

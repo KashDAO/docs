@@ -1,0 +1,121 @@
+---
+title: 'Markets & Quotes'
+description: 'List markets, read one market, quote a buy or sell, and read recent trades against a market.'
+---
+
+| Method | Path                              | Scope           | Rate-limit class |
+| ------ | --------------------------------- | --------------- | ---------------- |
+| `GET`  | `/v1/markets`                     | `markets:read`  | read             |
+| `GET`  | `/v1/markets/{id}`                | `markets:read`  | read             |
+| `GET`  | `/v1/markets/{id}/quote`          | `markets:quote` | read             |
+| `GET`  | `/v1/markets/{id}/predictions`    | `markets:read`  | read             |
+
+The dispute endpoints under `/v1/markets/{id}/disputes` are on the [Market disputes](/developer-docs/rest-api/endpoints/disputes) page.
+
+<Warning>
+**Pinning `2026-04-29` hides Solana markets.** Production trading runs on Solana. The default version, `2026-08-19`, lists them. If you pin `2026-04-29`, Solana markets are left out of `GET /v1/markets`, and `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one. See [API versions](/developer-docs/rest-api/overview#api-versions).
+</Warning>
+
+## The market resource
+
+| Field                | Type              | Notes |
+| -------------------- | ----------------- | ----- |
+| `id`                 | uuid              | |
+| `contractAddress`    | string            | The market's on-chain address (base58 on Solana, `0x` hex on EVM). |
+| `chainRef`           | string            | Chain identity, for example `solana:mainnet-beta`. Present on API version `2026-08-19` only, on every market. |
+| `chainId`            | integer           | EVM chain id. Present only for EVM markets. The key is absent for a Solana market. |
+| `title`              | string \| null    | |
+| `description`        | string \| null    | |
+| `status`             | enum \| null      | `UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED`. Stays `ACTIVE` for a market cancelled on chain or past its freeze deadline, so use `tradeable`. |
+| `outcomeCount`       | integer           | Number of outcomes. |
+| `outcomes[]`         | array             | `{ index, label, probability }`. `probability` is a number from 0 to 1. |
+| `imageUrl`           | string \| null    | |
+| `createdAt`          | date-time         | |
+| `expiresAt`          | date-time \| null | |
+| `freezeAt`           | date-time \| null | Trading closes at this time. |
+| `resolvedAt`         | date-time \| null | |
+| `resolution`         | object \| null    | `{ proposedOutcomeIndex, proposedAt, finalizableAt, settlementStatus, disputeOpen }`. `settlementStatus` is `proposed`, `disputed`, `finalized` or `cancelled`. `null` while no outcome has been proposed. |
+| `resolutionState`    | enum \| null      | `resolving`, `proposed`, `settling`, `resolved`, `cancelled`. |
+| `tradeable`          | boolean           | Whether the market accepts trades right now. This is the same rule that refuses a trade with `409 MARKET_NOT_TRADEABLE`. |
+| `notTradeableReason` | enum \| null      | In precedence order: `resolved`, `cancelled`, `inactive`, `frozen`. `null` when `tradeable` is true. |
+
+## `GET /v1/markets`
+
+Lists markets, newest first, with [cursor pagination](/developer-docs/rest-api/pagination).
+
+| Query    | Type    | Notes |
+| -------- | ------- | ----- |
+| `cursor` | string  | From the previous page's `pagination.cursor`. |
+| `limit`  | integer | 1 to 100, default 20. |
+| `status` | enum    | `UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED`. Filters on the lifecycle `status`, not on `tradeable`. |
+
+Response `200`: `{ data: Market[], pagination: { cursor, hasMore, limit }, _meta }`.
+
+```bash
+curl "https://api.kash.bot/v1/markets?status=ACTIVE&limit=20" \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19"
+```
+
+## `GET /v1/markets/{id}`
+
+Returns one market with its outcomes.
+
+Response `200`: `{ market: Market, data: Market, _meta }`.
+
+Errors: `404 MARKET_NOT_FOUND`, and `400 CHAIN_NOT_SUPPORTED` for a Solana market when you pin version `2026-04-29`.
+
+## `GET /v1/markets/{id}/quote`
+
+Prices a buy or a sell against the market's live on-chain state. The quote scope is separate from `markets:read`, so you can control quote traffic independently.
+
+| Query          | Type             | Notes |
+| -------------- | ---------------- | ----- |
+| `outcomeIndex` | integer, required| Zero-based outcome index. |
+| `action`       | `buy` \| `sell`, required | |
+| `amount`       | string, required | Integer string in atomic units: USDC with 6 decimals for a buy (`10000000` is 10 USDC), outcome tokens with 18 decimals (WAD) for a sell. |
+
+Response `200`:
+
+```json
+{
+  "quote": {
+    "action": "buy",
+    "outcomeIndex": 0,
+    "amountIn": "10000000",
+    "tokensOut": "18734012471176000000",
+    "effectivePrice": 0.5338,
+    "impliedProbability": 0.5412,
+    "reserveAfter": "…",
+    "c": "…",
+    "pAfter": ["…", "…"],
+    "qAfter": ["…", "…"]
+  },
+  "market": {
+    "id": "…", "contractAddress": "…", "chainRef": "solana:mainnet-beta",
+    "outcomes": [ { "index": 0, "label": "Yes", "probability": 0.53 } ],
+    "status": "ACTIVE", "tradeable": true, "notTradeableReason": null
+  },
+  "units": { "usdc": "atomic-6", "token": "wad-18" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+A sell quote carries `tokensIn`, `usdcOut` and `grossRelease` in place of `amountIn` and `tokensOut`. All big numbers are decimal strings. `effectivePrice` and `impliedProbability` are plain numbers for convenience. Responses carry `Cache-Control: public, max-age=10`.
+
+Errors: `400 OUTCOME_INDEX_INVALID`, `404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE` (a market cancelled on chain, or a Solana market whose on-chain state is no longer active), `422 MARKET_NOT_QUOTABLE` (the market contract refused to price the request), and `400 CHAIN_NOT_SUPPORTED` for a Solana market when you pin version `2026-04-29`.
+
+A quote is a read, so a market past its freeze deadline can still be quoted. Check `market.tradeable` before you trade.
+
+## `GET /v1/markets/{id}/predictions`
+
+Recent trades against a market, newest first, cursor-paginated.
+
+| Query          | Type    | Notes |
+| -------------- | ------- | ----- |
+| `cursor`       | string  | |
+| `limit`        | integer | 1 to 100, default 50. |
+| `side`         | `buy` \| `sell` | Optional filter. |
+| `outcomeIndex` | integer | Optional filter. |
+
+Each item: `{ id, marketId, outcomeIndex, side, usdcIn, usdcOut, tokensIn, tokensOut, price, probability, timestamp, blockNumber, transactionHash, logIndex }`. The amount fields are decimal strings or `null` depending on the side.

@@ -1,122 +1,86 @@
 ---
 title: 'Predicting'
-description: 'How to make predictions'
+description: 'How to read prices and place a prediction'
 icon: 'crystal-ball'
 ---
 
-<Note>
-Turn your insights into returns — pick a market on app.kash.bot, choose Yes or No, and confirm. That's a prediction.
-</Note>
-
 <img
-  style={{ borderRadius: '0.5rem', marginBottom: '1rem' }}
+  style={{ borderRadius: '0.5rem' }}
   className="block dark:hidden"
   src="/assets/cover/cover.svg"
   alt="Hero Light"
 />
 <img
-  style={{ borderRadius: '0.5rem', marginBottom: '1rem' }}
+  style={{ borderRadius: '0.5rem' }}
   className="hidden dark:block"
   src="/assets/cover/cover.svg"
   alt="Hero Dark"
 />
 
-<img
-  style={{ borderRadius: '0.5rem' }}
-  src="/assets/guides/predicting.gif"
-  alt="Making predictions walkthrough"
-/>
-
-# Understanding market odds
+# Understanding market prices
 
 ## How prediction markets work
 
-Every market card shows an **implied chance** — the market's current estimate of how likely each outcome is, based on real money traded:
+Every market shows an **implied chance** for each outcome: the market's current estimate of how likely it is, based on real money traded.
 
 <AccordionGroup>
   <Accordion title="Implied chance">
     - **Yes at 72%** means the market currently implies a 72% chance the event happens
     - The implied chance moves as people trade and new information emerges
-    - Buying an outcome pushes its implied chance up; selling pushes it down
-    - Markets can have more than two outcomes — the same logic applies to each one
+    - Buying an outcome pushes its price up; selling pushes it down
+    - Markets can have more than two outcomes, and the same logic applies to each one
   </Accordion>
-  <Accordion title="Your potential returns">
-    - When you set up a trade, the ticket shows an **estimated payout if you win**
-    - The lower the implied chance when you buy, the higher your estimated payout if you're right
-    - The estimate can shift as others trade — the final payout is your pro-rata share of the market's reserve at resolution
-    - If your outcome loses, your position is worth nothing at resolution
-    - **Markets stay liquid** — you can exit positions at any time at the current market price
+  <Accordion title="What a position can redeem for">
+    - The trade ticket shows an **estimated payout if your outcome wins** before you confirm
+    - The lower the price when you buy, the higher your estimated payout if you're right
+    - The estimate can shift as others trade. What your shares redeem for is fixed when the market resolves
+    - If your outcome doesn't happen, the position is worth nothing at resolution
+    - You can sell at the current price any time before trading closes
   </Accordion>
   <Accordion title="Market dynamics">
     - **Early predictions** often get better prices before consensus forms
-    - **Breaking news** can rapidly shift the implied chance
+    - **Breaking news** can shift prices quickly
     - **Large trades** move prices more than small ones
-    - **Arbitrage** keeps prices roughly in line with real-world probabilities
   </Accordion>
 </AccordionGroup>
 
 # How to make predictions
 
 <Tabs>
-  <Tab title="On the webapp">
-    **The primary way to trade — app.kash.bot**
-
+  <Tab title="In the web app">
     <Steps>
       <Step title="Find a market">
-        Browse trending markets, categories, or search on [app.kash.bot](https://app.kash.bot). Each card shows the question and the current implied chance.
+        Browse the home feed, categories or search on [app.kash.bot](https://app.kash.bot).
       </Step>
-      <Step title="Pick a side">
-        Tap **Yes** or **No** (or the specific outcome in multi-outcome markets). The trade ticket opens.
+      <Step title="Pick an outcome">
+        Tap the outcome you believe in. The trade ticket opens.
       </Step>
       <Step title="Set your amount">
-        Enter how much USDC to spend. The ticket shows your shares and the **estimated payout if you win** before you confirm.
+        Enter how much USDC to spend. The ticket shows the fees and your **estimated payout if your outcome wins**.
       </Step>
       <Step title="Confirm">
-        Confirm the trade — it executes gaslessly from your Kash wallet, and your position appears in your Portfolio immediately.
+        Confirm the trade. It executes from your own wallet, and the position appears in your Portfolio.
       </Step>
     </Steps>
   </Tab>
 
-  <Tab title="Trading from X">
-    **Optional: trade by replying on X (Twitter)**
+  <Tab title="On X">
+    Reply to a market's post on X, or quote it, and mention **@kash_bot_trade** with your amount and outcome:
 
-    Kash can turn your X account into a trading interface. This is **opt-in** — enable it under **Settings → Trading bot** on app.kash.bot first. Trades go through **Kash's dedicated trading account** — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile.
-
-    ## Simple format
-    Reply to or repost any Kash market post with:
-    - **"YES 50"** — put $50 on the event happening
-    - **"NO 100"** — put $100 on it not happening
-    - **"YES $25"** — dollar sign optional, case doesn't matter
-
-    ## What happens next
-    1. Kash confirms your prediction intent
-    2. Checks your wallet balance
-    3. Executes the trade at the current market price
-    4. Replies with your position details
-
-    **Example interaction:**
     ```
-    You: "YES 100"
-    Kash trading bot: "Bought Yes at 72% implied chance
-               Total cost: $100
-               Estimated payout if Yes wins: ~$137"
+    @kash_bot_trade buy $50 of Yes
     ```
+
+    The trade is submitted from your own wallet, and the bot replies with a confirmation and a transaction link. Your Kash account must be connected to X first. Trades on X carry no transaction fee. See [Trading on X](/getting-started/features/trading-on-x) for the full rules.
   </Tab>
 
-  <Tab title="Market resolution">
-    **How outcomes are determined**
+  <Tab title="Resolution">
+    - Trading closes shortly before the market's resolution time, and positions are locked in
+    - After the resolution time, Kash's automated resolution system proposes the outcome from the market's sources and rules, followed by a short dispute window
+    - Winning positions then become **claimable in your Portfolio**
+    - If a market is cancelled, positions are refunded at the snapshot price
 
-    ## Market close
-    - Trading stops at the market's deadline
-    - Existing positions are locked in
-    - The market awaits resolution
-
-    ## Resolution and claiming
-    - The market's oracle sets the winning outcome on-chain
-    - Winning positions become **claimable in your Portfolio**
-    - If a market can't be resolved, it can be cancelled and positions become refundable
-
-    See the [winning guide](/getting-started/guides/winning) for exactly how payouts, claims, and refunds work.
+    See [Redeeming positions](/getting-started/guides/winning) for how claims and refunds work.
   </Tab>
 </Tabs>
 
@@ -125,22 +89,19 @@ Every market card shows an **implied chance** — the market's current estimate 
 # Prediction strategies
 
 <AccordionGroup>
-  <Accordion title="Information edge">
-    - **Research before predicting** — read news, analyze trends, understand context
-    - **Follow reliable sources** — trust verified accounts and expert analysis
-    - **Spot market inefficiencies** — find implied chances that don't match reality
-    - **Act on breaking news** — be first to capitalize on new information
+  <Accordion title="Research">
+    - **Read the rules and sources** on the market page: the result is determined from them
+    - **Research before predicting**: news, trends, context
+    - **Use public sources**: the market's own sources are a good place to start
   </Accordion>
   <Accordion title="Portfolio approach">
-    - **Diversify across markets** — don't put all eggs in one basket
-    - **Don't trade your entire balance** — keep reserves for better opportunities
-    - **Take profits regularly** — lock in gains instead of letting them ride
-    - **Size predictions to your confidence level**
+    - **Diversify** across markets
+    - **Don't trade your entire balance**
+    - **Size predictions** to your confidence
   </Accordion>
   <Accordion title="Social signals">
-    - **Watch successful predictors** — follow proven track records on the leaderboards
-    - **Monitor sentiment shifts** — spot when opinion is changing before the price does
-    - **Learn from patterns** — recognize recurring market behaviors
+    - **Watch strong predictors** on the leaderboard and follow them
+    - **Copy a trader** you trust from their profile. See [Trading Options](/getting-started/features/trading-options)
   </Accordion>
 </AccordionGroup>
 
@@ -148,32 +109,22 @@ Every market card shows an **implied chance** — the market's current estimate 
 
 <AccordionGroup>
   <Accordion title="Track your positions">
-    - Your **Portfolio** shows every open position, its current value, and live profit and loss
-    - Watch how the implied chance moves after your entry
-    - Plan your exit — sell early or hold to resolution
+    - **Portfolio** shows every open position, its current value and live P&L
+    - Plan your exit: sell early or hold to resolution
   </Accordion>
-  <Accordion title="Sell before close">
-    - **Lock in profits early** — secure gains before the market closes
-    - **Cut losses** — minimize damage when you're clearly wrong
-    - Sell from the market page or your Portfolio at the current market price
-    - Sells pay a 1% protocol fee plus a 1% AMM fee
+  <Accordion title="Sell before trading closes">
+    - Sell all or part of a position at the current price
+    - Sell from the market page or your Portfolio
+    - Sells pay a protocol fee plus a small sell fee that stays in the market's pool
   </Accordion>
   <Accordion title="Add to a position">
-    - Buy the same outcome again anytime to increase your stake
-    - Adding at a different price averages your effective entry
-    - No limit on how many trades you can place
+    - Buy the same outcome again to increase your position
+    - Adding at a different price averages your entry
   </Accordion>
 </AccordionGroup>
 
-# Pro tips
-
-- **Early markets** often have better prices before consensus forms
-- **Breaking news** creates temporary price inefficiencies
-- **Start small** while learning market dynamics — fees are 1% on buys, 1% + 1% on sells
-- **Join the market chat** — every market has a discussion where traders share their reasoning
-
 <Tip>
-Every expert predictor started with their first prediction. Start small, learn the dynamics, and let your edge compound over time!
+Start small while you learn how prices move. The ticket shows every fee before you confirm.
 </Tip>
 
 <CardGroup cols={2}>
@@ -185,10 +136,10 @@ Every expert predictor started with their first prediction. Start small, learn t
     Discover markets to predict on
   </Card>
   <Card
-    title="Winning & payouts"
+    title="Redeeming positions"
     icon="trophy-star"
     href="/getting-started/guides/winning"
   >
-    Understand winnings and payouts
+    How resolved positions are redeemed
   </Card>
 </CardGroup>

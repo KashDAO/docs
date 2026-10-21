@@ -1,0 +1,102 @@
+---
+title: 'GET /api/markets/:id/leaderboard'
+description: 'Positions in one market, ranked by size'
+---
+
+Lists the traders in one market, ranked by the amount they put in (largest first). Profit and loss figures are not exposed.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/:id/leaderboard
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  Market UUID.
+</ParamField>
+
+## Query parameters
+
+<ParamField query="limit" type="integer" default="25">
+  1 to 50.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  0 to 10,000.
+</ParamField>
+
+## Response
+
+<ResponseField name="entries" type="Entry[]">
+  <Expandable title="Entry">
+    <ResponseField name="rank" type="integer">1-based rank by `amount`</ResponseField>
+    <ResponseField name="userId" type="string">Kash user UUID</ResponseField>
+    <ResponseField name="address" type="string">Trading wallet address</ResponseField>
+    <ResponseField name="username" type="string | null">Display name</ResponseField>
+    <ResponseField name="handle" type="string | null">X handle</ResponseField>
+    <ResponseField name="profilePictureUrl" type="string | null">Avatar</ResponseField>
+    <ResponseField name="titleDisplayName" type="string | null">The trader's displayed title</ResponseField>
+    <ResponseField name="titleRarity" type="string | null">Title rarity</ResponseField>
+    <ResponseField name="outcomeIndex" type="integer">The trader's main outcome</ResponseField>
+    <ResponseField name="outcomeIndices" type="integer[]">Every outcome the trader holds</ResponseField>
+    <ResponseField name="outcomeLabel" type="string">Label of `outcomeIndex`</ResponseField>
+    <ResponseField name="outcomeColor" type="string | null">The outcome's display color</ResponseField>
+    <ResponseField name="outcomeImageUrl" type="string | null">The outcome's image</ResponseField>
+    <ResponseField name="amount" type="number">Amount put in, in atomic USDC</ResponseField>
+    <ResponseField name="currentValue" type="number">Current value of the position, in atomic USDC</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="_meta" type="object">
+  `{ marketId, marketStatus, winningOutcomeIndex, resolvedAt, entryCount, totalEntries, returnedCount, limit, offset, hasMore }`. `totalEntries` is the number of ranked traders across all pages.
+</ResponseField>
+
+## Caching and rate limit
+
+Leaderboards group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
+
+## Example request
+
+```bash cURL
+curl "https://app.kash.bot/api/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/leaderboard?limit=10"
+```
+
+## Example response
+
+```json 200
+{
+  "entries": [
+    {
+      "userId": "3f2b0c1e-6a7d-4e59-9b8a-1c2d3e4f5a6b",
+      "address": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "username": "Example Trader",
+      "handle": "example_trader",
+      "profilePictureUrl": "https://pbs.twimg.com/profile_images/…_normal.jpg",
+      "titleDisplayName": "Rookie",
+      "titleRarity": "common",
+      "outcomeIndices": [1],
+      "outcomeIndex": 1,
+      "outcomeLabel": "No",
+      "outcomeColor": null,
+      "outcomeImageUrl": null,
+      "amount": 10000000,
+      "currentValue": 9702990,
+      "rank": 1
+    }
+  ],
+  "_meta": {
+    "marketId": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+    "marketStatus": "ACTIVE",
+    "winningOutcomeIndex": null,
+    "resolvedAt": null,
+    "entryCount": 1,
+    "totalEntries": 4,
+    "returnedCount": 1,
+    "limit": 10,
+    "offset": 0,
+    "hasMore": false
+  }
+}
+```

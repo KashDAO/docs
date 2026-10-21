@@ -1,21 +1,17 @@
 ---
 title: 'Creating an Account'
-description: 'Sign in with X, Google, email, or a wallet — your Kash account and smart wallet are created automatically'
+description: 'Sign in with X, Google, email, Telegram or Discord. Your account and your own embedded Solana wallet are set up automatically'
 icon: 'user-plus'
 ---
 
-<Note>
-Creating a Kash account takes seconds. Pick a sign-in method, and your wallet is set up for you — no seed phrase to write down. Kash is for users 18+ in supported regions.
-</Note>
-
 <img
-  style={{ borderRadius: '0.5rem', marginBottom: '1rem' }}
+  style={{ borderRadius: '0.5rem' }}
   className="block dark:hidden"
   src="/assets/cover/cover.svg"
   alt="Hero Light"
 />
 <img
-  style={{ borderRadius: '0.5rem', marginBottom: '1rem' }}
+  style={{ borderRadius: '0.5rem' }}
   className="hidden dark:block"
   src="/assets/cover/cover.svg"
   alt="Hero Dark"
@@ -23,27 +19,31 @@ Creating a Kash account takes seconds. Pick a sign-in method, and your wallet is
 
 ## Sign-in options
 
-Kash uses [Privy](https://privy.io) for authentication. Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
+Go to [app.kash.bot](https://app.kash.bot), click **Sign in**, and choose:
 
 | Method | How it works |
 |---|---|
-| **X (Twitter)** | One-click OAuth — also required if you want to use tweet-trading later |
-| **Google** | One-click OAuth with your Google account |
+| **X (Twitter)** | One-click sign-in. Connecting X is also what lets you [trade from X](/getting-started/features/trading-on-x) and [create markets](/getting-started/guides/creating-opportunities) |
+| **Google** | One-click sign-in with your Google account |
 | **Email** | Enter your email and confirm a one-time code |
-| **External wallet** | Connect an existing wallet you already control |
+| **Telegram** | Sign in with Telegram, including when you open Kash inside Telegram |
+| **Discord** | Sign in with Discord, including when you open Kash inside Discord |
 
 <Steps>
   <Step title="Choose a sign-in method">
-    Any of the options above works — you can start with whichever is most convenient.
+    Any option works. You can link the others later from **Settings → Account**.
   </Step>
-  <Step title="Wallet created automatically">
-    Privy creates an **embedded wallet** for you, and Kash deploys an **ERC-4337 smart account** on Base that holds your funds. This is where your USDC and positions live — under your control, not Kash's.
+  <Step title="Your wallet is created">
+    You get your own **embedded Solana wallet** automatically. It belongs to you, and it is where your USDC and positions live. There's no seed phrase to write down.
   </Step>
-  <Step title="Add a recovery email">
-    During onboarding you'll be prompted to set a **recovery email**. If you signed up with X and ever lose access to your X account, this email is how you recover your Kash account — set it, and use an address you'll keep.
+  <Step title="Give your wallet trading permission">
+    You'll be asked to **Approve Kash**, which gives Kash's app permission to submit transactions from your wallet on your behalf. This lets the trades you request, in the app or on X, go through without a signing prompt each time. If you choose **Not now**, you can keep browsing and you'll be asked again when you trade. Your funds stay in your wallet.
+  </Step>
+  <Step title="Add a recovery method">
+    Add a **recovery email** or a **passkey**. If you ever lose access to the account you signed in with, this is how you get back in.
   </Step>
   <Step title="Done">
-    You're ready to browse and trade. Optionally [deposit funds](/getting-started/guides/depositing) right away, or skip it and explore first.
+    You're ready to browse and trade. [Add funds](/getting-started/guides/depositing) now, or explore first.
   </Step>
 </Steps>
 
@@ -52,32 +52,29 @@ Kash uses [Privy](https://privy.io) for authentication. Go to [app.kash.bot](htt
 ## How your wallet works
 
 <AccordionGroup>
-  <Accordion title="Self-custody by design">
-    - Your funds sit in **your own smart account** on Base — Kash never takes custody
-    - Trades, payouts, and withdrawals execute from your wallet, verifiable on-chain
-    - You can **export your wallet key** at any time from **Settings**, so you're never locked in
+  <Accordion title="Your funds stay in your wallet">
+    - Your USDC sits in **your own Solana wallet**. Kash never holds custody of your funds
+    - Trades and redemptions move funds directly between your wallet and the on-chain market
+    - You can **export your private key** from **Settings → Account → Wallet backup** and import it into a compatible Solana wallet. Kash never sees your private key
   </Accordion>
   <Accordion title="No seed phrase, real recovery">
-    - No seed phrase to write down or lose
-    - Access is tied to your sign-in method (X, Google, email, or wallet)
-    - Your **recovery email** is the fallback if you lose access to your primary login
+    - Access is tied to your sign-in methods
+    - Add a recovery email or passkey, and link more than one sign-in method, so losing one doesn't lock you out
   </Accordion>
-  <Accordion title="Gasless transactions">
-    - The protocol sponsors gas via ERC-4337 account abstraction
-    - You never need to hold ETH or approve gas prompts
-    - Everything is priced and settled in USDC
+  <Accordion title="No SOL needed">
+    - Kash pays the Solana network fees for you
+    - On some actions a small network fee is charged back in USDC, and the app shows it before you confirm
   </Accordion>
 </AccordionGroup>
 
 ## Keep your account safe
 
-- **Enable 2FA** on the account you sign in with (X, Google, or email)
-- **Set your recovery email** during onboarding — don't skip it
-- **Never share** login codes or your exported key with anyone
-- If you connect an external wallet, standard wallet-security practice applies
+- **Turn on two-factor authentication** with your sign-in provider (X, Google, Telegram, Discord or your email account)
+- **Add a recovery method** during onboarding, and don't skip it
+- **Never share** login codes or your exported private key with anyone. Kash will never ask for them
 
 <Tip>
-Creating an account is free, and you can browse all markets before depositing anything.
+Creating an account is free, and you can browse every market before adding funds.
 </Tip>
 
 <CardGroup cols={2}>

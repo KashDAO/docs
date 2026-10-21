@@ -1,6 +1,6 @@
 ---
 title: 'How do I use Kash?'
-description: 'The core loop: sign in, deposit, trade, track, claim'
+description: 'The core loop: sign in, add funds, trade, track, redeem'
 icon: "compass"
 ---
 
@@ -21,39 +21,39 @@ icon: "compass"
 
 <Steps>
   <Step title="Sign in">
-    Go to [app.kash.bot](https://app.kash.bot) and sign in with **X (Twitter), Google, email, or an external wallet** (via Privy). An embedded wallet and ERC-4337 smart account on Base are created for you automatically — no seed phrase needed. Details in [Creating an Account](/getting-started/guides/creating-an-account).
+    Go to [app.kash.bot](https://app.kash.bot) and sign in with **X, Google, email, Telegram or Discord**. You get your own embedded Solana wallet automatically, with no seed phrase to write down. You also give the wallet permission for Kash to submit the trades you request, such as the ones you place by replying on X. See [Creating an Account](/getting-started/guides/creating-an-account).
   </Step>
 
-  <Step title="Deposit USDC">
-    Fund your account with a card, Apple Pay, Google Pay, or a direct crypto transfer. Everything on Kash trades in USDC on Base. See [Depositing](/getting-started/guides/depositing).
+  <Step title="Add USDC">
+    Open **Add funds** and use the checkout, or send USDC on Solana to your wallet address. See [Depositing](/getting-started/guides/depositing).
   </Step>
 
   <Step title="Find a market">
-    Browse **Trending**, **For You**, and **Recurring** tabs, filter by category, search by keyword, or explore [threads](/getting-started/features/threads) and the [World Cup hub](/getting-started/features/world-cup). More in [Finding Opportunities](/getting-started/guides/finding-opportunities).
+    Browse the home feed, explore by category, or search. See [Finding Opportunities](/getting-started/guides/finding-opportunities).
   </Step>
 
   <Step title="Buy an outcome">
-    On a market page, pick the outcome you believe in, enter an amount, review the quote (price, estimated payout, 1% fee), and confirm. The trade executes gas-free from your smart account. See [Predicting](/getting-started/guides/predicting).
+    On a market page, pick an outcome, enter an amount, review the quote and confirm. See [Predicting](/getting-started/guides/predicting).
   </Step>
 
   <Step title="Track your positions">
-    Your [Portfolio](/getting-started/guides/winning) shows open positions with live P&L, your trade history, and your balance. You can sell out of a position any time while the market is open (1% protocol + 1% AMM fee on sells).
+    **Portfolio** shows your open positions with live P&L, your history and your balance. You can sell out of a position any time before trading closes.
   </Step>
 
-  <Step title="Claim winnings when the market resolves">
-    When a market resolves, winning positions become claimable — hit **Claim Winnings** in your Portfolio. If a market is cancelled instead, a **Claim Refund** option appears. Details in [Winning](/getting-started/guides/winning).
+  <Step title="Claim when the market resolves">
+    When a market resolves, winning positions show up as claimable in your Portfolio. Claim them to redeem for USDC in your wallet. If a market is cancelled, tap **Claim refund** instead. See [Redeeming positions](/getting-started/guides/winning).
   </Step>
 </Steps>
 
 ---
 
-## Optional: trade from tweets
+## Trade from X
 
-If you enable the trading bot in **Settings → Trading bot**, you can also place trades on X by tweeting at **Kash's dedicated trading account** with a market link and your position (for example, an amount and the outcome you're backing) — find the current handle on the [@kash_bot](https://x.com/kash_bot) profile. The bot executes the trade from your Kash account and replies with a confirmation.
+Once your Kash account is connected to X, you can trade without opening the app: reply to a market's post (or quote it) and mention **@kash_bot_trade** with your amount and outcome, for example `buy $10 of Yes`. The trade is submitted from your own wallet, and the bot replies with a confirmation. See [Trading on X](/getting-started/features/trading-on-x).
 
-<Note>
-Tweet-trading is opt-in and covers placing trades only — deposits, withdrawals, claims, and everything else happen in the webapp.
-</Note>
+## Create your own market
+
+Connect your X account in the app, open **Launch** and describe the market you want to Kash AI. The assistant drafts it and you refine it by chatting. You pay to create it from your own funds, at least $20, and it goes live once the automatic review approves it. The market is yours. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
 
 ---
 
@@ -86,7 +86,7 @@ Tweet-trading is opt-in and covers placing trades only — deposits, withdrawals
     href="/getting-started/guides/creating-opportunities"
   />
   <Card
-    title="Winning"
+    title="Redeeming"
     icon="trophy"
     href="/getting-started/guides/winning"
   />

@@ -7,21 +7,23 @@ description: 'HTTP 403 — IP not allowed'
 
 ## When it fires
 
-The key has a non-empty `ip_allowlist` configured AND the request's source IP isn't in it.
+The key has an IP allowlist configured and the request's source IP is not on it.
 
-Empty allowlist (the default) means any IP is allowed — this code only fires when an allowlist is configured AND the caller's IP doesn't match.
+An empty allowlist (the default) allows any IP, so this code only fires when an allowlist is configured and the caller's IP doesn't match.
 
 ## Why it happens
 
-- The key is locked to a specific egress IP (common for MM and enterprise tier keys) and the call originated from elsewhere — your laptop, a CI runner, a proxy with a different egress.
-- The egress IP changed (cloud provider rotated NAT gateway, your home ISP's dynamic IP rolled).
+- The key is locked to specific egress IPs (common for market-maker and enterprise keys) and the call came from somewhere else: a laptop, a CI runner, or a proxy with a different egress.
+- Your egress IP changed (a cloud NAT gateway was replaced, or a dynamic ISP address rolled over).
 
 ## How to fix
 
-- Find the request's IP in the `requestId`'s Loki logs — search `requestId="<value>"`, the structured log carries the source IP.
-- If the new IP is legitimate, add it to the key's allowlist via Settings → API Keys → Edit (or `kash-admin api-keys` ops command).
-- If it's not, this code is a successful detection of an exfiltration attempt — investigate.
+- Confirm the public IP your requests leave from (for example by calling an IP-echo service from the same host).
+- If the new IP is legitimate, add it to the key's allowlist in the Kash app (Settings → API Keys), or contact Kash support with the `requestId` of the refused call.
+- If the IP is not one of yours, the allowlist has just stopped an unauthorised use of your key. Revoke the key and issue a new one.
+
+See [Authentication](/developer-docs/rest-api/authentication) for IP allowlists.
 
 ## Related codes
 
-- [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) — also 403, scope rather than IP
+- [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) — also 403, caused by scopes rather than IP

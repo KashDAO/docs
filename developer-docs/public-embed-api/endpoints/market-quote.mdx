@@ -1,182 +1,144 @@
 ---
 title: 'GET /api/markets/:id/quote'
-description: 'Get an on-chain AMM quote for buying or selling outcome tokens on a market'
+description: 'Price a buy or a sell of one outcome before it is placed'
 ---
 
-Fetch a live buy-or-sell price quote for any outcome of a prediction market. The
-endpoint calls the AMM's own on-chain view functions — `quoteBuyExactAssetsIn`
-and `quoteSellExactTokensIn` on the `Market` contract — and returns the full
-protocol response, so integrators have access to the same numbers the UI uses.
-
-No authentication is required.
-
----
+Asks the market's AMM what a trade would return. You get the tokens a buy would receive, or the USDC a sell would release, the prices after the trade, and the protocol fee. Buy quotes also include an estimated payout. A quote is read-only and places nothing.
 
 ## Endpoint
 
 ```
-GET https://app.kash.bot/api/markets/{id}/quote
+GET https://app.kash.bot/api/markets/:id/quote
 ```
 
-## Path Parameters
+## Path parameters
 
 <ParamField path="id" type="string" required>
-  The market's unique identifier (UUID). Use [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets) to discover market IDs.
+  Market UUID.
 </ParamField>
 
-## Query Parameters
+## Query parameters
 
-<ParamField query="outcomeIndex" type="number" required>
-  Which outcome to price. Zero-indexed. For binary markets: `0` = YES, `1` = NO. Must be between `0` and `numOutcomes - 1`.
+<ParamField query="outcomeIndex" type="integer" required>
+  The outcome to trade, from `0` to `outcomeCount - 1`.
 </ParamField>
 
 <ParamField query="action" type="string" required>
-  `buy` quotes how many outcome tokens you receive for a given USDC input.
-
-  `sell` quotes how much USDC you receive for a given outcome-token input (already net of the AMM's sell fee).
+  `buy` or `sell`.
 </ParamField>
 
 <ParamField query="amount" type="string" required>
-  Input size as a positive **integer in atomic units**, passed as a string to preserve precision. Units depend on `action`:
-
-  - `buy` → **USDC atomic-6**. `1_000_000` = 1 USDC.
-  - `sell` → **token WAD-18**. `1_000_000_000_000_000_000` = 1.0 tokens.
+  A positive whole number in **atomic units**. For `buy` it is USDC to spend, with 6 decimals (`1000000` is 1 USDC). For `sell` it is outcome tokens to sell, as WAD with 18 decimals (`1000000000000000000` is 1 token).
 </ParamField>
 
----
-
-## Units
-
-All bigint values in the response are serialised as **decimal strings** so that callers can parse them losslessly with `BigInt(...)`.
-
-| Field family        | Unit       | Example             | Notes                                       |
-| ------------------- | ---------- | ------------------- | ------------------------------------------- |
-| USDC (`amountIn`, `usdcOut`) | atomic-6   | `"1000000"` = 1 USDC | 6 decimals, matches USDC on Base.           |
-| Tokens, prices, capital shares (`tokensOut`, `tokensIn`, `grossRelease`, `reserveAfter`, `c`, `pAfter[]`, `qAfter[]`) | WAD-18 | `"1000000000000000000"` = 1.0 | Protocol-internal 18-decimal fixed point.   |
-
-The response always includes a `units` object reflecting the above so you never have to hardcode the convention on the caller side.
-
-```json
-"units": { "usdc": "atomic-6", "token": "wad-18" }
-```
-
----
-
-## Response — Buy
+## Response
 
 <ResponseField name="quote" type="object">
-  <Expandable title="Buy quote object">
-    <ResponseField name="outcomeIndex" type="number">Echoes the requested outcome index.</ResponseField>
-    <ResponseField name="action" type="string">Always `"buy"` for this variant.</ResponseField>
-    <ResponseField name="amountIn" type="string">USDC you would send in, atomic-6 (echoed from `amount`).</ResponseField>
-    <ResponseField name="tokensOut" type="string">
-      Outcome tokens you would receive, WAD-18. The core value to show the user.
+  <Expandable title="Quote (buy)">
+    <ResponseField name="outcomeIndex" type="integer">The quoted outcome</ResponseField>
+    <ResponseField name="action" type="string">`buy`</ResponseField>
+    <ResponseField name="amountIn" type="string">USDC in, atomic</ResponseField>
+    <ResponseField name="tokensOut" type="string">Outcome tokens received, WAD</ResponseField>
+    <ResponseField name="reserveAfter" type="string">AMM reserve after the trade, WAD</ResponseField>
+    <ResponseField name="c" type="string">AMM invariant after the trade, WAD</ResponseField>
+    <ResponseField name="pAfter" type="string[]">Each outcome's marginal price after the trade, WAD</ResponseField>
+    <ResponseField name="qAfter" type="string[]">Each outcome's token supply after the trade, WAD</ResponseField>
+    <ResponseField name="effectivePrice" type="number">USDC paid per token</ResponseField>
+    <ResponseField name="impliedProbability" type="number">The outcome's marginal price after the trade (0 to 1)</ResponseField>
+    <ResponseField name="protocolTradeFeeBps" type="number">Protocol fee in basis points</ResponseField>
+    <ResponseField name="estimate" type="object | null">
+      Payout estimate in whole USDC: `youPayUsdc`, `protocolFeeUsdc`, `netIntoAmmUsdc`, `tokensReceived`, `payoutAtCurrentPriceUsdc` (what the position pays if it wins and prices stay where they are), `estimatedPayoutUsdc` and `snapshotPayoutUsdc` (the same value with a historical adjustment applied), `payoutUplift`, `payoutUpliftPercentile`, `impliedChanceAfter`, `effectiveBreakEvenChance` and `gasEstimateUsdc`. A promotional `promotionalEstimatedPayoutUsdc` string may also be present. It is display-only and does not change the trade. `estimate` is `null` when it can't be computed.
     </ResponseField>
-    <ResponseField name="reserveAfter" type="string">
-      AMM USDC-equivalent reserve after the hypothetical trade, WAD-18. Useful for modelling how large your trade is relative to pool depth.
-    </ResponseField>
-    <ResponseField name="c" type="string">
-      The Pythagorean coefficient (`c`) of the market's quadratic bonding curve after the trade, WAD-18. `c` captures the market's price curvature; it is preserved on buys (buy fee = 0) and decreases on sells.
-    </ResponseField>
-    <ResponseField name="pAfter" type="string[]">
-      Marginal outcome prices after the trade, WAD-18, one per outcome. Values sum to 1e18 (i.e. a proper probability distribution). `pAfter[outcomeIndex]` is the post-trade probability the market is assigning to your chosen outcome.
-    </ResponseField>
-    <ResponseField name="qAfter" type="string[]">
-      Capital shares after the trade, WAD-18, one per outcome. These tell you what fraction of the reserve is backing each outcome. Values sum to 1e18.
-    </ResponseField>
-    <ResponseField name="effectivePrice" type="number">
-      Convenience number: `Number(amountIn) / Number(tokensOut)` — the average USDC-per-token price for this particular trade. Approximate (JS `number` precision); authoritative values are the string bigints above.
-    </ResponseField>
-    <ResponseField name="impliedProbability" type="number | null">
-      Convenience number: `pAfter[outcomeIndex] / 1e18`. Handy for display; null if the market has no outcomes at the requested index.
-    </ResponseField>
+  </Expandable>
+  <Expandable title="Quote (sell)">
+    <ResponseField name="action" type="string">`sell`</ResponseField>
+    <ResponseField name="tokensIn" type="string">Tokens sold, WAD</ResponseField>
+    <ResponseField name="usdcOut" type="string">USDC received, atomic</ResponseField>
+    <ResponseField name="grossRelease" type="string">Gross value released by the AMM before fees, WAD</ResponseField>
+    <ResponseField name="reserveAfter, c, pAfter, qAfter, effectivePrice, impliedProbability, protocolTradeFeeBps" type="…">As for buy</ResponseField>
+    <ResponseField name="gasEstimateUsdc" type="number">Estimated network cost in whole USDC</ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="market" type="object">
-  Summary of the market the quote was computed for: `id`, `contractAddress` (the on-chain `Market` contract), `chainId` (8453 = Base mainnet), `outcomes` (labels and DB-side probabilities), and `status`.
+  `{ id, contractAddress, chainId, outcomes, status }`. The `outcomes` here carry the AMM's raw marginal `probability`, next to `impliedChance`.
 </ResponseField>
 
 <ResponseField name="units" type="object">
-  `{ "usdc": "atomic-6", "token": "wad-18" }` — spelling out the units so you don't have to hardcode them.
+  Always `{ "usdc": "atomic-6", "token": "wad-18" }`.
 </ResponseField>
 
-## Response — Sell
+## Errors
 
-The sell response has the same shape as the buy response, with the following differences:
+| Status | When |
+|---|---|
+| 400 | `amount` isn't a positive integer, `outcomeIndex` doesn't exist in this market, `action` is missing, or the market has no on-chain address yet |
+| 404 | Unknown market |
+| 503 | The chain read timed out. Retry after the `Retry-After` header. |
 
-<ResponseField name="quote.action" type="string">Always `"sell"` for this variant.</ResponseField>
+## Caching and rate limit
 
-<ResponseField name="quote.tokensIn" type="string">
-  Outcome tokens you would burn, WAD-18 (echoed from `amount`).
-</ResponseField>
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
 
-<ResponseField name="quote.usdcOut" type="string">
-  USDC you would receive, atomic-6. **This is already net of the AMM's sell fee** (`sellFeeBps`) — it is what the user actually gets.
-</ResponseField>
-
-<ResponseField name="quote.grossRelease" type="string">
-  The pre-fee reserve release in WAD-18. The difference between `grossRelease` (converted to atomic USDC) and `usdcOut` is the fee the protocol retains. Exposed for integrators who want to display the fee transparently.
-</ResponseField>
-
-All other fields (`reserveAfter`, `c`, `pAfter`, `qAfter`, `effectivePrice`, `impliedProbability`) behave identically to the buy response.
-
----
-
-## Rate Limit
-
-<Info>
-**100 requests per minute** per IP address. Quotes are cached for 10 seconds on the server side; repeated requests for the same `(id, outcomeIndex, action, amount)` within that window are essentially free.
-</Info>
-
-## Example Requests
+## Example request
 
 <CodeGroup>
-```bash cURL (buy 1 USDC of YES)
-curl "https://app.kash.bot/api/markets/abc123/quote?outcomeIndex=0&action=buy&amount=1000000"
-```
-
-```bash cURL (sell 0.5 YES tokens)
-curl "https://app.kash.bot/api/markets/abc123/quote?outcomeIndex=0&action=sell&amount=500000000000000000"
+```bash cURL (buy 1 USDC of outcome 0)
+curl "https://app.kash.bot/api/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/quote?outcomeIndex=0&action=buy&amount=1000000"
 ```
 
 ```javascript JavaScript
-// Buy 1 USDC of YES on a binary market
+const usdc = 25;
+const params = new URLSearchParams({
+  outcomeIndex: '1',
+  action: 'buy',
+  amount: String(usdc * 1_000_000),
+});
 const res = await fetch(
-  'https://app.kash.bot/api/markets/abc123/quote' +
-    '?outcomeIndex=0&action=buy&amount=1000000'
+  `https://app.kash.bot/api/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/quote?${params}`
 );
 const { quote } = await res.json();
-
-const tokensOut = Number(BigInt(quote.tokensOut)) / 1e18;
-console.log(`You would receive ${tokensOut.toFixed(4)} YES tokens`);
-console.log(`Implied probability after trade: ${(quote.impliedProbability * 100).toFixed(1)}%`);
+console.log(`You get ${quote.estimate?.tokensReceived} tokens; pays ~$${quote.estimate?.payoutAtCurrentPriceUsdc} if it wins`);
 ```
 </CodeGroup>
 
-## Example Responses
+## Example response
 
-```json 200 - Buy quote
+```json 200 (buy)
 {
   "quote": {
     "outcomeIndex": 0,
     "action": "buy",
     "amountIn": "1000000",
-    "tokensOut": "1923076923076923076",
-    "reserveAfter": "11000000000000000000",
-    "c": "1000000000000000000",
-    "pAfter": ["600000000000000000", "400000000000000000"],
-    "qAfter": ["600000000000000000", "400000000000000000"],
-    "effectivePrice": 5.2e-13,
-    "impliedProbability": 0.6
+    "tokensOut": "2560361899641206351",
+    "reserveAfter": "35840000000000000000",
+    "c": "1284505599999999999890015839908063127120",
+    "pAfter": ["399183389531376030", "583654539537080709"],
+    "qAfter": ["28613465361609033879", "41836357394017945260"],
+    "effectivePrice": 0.39056978630252775,
+    "impliedProbability": 0.399183389531376,
+    "estimate": {
+      "youPayUsdc": 1,
+      "protocolFeeUsdc": 0.01,
+      "netIntoAmmUsdc": 0.99,
+      "tokensReceived": 2.5603618996412063,
+      "snapshotPayoutUsdc": 4.490933220704572,
+      "estimatedPayoutUsdc": 4.490933220704572,
+      "payoutAtCurrentPriceUsdc": 3.2069995480610554,
+      "impliedChanceAfter": 0.3186947569,
+      "payoutUplift": 1.40035355584,
+      "payoutUpliftPercentile": 95,
+      "effectiveBreakEvenChance": 0.3118179422895765,
+      "gasEstimateUsdc": 0.05
+    }
   },
   "market": {
-    "id": "abc123",
-    "contractAddress": "0xc7785fca5b1e7fd2ebd3cc1b20e0e73bca3f1fed",
-    "chainId": 8453,
+    "id": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+    "contractAddress": "HGiuo13ea68p3BphxamZSyHzqo8HYnUJutFFqyrbfA7C",
+    "chainId": 9000001,
     "outcomes": [
-      { "outcomeIndex": 0, "label": "YES", "probability": 0.5 },
-      { "outcomeIndex": 1, "label": "NO", "probability": 0.5 }
+      { "outcomeIndex": 0, "tokenId": 60928, "label": "Yes", "weight": "500000000000000000", "shareSupply": "26053103461967827528", "probability": 0.3837577016, "impliedChance": 0.279436651 },
+      { "outcomeIndex": 1, "tokenId": 60929, "label": "No", "weight": "500000000000000000", "shareSupply": "41836357394017945260", "probability": 0.6162422983, "impliedChance": 0.7205633489 }
     ],
     "status": "ACTIVE"
   },
@@ -184,140 +146,11 @@ console.log(`Implied probability after trade: ${(quote.impliedProbability * 100)
 }
 ```
 
-```json 200 - Sell quote
-{
-  "quote": {
-    "outcomeIndex": 0,
-    "action": "sell",
-    "tokensIn": "500000000000000000",
-    "usdcOut": "237500",
-    "grossRelease": "250000000000000000",
-    "reserveAfter": "9750000000000000000",
-    "c": "990000000000000000",
-    "pAfter": ["498000000000000000", "502000000000000000"],
-    "qAfter": ["498000000000000000", "502000000000000000"],
-    "effectivePrice": 4.75e-13,
-    "impliedProbability": 0.498
-  },
-  "market": { "id": "abc123", "contractAddress": "0x...", "chainId": 8453, "outcomes": [], "status": "ACTIVE" },
-  "units": { "usdc": "atomic-6", "token": "wad-18" }
-}
-```
-
-```json 400 - Validation error
+```json 400
 {
   "error": "ValidationError",
-  "message": "Amount must be greater than zero"
+  "message": "outcomeIndex is not an outcome",
+  "code": "VALIDATION_ERROR",
+  "timestamp": "2026-10-20T17:45:02.118Z"
 }
 ```
-
-```json 404 - Market not found
-{
-  "error": "NotFoundError",
-  "message": "Market not found"
-}
-```
-
----
-
-## Worked Examples
-
-Integrators rarely want the raw tuple — they want to answer real user questions. Here are the four most common ones, each mapped to one field.
-
-### "If I put in $100, how many YES tokens do I get?"
-
-```javascript
-// $100 in USDC atomic-6 = 100 * 1_000_000
-const res = await fetch(
-  'https://app.kash.bot/api/markets/abc123/quote' +
-    '?outcomeIndex=0&action=buy&amount=100000000'
-);
-const { quote } = await res.json();
-
-const tokens = Number(BigInt(quote.tokensOut)) / 1e18;
-console.log(`You receive ${tokens.toFixed(4)} YES tokens`);
-// → "You receive 177.6534 YES tokens"
-```
-
-### "What's the average price I'd pay per token?"
-
-```javascript
-// amountIn is in USDC atomic-6, tokensOut in WAD-18
-// To get $ / token: (amountIn / 1e6) / (tokensOut / 1e18)
-const usdcIn = Number(BigInt(quote.amountIn)) / 1e6;
-const tokens = Number(BigInt(quote.tokensOut)) / 1e18;
-const pricePerToken = usdcIn / tokens;
-console.log(`Average price: $${pricePerToken.toFixed(4)} / token`);
-// → "Average price: $0.5629 / token"
-```
-
-### "What's the market probability after my trade?"
-
-```javascript
-// impliedProbability is already a 0..1 decimal — just multiply by 100
-console.log(
-  `After your $100 buy, YES is priced at ${(quote.impliedProbability * 100).toFixed(1)}%`
-);
-// → "After your $100 buy, YES is priced at 56.3%"
-```
-
-For all outcomes at once, read `pAfter[]`:
-
-```javascript
-// pAfter values are WAD-18; divide by 1e18 to get probabilities
-quote.pAfter.forEach((p, i) => {
-  const prob = Number(BigInt(p)) / 1e18;
-  console.log(`  Outcome ${i}: ${(prob * 100).toFixed(1)}%`);
-});
-```
-
-### "How much USDC do I get if I sell 1 YES token?"
-
-```javascript
-// 1 token in WAD-18 = 1_000000000000000000
-const res = await fetch(
-  'https://app.kash.bot/api/markets/abc123/quote' +
-    '?outcomeIndex=0&action=sell&amount=1000000000000000000'
-);
-const { quote } = await res.json();
-
-const usdc = Number(BigInt(quote.usdcOut)) / 1e6;      // post-fee
-const gross = Number(BigInt(quote.grossRelease)) / 1e18; // pre-fee in USDC
-const fee = gross - usdc;
-
-console.log(`You receive $${usdc.toFixed(2)} (fee: $${fee.toFixed(4)})`);
-// → "You receive $0.28 (fee: $0.0035)"
-```
-
-### Advanced: "How much would it cost to move the market to 70%?"
-
-There's no single-call answer — walk `amount` up and watch `pAfter[outcomeIndex]` move. Quotes are cached 10s server-side, so a client-side binary search is cheap:
-
-```javascript
-async function costToReach(marketId, outcomeIndex, targetProb) {
-  let lo = 1_000_000n;            // $1
-  let hi = 1_000_000_000_000n;    // $1M
-  for (let i = 0; i < 20; i++) {
-    const mid = (lo + hi) / 2n;
-    const r = await fetch(
-      `https://app.kash.bot/api/markets/${marketId}/quote` +
-        `?outcomeIndex=${outcomeIndex}&action=buy&amount=${mid}`
-    );
-    const { quote } = await r.json();
-    if (quote.impliedProbability < targetProb) lo = mid;
-    else hi = mid;
-  }
-  return Number(lo) / 1e6; // USDC
-}
-```
-
----
-
-## Notes & Gotchas
-
-- **Quotes are view calls — nothing on-chain changes.** You can poll at will within the rate limit.
-- **`usdcOut` on sells is post-fee.** If you need to display the fee, compute `grossRelease / 1e18 * 1e6 - Number(usdcOut)` (or do it in bigint math).
-- **Buy fee is zero** on the current AMM; `tokensOut` reflects the full reserve increase.
-- **`pAfter` and `qAfter` always sum to `1e18`.** The last element may absorb up to 1 wei of rounding dust.
-- **`effectivePrice` is a JS-number convenience field** and can lose precision on tiny trades. For any authoritative display or accounting, derive values from the string bigint fields with `BigInt(...)`.
-- **Finding market IDs.** Use [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets) for pagination/filtering or [`GET /api/markets/:id`](/developer-docs/public-embed-api/endpoints/market-detail) for a single market. Both are public and CORS-enabled.

@@ -1,0 +1,105 @@
+---
+title: 'GET /api/markets/:id/state'
+description: 'Live prices, volume and lifecycle for one market'
+---
+
+Returns only the fields of a market that change with each trade: prices, volume, trade and participant counts, and lifecycle. It is small and refreshes about once a second, so it is a good fit for polling a single market card. Load the market's title, labels and branding once from [`GET /api/markets/:id`](/developer-docs/public-embed-api/endpoints/market-detail), then poll this endpoint.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/:id/state
+```
+
+## Path parameters
+
+<ParamField path="id" type="string" required>
+  Market UUID.
+</ParamField>
+
+## Response
+
+<ResponseField name="market" type="MarketState">
+  <Expandable title="MarketState">
+    <ResponseField name="id" type="string">Market UUID</ResponseField>
+    <ResponseField name="asOf" type="string">Server time of the read (ISO 8601)</ResponseField>
+    <ResponseField name="lifecycle" type="object">
+      `{ status, endTime, freezeAt, resolvedAt, winningOutcomeIndex, updatedAt }`. `status` is `UNSEEDED`, `ACTIVE`, `RESOLVED` or `ABANDONED`. `endTime`, `freezeAt` and `resolvedAt` are in **seconds** since the epoch.
+    </ResponseField>
+    <ResponseField name="totalVolume" type="number">Lifetime volume in atomic USDC (6 decimals)</ResponseField>
+    <ResponseField name="seedAmountAtomic" type="number">Opening liquidity in atomic USDC</ResponseField>
+    <ResponseField name="tradeCount" type="integer">Number of trades</ResponseField>
+    <ResponseField name="participantCount" type="integer">Number of distinct traders</ResponseField>
+    <ResponseField name="currentImpliedChance" type="number">Implied probability of outcome 0. `currentProbability` holds the same value.</ResponseField>
+    <ResponseField name="lastActivityAt" type="string | null">Time of the last trade</ResponseField>
+    <ResponseField name="outcomes" type="object[]">
+      `{ outcomeIndex, probability, impliedChance, shareSupply }`. `probability` and `impliedChance` hold the same normalized implied probabilities. `shareSupply` is a WAD string.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="asOf" type="string">Same as `market.asOf`</ResponseField>
+
+## Caching
+
+`Cache-Control: public, s-maxage=1, max-age=0, must-revalidate`. A response is never more than about 2 seconds old, so polling faster than once a second gains nothing.
+
+## Rate limit
+
+Market state group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). The group's budget is shared with [`GET /api/markets/state`](/developer-docs/public-embed-api/endpoints/markets-state). Responses may be served from a short-lived cache.
+
+## Example request
+
+<CodeGroup>
+```bash cURL
+curl "https://app.kash.bot/api/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/state"
+```
+
+```javascript JavaScript
+async function pollPrices(id, onUpdate) {
+  const res = await fetch(`https://app.kash.bot/api/markets/${id}/state`);
+  if (res.ok) onUpdate((await res.json()).market);
+  setTimeout(() => pollPrices(id, onUpdate), 5000);
+}
+```
+</CodeGroup>
+
+## Example response
+
+```json 200
+{
+  "market": {
+    "id": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+    "asOf": "2026-10-20T17:43:30.730Z",
+    "lifecycle": {
+      "status": "ACTIVE",
+      "endTime": 1792530000,
+      "freezeAt": 1792526400,
+      "resolvedAt": null,
+      "winningOutcomeIndex": null,
+      "updatedAt": "2026-10-20T16:06:51.435Z"
+    },
+    "totalVolume": 35000000,
+    "seedAmountAtomic": 20000000,
+    "tradeCount": 4,
+    "participantCount": 4,
+    "currentProbability": 0.279436651,
+    "currentImpliedChance": 0.279436651,
+    "lastActivityAt": "2026-10-20 16:06:51.435382+00",
+    "outcomes": [
+      { "outcomeIndex": 0, "probability": 0.279436651, "impliedChance": 0.279436651, "shareSupply": "26053103461967827528" },
+      { "outcomeIndex": 1, "probability": 0.7205633489, "impliedChance": 0.7205633489, "shareSupply": "41836357394017945260" }
+    ]
+  },
+  "asOf": "2026-10-20T17:43:30.730Z"
+}
+```
+
+```json 404
+{
+  "error": "NotFoundError",
+  "message": "Market 00000000-0000-4000-8000-000000000000 not found not found",
+  "code": "NOT_FOUND",
+  "timestamp": "2026-10-20T17:53:08.527Z"
+}
+```

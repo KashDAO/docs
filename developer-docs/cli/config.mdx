@@ -25,8 +25,13 @@ Set a single config field.
 
 **Arguments**
 
-- `key` — top-level key OR `customChain.<leaf>` / `customChain.smartAccount.<leaf>` dot-path
+- `key` — config field for the API-backed commands: `apiKey`, `baseUrl` or `apiVersion`
 - `value` — value to set
+
+```bash
+kash config set baseUrl https://api.kash.bot/v1
+kash config set apiVersion 2026-08-19
+```
 
 ### `kash config profiles`
 

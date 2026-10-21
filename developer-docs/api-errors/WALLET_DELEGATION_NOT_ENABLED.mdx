@@ -7,22 +7,22 @@ description: 'HTTP 409 — Wallet delegation not enabled'
 
 ## When it fires
 
-A smart account exists for the actor, but Privy server-side delegation is disabled. The platform can't sign user-operations on behalf of the user, so trades can't execute.
+Kash cannot act on the wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
 
-We surface this at the API layer as a preflight check rather than failing at execution — better UX for the consumer.
+Today this happens when the key is configured to trade from a smart account other than the key owner's own. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
+
+Wallet delegation (your permission for Kash's app to submit transactions from your wallet on your behalf) is granted in the Kash app, at the **Approve Kash** step. If it is missing, trades accepted by the API fail at execution rather than returning this code synchronously; check the trade's status on `GET /v1/trades/{id}`.
 
 ## Why it happens
 
-- The user revoked delegation in Privy after onboarding.
-- A Privy app config change disabled delegation for a class of users.
-- An incomplete onboarding flow that skipped the delegation grant step.
+- The key was issued to trade from an account other than your own.
+- The **Approve Kash** step was skipped during sign-in, or the app has asked for a fresh approval that hasn't been given yet.
 
 ## How to fix
 
-- The user must re-grant delegation via the webapp (Settings → Wallet → Re-enable). One-click; uses the existing Privy session.
-- For orgs, the org admin re-grants on behalf of the org wallet.
-- If the issue is platform-wide (multiple users), check the Privy app config or the status page.
+- Use a key configured to trade from your user account. Issue one in the Kash app (Settings → API Keys) or ask Kash support.
+- If delegation is missing, complete the **Approve Kash** step in the Kash app. It is shown again when you next trade there.
 
 ## Related codes
 
-- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) — earlier failure point
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) — earlier failure point: no wallet yet

@@ -1,0 +1,25 @@
+---
+title: 'DISPUTE_ALREADY_FILED'
+description: 'HTTP 409 — Dispute already filed'
+---
+
+**HTTP status:** 409 · **Title:** "Dispute already filed"
+
+## When it fires
+
+`POST /v1/markets/{id}/disputes` was called for a market whose current resolution proposal you have already disputed. Each user may file exactly one dispute per proposal, and concurrent retries resolve to a single dispute.
+
+## Why it happens
+
+- Your client retried a filing whose first attempt actually succeeded (for example, the response was lost in flight).
+- Two processes using the same account raced to file for the same market.
+
+## How to fix
+
+- Treat this as success: your dispute exists, and it holds settlement until the automated review completes. This holds even if your first attempt returned a 503 after recording the dispute; nothing is lost by stopping your retries here.
+- Fetch your dispute, including its review outcome (`status`, `reviewedAt`, `reviewNote`), with `GET /v1/markets/{id}/disputes`.
+- A dispute cannot be amended; the original `reason` stands. If you have material new evidence, contact Kash support.
+
+## Related codes
+
+- [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED), [`MARKET_NOT_DISPUTABLE`](/developer-docs/api-errors/MARKET_NOT_DISPUTABLE), [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND)

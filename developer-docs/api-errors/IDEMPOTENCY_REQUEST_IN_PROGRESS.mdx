@@ -1,0 +1,34 @@
+---
+title: 'IDEMPOTENCY_REQUEST_IN_PROGRESS'
+description: 'HTTP 409 — Idempotency request in progress'
+---
+
+**HTTP status:** 409 · **Title:** "Idempotency request in progress"
+
+## When it fires
+
+Another request carrying the same `Idempotency-Key` is still being processed. The server claimed the key when that request arrived and has no response to replay yet, so it refuses to run the endpoint a second time.
+
+This is the concurrent sibling of [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT): the key and the body are the same, but the first attempt has not finished.
+
+## Why it happens
+
+- Most common: an HTTP client that retries on its **own** timeout while the original request is still running on the server. The server is usually slower than the client's patience, not stuck.
+- A worker pool that sends the same logical operation from two workers sharing one key.
+- A previous attempt that died mid-flight. The claim it left behind is held for about 60 seconds and then released automatically. There is no manual cleanup and no 24-hour lock-out.
+
+## How to fix
+
+- **Retry with the same key.** Once the first attempt finishes you receive its response verbatim, with the `Idempotent-Replay: true` header. That is the point of the key. Don't generate a fresh one, which would execute the operation a second time.
+- Back off before retrying (a second or two is usually enough) rather than retrying in a tight loop.
+- Raise your client's request timeout above the endpoint's normal latency so the retry is not racing a request that was always going to succeed.
+- If you genuinely want two independent operations, give them two different keys.
+
+A request that ends in an error (any non-2xx response) releases its key, so a retry after a failure runs fresh.
+
+See [Idempotency](/developer-docs/rest-api/idempotency).
+
+## Related codes
+
+- [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) — same key, **different** body
+- [`CLIENT_REQUEST_ID_CONFLICT`](/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT) — the body-level `clientRequestId` equivalent

@@ -7,21 +7,22 @@ description: 'HTTP 409 — Smart account not provisioned'
 
 ## When it fires
 
-The actor (user or organization) doesn't have a smart account row yet, so trades can't execute on-chain.
+The account behind your API key does not have a fully set-up trading wallet yet, so nothing can be executed on-chain for it. Returned by `POST /v1/trades`, `POST /v1/redemptions` and `GET /v1/portfolio`.
+
+What "set up" means depends on the market's chain. On EVM chains the account needs a completed smart account; on Solana the account's own wallet is used, and it must exist.
 
 ## Why it happens
 
-- New account that hasn't completed the wallet-creation step in the webapp.
-- An organization that's enabled the API but hasn't provisioned its own org-level smart account.
-- The smart-account worker is backlogged — provisioning is async.
+- A new account that has not finished wallet setup in the Kash app.
+- Wallet creation is asynchronous and has not completed yet.
+- Rarely, the account's setup is incomplete on Kash's side; the `detail` says so and asks you to contact support.
 
 ## How to fix
 
-- For users: complete the wallet setup flow in the webapp (Settings → Wallet). Smart account provisioning is async — typically a few seconds.
-- For orgs: an admin needs to provision the org smart account via the org settings page.
-- If you provisioned recently and still see this error, retry after 30 s. If it persists past a minute, contact support with your `requestId`.
+- Finish onboarding in the Kash app. Wallet creation normally completes within a few seconds.
+- If you set up recently, retry after about 30 seconds. If it persists for more than a minute, contact Kash support with the `requestId`.
 
 ## Related codes
 
-- [`WALLET_DELEGATION_NOT_ENABLED`](/developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED) — smart account exists but Privy delegation is off
-- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) — smart account provisioned but no USDC
+- [`WALLET_DELEGATION_NOT_ENABLED`](/developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED) — the key cannot trade for this account
+- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) — the account holds nothing to redeem

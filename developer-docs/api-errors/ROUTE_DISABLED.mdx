@@ -3,27 +3,34 @@ title: 'ROUTE_DISABLED'
 description: 'HTTP 503 — Route disabled'
 ---
 
-**HTTP status:** 503 · **Title:** "Route disabled" · **Retry-After:** 60s
+**HTTP status:** 503 · **Title:** "Route disabled" · **Retry-After:** computed per response
 
 ## When it fires
 
-A single route is disabled by ops via a per-route kill switch. Distinct from the coarse [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) so SDK consumers can branch on "my entire trading capability is offline" vs "just one endpoint."
+One endpoint is temporarily unavailable. This is distinct from [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED), which covers all API trade writes.
 
-The Problem detail's `extensions.flag` field carries the kill-switch name (e.g., `"api-quotes-read"`) so you can tell exactly which route is gated.
+Example problem body:
 
-## Why it happens
-
-- Targeted rollback after a route-specific bug shipped.
-- Pre-deploy lockdown of one endpoint while the rest of the API stays live.
-- Capacity-driven shedding (rare — usually we'd raise rate limits first).
+```json
+{
+  "type": "https://docs.kash.bot/developer-docs/api-errors/ROUTE_DISABLED",
+  "title": "Route disabled",
+  "status": 503,
+  "code": "ROUTE_DISABLED",
+  "detail": "This endpoint is temporarily unavailable. Retry after the cooldown.",
+  "instance": "/v1/markets/3f6c.../quote?outcomeIndex=0&amount=10",
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
+}
+```
 
 ## How to fix
 
-- Honour `Retry-After`. The flag is binary; polling won't help.
-- Read the `extensions.flag` field — if it's an endpoint you don't actually need, ignore it; other endpoints are fine.
-- For mission-critical endpoints, contact support to understand the ETA.
+- Honour `Retry-After`. Polling faster will not re-enable the endpoint.
+- Other endpoints are unaffected. If you don't need this one right now, carry on.
+- For an endpoint critical to your integration, contact Kash support for an estimate.
+- The TypeScript SDK raises this as `KashMaintenanceError`.
 
 ## Related codes
 
-- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — coarser kill switch covering all trade writes
-- [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) — distinct: this is "ops chose to disable", that's "infra is broken"
+- [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) — all API trade writes unavailable
+- [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) — a dependency failure

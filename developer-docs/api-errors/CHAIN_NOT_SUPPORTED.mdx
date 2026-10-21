@@ -7,19 +7,27 @@ description: 'HTTP 400 — Chain not supported'
 
 ## When it fires
 
-A route that performs an on-chain read (`POST /v1/redemptions`, `GET /v1/markets/{id}/quote`) resolved a market on a chain the API does not support for on-chain reads.
+The request targets a chain this environment does not support for the operation. There are two cases.
+
+1. **A market on an unsupported chain.** `GET /v1/markets/{id}/quote` and `POST /v1/redemptions` read the chain, and the market is on a chain this environment cannot read.
+2. **A Solana market when the client pins API version `2026-04-29`.** See below.
+
+### A Solana market on a pinned `2026-04-29`
+
+`GET /v1/markets/{id}` and `GET /v1/markets/{id}/quote` return this code for a **Solana** market only when the request sends `X-Kash-Api-Version: 2026-04-29`, because that legacy contract has no field that can describe a non-EVM chain. Requests without the header are served `2026-08-19` and never hit this case. It is returned **whatever the market's state**, so it does not mean the market is cancelled or closed.
+
+Drop the header or send `X-Kash-Api-Version: 2026-08-19`. The market then carries `chainRef`, `tradeable` and `notTradeableReason`, and an untradeable market's quote or trade returns [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) (409) instead. `POST /v1/trades` does not use this code for Solana markets on either version.
 
 ## Why it happens
 
-- The market is on a chain this environment does not support.
-
-Your request is well-formed — this is a chain-support condition, not a client input error, so it is a permanent `400` (retrying will not help). (A *supported* chain missing a contract address is a server-config fault and returns `500 INTERNAL_ERROR`, not this code.)
+The market is on a chain this environment does not support for the operation. Your request is well formed; this is a chain-support condition, so it is a permanent `400` and retrying will not help. (A supported chain with incomplete server configuration returns [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) instead.)
 
 ## How to fix
 
-- Confirm the market's chain is one of the supported chains (the `detail` lists them).
-- If you believe the chain should be supported, contact support — it is a server configuration gap, not something the caller can correct.
+- **Solana markets:** stop pinning `2026-04-29`. Drop the header or send `X-Kash-Api-Version: 2026-08-19`. Production trading runs on Solana.
+- **Other market routes:** the `detail` field lists the supported chains.
+- If you believe the chain should be supported, contact Kash support. It is a server configuration gap, not something you can correct.
 
 ## Related codes
 
-- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND), [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE)
+- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND), [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE), [`API_VERSION_UNSUPPORTED`](/developer-docs/api-errors/API_VERSION_UNSUPPORTED), [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE)

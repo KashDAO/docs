@@ -3,37 +3,42 @@ title: 'RATE_LIMIT_EXCEEDED'
 description: 'HTTP 429 — Too Many Requests'
 ---
 
-**HTTP status:** 429 · **Title:** "Too Many Requests"
+**HTTP status:** 429 · **Title:** "Too Many Requests" · **Retry-After:** computed per response
 
 ## When it fires
 
-Per-user (authenticated) or per-IP (anonymous reads) rate limit was exceeded. Limits are enforced as a sliding window in Redis.
+You exceeded a rate limit. Authenticated requests are limited per user (shared by every key on the account) and per key; anonymous reads are limited per client IP. Limits use a sliding one-minute window.
 
-For authenticated requests, the limit is **tier-differentiated** — 60 req/min on `free`, 300 req/min on `developer`, custom (admin-set) on `enterprise` and `mm`. See [Rate limits](/developer-docs/rest-api/rate-limits) for the full matrix.
+Authenticated limits depend on your key's tier. Read the limit that applied from `X-RateLimit-Limit`. See [Rate limits](/developer-docs/rest-api/rate-limits).
+
+The same code is also returned during a temporary **authentication lockout**: after too many failed authentication attempts from one source, requests from it are refused for a period given by `Retry-After`.
 
 ## Response headers
 
-Every 429 response carries:
+A 429 from the rate limiter carries:
 
-- `Retry-After: <seconds>` — wait at least this long before the next request
-- `X-RateLimit-Limit: <n>` — the limit that applied
-- `X-RateLimit-Remaining: 0` — confirms you're capped
-- `X-RateLimit-Reset: <unix-timestamp>` — when the window resets
+- `Retry-After: <seconds>`, how long to wait before the next request
+- `X-RateLimit-Limit: <n>`, the limit that applied
+- `X-RateLimit-Remaining: 0`
+- `X-RateLimit-Reset: <unix-seconds>`, when the window resets
+
+The `detail` field names which limit (account or key) refused the request.
 
 ## Why it happens
 
-- Burst traffic spike (e.g., a polling loop without backoff).
-- A retry storm — every consumer retried at the same instant after a transient failure.
-- Genuine sustained traffic above your tier's quota.
+- A burst of traffic, such as a polling loop without backoff.
+- A retry storm: every consumer retried at the same instant after a transient failure.
+- Sustained traffic above your tier's limit.
 
 ## How to fix
 
-- Honour `Retry-After`. The TS SDK does this automatically (`KashRateLimitError.retryAfterSeconds`).
-- Add jitter to retry timing so multiple consumers don't synchronise.
-- For polling, switch to webhooks — every poll is a wasted request.
-- If you consistently bump against the limit during normal operation, upgrade your tier — see [Rate limits](/developer-docs/rest-api/rate-limits) for the upgrade paths. The 60 → 300 req/min jump from `free` → `developer` is 5×, and `enterprise`/`mm` have no application-level cap.
+- Honour `Retry-After`. The TypeScript SDK does this automatically and exposes the value as `KashRateLimitError.retryAfterSeconds`.
+- Add jitter to retries so multiple consumers don't synchronise.
+- Replace polling with [webhooks](/developer-docs/rest-api/webhooks/overview) where you can.
+- If you hit the limit during normal operation, move to a higher tier. See [Rate limits](/developer-docs/rest-api/rate-limits).
 
 ## Related codes
 
-- [`RATE_LIMIT_UNAVAILABLE`](/developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE) — 503; the rate-limit subsystem itself is temporarily unavailable. Distinct from `EXCEEDED`: `UNAVAILABLE` means we couldn't check your quota; `EXCEEDED` means we checked and you're over.
-- [`WEBHOOK_REPLAY_LIMIT_REACHED`](/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED) — also 429, but specific to the webhook replay endpoint's amplification cap
+- [`RATE_LIMIT_UNAVAILABLE`](/developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE) — 503: Kash could not check your limit. `EXCEEDED` means it checked and you are over.
+- [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) — also 429, limits unfinished trades rather than request rate
+- [`WEBHOOK_REPLAY_LIMIT_REACHED`](/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED) — also 429, specific to webhook redelivery

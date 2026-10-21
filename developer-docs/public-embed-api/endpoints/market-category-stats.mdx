@@ -1,0 +1,44 @@
+---
+title: 'GET /api/markets/category-stats'
+description: 'Market counts and volume per category'
+---
+
+Returns one row per market category, with its market count, live market count and volume. The `category` values work as the `category` filter on [`GET /api/markets`](/developer-docs/public-embed-api/endpoints/markets).
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/category-stats
+```
+
+This endpoint takes no parameters.
+
+## Response
+
+<ResponseField name="categories" type="object[]">
+  `{ category, categoryLabel, marketCount, liveCount, totalVolume }`. `category` is the slug. `marketCount` counts the category's active markets, including ones that have stopped trading and are waiting to resolve. `liveCount` counts only the markets that can still be traded. `totalVolume` is lifetime volume across all of the category's markets, resolved ones included, in atomic USDC.
+</ResponseField>
+
+<ResponseField name="_meta" type="object">`{ requestedAt, count }`</ResponseField>
+
+## Caching and rate limit
+
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
+
+## Example request
+
+```bash cURL
+curl "https://app.kash.bot/api/markets/category-stats"
+```
+
+## Example response
+
+```json 200 (trimmed)
+{
+  "categories": [
+    { "category": "business", "categoryLabel": "Business", "marketCount": 2, "liveCount": 2, "totalVolume": 568153790 },
+    { "category": "crypto-twitter", "categoryLabel": "Crypto Twitter", "marketCount": 1, "liveCount": 1, "totalVolume": 7249707662 }
+  ],
+  "_meta": { "requestedAt": "2026-10-20T17:43:31.748Z", "count": 26 }
+}
+```

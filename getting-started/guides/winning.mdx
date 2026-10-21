@@ -1,12 +1,8 @@
 ---
-title: 'Winning'
-description: 'How claims, refunds, and payouts work'
+title: 'Redeeming positions'
+description: 'How resolved positions are claimed, and how refunds work'
 icon: 'trophy-star'
 ---
-
-<Note>
-When a market resolves in your favor, your winnings become claimable — head to your Portfolio and hit **Claim** to receive your USDC.
-</Note>
 
 <img
   style={{ borderRadius: '0.5rem' }}
@@ -21,120 +17,68 @@ When a market resolves in your favor, your winnings become claimable — head to
   alt="Hero Dark"
 />
 
-# Claiming your winnings
+# Claiming a resolved position
 
 ## When a market resolves
 
-1. **The oracle resolves the market** — the winning outcome (or outcomes) is set on-chain
-2. **Your winning position becomes claimable** — you'll see it flagged in your Portfolio
-3. **You claim** — press **Claim** on the position, and your winning shares are redeemed for USDC
-4. **USDC lands in your wallet** — redemption executes from your own smart wallet; Kash never holds your winnings
+1. **The outcome is proposed** by Kash's automated resolution system from the market's published sources and rules.
+2. **A short dispute window** follows. Any signed-in user can dispute the proposed outcome. An open dispute holds settlement while the same automated system reviews it against the market's sources and rules.
+3. **The market settles** on-chain, and winning positions appear under **Claimable** in your Portfolio.
+4. **You claim.** Claim a position, or use **Claim all**. The redemption is submitted to the market program from your wallet, and the USDC lands in your wallet.
+
+Some markets that resolved before claiming was available were redeemed to holders' wallets automatically. Those positions show their payout status in Portfolio, and there is nothing to claim.
 
 <Note>
-On mainnet, a claim may deduct a small gas amount in USDC from your winnings — you receive the net USDC. There is no Kash fee on redemption.
+A claim covers its own network fee, which is deducted from the amount you receive. Your first claim also covers setting up your USDC account. There is no Kash fee on claims.
 </Note>
 
 ## When a market is cancelled
 
-If a market can't be resolved (for example, the event was called off), it can be cancelled instead. Your position becomes refundable, and you claim it the same way — press **Claim refund** in your Portfolio.
+A market can be cancelled when its rules require it (for example, the event is called off) or when it can't be resolved. You claim the refund the same way: tap **Claim refund** in your Portfolio.
 
-- **Refund value:** each outcome is refunded at its market price **snapshotted at the moment of cancellation** — not your entry price. If you bought at $0.30 and the price at cancellation was $0.45, you're refunded at $0.45 per share (and vice versa).
-- **Trading fees you already paid are not refunded**, but no new fees are charged on the refund itself.
+- **Refund value:** every holder is refunded at the market price **snapshotted at cancellation**, not your entry price. If the snapshot price is above your entry price you get back more than you paid, and if it is below you get back less.
+- **Trading fees you already paid are not refunded.**
 
-<Note>
-**Contract-enforced exit:** if a market's oracle ever goes unresponsive, *anyone* can cancel the market once the resolution deadline plus a grace period has passed. Recovery from a stuck market doesn't depend on Kash or the oracle — the cancellation path is enforced by the contract itself (subject to normal smart-contract risk).
-</Note>
+# What a winning position redeems for
 
-# Understanding payouts
-
-## How payouts are calculated
-
-Winning shares don't pay a fixed amount. Instead, winning shares redeem for a **pro-rata share of the market's reserve** — the pool of USDC that traders paid in:
-
-- **Your payout = your winning shares' proportion of all winning shares × the market reserve**
-- The trade ticket shows an **estimated payout if you win** at the moment you trade — this is your best guide to what a position is worth
-- The estimate can shift as others trade, because the final reserve and share supply are only fixed at resolution
-- In markets where **multiple outcomes win**, all winning outcomes share the reserve
-
-## Fees
-
-<AccordionGroup>
-  <Accordion title="Fee schedule">
-    - **Buys:** 1% protocol fee
-    - **Sells:** 1% protocol fee + 1% AMM fee
-    - **Redemption:** no fee — you claim your full pro-rata payout (minus a small USDC gas deduction on mainnet claims)
-    - **Gas:** sponsored by Kash for trading — no ETH needed
-  </Accordion>
-  <Accordion title="When fees are charged">
-    - Fees are charged **at the time of the trade** — nothing extra is taken from winning payouts
-    - Holding positions costs nothing
-    - Kash charges no deposit fee; payment providers charge their own processing fees
-  </Accordion>
-</AccordionGroup>
-
-## Payout example
-
-```
-You spend $100 on Yes when the implied chance is 40%.
-The trade ticket shows: "Estimated payout if you win: ~$240"
-
-The market resolves Yes.
-Your position becomes claimable in Portfolio.
-You claim and receive your pro-rata share of the market
-reserve — close to the estimate, adjusted for trading
-that happened after your entry.
-```
-
-The "estimated payout" on the ticket is exactly that — an estimate based on the market state when you trade, not a guaranteed fixed amount per share.
+When a market resolves, the winning outcome's positions can be redeemed. The trade ticket shows an **estimated payout if your outcome wins** when you trade; the final amount is fixed at resolution and can differ because of trading after your entry. A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. The app shows the exact fees before you confirm.
 
 # Ways a position can end
 
 <AccordionGroup>
-  <Accordion title="Market win">
-    Your outcome is among the winners at resolution. Your shares redeem for a pro-rata share of the market reserve — claim from your Portfolio.
+  <Accordion title="Your outcome happened">
+    Your positions can be redeemed. Claim from your Portfolio.
   </Accordion>
   <Accordion title="Early exit">
-    You sold before resolution. You locked in your profit (or cut your loss) at the market price and received USDC immediately — no claim needed. Sells pay the 1% protocol + 1% AMM fee.
+    You sold before trading closed and received USDC straight away, with no claim needed. Sells pay the protocol fee plus the sell fee.
   </Accordion>
-  <Accordion title="Market loss">
-    Your outcome didn't win. Losing shares are worth nothing at resolution — this is why position sizing matters.
+  <Accordion title="Your outcome didn't happen">
+    Your outcome didn't win, and the shares are worth nothing at resolution. This is why position sizing matters.
   </Accordion>
   <Accordion title="Market cancelled">
-    The market was cancelled. Claim your refund from Portfolio — each outcome refunds at its cancellation-snapshot price, with no new fees.
+    Claim your refund from Portfolio at the cancellation snapshot price.
   </Accordion>
 </AccordionGroup>
 
 # Managing positions and risk
 
 <AccordionGroup>
-  <Accordion title="Smart position sizing">
+  <Accordion title="Position sizing">
     - Never risk more than you can afford to lose completely
-    - Spread across markets instead of going all-in on one
-    - Scale up gradually as your track record grows
+    - Spread across markets instead of putting everything into one market
   </Accordion>
   <Accordion title="Exit timing">
-    - You don't have to wait for resolution — selling early locks in gains and removes resolution risk
-    - Cut losses when you're clearly wrong instead of hoping
-    - Remember sells carry the extra 1% AMM fee; factor it into exit decisions
-  </Accordion>
-  <Accordion title="Information edge">
-    - Specialize in categories you genuinely understand
-    - Early positions, before consensus forms, often offer the best prices
-    - Review both wins and losses — your Portfolio history shows exactly how each position played out
+    - You don't have to wait for resolution. Selling early locks in gains and removes resolution risk
+    - Factor the sell fees into exit decisions
   </Accordion>
 </AccordionGroup>
 
 # Track your performance
 
-Kash has built-in performance tracking on the webapp:
-
-- **Portfolio** — open positions, claimable winnings, realized profit and loss, and full history
-- **Leaderboards** — see how you rank against other predictors by profit and volume on the community page
-- **Achievements** — unlock badges for prediction milestones
-
-<Tip>
-Winning feels great, but consistent winning comes from discipline, research, and bankroll management. Claim your winnings, review what worked, and find the next opportunity.
-</Tip>
+- **Portfolio:** open positions, claimable positions, P&L and full history
+- **Leaderboard:** see how you rank against other predictors
+- **Rewards:** XP, levels and achievements. See [Rewards](/getting-started/ecosystem/incentives-and-rewards)
+- **Share a result:** create a P&L card from a position and post it to X
 
 <CardGroup cols={2}>
   <Card
@@ -145,10 +89,10 @@ Winning feels great, but consistent winning comes from discipline, research, and
     Learn how to place predictions
   </Card>
   <Card
-    title="Earn (coming soon)"
-    icon="coins"
-    href="/getting-started/features/earn"
+    title="Withdrawing"
+    icon="arrow-left"
+    href="/getting-started/guides/withdrawing"
   >
-    The Earn vault will let you put idle USDC to work
+    Move USDC out of your wallet
   </Card>
 </CardGroup>

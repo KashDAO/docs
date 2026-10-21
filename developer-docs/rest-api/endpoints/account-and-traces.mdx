@@ -1,0 +1,59 @@
+---
+title: 'Account Usage & Traces'
+description: 'Per-key usage telemetry, and the event timeline behind one trade.'
+---
+
+| Method | Path                            | Scope         | Rate-limit class |
+| ------ | ------------------------------- | ------------- | ---------------- |
+| `GET`  | `/v1/account/usage`             | `auth:manage` | read             |
+| `GET`  | `/v1/traces/{correlationId}`    | `trades:read` | read             |
+
+## `GET /v1/account/usage`
+
+Rolling usage for the **calling key**, in one round trip.
+
+```json
+{
+  "data": {
+    "apiKeyId": "…",
+    "generatedAt": "2026-10-20T12:00:00.000Z",
+    "trades": {
+      "24h": { "total": 120, "completed": 117, "failed": 3, "successRate": 0.975,
+               "latencyMs": { "p50": 2100, "p99": 9400 } },
+      "7d":  { "total": 640, "completed": 628, "failed": 12, "successRate": 0.98125 },
+      "30d": { "total": 2400, "completed": 2361, "failed": 39, "successRate": 0.98375 }
+    },
+    "webhooks": {
+      "7d": { "emitted": 640, "delivered": 638, "failed": 2, "successRate": 0.996875 }
+    },
+    "auth": {
+      "24h": { "failures": 0, "rateLimitRejections": 4 }
+    }
+  },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+`successRate` is `null` when the window's total is zero. `latencyMs` is end-to-end trade latency; its values are `null` when there is nothing to measure.
+
+## `GET /v1/traces/{correlationId}`
+
+The event timeline for one trade, keyed by the trade's `correlationId`: intent, funding, execution and webhook delivery. Each event carries a fixed, allowlisted subset of its data.
+
+```json
+{
+  "trace": {
+    "correlationId": "…",
+    "events": [
+      { "type": "…", "occurredAt": "…", "sequenceNumber": 0, "data": { } }
+    ],
+    "retention": { "windowDays": 90, "expired": false }
+  },
+  "data": { "…": "same as trace" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+Events are kept for 90 days (`retention.windowDays`). For an older trade `retention.expired` is `true` and `events` may be incomplete or empty because they were deleted, not because nothing happened. The trade itself stays readable on `GET /v1/trades/{id}` at any age.
+
+An unknown correlation id and a trade that is not yours both return `404 RESOURCE_NOT_FOUND`, so ids cannot be probed.

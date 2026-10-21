@@ -7,22 +7,24 @@ description: 'HTTP 429 — Replay limit reached'
 
 ## When it fires
 
-`POST /v1/webhooks/events/{id}/redeliver` was called for an event that has already been replayed up to its cap (default 5).
+`POST /v1/webhooks/events/{eventId}/redeliver` was called for an event that has already been redelivered the maximum of **5 times**.
 
 ## Why it happens
 
-- A bug in the consumer kept calling the redeliver endpoint in a loop instead of fixing the underlying delivery problem.
-- An automation re-replayed without checking past attempts.
-- A genuinely persistent need to replay an event many times — uncommon and usually signals an upstream issue.
+- Your integration called the redeliver endpoint in a loop instead of fixing the underlying delivery problem.
+- An automation redelivered without checking previous attempts.
+- A genuine need to redeliver one event many times, which is unusual and usually points to an endpoint problem.
 
-The cap exists to stop a compromised key from looping the replay endpoint to flood its own customer endpoint or our delivery worker.
+The cap stops a leaked key from using the redeliver endpoint to flood your own webhook endpoint.
 
 ## How to fix
 
-- Stop calling the redeliver endpoint for this event id. The cap is per-event, so other events still replay normally.
-- Fix the underlying delivery failure first — check the event's delivery status via `GET /v1/trades/:id` (the `webhookDelivery` field) or via `kash-admin webhooks trace --event-id <id>` (operator command).
-- If you legitimately need more replays for one event (e.g., recovering from a long endpoint outage), contact support — we can clear the counter manually.
+- Stop redelivering this event. The cap is per event, so other events can still be redelivered.
+- Fix the delivery failure first. Check delivery status with `GET /v1/webhooks/events`, or the `webhookDelivery` field on `GET /v1/trades/{id}`.
+- If you legitimately need more redeliveries of one event (for example after a long endpoint outage), contact Kash support.
+
+See [Webhooks](/developer-docs/rest-api/webhooks/overview).
 
 ## Related codes
 
-- [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) — general per-key rate limit
+- [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) — the general rate limit

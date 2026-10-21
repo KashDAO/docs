@@ -1,221 +1,119 @@
 ---
 title: 'Quickstart Guide'
-description: 'Get your first Kash embed running in 5 minutes'
+description: 'Get your first Kash embed running in five minutes'
 ---
 
-Get prediction market embeds on your website in under 5 minutes.
+You don't need an API key. You can make every request on this page from a terminal or a browser.
 
-## Step 1: Choose a Thread
+## Step 1: Find a market
 
-First, fetch a list of available threads from our API:
+List live markets and pick one:
 
 ```bash cURL
-curl "https://app.kash.bot/api/threads?status=active&limit=5"
+curl "https://app.kash.bot/api/markets?status=active&tradableOnly=true&limit=5"
 ```
 
-You'll get a response like this:
-
-```json Response
+```json Response (trimmed)
 {
-  "threads": [
+  "markets": [
     {
-      "id": "abc123-def456",
-      "title": "2024 Election Predictions",
-      "marketCount": 12,
-      "totalVolume": 1250000,
-      "status": "active"
+      "id": "93f1445c-912c-47b4-8065-d1ff5a6b8dfc",
+      "title": "Will Ousmane Dembélé score against FC Barcelona?",
+      "status": "ACTIVE",
+      "chainId": 9000001,
+      "tradable": true,
+      "endTime": 1792530000000,
+      "outcomes": [
+        { "outcomeIndex": 0, "label": "Yes", "impliedChance": 0.2794 },
+        { "outcomeIndex": 1, "label": "No", "impliedChance": 0.7206 }
+      ]
     }
   ],
-  "pagination": { ... }
+  "pagination": { "offset": 0, "limit": 5, "total": 47, "hasMore": true }
 }
 ```
 
-Copy the `id` field from the thread you want to embed.
+Copy the market's `id`.
 
-## Step 2: Add the Iframe
-
-Add this HTML to your website, replacing `{threadId}` with the ID from Step 1:
+## Step 2: Add the iframe
 
 ```html HTML
 <iframe
-  src="https://app.kash.bot/threads/{threadId}/iframe?source=your-site-name"
+  src="https://app.kash.bot/markets/{marketId}/iframe"
   width="100%"
-  height="900"
+  height="520"
   frameborder="0"
+  loading="lazy"
   allow="clipboard-write"
-  title="Kash Prediction Markets"
+  title="Kash prediction market"
   style="border: none; border-radius: 12px;"
 ></iframe>
 ```
 
-<Tip>
-Replace `your-site-name` in the `source` parameter with your actual website name. The `source` label shows up in embed analytics so you can see where your traffic comes from.
-</Tip>
+Replace `{marketId}` with the ID from step 1. Any site can frame the embed pages. They send `Content-Security-Policy: frame-ancestors *`.
 
-## Step 3: Style the Container (Optional)
+See [Thread iframe](/developer-docs/public-embed-api/guides/thread-iframe) for the thread widget.
 
-Wrap your iframe in a container for better responsive design:
+## Step 3: Listen for embed events (optional)
 
-```html HTML
-<div class="kash-embed-container">
-  <iframe
-    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
-    width="100%"
-    height="900"
-    frameborder="0"
-    allow="clipboard-write"
-    title="Kash Prediction Markets"
-  ></iframe>
-</div>
-
-<style>
-  .kash-embed-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
-
-  .kash-embed-container iframe {
-    width: 100%;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (max-width: 768px) {
-    .kash-embed-container iframe {
-      height: 700px;
-    }
-  }
-</style>
-```
-
-## Step 4: Add Event Listeners (Optional)
-
-Track user interactions with the embed:
+The thread embed posts messages to the parent page. Each message is `{ type, data, origin, timestamp }`, and `type` always starts with `kash-`:
 
 ```javascript JavaScript
 window.addEventListener('message', (event) => {
-  // Verify origin for security
   if (event.origin !== 'https://app.kash.bot') return;
+  const { type, data } = event.data ?? {};
 
-  if (event.data.type === 'kash-iframe-ready') {
-    console.log('Embed loaded successfully');
+  if (type === 'kash-iframe-ready') {
+    console.log('Embed loaded', data); // { threadId, marketCount, totalVolume }
   }
-
-  if (event.data.type === 'kash-market-clicked') {
-    console.log('User clicked market:', event.data.data.marketId);
-    // Track in your analytics
+  if (type === 'kash-market-clicked') {
+    console.log('Market opened', data.marketId);
   }
 });
 ```
 
-## Complete Example
+## Step 4: Build your own UI (optional)
 
-Here's a complete, production-ready example:
+If you'd rather render markets yourself, read them from the JSON endpoints and add a "Predict on X" button with a [deep link](/developer-docs/public-embed-api/endpoints/market-twitter-link):
 
-```html HTML
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Prediction Markets</title>
-  <style>
-    .kash-embed-container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .kash-embed-container iframe {
-      width: 100%;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    @media (max-width: 768px) {
-      .kash-embed-container iframe {
-        height: 700px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="kash-embed-container">
-    <h1>Live Prediction Markets</h1>
-    <iframe
-      src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
-      height="900"
-      frameborder="0"
-      allow="clipboard-write"
-      title="Kash Prediction Markets"
-    ></iframe>
-  </div>
-
-  <script>
-    window.addEventListener('message', (event) => {
-      if (event.origin !== 'https://app.kash.bot') return;
-
-      switch(event.data.type) {
-        case 'kash-iframe-ready':
-          console.log('Markets loaded:', event.data.data);
-          break;
-        case 'kash-market-clicked':
-          console.log('Market clicked:', event.data.data);
-          break;
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
-## Recommended Dimensions
-
-Different embed types work best at specific dimensions:
-
-| Embed Type | Desktop | Tablet | Mobile |
-|-----------|---------|--------|--------|
-| Thread (20-tile grid) | 100% × 900px | 100% × 800px | 100% × 700px |
-| Single Market | 100% × 500px | 100% × 500px | 100% × 400px |
-
-<Note>
-Always use `width="100%"` for responsive design. Only the height needs to be fixed.
-</Note>
-
-## Troubleshooting
-
-### Iframe not loading?
-
-1. **Check the thread ID** - Make sure you're using a valid thread ID from the API
-2. **Verify the URL** - The format should be exact: `https://app.kash.bot/threads/{id}/iframe`
-3. **Check CORS policies** - Some Content Security Policies may block iframes
-4. **Test in incognito** - Ad blockers sometimes interfere with embed loading
-
-### Embed looks broken on mobile?
-
-Reduce the iframe `height` attribute for mobile devices using CSS media queries:
-
-```css CSS
-@media (max-width: 768px) {
-  iframe {
-    height: 700px !important;
-  }
+```javascript JavaScript
+const marketId = '93f1445c-912c-47b4-8065-d1ff5a6b8dfc';
+const res = await fetch(
+  `https://app.kash.bot/api/markets/${marketId}/twitter-link?outcomeIndex=0&amount=10`
+);
+if (res.ok) {
+  const { twitterUrl } = await res.json();
+  window.open(twitterUrl, '_blank', 'noopener');
 }
 ```
 
-### Interested in earning revenue share?
+## Recommended sizes
 
-Organizations and partners earn a share of trading fees on trades in markets **they create** — embeds are a great way to drive that activity. See [Kash for businesses](/for-businesses/overview) or contact [partnerships@kash.bot](mailto:partnerships@kash.bot). The `?source=` parameter is an analytics label for your embed traffic; it does not by itself set up revenue sharing.
+| Embed | Width | Height |
+|---|---|---|
+| Single market | `100%` | 480 to 560px |
+| Thread | `100%` | 800 to 900px |
 
-## Next Steps
+## Troubleshooting
+
+- **The embed shows "not found".** Check the ID. Market and thread embeds need a UUID.
+- **A thread embed shows no markets.** The thread has no live markets. Check with `GET /api/threads/{id}/markets`.
+- **The deep-link endpoint returns `400`.** The market is no longer accepting predictions, because it isn't `ACTIVE` or it has expired.
+
+<Note>
+Creators receive a creator fee on trades in markets **they create**, wherever the trade happens; it depends on trading activity and is not guaranteed. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
+</Note>
+
+## Next steps
 
 <CardGroup cols={3}>
-  <Card title="API Endpoints" icon="code" href="/developer-docs/public-embed-api/endpoints/threads">
-    Explore all available API endpoints
+  <Card title="API overview" icon="book" href="/developer-docs/public-embed-api/overview">
+    Endpoints, rate limits and errors
   </Card>
-  <Card title="Iframe Guide" icon="window" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Learn more about iframe embedding options
+  <Card title="Markets endpoint" icon="code" href="/developer-docs/public-embed-api/endpoints/markets">
+    Filtering, search and pagination
   </Card>
   <Card title="Examples" icon="github" href="/developer-docs/public-embed-api/examples/react">
-    View React and vanilla JS examples
+    React, HTML and plain JavaScript
   </Card>
 </CardGroup>

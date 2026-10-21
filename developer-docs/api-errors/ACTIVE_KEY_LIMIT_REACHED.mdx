@@ -7,19 +7,19 @@ description: 'HTTP 409 — Active key limit reached'
 
 ## When it fires
 
-The user has hit `MAX_ACTIVE_KEYS_PER_USER` (5) and `POST /api/account/api-keys` in the webapp (or `kash-admin api-keys issue`) was called to issue another. The cap is enforced both at the application layer and via the `trg_api_keys_enforce_max_active_per_user` BEFORE INSERT trigger (which closes a TOCTOU window that the app-level check alone leaves open).
+You tried to issue a new API key while your account already holds the maximum of **5 active (non-revoked) keys**. The limit is per user, across all environments, and is enforced when a key is issued from the Kash app (Settings → API Keys). It is not returned by the `/v1/*` endpoints themselves.
 
 ## Why it happens
 
-- A genuine ceiling — most users only need 2-3 keys (one per environment, maybe a CI key). The cap exists to prevent runaway issuance from compromising audit hygiene.
-- A bot that issues a fresh key per run instead of reusing one (anti-pattern).
+- A genuine ceiling. Most integrations need two or three keys (one per environment, perhaps one for CI). The cap stops key pooling, which would otherwise let one account multiply its per-user rate limit.
+- A script that issues a fresh key on every run instead of reusing one.
 
 ## How to fix
 
-- Revoke an existing key first — Settings → API Keys → Revoke (or `kash-admin api-keys revoke <id>`).
-- Reuse keys across environments where appropriate: one `kash_live_…` for production code, one `kash_test_…` for everything else.
-- For mm/enterprise tiers, the cap is higher — contact support if your usage genuinely needs more.
+- Revoke a key you no longer use (Settings → API Keys → Revoke), then issue the new one.
+- Reuse keys where it makes sense: one `kash_live_…` key for production code and one `kash_test_…` key for everything else.
+- If your integration genuinely needs more active keys, contact Kash support.
 
 ## Related codes
 
-- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — what happens after revocation if you keep using the old key
+- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — what you get if you keep using a key after revoking it

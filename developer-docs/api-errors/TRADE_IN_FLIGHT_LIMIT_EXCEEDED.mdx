@@ -1,0 +1,45 @@
+---
+title: 'TRADE_IN_FLIGHT_LIMIT_EXCEEDED'
+description: 'HTTP 429 — Too many trades in flight'
+---
+
+**HTTP status:** 429 · **Title:** "Too many trades in flight" · **Retry-After:** computed per response
+
+## When it fires
+
+`POST /v1/trades` (or `POST /v1/trades/{id}/confirm` for a high-value trade) when your account already has the
+maximum number of trades **in flight** for your key's tier. A trade is in flight from the moment it is accepted
+until it settles (`completed`, `failed` or `rejected`). Trades placed through the Kash app count too: the limit
+is per account, not per key.
+
+**Nothing was placed.** The request was refused before anything was written, so retrying it, with the same
+`Idempotency-Key` or `clientRequestId`, is a fresh attempt and never a duplicate.
+
+## Why the limit exists
+
+Your account's trades execute one after another, in the order you placed them. A queue deeper than Kash
+can work through in time would not make your trades faster; the tail would expire unexecuted. Refusing at the door
+tells you immediately and lets you decide what to resend.
+
+Your key's tier sets the maximum; the response body's `maxInFlight` gives it. A trade stops counting once it settles, or after a timeout if it has not settled.
+
+This is separate from [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED): that limits how fast requests
+**arrive**; this limits how many trades are **unfinished**.
+
+## Response body
+
+In addition to the standard fields, the problem body carries two top-level members:
+
+- `inFlight`: how many of your trades were in flight when you were refused
+- `maxInFlight`: your limit
+
+## How to fix
+
+- **Honour `Retry-After`.** The TypeScript SDK retries 429 responses automatically and honours `Retry-After`.
+- **Track your trades to completion** ([webhooks](/developer-docs/rest-api/webhooks/overview) or `GET /v1/trades/{id}`) and keep fewer than your limit
+  outstanding, instead of firing and forgetting.
+
+## Related codes
+
+- [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) — 429, requests arriving faster than your tier allows
+- [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) — 503, trading as a whole is busy

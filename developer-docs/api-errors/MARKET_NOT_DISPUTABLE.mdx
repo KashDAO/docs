@@ -1,0 +1,30 @@
+---
+title: 'MARKET_NOT_DISPUTABLE'
+description: 'HTTP 422 — Market not disputable'
+---
+
+**HTTP status:** 422 · **Title:** "Market not disputable"
+
+## When it fires
+
+`POST /v1/markets/{id}/disputes` was called for a market that has no resolution proposal in a disputable state. The `detail` field says which case you hit:
+
+- **"no pending proposal"**: nothing has been proposed yet, so there is nothing to dispute.
+- **"settlement has begun"**, **"already finalized"** or **"already cancelled"**: the proposal has moved past `proposed`, so the right to dispute has ended.
+
+A proposal whose dispute window has ended is refused with [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), and one whose disputes have already been reviewed with [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED); both are 409. The filing is checked atomically against the live settlement state, so even if the market's `resolution` object showed `proposed` when you read it, a filing that races settlement is refused rather than recorded against a settled market.
+
+## Why it happens
+
+- The market is still trading, and no resolution has been proposed yet.
+- Settlement began, or the proposal was finalized or cancelled, before your request arrived, possibly between your read of the market and your POST.
+
+## How to fix
+
+- Check the market's settlement state with `GET /v1/markets/{id}`. The `resolution` object carries `settlementStatus` and `finalizableAt` (`null` when no proposal is pending).
+- If the market has no proposal yet, wait for one. Its dispute window opens when it is proposed and ends at `finalizableAt`.
+- Once settlement begins the outcome is final; there is no late-dispute path through the API.
+
+## Related codes
+
+- [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED), [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED), [`DISPUTE_ALREADY_FILED`](/developer-docs/api-errors/DISPUTE_ALREADY_FILED), [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND)

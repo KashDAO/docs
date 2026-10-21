@@ -10,7 +10,13 @@
   },
   "favicon": "/assets/favicon.svg",
   "contextual": {
-    "options": ["copy", "view", "chatgpt", "claude", "perplexity"]
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity"
+    ]
   },
   "navigation": {
     "tabs": [
@@ -46,23 +52,17 @@
               "getting-started/features/custom-amm",
               "getting-started/features/market-mechanics",
               "getting-started/features/trading-options",
+              "getting-started/features/trading-on-x",
               "getting-started/features/natural-language",
               "getting-started/features/social",
-              "getting-started/features/earn",
-              "getting-started/features/threads",
-              "getting-started/features/parlays",
-              "getting-started/features/world-cup"
+              "getting-started/features/threads"
             ]
           },
           {
             "group": "Ecosystem",
             "pages": [
               "getting-started/ecosystem/socials",
-              "getting-started/ecosystem/tokenomics",
-              "getting-started/ecosystem/governance",
-              "getting-started/ecosystem/incentives-and-rewards",
-              "getting-started/ecosystem/competitions-and-tournaments",
-              "getting-started/ecosystem/bug-bounty-program"
+              "getting-started/ecosystem/incentives-and-rewards"
             ]
           },
           {
@@ -82,28 +82,13 @@
         ]
       },
       {
-        "tab": "For Businesses",
-        "groups": [
-          {
-            "group": "For Businesses",
-            "pages": [
-              "for-businesses/overview",
-              "for-businesses/pricing-and-revenue-share",
-              "for-businesses/partner-portal-quickstart",
-              "for-businesses/market-creation",
-              "for-businesses/white-label-branding",
-              "for-businesses/analytics-and-earnings",
-              "for-businesses/api-access"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "Developer Docs",
         "groups": [
           {
             "group": "Overview",
-            "pages": ["developer-docs/introduction"]
+            "pages": [
+              "developer-docs/introduction"
+            ]
           },
           {
             "group": "REST API",
@@ -118,7 +103,13 @@
               "developer-docs/rest-api/pagination",
               "developer-docs/rest-api/etags",
               "developer-docs/rest-api/endpoint-reference",
-              "developer-docs/rest-api/migration-from-webapp"
+              "developer-docs/rest-api/endpoints/markets",
+              "developer-docs/rest-api/endpoints/trades",
+              "developer-docs/rest-api/endpoints/portfolio-and-redemptions",
+              "developer-docs/rest-api/endpoints/disputes",
+              "developer-docs/rest-api/endpoints/webhooks",
+              "developer-docs/rest-api/endpoints/account-and-traces",
+              "developer-docs/rest-api/endpoints/system"
             ]
           },
           {
@@ -132,7 +123,9 @@
           },
           {
             "group": "REST API SDK (TypeScript)",
-            "pages": ["developer-docs/rest-api/sdks/typescript"]
+            "pages": [
+              "developer-docs/rest-api/sdks/typescript"
+            ]
           },
           {
             "group": "CLI",
@@ -143,12 +136,10 @@
               "developer-docs/cli/completion",
               "developer-docs/cli/config",
               "developer-docs/cli/docs",
-              "developer-docs/cli/eoa",
               "developer-docs/cli/explain",
               "developer-docs/cli/health",
               "developer-docs/cli/markets",
               "developer-docs/cli/portfolio",
-              "developer-docs/cli/protocol",
               "developer-docs/cli/quote",
               "developer-docs/cli/schema",
               "developer-docs/cli/setup",
@@ -156,26 +147,23 @@
               "developer-docs/cli/trade",
               "developer-docs/cli/version",
               "developer-docs/cli/webhooks",
-              "developer-docs/cli/with-retry"
+              "developer-docs/cli/with-retry",
+              "developer-docs/cli/redeem"
             ]
           },
           {
             "group": "Protocol SDK (TypeScript)",
             "pages": [
               "developer-docs/protocol-sdk/overview",
-              "developer-docs/protocol-sdk/quickstart-eoa",
-              "developer-docs/protocol-sdk/quickstart-smart-account",
-              "developer-docs/protocol-sdk/error-handling",
-              "developer-docs/protocol-sdk/cross-language-parity"
+              "developer-docs/protocol-sdk/quickstart",
+              "developer-docs/protocol-sdk/error-handling"
             ]
           },
           {
             "group": "Protocol SDK (Python)",
             "pages": [
               "developer-docs/protocol-sdk-python/overview",
-              "developer-docs/protocol-sdk-python/quickstart-eoa",
-              "developer-docs/protocol-sdk-python/quickstart-smart-account",
-              "developer-docs/protocol-sdk-python/hummingbot"
+              "developer-docs/protocol-sdk-python/quickstart"
             ]
           },
           {
@@ -197,16 +185,23 @@
               "developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
               "developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
               "developer-docs/api-errors/DEPENDENCY_UNAVAILABLE",
+              "developer-docs/api-errors/DISPUTE_ALREADY_FILED",
+              "developer-docs/api-errors/DISPUTE_DECIDED",
+              "developer-docs/api-errors/DISPUTE_WINDOW_CLOSED",
               "developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT",
               "developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED",
               "developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID",
               "developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG",
+              "developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS",
               "developer-docs/api-errors/INSUFFICIENT_BALANCE",
               "developer-docs/api-errors/INSUFFICIENT_SCOPE",
               "developer-docs/api-errors/INTERNAL_ERROR",
               "developer-docs/api-errors/IP_NOT_ALLOWED",
+              "developer-docs/api-errors/MARKET_NOT_DISPUTABLE",
               "developer-docs/api-errors/MARKET_NOT_FOUND",
+              "developer-docs/api-errors/MARKET_NOT_QUOTABLE",
               "developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+              "developer-docs/api-errors/ORGANIZATION_INACTIVE",
               "developer-docs/api-errors/OUTCOME_INDEX_INVALID",
               "developer-docs/api-errors/POSITION_NOT_CLAIMABLE",
               "developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
@@ -218,6 +213,8 @@
               "developer-docs/api-errors/ROUTE_DISABLED",
               "developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED",
               "developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED",
+              "developer-docs/api-errors/TRADE_ADMISSION_BUSY",
+              "developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED",
               "developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION",
               "developer-docs/api-errors/VALIDATION_FAILED",
               "developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED",
@@ -233,28 +230,11 @@
             ]
           },
           {
-            "group": "Embed — Organization Endpoints",
-            "pages": [
-              "developer-docs/public-embed-api/endpoints/organization-detail",
-              "developer-docs/public-embed-api/endpoints/organization-markets",
-              "developer-docs/public-embed-api/endpoints/organization-partners",
-              "developer-docs/public-embed-api/endpoints/organization-threads"
-            ]
-          },
-          {
-            "group": "Embed — Partner Endpoints",
-            "pages": [
-              "developer-docs/public-embed-api/endpoints/partner-detail",
-              "developer-docs/public-embed-api/endpoints/partner-threads"
-            ]
-          },
-          {
             "group": "Embed — Thread Endpoints",
             "pages": [
               "developer-docs/public-embed-api/endpoints/threads",
               "developer-docs/public-embed-api/endpoints/thread-detail",
-              "developer-docs/public-embed-api/endpoints/thread-markets",
-              "developer-docs/public-embed-api/endpoints/thread-chapters"
+              "developer-docs/public-embed-api/endpoints/thread-markets"
             ]
           },
           {
@@ -262,7 +242,12 @@
             "pages": [
               "developer-docs/public-embed-api/endpoints/markets",
               "developer-docs/public-embed-api/endpoints/market-detail",
-              "developer-docs/public-embed-api/endpoints/market-quote"
+              "developer-docs/public-embed-api/endpoints/market-quote",
+              "developer-docs/public-embed-api/endpoints/market-state",
+              "developer-docs/public-embed-api/endpoints/markets-state",
+              "developer-docs/public-embed-api/endpoints/market-leaderboard",
+              "developer-docs/public-embed-api/endpoints/market-participants",
+              "developer-docs/public-embed-api/endpoints/market-category-stats"
             ]
           },
           {
@@ -276,8 +261,7 @@
           {
             "group": "Embed — Guides",
             "pages": [
-              "developer-docs/public-embed-api/guides/thread-iframe",
-              "developer-docs/public-embed-api/guides/organization-iframe"
+              "developer-docs/public-embed-api/guides/thread-iframe"
             ]
           },
           {
@@ -336,18 +320,18 @@
   },
   "seo": {
     "metatags": {
-      "description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
-      "keywords": "prediction market, prediction marketplace, prediction markets api, embed prediction markets, kash, kash bot, kash docs",
+      "description": "Kash is an interface built on an open, permissionless prediction-market protocol on Solana: trade real-world outcomes in USDC and create markets.",
+      "keywords": "prediction market, prediction market protocol, prediction markets api, embed prediction markets, kash, kash bot, kash docs",
       "author": "Kash",
       "og:title": "Docs | Kash",
-      "og:description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
+      "og:description": "Kash is an interface built on an open, permissionless prediction-market protocol on Solana: trade real-world outcomes in USDC and create markets.",
       "og:site_name": "Kash Docs",
       "og:type": "website",
       "og:url": "https://docs.kash.bot",
       "og:locale": "en_US",
       "og:image": "/assets/thumbnail/thumbnail.png",
       "twitter:title": "Kash Bot",
-      "twitter:description": "Kash is a prediction marketplace where you can trade on real-world events, create markets, and bring prediction markets to your own community.",
+      "twitter:description": "Kash is an interface built on an open, permissionless prediction-market protocol on Solana: trade real-world outcomes in USDC and create markets.",
       "twitter:image:alt": "Kash Bot",
       "twitter:card": "summary_large_image",
       "twitter:site": "@kash_bot",
@@ -374,5 +358,79 @@
       "github": "https://github.com/KashDAO",
       "telegram": "https://t.me/kashDAO"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/for-businesses/overview",
+      "destination": "/getting-started/quick-start/what-kash"
+    },
+    {
+      "source": "/for-businesses/market-creation",
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/for-businesses/api-access",
+      "destination": "/developer-docs/rest-api/authentication"
+    },
+    {
+      "source": "/for-businesses/partner-portal-quickstart",
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/for-businesses/pricing-and-revenue-share",
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/for-businesses/white-label-branding",
+      "destination": "/getting-started/quick-start/what-kash"
+    },
+    {
+      "source": "/for-businesses/analytics-and-earnings",
+      "destination": "/getting-started/guides/creating-opportunities"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-detail",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-markets",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-partners",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-threads",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-profile",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organization-leaderboard",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/organizations-featured",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/partner-detail",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/endpoints/partner-threads",
+      "destination": "/developer-docs/public-embed-api/overview"
+    },
+    {
+      "source": "/developer-docs/public-embed-api/guides/organization-iframe",
+      "destination": "/developer-docs/public-embed-api/guides/thread-iframe"
+    },
+    {
+      "source": "/getting-started/ecosystem/competitions-and-tournaments",
+      "destination": "/getting-started/ecosystem/incentives-and-rewards"
+    }
+  ]
 }

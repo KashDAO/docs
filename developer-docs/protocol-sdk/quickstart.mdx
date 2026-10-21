@@ -1,0 +1,151 @@
+---
+title: 'Quickstart'
+description: 'Read, quote, buy, sell and redeem on the Kash market program on Solana with @kashdao/protocol-sdk.'
+---
+
+This walkthrough reads a market on Solana mainnet-beta, quotes it, then
+trades from a local keypair. Steps 1 and 2 need no wallet or funds.
+
+## Prerequisites
+
+- Node.js 22 or later.
+- A Solana mainnet-beta RPC endpoint. The public endpoint works for
+  reads; use a dedicated provider for trading.
+- For steps 3 and 4: a keypair holding **USDC** (in its associated token
+  account) and a little **SOL** for transaction fees and, on a first buy,
+  the position account's rent.
+
+```bash
+npm install @kashdao/protocol-sdk @solana/web3.js @coral-xyz/anchor @solana/spl-token bn.js
+```
+
+## 1. Read a market
+
+```ts
+import { Connection } from '@solana/web3.js';
+import { createSolanaClient } from '@kashdao/protocol-sdk/solana';
+
+const kash = createSolanaClient({
+  connection: new Connection(process.env.SOLANA_RPC_URL!, 'confirmed'),
+}); // mainnet-beta by default
+
+const config = await kash.protocol.config();
+console.log(`protocol fee ${config.defaultProtocolFeeBps} bps`);
+
+// By numeric market id, or by the market account address
+// (the REST API's `contractAddress` for a Solana market).
+const market = await kash.markets.get(5n);
+console.log(market.status, market.numOutcomes);
+market.probabilitiesWad.forEach((p, k) => {
+  console.log(`outcome ${k}: ${(Number(p) / 1e16).toFixed(2)}%`);
+});
+```
+
+## 2. Quote
+
+Quotes are the program's exact integer answer, computed locally from the
+market account.
+
+```ts
+// What would 5 USDC of outcome 0 buy?
+const buy = await kash.markets.quoteBuy({ market: 5n, outcome: 0, amountUsdc: 5_000_000n });
+console.log(`${buy.tokensOutWad} WAD, fee ${buy.protocolFeeUsdc} atomic USDC`);
+
+// What would selling 0.1 token of outcome 1 pay? Only tokens traders hold can
+// be sold, so a sell quote larger than that throws KashValidationError (ExceedsSupply).
+const sell = await kash.markets.quoteSell({ market: 5n, outcome: 1, tokensInWad: 10n ** 17n });
+console.log(`${sell.amountOutUsdc} atomic USDC`);
+```
+
+## 3. Buy and sell
+
+```ts
+import { Keypair } from '@solana/web3.js';
+import { keypairSigner } from '@kashdao/protocol-sdk/solana';
+
+const keypair = Keypair.fromSecretKey(
+  Uint8Array.from(JSON.parse(process.env.SOLANA_SECRET_KEY!) as number[]),
+);
+const signer = keypairSigner(keypair);
+
+console.log(`USDC: ${await kash.account.usdcBalance(keypair.publicKey)} (atomic)`);
+
+// Buy 1 USDC of outcome 0, accepting at most 1% below the quote.
+// The first buy also opens the position account in the same transaction.
+const bought = await kash.trades.buy({
+  market: 5n,
+  outcome: 0,
+  amountUsdc: 1_000_000n,
+  maxSlippageBps: 100,
+  signer,
+  computeUnitPriceMicroLamports: 10_000, // optional priority fee
+});
+console.log(`bought: ${bought.signature} (floor ${bought.plan.minTokensOutWad} WAD)`);
+
+// Sell the whole position back.
+const position = await kash.account.position({ market: 5n, outcome: 0, owner: keypair.publicKey });
+const sold = await kash.trades.sell({
+  market: 5n,
+  outcome: 0,
+  tokensInWad: position.balanceWad,
+  maxSlippageBps: 100,
+  signer,
+});
+console.log(`sold: ${sold.signature} for at least ${sold.plan.minAmountOutUsdc} atomic USDC`);
+```
+
+`buy` and `sell` refuse before signing, with a `KashValidationError`,
+when the market is not accepting the trade, for example because it is
+not active or is frozen.
+
+## 4. Build, simulate, then send
+
+The one-call methods are a build followed by a send. Split them when you
+want to inspect a plan, simulate it, or hand it to a different signer:
+
+```ts
+const plan = await kash.trades.buildBuy({
+  market: 5n,
+  outcome: 0,
+  amountUsdc: 1_000_000n,
+  maxSlippageBps: 100,
+  trader: keypair.publicKey,
+});
+console.log(plan.instructions.length, plan.opensPosition, plan.minTokensOutWad);
+
+const simulation = await kash.trades.simulate(plan, { payer: keypair.publicKey });
+if (simulation.error) throw new Error(`refused: ${simulation.error.name ?? 'unknown'}`);
+
+const { signature } = await kash.trades.send(plan, { signer });
+```
+
+## 5. Redeem and close
+
+After a market resolves (or is cancelled), redeem the position, then
+close the empty position account to reclaim its rent:
+
+```ts
+const settled = await kash.markets.get(5n);
+const redeem = settled.status === 'resolved' ? kash.trades.redeem : kash.trades.redeemCancelled;
+
+// amountWad defaults to the whole position. A losing outcome pays zero.
+const redeemed = await redeem({ market: 5n, outcome: 0, maxSlippageBps: 50, signer });
+console.log(`redeemed: ${redeemed.signature}`);
+
+const closed = await kash.trades.closePosition({ market: 5n, outcome: 0, signer });
+console.log(`rent returned to ${closed.plan.rentRecipient.toBase58()}`);
+```
+
+The rent goes back to whoever funded the position account, which can
+differ from the owner who signs.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Error handling" icon="circle-exclamation" href="/developer-docs/protocol-sdk/error-handling">
+    What each failure means, and which ones are safe to retry.
+  </Card>
+  <Card title="Runnable examples" icon="github" href="https://github.com/KashDAO/protocol-sdk-typescript/tree/main/examples/solana">
+    Read-and-quote, buy-and-sell, and redeem-and-close scripts.
+  </Card>
+</CardGroup>

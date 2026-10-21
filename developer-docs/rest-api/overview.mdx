@@ -1,88 +1,97 @@
 ---
 title: 'REST API Overview'
-description: 'Programmatic access to Kash markets, trades, portfolios, and webhooks at api.kash.bot'
+description: 'Programmatic access to Kash markets, trades, portfolios, disputes and webhooks at api.kash.bot.'
 ---
 
-The Kash REST API is the programmatic interface to the prediction-marketplace protocol. It's built for developers, automated agents, and market makers — anything that talks to Kash without a human in the loop.
+The Kash REST API is the programmatic interface to Kash prediction markets. It is built for developers, automated agents and market makers: anything that talks to Kash without a human in the loop.
 
 <Note>
-**The two surfaces, and when to use which:**
+**Two surfaces, and when to use which:**
 
-- **`api.kash.bot`** (this API) — for **machines**. Authenticated with API keys. Per-key rate limits, telemetry, attribution. Trade execution, webhooks, portfolio access.
-- **`app.kash.bot/api`** (the [Public Embed API](/developer-docs/public-embed-api/overview)) — for **humans / UIs**. Anonymous reads, designed for embedding markets in websites and apps. No trading.
-
-If you're building a trading bot, an analytics dashboard against your own positions, an MM strategy, a portfolio tool, or a connector for a third-party platform, you want the REST API. If you're embedding markets in an article or website, you want the Embed API.
+- **`api.kash.bot`** (this API) is for **machines**. Every request carries an API key, which gives you per-key rate limits, telemetry and spending caps. Trading, portfolio, disputes and webhooks live here.
+- **`app.kash.bot/api`** (the [Public Embed API](/developer-docs/public-embed-api/overview)) is for **embedding**: anonymous reads for showing markets in websites and apps. No trading.
 </Note>
 
 <Tip>
-**Building a bot? Start here.** Don't hand-roll HTTP — use the official [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) TypeScript client (auth, retries, idempotency, typed errors, webhook verification built in), and follow the end-to-end [**Build a trading bot**](/developer-docs/rest-api/trading-bot) guide. Prefer Python or run your own signer? See the [Protocol SDK](/developer-docs/protocol-sdk/overview).
+**Building a bot?** Use the official [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) TypeScript client (auth, retries, idempotency, typed errors and webhook verification built in) and follow [Build a trading bot](/developer-docs/rest-api/trading-bot). To sign transactions yourself, see the [Protocol SDK](/developer-docs/protocol-sdk/overview).
 </Tip>
 
 ## What's in v1
 
 <CardGroup cols={2}>
-  <Card title="Markets & Quotes" icon="chart-line" href="/developer-docs/rest-api/endpoint-reference">
-    Browse markets, fetch detail, get on-chain quotes, list recent trades against a market.
+  <Card title="Markets & quotes" icon="chart-line" href="/developer-docs/rest-api/endpoints/markets">
+    Browse markets, read one market, quote a buy or sell, read recent trades.
   </Card>
-  <Card title="Trades" icon="bolt" href="/developer-docs/rest-api/endpoint-reference">
-    Place buy/sell orders, list and inspect your own trades, confirm high-value trades.
+  <Card title="Trades" icon="bolt" href="/developer-docs/rest-api/endpoints/trades">
+    Place buy and sell orders, confirm high-value trades, read your trades.
   </Card>
-  <Card title="Portfolio" icon="wallet" href="/developer-docs/rest-api/endpoint-reference">
-    Smart-account address, position summary, per-market position detail.
+  <Card title="Portfolio & redemptions" icon="wallet" href="/developer-docs/rest-api/endpoints/portfolio-and-redemptions">
+    Your smart account and positions; claim settled positions back to USDC.
+  </Card>
+  <Card title="Market disputes" icon="gavel" href="/developer-docs/rest-api/endpoints/disputes">
+    Dispute a proposed resolution during its dispute window.
   </Card>
   <Card title="Webhooks" icon="bell" href="/developer-docs/rest-api/webhooks/overview">
-    Receive trade lifecycle events at your endpoint. Stripe-style HMAC-signed, retried, replayable.
+    Signed, retried, replayable trade lifecycle events at your endpoint.
   </Card>
-  <Card title="Account" icon="gauge" href="/developer-docs/rest-api/endpoint-reference">
-    Per-key telemetry: trade volume, latency p50/p99, webhook success rate, auth failures.
+  <Card title="Account usage" icon="gauge" href="/developer-docs/rest-api/endpoints/account-and-traces">
+    Per-key trade volume, latency, webhook success and auth failures.
   </Card>
-  <Card title="Traces" icon="route" href="/developer-docs/rest-api/endpoint-reference">
-    Walk a trade's event timeline by correlation id — for debugging and observability.
+  <Card title="Traces" icon="route" href="/developer-docs/rest-api/endpoints/account-and-traces">
+    The event timeline behind one trade, for debugging.
   </Card>
 </CardGroup>
 
-## Design principles
-
-- **Stripe-shaped wire protocol.** RFC 7807 errors, `Idempotency-Key` header, cursor pagination, dual-key envelopes (`{ trade, data }` on every single-resource response), Stripe-style HMAC webhook signatures. If you've integrated with Stripe, this will feel familiar.
-- **OpenAPI 3.1 is the contract of record.** The live spec at [`https://api.kash.bot/v1/openapi.json`](https://api.kash.bot/v1/openapi.json) is the source of truth. Interactive docs at [`https://api.kash.bot/v1/docs`](https://api.kash.bot/v1/docs).
-- **Versioning by URL.** Currently `/v1/`. Sunset and Deprecation headers (RFC 8594) announce changes 12 months ahead.
-- **Always-on auth.** Every data route requires a key — no anonymous fallback. This unlocks per-key rate limits, telemetry, kill switches, and abuse mitigation.
-- **Decimal strings for big numbers.** USDC and outcome-token amounts are returned as decimal strings (atomic-6 for USDC, WAD-18 for tokens). Never lose precision parsing JSON.
-
-## Base URL
+## Base URLs
 
 ```
 Production: https://api.kash.bot/v1
 Staging:    https://api-staging.kash.bot/v1
 ```
 
-The staging environment is wired to Base Sepolia and is the right place to integrate before going live.
+Production trades on **Solana mainnet**. Staging trades on Solana devnet and is the place to integrate before going live. Production keys start `kash_live_`; staging keys start `kash_test_`.
 
-## API version
+## API versions
 
-The current API version is `2026-04-29`. Every response carries `X-Kash-Api-Version: 2026-04-29`; every webhook envelope includes `apiVersion`. We surface this date so consumers can detect a server upgrade and pin against it.
+The URL is versioned (`/v1/`). Within v1, you pick a contract date with the `X-Kash-Api-Version` request header. Two dates are supported:
+
+| `X-Kash-Api-Version` | Behaviour |
+| -------------------- | --------- |
+| `2026-08-19` | **The default when you send no header.** Every market, quote and trade carries `chainRef` (for example `solana:mainnet-beta`), Solana markets are listed and readable, and a trade's `txHash` is returned for every chain. The TypeScript SDK sends this version too. |
+| `2026-04-29` | Served only when you pin it. Legacy contract that cannot describe Solana: Solana markets are left out of `GET /v1/markets`, `GET /v1/markets/{id}` and `/quote` answer `400 CHAIN_NOT_SUPPORTED` for one, and a Solana trade's `txHash` is `null`. |
+
+Sending no header is the same as sending `2026-08-19`. Pin a date if you want your integration to stay on one contract. Any other value is refused with `410 API_VERSION_UNSUPPORTED`, whose body lists the `supported` versions.
+
+Responses carry `X-API-Version`, the contract date that served the request: your pinned value, or `2026-08-19` when you sent no header. Webhook deliveries always use `2026-08-19`. When a version is scheduled for removal, responses also carry `Sunset` and `Deprecation` headers (RFC 8594).
+
+## Design principles
+
+- **Stripe-shaped wire protocol.** RFC 7807 errors with a stable `code`, an `Idempotency-Key` header, cursor pagination, a dual-key envelope on single resources (`{ trade, data, _meta }`) and HMAC-signed webhooks.
+- **OpenAPI 3.1 is the contract.** The live spec is at [`/v1/openapi.json`](https://api.kash.bot/v1/openapi.json), rendered at [`/v1/docs`](https://api.kash.bot/v1/docs).
+- **Always-on auth.** Every data route needs a key. There is no anonymous access to `api.kash.bot`.
+- **Decimal strings for big numbers.** USDC amounts are atomic strings with 6 decimals and outcome-token amounts are WAD strings with 18 decimals, so nothing loses precision in JSON.
 
 ## Next steps
 
 <CardGroup cols={3}>
   <Card title="Quickstart" icon="rocket" href="/developer-docs/rest-api/quickstart">
-    Generate a key, place your first trade, receive your first webhook — under 5 minutes.
+    Get a key, quote a market and place your first trade.
   </Card>
   <Card title="Authentication" icon="key" href="/developer-docs/rest-api/authentication">
-    `X-API-Key`, scopes, IP allowlists, and key rotation.
+    `X-API-Key`, scopes, IP allowlists and request signing.
   </Card>
-  <Card title="Endpoint Reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
-    The full live spec, rendered interactively at `/v1/docs`.
+  <Card title="Endpoint reference" icon="book" href="/developer-docs/rest-api/endpoint-reference">
+    All 31 routes with scopes and reference pages.
   </Card>
 </CardGroup>
 
 ## Need help?
 
 <CardGroup cols={2}>
-  <Card title="Developer Support" icon="headset">
-    Email [dev@kash.bot](mailto:dev@kash.bot) for technical questions.
+  <Card title="Developer support" icon="headset">
+    Email [dev@kash.bot](mailto:dev@kash.bot) for technical questions. Quote the `requestId` from any error.
   </Card>
   <Card title="Discord" icon="discord" href="https://discord.com/invite/n9eumqjMPb">
-    Join the `#developers` channel for real-time help and to share what you're building.
+    Join the `#developers` channel for real-time help.
   </Card>
 </CardGroup>

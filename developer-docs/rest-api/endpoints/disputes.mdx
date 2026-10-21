@@ -1,0 +1,47 @@
+---
+title: 'Market Disputes'
+description: 'Dispute a proposed market resolution while its dispute window is open, and read your dispute.'
+---
+
+| Method | Path                         | Scope          | Rate-limit class | Idempotency-Key |
+| ------ | ---------------------------- | -------------- | ---------------- | --------------- |
+| `POST` | `/v1/markets/{id}/disputes`  | `trades:write` | write            | honoured        |
+| `GET`  | `/v1/markets/{id}/disputes`  | `markets:read` | read             |                 |
+
+Outcomes are determined by Kash's automated resolution system from the market's published sources and rules. A market resolves in three steps: the system **proposes** an outcome, a **dispute window** runs until the market's `resolution.finalizableAt`, then the market **settles**. An undisputed proposal settles when its window ends. An open dispute holds settlement while the same automated system reviews it against the market's sources and rules; the market settles on the result of that review.
+
+Watch `resolution` and `resolutionState` on the [market resource](/developer-docs/rest-api/endpoints/markets#the-market-resource) to know when a proposal exists and when its window closes.
+
+## The dispute resource
+
+| Field        | Type              | Notes |
+| ------------ | ----------------- | ----- |
+| `id`         | uuid              | |
+| `marketId`   | uuid              | |
+| `status`     | enum              | `open`, `reviewing`, `rejected`, `upheld`. |
+| `reason`     | string            | What you filed. |
+| `createdAt`  | date-time         | |
+| `reviewedAt` | date-time \| null | |
+| `reviewNote` | string \| null    | A note explaining the review result, once decided. |
+
+## `POST /v1/markets/{id}/disputes`
+
+Files your dispute against the market's pending proposal.
+
+| Body field | Type   | Notes |
+| ---------- | ------ | ----- |
+| `reason`   | string, required | 10 to 2,000 characters. |
+
+Response `201`: `{ dispute, data, _meta }`. Settlement is now blocked until review.
+
+Errors:
+
+- `409 DISPUTE_WINDOW_CLOSED`: the window ended (after `finalizableAt`).
+- `409 DISPUTE_DECIDED`: the market's disputes have already been reviewed and the market has settled.
+- `409 DISPUTE_ALREADY_FILED`: one dispute per user per proposal.
+- `422 MARKET_NOT_DISPUTABLE`: the market has no proposal, or its settlement has begun.
+- `404 RESOURCE_NOT_FOUND`: the market does not exist.
+
+## `GET /v1/markets/{id}/disputes`
+
+Returns the latest dispute **you** filed against this market, including the review outcome. Response `200`: `{ dispute, data, _meta }`. Returns `404 RESOURCE_NOT_FOUND` if you have not filed one: disputes filed by other users are never visible.

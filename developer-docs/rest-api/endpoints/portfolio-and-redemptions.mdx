@@ -1,0 +1,73 @@
+---
+title: 'Portfolio & Redemptions'
+description: 'Read your smart account and positions, and claim settled positions back to USDC.'
+---
+
+| Method | Path                       | Scope            | Rate-limit class | Idempotency-Key |
+| ------ | -------------------------- | ---------------- | ---------------- | --------------- |
+| `GET`  | `/v1/portfolio`            | `portfolio:read` | read             |                 |
+| `GET`  | `/v1/portfolio/positions`  | `portfolio:read` | read             |                 |
+| `POST` | `/v1/redemptions`          | `trades:write`   | write            | honoured        |
+
+## `GET /v1/portfolio`
+
+The authenticated user's smart account and a summary of open positions.
+
+```json
+{
+  "portfolio": {
+    "smartAccountAddress": "…",
+    "activePositions": 3,
+    "totalCostBasisAtomic": "125000000"
+  },
+  "data": { "…": "same as portfolio" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+`totalCostBasisAtomic` is USDC in atomic units (6 decimals). Returns `409 SMART_ACCOUNT_NOT_PROVISIONED` while the account has no smart account yet.
+
+## `GET /v1/portfolio/positions`
+
+Every active position, in one response (not paginated).
+
+| Query      | Type | Notes |
+| ---------- | ---- | ----- |
+| `marketId` | uuid | Optional filter to one market. |
+
+Each item: `{ marketId, outcomeIndex, shares, costBasisAtomic, tradeCount, firstTradeAt, lastTradeAt }`. `shares` is an 18-decimal (WAD) integer string; `costBasisAtomic` is atomic USDC.
+
+This route supports conditional requests. Every `200` carries a weak `ETag` and `Cache-Control: private, no-cache`. Send the ETag back as `If-None-Match` and an unchanged position set is answered `304 Not Modified` with no body, before the list is even queried. A `304` still counts toward your rate limit. See [ETags](/developer-docs/rest-api/etags).
+
+## `POST /v1/redemptions`
+
+Claims one settled position back to USDC: winning tokens in a resolved market, or a refund of a held outcome in a cancelled market. The claim is recorded, and the redemption is then submitted to the market program from your wallet asynchronously; this call makes no on-chain call itself. Poll `GET /v1/portfolio/positions` (or your wallet balance) for the result.
+
+| Body field     | Type              | Notes |
+| -------------- | ----------------- | ----- |
+| `marketId`     | uuid, required    | |
+| `outcomeIndex` | integer, required | 0 to 255. |
+
+Responses:
+
+- **`201 Created`**: the claim was recorded and its redemption will be submitted from your wallet.
+- **`200 OK`**: this position was already claimed. The original request is returned unchanged with `_meta.idempotent: true`.
+
+```json
+{
+  "redemption": {
+    "id": "…",
+    "marketId": "…",
+    "outcomeIndex": 1,
+    "kind": "resolved",
+    "sharesWad": "18734012471176000000",
+    "status": "pending"
+  },
+  "data": { "…": "same as redemption" },
+  "_meta": { "requestId": "…", "timestamp": "…", "idempotent": false }
+}
+```
+
+`kind` is `resolved` (winning tokens) or `cancelled` (refund). `sharesWad` is the on-chain balance being redeemed. `status` is `pending` when the claim is created.
+
+Errors: `404 REDEMPTIONS_NOT_ENABLED` (self-service redemption is not available in this environment; winning positions are then redeemed automatically), `404 MARKET_NOT_FOUND`, `400 OUTCOME_INDEX_INVALID`, `409 POSITION_NOT_CLAIMABLE` (the outcome did not win, the market has no refund price, self-service is not live for this market, or the position is already redeemed), `409 INSUFFICIENT_BALANCE` (you hold none of that outcome), `409 SMART_ACCOUNT_NOT_PROVISIONED`, `409 WALLET_DELEGATION_NOT_ENABLED`, `400 CHAIN_NOT_SUPPORTED`.

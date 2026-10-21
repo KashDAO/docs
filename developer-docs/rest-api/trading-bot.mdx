@@ -1,14 +1,14 @@
 ---
 title: 'Build a trading bot'
-description: 'End-to-end: from an API key to a running bot that quotes, trades, verifies webhooks, manages positions, and claims winnings — with @kashdao/sdk.'
+description: 'End-to-end: from an API key to a running bot that quotes, trades, verifies webhooks, manages positions, and redeems resolved positions — with @kashdao/sdk.'
 ---
 
-This is the spine that ties the reference pages together. You'll build a bot that watches a market, places a sized trade on a signal, verifies webhook events, tracks its positions, and claims its winnings after the market resolves. Everything here runs against **staging** (`api-staging.kash.bot`, Base Sepolia) — going live is the same code against `api.kash.bot`.
+This is the spine that ties the reference pages together. You'll build a bot that watches a market, places a sized trade on a signal, verifies webhook events, tracks its positions, and redeems its winning positions after the market resolves. Everything here runs against **staging** (`api-staging.kash.bot`, Solana devnet with simulated USDC). Going live is the same code with a live key against `api.kash.bot`, where trading runs on Solana mainnet.
 
 <Note>
-Use the **[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript)** TypeScript client, not raw HTTP. It handles auth, retries, idempotency, typed errors, and webhook signature verification for you. Everything below is SDK-first; the one place you'll drop to `fetch` is redemptions (not yet in the SDK — see [step 8](#8-claim-winnings-redeem)).
+Use the **[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript)** TypeScript client, not raw HTTP. It handles auth, retries, idempotency, typed errors, and webhook signature verification for you. Everything below is SDK-first.
 
-Building on the **self-orchestrated** surface instead — you run your own signer / market-making infra? Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (and the [Hummingbot connector](/developer-docs/protocol-sdk-python/hummingbot)). This tutorial is the **managed** REST path.
+Building on the **self-orchestrated** surface instead — you run your own signer / market-making infra? Use the [Protocol SDK](/developer-docs/protocol-sdk/overview). This tutorial is the **managed** REST path.
 </Note>
 
 ## What you'll build
@@ -20,38 +20,38 @@ A long-running loop that:
 3. Confirms the trade if it trips the high-value gate.
 4. Learns the outcome asynchronously via a signed webhook (or by polling).
 5. Tracks open positions.
-6. Redeems winnings once the market resolves.
+6. Redeems winning positions once the market resolves.
 
 ## 1. Prerequisites
 
-- A Kash account — sign up at [staging.kash.bot](https://staging.kash.bot).
-- An **API key** with these scopes (see [Authentication](/developer-docs/rest-api/authentication)): `markets:read`, `markets:quote`, `trades:read`, `trades:write`, `portfolio:read`, `webhooks:manage`. Keys are created in the webapp (**Settings → API Keys**) and shown once — capture the plaintext. A `kash_test_*` key targets staging automatically.
+- A Kash account — sign up in the [Kash app](https://app.kash.bot).
+- An **API key** with these scopes (see [Authentication](/developer-docs/rest-api/authentication)): `markets:read`, `markets:quote`, `trades:read`, `trades:write`, `portfolio:read`, `webhooks:manage`. Keys are created in the app (**Settings → API Keys**, mode `Test` for staging) and shown once — capture the plaintext. A `kash_test_*` key targets staging automatically.
 - Node 22+.
 
 ```bash
 npm i @kashdao/sdk
 export KASH_API_KEY="kash_test_…"        # staging key
-export KASH_WEBHOOK_SECRET="whsec_…"     # from the webapp, for step 4
+export KASH_WEBHOOK_SECRET="whsec_…"     # from the app, for step 6
 ```
 
 ## 2. Construct the client
 
-The SDK auto-routes to staging for a `kash_test_` key and to production for a `kash_live_` key — you don't hard-code a base URL.
+The SDK auto-routes to staging for a `kash_test_` key and to production for a `kash_live_` key — you don't hard-code a base URL. It pins API version `2026-08-19`, which is the version that lists and quotes Solana markets and identifies each market's chain with `chainRef`.
 
 ```ts
 import { KashClient } from '@kashdao/sdk';
 
 const kash = new KashClient({ apiKey: process.env.KASH_API_KEY! });
-// kash_test_* → https://api-staging.kash.bot/v1  (Base Sepolia)
-// kash_live_* → https://api.kash.bot/v1
+// kash_test_* → https://api-staging.kash.bot/v1  (Solana devnet)
+// kash_live_* → https://api.kash.bot/v1          (Solana mainnet)
 ```
 
 ## 3. Read a market and quote
 
-Pick a market, then quote before you trade so you size against real on-chain liquidity. `amountUsdcAtomic` is USDC in atomic units (6 decimals → `10_000_000` = 10 USDC).
+Pick a market, then quote before you trade so you size against real on-chain liquidity. `amountUsdcAtomic` is USDC in atomic units (6 decimals → `10_000_000` = 10 USDC); outcome-token amounts are WAD (18 decimals).
 
 ```ts
-const { data: markets } = await kash.markets.list({ status: 'active' });
+const { data: markets } = await kash.markets.list({ status: 'ACTIVE' });
 const market = markets[0];
 
 const quote = await kash.quotes.buy({
@@ -60,13 +60,13 @@ const quote = await kash.quotes.buy({
   amountUsdcAtomic: 10_000_000n,   // 10 USDC into outcome 0
 });
 
-// quote.amountOut = outcome tokens you'd receive; quote.pricesAfterWad = post-trade prices
-console.log('would receive', quote.amountOut, 'tokens');
+// quote.tokensOut = outcome tokens you'd receive (WAD); quote.pAfter = post-trade prices (WAD)
+console.log('would receive', quote.tokensOut, 'tokens at', quote.effectivePrice);
 ```
 
 ## 4. Place a trade (idempotent)
 
-Pass an `idempotencyKey`: if the request times out and your bot retries, you get the **same** trade back rather than a duplicate. The response carries `idempotent: true` when it's a replay.
+Pass an `idempotencyKey`: if the request times out and your bot retries, you get the **same** trade back rather than a duplicate. The response carries `idempotent: true` when it's a replay. (Without one, the SDK auto-generates a key per call, which protects its own retries but not a retry in your code.) `amount` is a USDC decimal string.
 
 ```ts
 import { randomUUID } from 'node:crypto';
@@ -85,11 +85,11 @@ Reuse the **same** `idempotencyKey` for a given logical order across retries; ge
 
 ## 5. Confirm high-value trades
 
-Trades above your key's per-trade threshold return a one-time `confirmation` token instead of executing immediately (the trade sits in `pending_confirmation`). Confirm it to release execution.
+Trades above your key's per-trade threshold return a one-time `confirmation` token instead of executing immediately (the trade sits in `pending_confirmation`). Confirm it within 60 seconds to release execution.
 
 ```ts
 if (trade.confirmation) {
-  // trade.confirmation = { token, expiresAt } — the token is shown once, here.
+  // trade.confirmation = { token, expiresAt } — shown once, valid for 60 seconds.
   await kash.trades.confirm(trade.id, { token: trade.confirmation.token });
 }
 ```
@@ -111,7 +111,7 @@ app.post('/webhooks/kash', express.raw({ type: 'application/json' }), async (req
 
   let event;
   try {
-    // Verifies the HMAC signature + timestamp, then parses. Throws on a bad signature.
+    // Verifies the HMAC signature + 5-minute timestamp window, then parses. Throws on a bad signature.
     event = await kash.webhooks.constructEvent(raw, signature, process.env.KASH_WEBHOOK_SECRET!);
   } catch (err) {
     return res.status(400).send('invalid signature');
@@ -120,7 +120,7 @@ app.post('/webhooks/kash', express.raw({ type: 'application/json' }), async (req
   if (alreadyProcessed(eventId)) return res.status(200).send('dup');  // your idempotency store
 
   switch (event.type) {
-    case 'trade.completed': /* position is live */ break;
+    case 'trade.completed': /* event.data.txHash = Solana signature */ break;
     case 'trade.failed':
     case 'trade.rejected': /* surface + retry policy */ break;
     case 'trade.confirmation-required': /* call kash.trades.confirm */ break;
@@ -132,8 +132,8 @@ app.post('/webhooks/kash', express.raw({ type: 'application/json' }), async (req
 Prefer webhooks in production. For a script or a quick test, **poll** instead:
 
 ```ts
-const settled = await kash.trades.waitForCompletion(trade.id);
-console.log(settled.status);   // 'completed' | 'failed' | 'rejected'
+const settled = await kash.trades.waitForCompletion(trade.id);   // polls every 2s, up to 60s by default
+console.log(settled.status, settled.txHash);   // 'completed' | 'failed' | 'rejected'
 ```
 
 See [Webhooks → Verifying](/developer-docs/rest-api/webhooks/verifying) for the full event catalog and signature scheme.
@@ -141,36 +141,39 @@ See [Webhooks → Verifying](/developer-docs/rest-api/webhooks/verifying) for th
 ## 7. Track positions
 
 ```ts
-const summary = await kash.portfolio.get();                       // account-wide
-const { data: positions } = await kash.portfolio.positions({ marketId: market.id });
+const summary = await kash.portfolio.get();                               // account-wide
+const positions = await kash.portfolio.positions({ marketId: market.id }); // PositionResource[]
 ```
 
-`positions` is **not** paginated in v1 — it returns everything, filterable by `marketId`.
+`positions()` returns an array, **not** a page — everything at once, filterable by `marketId`. Each position carries `shares` (WAD) and `costBasisAtomic` (USDC). For a long-running bot, `kash.portfolio.watchPositions()` yields the positions now and again whenever they change, backing off while nothing moves.
 
-## 8. Claim winnings (redeem)
+## 8. Redeem winning positions
 
-When a market resolves, your winning outcome tokens sit in your smart account until you claim them. Create a redemption for the `(market, outcome)` you hold; the existing payout pipeline settles it on-chain and your USDC balance increases.
-
-<Note>
-Redemptions aren't in `@kashdao/sdk` **yet**, so call the endpoint directly. It reuses your `trades:write` scope and is idempotent — one open claim per `(market, outcome)`; a repeat returns the original with `200`.
-</Note>
+When a market resolves (or is cancelled), your winning outcome tokens stay in your account until they are claimed. Create a redemption for each `(market, outcome)` you hold; the redemption is then submitted from your wallet and settles on-chain asynchronously.
 
 ```ts
-const res = await fetch('https://api-staging.kash.bot/v1/redemptions', {
-  method: 'POST',
-  headers: { 'X-API-Key': process.env.KASH_API_KEY!, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ marketId: market.id, outcomeIndex: 0 }),
-});
-// 201 new claim · 200 duplicate (original returned) · 409 POSITION_NOT_CLAIMABLE
-// · 404 REDEMPTIONS_NOT_ENABLED (feature off for your org)
-const redemption = await res.json();
+import { KashConflictError, KashNotFoundError } from '@kashdao/sdk';
+
+try {
+  const redemption = await kash.redemptions.create({ marketId: market.id, outcomeIndex: 0 });
+  // { id, marketId, outcomeIndex, kind: 'resolved' | 'cancelled', sharesWad, status, idempotent }
+  console.log(redemption.kind, redemption.sharesWad, redemption.status);
+} catch (err) {
+  if (err instanceof KashConflictError && err.code === 'POSITION_NOT_CLAIMABLE') {
+    // not settled yet, losing outcome, or already redeemed
+  } else if (err instanceof KashNotFoundError && err.code === 'REDEMPTIONS_NOT_ENABLED') {
+    // self-service redemption is switched off
+  } else {
+    throw err;
+  }
+}
 ```
 
-There is **no** redemption webhook. Detect settlement by polling `GET /v1/portfolio` until the USDC balance reflects the payout. See the [`POST /v1/redemptions`](/developer-docs/rest-api/endpoint-reference) reference and the [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) / [`REDEMPTIONS_NOT_ENABLED`](/developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED) codes.
+It uses your `trades:write` scope and is idempotent: one open claim per `(market, outcome)`, and a repeat returns the original request with `idempotent: true`. There is **no** redemption webhook. See the [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) and [`REDEMPTIONS_NOT_ENABLED`](/developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED) codes.
 
 ## 9. Handle errors and rate limits
 
-Every failure is a typed `KashError` subclass — branch on the class, not the message.
+Every failure is a typed `KashError` subclass — branch on the class, not the message. The SDK already retries 429s, 5xx, network errors and timeouts (up to `maxRetries`, default 3) before throwing.
 
 ```ts
 import {
@@ -178,19 +181,22 @@ import {
   KashAuthorizationError,
   KashValidationError,
   KashConflictError,
+  KashMaintenanceError,
 } from '@kashdao/sdk';
 
 try {
   await kash.trades.create(/* … */);
 } catch (err) {
   if (err instanceof KashRateLimitError) {
-    await sleep(err.retryAfterSeconds * 1000);   // seconds, honour it
+    await sleep((err.retryAfterSeconds ?? 1) * 1000);   // seconds; undefined if no Retry-After
   } else if (err instanceof KashConflictError) {
     // e.g. duplicate idempotency key with a different body, or already-claimed
   } else if (err instanceof KashAuthorizationError) {
     // missing scope / IP not allowed — fix the key, don't retry
+  } else if (err instanceof KashMaintenanceError) {
+    // 503 — trading temporarily unavailable; back off for err.retryAfterSeconds
   } else if (err instanceof KashValidationError) {
-    // 400 — bad input; inspect err and fix the request
+    // 400 — bad input; inspect err.issues and fix the request
   } else {
     throw err;
   }
@@ -201,9 +207,9 @@ See [Rate limits](/developer-docs/rest-api/rate-limits) and the [Error catalogue
 
 ## 10. Going live
 
-- Swap the key for a `kash_live_*` key — the SDK re-routes to `api.kash.bot` automatically.
-- Point `webhook_url` at your production endpoint and set the production `KASH_WEBHOOK_SECRET`.
-- Review [rate limits](/developer-docs/rest-api/rate-limits) for your tier and the [webapp → REST migration notes](/developer-docs/rest-api/migration-from-webapp).
+- Swap the key for a `kash_live_*` key — the SDK re-routes to `api.kash.bot` automatically, and trades settle on Solana mainnet with real USDC.
+- Set the live key's webhook URL to your production endpoint (in **Settings → API Keys**) and use that key's `KASH_WEBHOOK_SECRET`.
+- Review [rate limits](/developer-docs/rest-api/rate-limits) for your tier.
 
 ## See also
 

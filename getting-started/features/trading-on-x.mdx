@@ -1,0 +1,99 @@
+---
+title: 'Trading on X'
+description: 'Trade Kash markets by replying to their posts on X'
+icon: 'x-twitter'
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="block dark:hidden"
+  src="/assets/cover/cover.svg"
+  alt="Hero Light"
+/>
+<img
+  style={{ borderRadius: '0.5rem' }}
+  className="hidden dark:block"
+  src="/assets/cover/cover.svg"
+  alt="Hero Dark"
+/>
+
+Kash markets are posted on X, and you can trade them without leaving X. Reply to a market's post and mention the trading account, and the trade is submitted from your own wallet.
+
+## Before your first trade
+
+<Steps>
+  <Step title="Create a Kash account">
+    Sign up at [app.kash.bot](https://app.kash.bot). See [Creating an Account](/getting-started/guides/creating-an-account).
+  </Step>
+  <Step title="Connect your X account">
+    Sign in with X, or connect X later from **Settings → Account**. The bot recognises you by your connected X account.
+  </Step>
+  <Step title="Give your wallet trading permission">
+    You give this once, during onboarding. If you skipped it, the bot will tell you to finish it in the app.
+  </Step>
+  <Step title="Add USDC">
+    Trades are paid from the USDC in your own wallet. See [Depositing](/getting-started/guides/depositing).
+  </Step>
+</Steps>
+
+## Placing a trade
+
+Find the market's post on X, then either **reply** to it (anywhere in its thread) or **quote** it, and mention **@kash_bot_trade** with your amount and outcome:
+
+```
+@kash_bot_trade buy $50 of Yes
+```
+
+```
+@kash_bot_trade buy $10 of Argentina
+```
+
+Kash reads the amount and matches the outcome by its label, in several languages. When the trade goes through, the bot replies with a confirmation such as **"✅ Yes for $50"** and a link to the transaction.
+
+You can also close a position the same way, or ask the bot for the current prices, the time left or your P&L on that market.
+
+<Warning>
+**Mention the account that posted the market.** Most markets are posted by [@kash_bot_trade](https://x.com/kash_bot_trade), but creators can post markets from their own accounts. If you mention the wrong account, the bot will tell you which one to use.
+</Warning>
+
+## Rules and limits
+
+- **Reply to or quote the market post.** A mention on its own, a pasted market link, or a quote of a post that isn't a market won't be traded.
+- **Trade size:** the bot tells you if your amount is too small to trade.
+- **Act promptly:** a mention that's too old when it's processed is refused rather than filled at a stale price.
+- **Open markets only:** markets that have frozen, resolved or been cancelled can't be traded.
+- **No transaction fee:** trades placed on X don't carry the network fee that web trades may include. The usual protocol fee applies.
+
+## Direct messages
+
+You can DM the bot to:
+- check your **balance**, **portfolio**, **P&L**, **trade history** and **pending trades**
+- get the **prices** on a market or **discover** markets
+- request an **export** of your data
+
+Trading happens by replying to market posts, not in DMs, and markets are created in the web app.
+
+## Your own X bot
+
+Creators can connect their own X account in **Settings → X bot**. Kash then posts your markets from your account, and your followers can trade them by replying to your posts. Disconnecting revokes Kash's access to your X account and stops the posts.
+
+<Note>
+Kash will never DM you asking for your private key, a login code or a "verification" deposit. Deposits, withdrawals and claims happen in the web app.
+</Note>
+
+<CardGroup cols={2}>
+  <Card
+    title="Trading Options"
+    icon="chart-line"
+    href="/getting-started/features/trading-options"
+  >
+    Every way to trade on Kash
+  </Card>
+  <Card
+    title="Troubleshooting"
+    icon="wrench"
+    href="/getting-started/faqs/troubleshooting"
+  >
+    If a trade on X didn't go through
+  </Card>
+</CardGroup>

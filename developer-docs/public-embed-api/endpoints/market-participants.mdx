@@ -1,0 +1,51 @@
+---
+title: 'GET /api/markets/participants'
+description: 'Recent trader avatars for up to 50 markets'
+---
+
+Returns up to four recent traders for each market, for a "who's trading" avatar stack on market cards. The traders come from each market's 50 most recent trades, newest first. It is a sample for display, not a full count. Use `participantCount` on the market for the total.
+
+## Endpoint
+
+```
+GET https://app.kash.bot/api/markets/participants?ids=:id1,:id2
+```
+
+## Query parameters
+
+<ParamField query="ids" type="string" required>
+  A comma-separated list of up to 50 market UUIDs.
+</ParamField>
+
+## Response
+
+<ResponseField name="participants" type="object">
+  A map from market ID to a list of up to 4 `{ userId, src, alt, fallback }`. `src` is the avatar URL or `null`, and `alt` and `fallback` hold the trader's display name. Every requested ID is present as a key, with an empty list when there is nothing to show.
+</ResponseField>
+
+## Caching and rate limit
+
+Market reads group, rate-limited per IP (see [Rate limits](/developer-docs/public-embed-api/overview#rate-limits)). Responses may be served from a short-lived cache.
+
+## Example request
+
+```bash cURL
+curl "https://app.kash.bot/api/markets/participants?ids=93f1445c-912c-47b4-8065-d1ff5a6b8dfc"
+```
+
+## Example response
+
+```json 200
+{
+  "participants": {
+    "93f1445c-912c-47b4-8065-d1ff5a6b8dfc": [
+      {
+        "userId": "3f2b0c1e-6a7d-4e59-9b8a-1c2d3e4f5a6b",
+        "src": "https://pbs.twimg.com/profile_images/…_normal.jpg",
+        "alt": "Example Trader",
+        "fallback": "Example Trader"
+      }
+    ]
+  }
+}
+```

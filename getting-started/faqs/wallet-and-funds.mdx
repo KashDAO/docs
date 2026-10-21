@@ -1,6 +1,6 @@
 ---
 title: 'Wallet & Funds'
-description: 'Common questions about wallet management and fund storage'
+description: 'Common questions about your wallet and your funds'
 icon: 'wallet'
 ---
 
@@ -17,36 +17,19 @@ icon: 'wallet'
   alt="Hero Dark"
 />
 
-# Your Kash wallet
+# Your wallet
 
 <AccordionGroup>
   <Accordion title="Where are my funds stored?">
-    Your funds live in your own **smart wallet** on the Base network — an ERC-4337 smart account created for you when you sign up.
-
-    - **Your account, on-chain:** the smart account belongs to you and holds your USDC and market positions
-    - **Non-custodial:** deposits, trades, and payouts all execute from your own account — Kash never takes custody of your funds
-    - **Signing:** the smart account is controlled by an embedded wallet (powered by Privy) tied to your login
-    - **Gasless:** transactions are sponsored via a paymaster, so you never need ETH for gas
-    - **Transparent:** everything is verifiable on the Base blockchain
+    In **your own embedded Solana wallet**, set up when you signed up. You own it, and Kash never holds custody of your funds: trades and redemptions move USDC directly between your wallet and each on-chain market. You can export the wallet's private key from **Settings → Account → Wallet backup**.
   </Accordion>
 
   <Accordion title="How do I check my balance?">
-    Sign in at [app.kash.bot](https://app.kash.bot) and open your **Portfolio**:
-
-    - **Available balance** — USDC ready to trade or withdraw
-    - **Open positions** — the current value of your market positions
-    - **Claimable winnings** — resolved positions waiting for you to claim
-    - **History** — every deposit, trade, claim, and withdrawal
-
-    Balances update in real time as you trade, and everything is independently verifiable on a Base block explorer.
+    Your USDC balance is shown in the app header and in **Portfolio**, along with the value of your open positions and anything waiting to be claimed.
   </Accordion>
 
   <Accordion title="What currencies does Kash support?">
-    **USDC only.** All balances, trades, payouts, and withdrawals on Kash are in USDC — a stablecoin pegged to the US dollar.
-
-    - Kash does **not** accept or auto-convert other tokens (no ETH, WETH, or DAI)
-    - Fiat deposits (card, Apple Pay, Google Pay) are converted to USDC by the payment provider before reaching your wallet
-    - **Does Kash have a token?** Kash has not launched a token. If that ever changes, it will be announced through official channels — treat anything else as a scam.
+    **USDC on Solana.** Every price, trade, redemption and withdrawal is in USDC. You never need SOL, because Kash pays the Solana network fees.
   </Accordion>
 </AccordionGroup>
 
@@ -54,25 +37,15 @@ icon: 'wallet'
 
 <AccordionGroup>
   <Accordion title="How do I deposit funds?">
-    Two ways, both from the deposit flow on app.kash.bot:
-
-    **1. Card, Apple Pay, or Google Pay** — all fiat processing is handled by third-party payment providers; Kash never sees or stores your card or bank details:
-
-    | Provider | Fee | KYC |
-    |---|---|---|
-    | Halliday | 2.9% + $0.30 | Basic (government ID) |
-
-    Additional payment options may appear in the deposit flow — fees and limits are always shown before you confirm.
-
-    **2. Direct crypto transfer** — send USDC from any wallet or exchange on **Base, Ethereum, Polygon, Arbitrum, Optimism, Avalanche, BNB Chain, Linea, Scroll, Mantle, Mode, or Blast** ($1 – $100,000 per transaction, limits subject to change; no identity verification currently required, subject to compliance screening). Anything sent on a network other than Base is automatically bridged to Base for you.
-
-    See the [depositing guide](/getting-started/guides/depositing) for step-by-step instructions.
+    Open **Add funds**. Use the checkout to buy or transfer USDC with the payment methods available in your region, or send USDC on Solana straight to your wallet address. See [Depositing](/getting-started/guides/depositing).
   </Accordion>
 
   <Accordion title="How long do deposits take?">
-    - **Card / Apple Pay / Google Pay:** usually within a few minutes of payment completing
-    - **USDC on Base:** a couple of minutes
-    - **USDC on other networks:** roughly 10–15 minutes, since the funds are bridged to Base automatically
+    A USDC transfer on Solana is credited once it confirms on-chain. Checkout purchases depend on the payment method, and the checkout shows the expected time.
+  </Accordion>
+
+  <Accordion title="Can I deposit other tokens, or USDC on another network?">
+    Send only **USDC on Solana** to your wallet address. Other tokens, or USDC sent on a different network, won't be credited and may be unrecoverable. If your funds are elsewhere, use the checkout, which delivers USDC on Solana.
   </Accordion>
 </AccordionGroup>
 
@@ -80,55 +53,39 @@ icon: 'wallet'
 
 <AccordionGroup>
   <Accordion title="How do I withdraw funds?">
-    Open **Withdraw** in your wallet on app.kash.bot, enter an amount and destination address, and choose a destination network. Withdrawals are always in USDC.
-
-    **Supported destination networks:** Base, Ethereum, Arbitrum, Optimism, Polygon. Withdrawals to networks other than Base are bridged automatically; bridging costs are shown in the quote. A fiat cash-out option, handled through Kash's third-party payment providers, is also available in the withdrawal flow.
-
-    Withdrawals are processed automatically and typically complete within minutes. See the [withdrawing guide](/getting-started/guides/withdrawing) for the full walkthrough.
+    Choose **Withdraw**, enter the amount and the destination address, check the network, and confirm. You can follow its status in the app. See [Withdrawing](/getting-started/guides/withdrawing).
   </Accordion>
 
-  <Accordion title="What are the withdrawal limits?">
-    | Limit | Value |
-    |---|---|
-    | Minimum per transaction | $1 |
-    | Maximum per transaction | $25,000 |
-    | Daily maximum | $10,000 |
-    | Weekly maximum | $50,000 |
-    | Withdrawals per hour | 5 |
-
-    Limits are current as of publication — the app always shows live limits before you confirm.
+  <Accordion title="Can I send USDC to another Kash user?">
+    Yes, from a chat in **Messages**. If you can message someone, you can pay them. Any network fee is shown before you confirm.
   </Accordion>
 
   <Accordion title="Are there minimum balance requirements?">
-    No. There's no minimum balance, no maintenance fees, and no lock-ups. You can hold a zero balance, and every feature works regardless of how much you hold. The only hard minimum is $1 per withdrawal.
+    No. There's no minimum balance to keep an account. Some actions have minimums, and the app or the bot tells you if an amount is too small.
   </Accordion>
 </AccordionGroup>
 
-# Account access and security
+# Funds from before the move to Solana
 
 <AccordionGroup>
-  <Accordion title="How do I access my wallet?">
-    Your wallet is tied to your Kash account. You can sign in with **X (Twitter), Google, email, or an external wallet** — whichever you used to create your account. A recovery email can be added in Settings so you're not dependent on a single login method.
+  <Accordion title="I have USDC from Kash's earlier network. What do I do?">
+    Kash markets used to run on Base. If you still hold USDC there, the app shows that balance with two options:
+    - **Move to Solana · One-way:** moves it to your Solana wallet so you can trade it on current markets. A bridging fee is shown before you confirm, and the move can't be reversed. The app tells you if an amount can't be moved.
+    - **Withdraw** it to an outside address instead.
   </Accordion>
+</AccordionGroup>
 
+# Wallet security
+
+<AccordionGroup>
   <Accordion title="How do I keep my wallet secure?">
-    - **Secure your login method** — enable 2FA on the X or Google account you sign in with, and add a recovery email
-    - **Verify addresses** before every withdrawal — blockchain transactions can't be reversed
-    - **Watch for phishing** — only use app.kash.bot and official channels; Kash will never DM you asking for credentials
-    - **Monitor your activity** — review your history regularly and contact support@kash.bot about anything suspicious
+    Use two-factor authentication with your sign-in provider, add a recovery email or passkey, and never share your exported private key or login codes. See [Security](/getting-started/faqs/security).
   </Accordion>
 
   <Accordion title="What should I do if I have wallet issues?">
-    1. **Balance not updating?** Refresh the page; deposits need blockchain confirmation first
-    2. **Deposit not showing?** Verify you sent USDC on a supported network to the exact address shown in the deposit flow
-    3. **Withdrawal delayed?** Check its status in the app — cross-chain withdrawals take longer
-    4. **Still stuck?** Contact support@kash.bot or use the in-app feedback widget with the transaction details
+    Refresh the app and check **Portfolio → Transactions**. If something still looks wrong, report it from the info button in the app or email [support@kash.bot](mailto:support@kash.bot).
   </Accordion>
 </AccordionGroup>
-
-<Warning>
-Blockchain transactions are final. Always double-check destination addresses and networks — Kash cannot recover funds sent to a wrong address or an unsupported network.
-</Warning>
 
 <CardGroup cols={2}>
   <Card
@@ -136,13 +93,13 @@ Blockchain transactions are final. Always double-check destination addresses and
     icon="shield"
     href="/getting-started/faqs/security"
   >
-    Learn about wallet security
+    Protect your account and funds
   </Card>
   <Card
     title="Transactions"
     icon="arrow-right-arrow-left"
     href="/getting-started/faqs/transactions"
   >
-    Understand transaction process
+    Fees, trades, claims and withdrawals
   </Card>
 </CardGroup>

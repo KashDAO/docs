@@ -7,23 +7,24 @@ description: 'HTTP 401 — Authentication required'
 
 ## When it fires
 
-The `X-API-Key` header is well-formed but no row in the API key store matches its prefix or HMAC.
+The `X-API-Key` header is well formed, but it does not match any key Kash knows about.
 
 ## Why it happens
 
-- The key was deleted (not just revoked — see [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) for that distinct case).
-- A character was modified in transit or storage (e.g., copy-paste truncation that still happened to land on the right length).
-- Wrong environment — a `kash_test_…` key sent to production, or vice versa. Production never accepts test keys.
-- The HMAC pepper has been rotated and the rotation grace period has elapsed for an old issuance.
+- The key was deleted (not just revoked; see [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) for that case).
+- A character was changed in transit or storage, for example a copy-paste that altered the value but kept its length.
+- Wrong environment: a `kash_test_…` key sent to production, or a `kash_live_…` key sent to staging. Each environment accepts only its own keys.
 
 ## How to fix
 
-- Compare the stored value to what the webapp Settings → API Keys page shows for the prefix (`kash_live_xxxx…`).
-- If the prefix doesn't match anything in your account, the key was never yours or has been deleted — issue a new one.
-- If the prefix matches but auth still fails, contact support with the prefix and your `X-Request-ID` from a recent failed call.
+- Compare the value you are sending with the key prefix shown in the Kash app (Settings → API Keys).
+- If the prefix matches nothing in your account, the key has been deleted or was never yours. Issue a new one.
+- If the prefix matches and authentication still fails, contact Kash support with the prefix and the `requestId` from a recent failed call.
+
+Repeated authentication failures from one source trigger a temporary lockout, answered with [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED). Fix the key before retrying.
 
 ## Related codes
 
 - [`API_KEY_MISSING`](/developer-docs/api-errors/API_KEY_MISSING), [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED) — earlier failure points
-- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — key existed but was explicitly revoked
-- [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) — key existed but is past `expires_at`
+- [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) — the key existed but was revoked
+- [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) — the key existed but is past its expiry

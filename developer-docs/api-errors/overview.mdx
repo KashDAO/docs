@@ -4,89 +4,247 @@ description: 'Stable, RFC 7807-shaped problem responses. Every code has its own 
 ---
 
 The Kash REST API returns errors as
-[RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) Problem Details
-JSON. Every response carries a stable `code` and a `type` URL that
-resolves to the error's documentation page on this site:
+[RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) Problem Details, with
+`Content-Type: application/problem+json`. Every response carries a stable
+`code` and a `type` URL that resolves to that code's page in this catalogue:
 
 ```json
 {
-  "type":      "https://docs.kash.bot/developer-docs/api-errors/MARKET_NOT_TRADEABLE",
-  "title":     "Market not tradeable",
-  "status":    409,
-  "code":      "MARKET_NOT_TRADEABLE",
-  "detail":    "Market 0xabc... is FROZEN; trades are rejected until the resolution period closes.",
-  "instance":  "/v1/trades",
+  "type": "https://docs.kash.bot/developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+  "title": "Market not tradeable",
+  "status": 409,
+  "code": "MARKET_NOT_TRADEABLE",
+  "detail": "Market is frozen: its freeze deadline has passed and trading has closed.",
+  "instance": "/v1/trades",
   "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
 }
 ```
 
-The `code` field is **the** stable identifier — branch on it from
-your client. The `type` URL is for humans (and AI agents) following
-the link. The `detail` string is a human-readable explanation that
-may evolve over time; **don't** parse it.
+| Field       | Always present | Meaning                                                                                  |
+| ----------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `type`      | yes            | Link to this code's documentation page                                                   |
+| `title`     | yes            | Short, stable summary of the problem                                                     |
+| `status`    | yes            | The HTTP status, repeated in the body                                                    |
+| `code`      | yes            | The stable, machine-readable identifier. **Branch on this.**                             |
+| `detail`    | usually        | Human-readable explanation of this occurrence. May change at any time; don't parse it   |
+| `instance`  | yes            | The request path (and query) that failed                                                 |
+| `requestId` | yes            | Correlation id for this request. Quote it to Kash support                                |
 
-## How to read this catalogue
+Some codes add **extension members** at the top level of the body, next to
+the standard fields: for example
+`inFlight` and `maxInFlight` on
+[`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED),
+`queueAgeSeconds` on
+[`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY), and
+`requested`, `supported` and `current` on
+[`API_VERSION_UNSUPPORTED`](/developer-docs/api-errors/API_VERSION_UNSUPPORTED).
+Each code's page documents its members.
 
-Each per-code page is the canonical reference for what triggers the
-error, why it happens, and how to recover. Pages are short by
-design — when something fires, you should be able to read the
-relevant page in under a minute and know your next move.
+Retryable errors (429, 503 and 504) carry a `Retry-After` header in
+seconds. Rate-limited responses also carry `X-RateLimit-Limit`,
+`X-RateLimit-Remaining` and `X-RateLimit-Reset`; see
+[Rate limits](/developer-docs/rest-api/rate-limits). For how errors fit
+the rest of the API, see [Errors](/developer-docs/rest-api/errors).
 
-The catalogue is **single-sourced** from the public-API service's
-markdown at `apps/public-api/docs/api-errors/<CODE>.md` in the Kash
-monorepo. Mintlify pages here are auto-generated from those source
-files at every release; the contract test
-`tests/unit/errors/documentation-url.test.ts` enforces that every
-runtime `ErrorCode` has a corresponding source-of-truth page.
+### Responses outside the catalogue
+
+A few responses come from the API's framework layer rather than an
+endpoint. They use the same problem shape but carry `type: "about:blank"`:
+an unknown path returns `404` with `code: "ROUTE_NOT_FOUND"`, a request the
+framework rejects before it reaches an endpoint can return `400` with
+`code: "BAD_REQUEST"`, and a request that runs out of time returns
+[`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT). Your
+client should fall back to the HTTP status for any `code` it does not
+recognise.
 
 ## Stability promise
 
-The `code` field is part of the public-API contract. We follow these
-rules:
+The `code` field is part of the public API contract:
 
-- **Adding a new `code`** is non-breaking — your client should fall
-  through to a generic error handler for any code it doesn't
-  recognize.
-- **Renaming a `code`** is breaking and requires a version bump.
-- **Repurposing a `code`** (changing what conditions cause it to
-  fire) is breaking and requires a version bump.
-- **Changing the HTTP status** for an existing `code` is breaking.
+- **Adding a new `code`** is non-breaking. Your client should fall
+  through to a generic handler for any code it doesn't recognise.
+- **Renaming a `code`** is breaking and requires a new API version.
+- **Repurposing a `code`** (changing what causes it) is breaking and
+  requires a new API version.
+- **Changing the HTTP status** of an existing `code` is breaking.
 
-The `title` field is also stable — it appears in customer-facing
-logs and dashboards. The `detail` string is **not** stable; it may
-be reworded for clarity in any release. The `requestId` and
-`instance` fields are present on every error response and are the
-fastest path to support — quote them when filing an issue.
+The `title` is also stable; it appears in customer logs and dashboards.
+The `detail` string is **not** stable and may be reworded in any release.
+`instance` and `requestId` are the fastest route to support: quote them
+when you report a problem.
 
 ## Branching on errors
 
+The TypeScript SDK (`@kashdao/sdk`) turns every problem response into a
+typed error class, chosen from the HTTP status (and, for a few codes, the
+`code`). Every class extends `KashError`, which exposes `code`,
+`statusCode`, `requestId`, `isRetryable` and `extensions` (the extension
+members above).
+
+| HTTP status                       | SDK class                 |
+| --------------------------------- | ------------------------- |
+| 400, 422                          | `KashValidationError`     |
+| 401                               | `KashAuthenticationError` |
+| 403                               | `KashAuthorizationError`  |
+| 404                               | `KashNotFoundError`       |
+| 409, 410                          | `KashConflictError`       |
+| 429                               | `KashRateLimitError`      |
+| 503 (`ROUTE_DISABLED`, `API_TRADE_PROCESSING_HALTED`) | `KashMaintenanceError` |
+| other 5xx (including 504)         | `KashServerError`         |
+
 ```ts
 import {
+  KashClient,
   KashAuthenticationError,
-  KashRateLimitError,
   KashConflictError,
   KashError,
+  KashMaintenanceError,
+  KashRateLimitError,
 } from '@kashdao/sdk';
 
+const kash = new KashClient({ apiKey: process.env.KASH_API_KEY });
+
 try {
-  await kash.trades.create({ ... });
+  await kash.trades.create({
+    marketId: '3f6c1e2a-8d4b-4c7e-9a1f-2b5d6e7f8a9b',
+    outcomeIndex: 0,
+    amount: '100',
+    side: 'buy',
+  });
 } catch (err) {
   if (err instanceof KashAuthenticationError) {
-    // Auth-tier failures: API_KEY_MISSING, API_KEY_INVALID, API_KEY_EXPIRED, ...
-    return refreshKey();
+    // API_KEY_MISSING, API_KEY_INVALID, API_KEY_EXPIRED, ...: fix the key, don't retry
+    throw err;
   }
   if (err instanceof KashRateLimitError) {
-    // RATE_LIMIT_EXCEEDED — back off until err.retryAfterSeconds
+    // RATE_LIMIT_EXCEEDED or TRADE_IN_FLIGHT_LIMIT_EXCEEDED
     return scheduleRetry(err.retryAfterSeconds);
   }
-  if (err instanceof KashConflictError && err.code === 'CONFIRMATION_EXPIRED') {
-    // Specific conflict; recreate the trade
-    return retryTradeCreation();
+  if (err instanceof KashMaintenanceError) {
+    // ROUTE_DISABLED or API_TRADE_PROCESSING_HALTED
+    return showUnavailableBanner(err.retryAfterSeconds);
   }
-  throw err; // pass through everything else
+  if (err instanceof KashConflictError && err.code === 'MARKET_NOT_TRADEABLE') {
+    return pickAnotherMarket();
+  }
+  if (err instanceof KashError) {
+    // Any other API error: log the code and requestId for support
+    console.error(err.code, err.requestId);
+  }
+  throw err;
 }
 ```
 
-The TS SDK maps each catalogue code to a typed error class; the
-Python SDK does the same with the protocol-level error hierarchy.
-See the per-SDK pages for the exact mapping.
+By default the SDK retries 429 and 5xx responses (up to 3 retries, with
+exponential backoff that honours `Retry-After`) and sends an
+`Idempotency-Key` on every POST so retries cannot execute twice. Use
+`KashError.isKashError(err)` instead of `instanceof` if errors may cross
+a realm boundary (for example between a worker and the main thread).
+
+## All error codes
+
+### 400 Bad Request
+
+| Code | Title |
+| ---- | ----- |
+| [`AMOUNT_TOO_LARGE`](/developer-docs/api-errors/AMOUNT_TOO_LARGE) | Amount too large |
+| [`CHAIN_NOT_SUPPORTED`](/developer-docs/api-errors/CHAIN_NOT_SUPPORTED) | Chain not supported |
+| [`IDEMPOTENCY_KEY_FORMAT_INVALID`](/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID) | Idempotency key format invalid |
+| [`IDEMPOTENCY_KEY_TOO_LONG`](/developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG) | Idempotency key too long |
+| [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID) | Outcome index invalid |
+| [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) | Validation failed |
+
+### 401 Unauthorized
+
+| Code | Title |
+| ---- | ----- |
+| [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) | API key expired |
+| [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) | Authentication required |
+| [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED) | Authentication required |
+| [`API_KEY_MISSING`](/developer-docs/api-errors/API_KEY_MISSING) | Authentication required |
+| [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) | API key revoked |
+| [`REQUEST_SIGNATURE_INVALID`](/developer-docs/api-errors/REQUEST_SIGNATURE_INVALID) | Request signature invalid |
+
+### 403 Forbidden
+
+| Code | Title |
+| ---- | ----- |
+| [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) | Insufficient scope |
+| [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED) | IP not allowed |
+| [`ORGANIZATION_INACTIVE`](/developer-docs/api-errors/ORGANIZATION_INACTIVE) | Account inactive |
+
+### 404 Not Found
+
+| Code | Title |
+| ---- | ----- |
+| [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) | Market not found |
+| [`REDEMPTIONS_NOT_ENABLED`](/developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED) | Redemptions not enabled |
+| [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND) | Not Found |
+
+### 409 Conflict
+
+| Code | Title |
+| ---- | ----- |
+| [`ACTIVE_KEY_LIMIT_REACHED`](/developer-docs/api-errors/ACTIVE_KEY_LIMIT_REACHED) | Active key limit reached |
+| [`CLIENT_REQUEST_ID_CONFLICT`](/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT) | Client request id conflict |
+| [`CONFIRMATION_EXPIRED`](/developer-docs/api-errors/CONFIRMATION_EXPIRED) | Confirmation expired |
+| [`CONFIRMATION_TOKEN_INVALID`](/developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID) | Confirmation token invalid |
+| [`CONFIRMATION_TOKEN_USED`](/developer-docs/api-errors/CONFIRMATION_TOKEN_USED) | Confirmation token used |
+| [`DISPUTE_ALREADY_FILED`](/developer-docs/api-errors/DISPUTE_ALREADY_FILED) | Dispute already filed |
+| [`DISPUTE_DECIDED`](/developer-docs/api-errors/DISPUTE_DECIDED) | Dispute already decided |
+| [`DISPUTE_WINDOW_CLOSED`](/developer-docs/api-errors/DISPUTE_WINDOW_CLOSED) | Dispute window closed |
+| [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) | Idempotency key conflict |
+| [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | Idempotency request in progress |
+| [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) | Insufficient balance |
+| [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) | Market not tradeable |
+| [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) | Position not claimable |
+| [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) | Smart account not provisioned |
+| [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED) | Spending limit exceeded |
+| [`TRADE_NOT_AWAITING_CONFIRMATION`](/developer-docs/api-errors/TRADE_NOT_AWAITING_CONFIRMATION) | Trade not awaiting confirmation |
+| [`WALLET_DELEGATION_NOT_ENABLED`](/developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED) | Wallet delegation not enabled |
+
+### 410 Gone
+
+| Code | Title |
+| ---- | ----- |
+| [`API_VERSION_UNSUPPORTED`](/developer-docs/api-errors/API_VERSION_UNSUPPORTED) | API version unsupported |
+| [`IDEMPOTENCY_KEY_EXPIRED`](/developer-docs/api-errors/IDEMPOTENCY_KEY_EXPIRED) | Idempotency key expired |
+
+### 422 Unprocessable Content
+
+| Code | Title |
+| ---- | ----- |
+| [`MARKET_NOT_DISPUTABLE`](/developer-docs/api-errors/MARKET_NOT_DISPUTABLE) | Market not disputable |
+| [`MARKET_NOT_QUOTABLE`](/developer-docs/api-errors/MARKET_NOT_QUOTABLE) | Market not quotable |
+
+### 429 Too Many Requests
+
+| Code | Title |
+| ---- | ----- |
+| [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) | Too Many Requests |
+| [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) | Too many trades in flight |
+| [`WEBHOOK_REPLAY_LIMIT_REACHED`](/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED) | Replay limit reached |
+| [`WEBHOOK_SECRET_ROTATION_COOLDOWN`](/developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN) | Rotation cooldown active |
+
+### 500 Internal Server Error
+
+| Code | Title |
+| ---- | ----- |
+| [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) | Internal Server Error |
+
+### 503 Service Unavailable
+
+| Code | Title |
+| ---- | ----- |
+| [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED) | Service unavailable |
+| [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) | Service unavailable |
+| [`RATE_LIMIT_UNAVAILABLE`](/developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE) | Rate limit subsystem unavailable |
+| [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) | Route disabled |
+| [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) | Trading busy |
+
+### 504 Gateway Timeout
+
+| Code | Title |
+| ---- | ----- |
+| [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT) | Gateway timeout |
+

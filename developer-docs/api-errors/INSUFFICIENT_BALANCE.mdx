@@ -7,25 +7,23 @@ description: 'HTTP 409 — Insufficient balance'
 
 ## When it fires
 
-The actor lacks the balance the operation needs — the exact meaning depends on the endpoint:
+`POST /v1/redemptions` was called for an outcome your account holds **none** of. Kash read the account's on-chain balance of that outcome token and it was zero, so there is nothing to redeem.
 
-- **`POST /v1/trades`** — the smart account's USDC balance is below the requested `amount` (the rest of this page).
-- **`POST /v1/redemptions`** — the smart account holds **zero** of the outcome token you are trying to claim, so there is nothing to redeem (e.g. the tokens were already moved or redeemed). For redemptions, ignore the USDC-funding advice below — check the account actually holds the outcome token via `GET /v1/portfolio/positions`.
+`POST /v1/trades` does not return this code. A trade's USDC balance is checked after the trade is accepted; a trade the account cannot fund ends as `failed` or `rejected`, visible on `GET /v1/trades/{id}` and in trade webhooks.
 
 ## Why it happens
 
-- You haven't funded the account yet.
-- A previous trade consumed more than expected (gas + slippage) and left a sub-threshold balance.
-- The auto-funding pipeline is backed up — common during very high-throughput windows.
-- Org account: trade is being charged to the user but the org policy expected the org to pay (or vice versa). Check `feePayerType`.
+- The tokens were already redeemed or moved.
+- The account never held that outcome (for example, the wrong `outcomeIndex`).
+- The request was made with a key belonging to a different account from the one holding the position.
 
 ## How to fix
 
-- Check the current balance via `GET /v1/portfolio` — `usdcBalance` field.
-- For users: fund via the webapp's onramp flow (or transfer USDC into the smart account directly).
-- For orgs: the org admin tops up the org wallet.
-- For staging/sandbox: use the testnet faucet flow.
+- Check what the account holds with `GET /v1/portfolio/positions`, and redeem an outcome that appears there.
+- Confirm the `marketId` and `outcomeIndex`.
+- If you expected the position to have been redeemed already, check `GET /v1/portfolio`.
 
 ## Related codes
 
-- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED), [`SPENDING_LIMIT_EXCEEDED`](/developer-docs/api-errors/SPENDING_LIMIT_EXCEEDED)
+- [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) — you hold the token, but it is not claimable
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) — the account has no trading wallet yet

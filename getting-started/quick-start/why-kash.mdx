@@ -1,7 +1,7 @@
 ---
 title: 'Why would I use Kash?'
-description: 'What actually sets Kash apart — honestly stated'
-icon: "gamepad-modern"
+description: 'What sets Kash apart, stated plainly'
+icon: "lightbulb"
 ---
 
 <img
@@ -17,48 +17,48 @@ icon: "gamepad-modern"
   alt="Hero Dark"
 />
 
-Prediction markets are a great idea with a rough onboarding problem: wallets, gas, seed phrases, order books. Kash's goal is to remove that friction without taking custody of your money.
+Prediction markets are a great idea with a rough onboarding problem: wallets, gas tokens, seed phrases, order books. Kash removes that friction, and never takes custody of your money.
 
 ## The differentiators
 
 <AccordionGroup>
-  <Accordion title="Gasless, app-like UX">
-    Sign in with X, Google, or email. An embedded wallet and ERC-4337 smart account are created for you, and the protocol sponsors gas — no ETH, no browser extension, no seed phrase to write down. It feels like a normal app; it settles on Base.
+  <Accordion title="App-like experience">
+    Sign in with X, Google, email, Telegram or Discord. You get your own embedded Solana wallet, with no seed phrase to write down and no browser extension. Kash pays the network fees, so you never need SOL.
+  </Accordion>
+
+  <Accordion title="Trade where the conversation is">
+    Markets are posted on X, and you can trade them by replying to the post. No app switch, no link to open. See [Trading on X](/getting-started/features/trading-on-x).
+  </Accordion>
+
+  <Accordion title="Anyone can create a market">
+    Connect your X account and describe a question to Kash AI, and it drafts a complete market: outcomes, timing, resolution rules and sources. Every market is reviewed automatically before it goes live. The creator pays to create it from their own funds, at least $20, owns the market, and receives a creator fee on its trades, which depends on trading activity and is not guaranteed.
   </Accordion>
 
   <Accordion title="Multi-outcome markets with instant liquidity">
-    Markets support 2–8 outcomes, each priced by an automated market maker seeded at creation. You can enter or exit any time the market is open, without waiting for a counterparty. See [Custom AMM](/getting-started/features/custom-amm) for how pricing works.
+    A market can list many outcomes, each priced by an on-chain automated market maker funded when the market is created. You can enter or exit whenever trading is open. See [Custom AMM](/getting-started/features/custom-amm).
   </Accordion>
 
-  <Accordion title="Self-custody">
-    Your USDC and positions live in **your own smart account** — Kash never holds your funds. Trades and payouts execute from your wallet, all verifiable on Base. You can export your key from Settings at any time.
+  <Accordion title="Non-custodial: your own wallet">
+    Markets are created and traded on an open, permissionless protocol on Solana that anyone can use directly. Kash is an interface built on that protocol, and it operates the automated market creation and resolution system. Your USDC and positions stay in your own Solana wallet, Kash never holds custody of them, and you can export the private key from Settings at any time. To trade from the app, chat and X, you approve Kash's app to submit transactions from your wallet on your behalf.
   </Accordion>
 
-  <Accordion title="A contract-enforced exit">
-    Markets are resolved by Kash's oracle, but recovery doesn't depend on it: if a market isn't resolved after its resolve time plus a grace period, anyone can trigger cancellation and every position is refunded at its last market price — enforced by the contract itself, subject to normal smart-contract risk.
-  </Accordion>
-
-  <Accordion title="Markets where your community already is">
-    Trade from the webapp, from tweets (opt-in), or on partner sites that [embed Kash markets](/for-businesses/overview). [Threads](/getting-started/features/threads) bundle related markets, and chat, leaderboards, and groups make trading social rather than solitary.
+  <Accordion title="Transparent resolution">
+    Outcomes are determined by Kash's automated resolution system from each market's published sources and rules. Any signed-in user can dispute a proposed result before it settles, and the same automated system reviews the dispute.
   </Accordion>
 </AccordionGroup>
 
 ## At a glance
 
-| | Typical platforms | Kash |
-|---|---|---|
-| **Onboarding** | Wallet setup, seed phrases | Social login, wallet auto-created |
-| **Gas fees** | Paid by you | Sponsored by the protocol |
-| **Custody** | Platform holds funds | Your own smart account |
-| **Market structure** | Often binary only | 2–8 outcomes per market |
-| **Stuck markets** | At platform's discretion | Contract-enforced refund path |
-| **Fees** | Varies | 1% on buys, 1% + 1% on sells |
+| | Kash |
+|---|---|
+| **Onboarding** | Social login, your own embedded wallet |
+| **Network fees** | Paid by Kash; you never need SOL |
+| **Custody** | Non-custodial: your own wallet; Kash never holds custody |
+| **Market structure** | Multiple outcomes per market |
+| **Where you trade** | Web app and X |
+| **Fees** | A protocol fee on trades, shown before you confirm |
 
-Fees shown are current as of publication — the app always shows live fees before you confirm.
-
-<Tip>
-Kash won't promise you "trustless everything" — resolution is handled by Kash's oracle today. What it offers instead: your funds stay in your own smart account, and the contracts provide a recovery path that doesn't depend on Kash or the oracle.
-</Tip>
+The app always shows the exact fees before you confirm.
 
 <CardGroup cols={2}>
   <Card

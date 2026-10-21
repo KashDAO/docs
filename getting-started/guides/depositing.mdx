@@ -1,12 +1,8 @@
 ---
 title: 'Depositing'
-description: 'How to fund your wallet and start predicting'
+description: 'How to add USDC to your own wallet and start predicting'
 icon: 'arrow-right'
 ---
-
-<Note>
-Fund your Kash balance with a card, Apple Pay, Google Pay, or a direct USDC transfer. Deposits typically arrive within minutes.
-</Note>
 
 <img
   style={{ borderRadius: '0.5rem' }}
@@ -23,74 +19,52 @@ Fund your Kash balance with a card, Apple Pay, Google Pay, or a direct USDC tran
 
 # How deposits work
 
-Everything on Kash runs on **USDC** (a US dollar stablecoin) on the **Base** network. When you deposit, USDC is delivered directly to your own Kash smart wallet — Kash never takes custody of your funds.
+Everything on Kash runs on **USDC** (a US dollar stablecoin) on **Solana**. Deposits land directly in your own wallet.
 
-- **USDC only** — Kash does not accept or auto-convert other tokens (no ETH, WETH, or DAI)
-- **Delivered to Base** — fiat purchases arrive on Base directly; crypto sent on other networks is automatically bridged to Base for you
-- **No deposit fee from Kash** — payment providers charge their own processing fees (listed below)
+- **USDC on Solana only.** Your balance is held in USDC on Solana.
+- **No deposit fee from Kash.** Payment providers may charge their own fees, and the checkout shows them before you pay.
+- **No SOL needed.** You don't need to hold SOL to receive, trade or withdraw.
 
 # Deposit methods
 
+Open **Add funds** from your wallet or Portfolio on [app.kash.bot](https://app.kash.bot).
+
 <Tabs>
-  <Tab title="Card, Apple Pay & Google Pay">
-    **Buy USDC directly with a card or mobile wallet**
+  <Tab title="Checkout">
+    **Buy or transfer USDC through the checkout**
 
     <Steps>
-      <Step title="Open the deposit flow">
-        On [app.kash.bot](https://app.kash.bot), open your wallet and choose **Deposit** (or **Add funds**).
+      <Step title="Open Add funds">
+        The checkout opens by default when you tap **Add funds**.
       </Step>
       <Step title="Choose an amount and payment method">
-        Select how much USDC you want and pay with card, Apple Pay, or Google Pay.
+        Pick an amount and one of the payment methods offered. The available methods depend on your region and are shown in the checkout.
       </Step>
-      <Step title="Complete the purchase">
-        Fees and the amount you'll receive are shown before you confirm. USDC is sent straight to your Kash wallet, usually within a few minutes.
+      <Step title="Confirm">
+        Fees and the amount you'll receive are shown before you confirm. The USDC is delivered to your wallet on Solana.
       </Step>
     </Steps>
 
-    **Payment provider**
-
-    All fiat processing is handled by third-party payment providers — Kash never sees or stores your card or bank details.
-
-    | Provider | Methods | Fee | KYC |
-    |---|---|---|---|
-    | **Halliday** | Card, Apple Pay, Google Pay | 2.9% + $0.30 | Basic (government ID) |
-
-    <Note>
-    Additional payment options may appear in the deposit flow. Provider fees are current as of publication — the app always shows live fees and limits before you confirm.
-    </Note>
+    The checkout is run by a third-party payment provider, and Kash never sees or stores your card or bank details. The provider may ask you to verify your identity.
   </Tab>
 
-  <Tab title="Crypto transfer">
-    **Send USDC from an exchange or external wallet**
+  <Tab title="Send USDC on Solana">
+    **Send USDC from an exchange or an external Solana wallet**
 
     <Steps>
-      <Step title="Get your deposit address">
-        In the deposit flow on app.kash.bot, choose **Crypto** and select the network you're sending from. Kash shows you the exact address (and QR code) to send to.
+      <Step title="Get your address">
+        In **Add funds**, choose **USDC**. Kash shows your wallet address and a QR code.
       </Step>
-      <Step title="Send USDC">
-        Transfer USDC from any wallet or exchange. Supported networks:
-        - **Base** (fastest — arrives in minutes)
-        - **Ethereum**
-        - **Polygon**
-        - **Arbitrum**
-        - **Optimism**
-        - **Avalanche**
-        - **BNB Chain**
-        - **Linea**, **Scroll**, **Mantle**, **Mode**, and **Blast**
-
-        The full list is always shown in the deposit flow.
+      <Step title="Send USDC on Solana">
+        From your exchange or wallet, withdraw **USDC** on the **Solana** network to that address.
       </Step>
-      <Step title="Automatic bridging to Base">
-        USDC sent on any network other than Base is automatically bridged to Base and credited to your Kash wallet. Cross-chain deposits typically take around 10–15 minutes; Base deposits arrive in a couple of minutes.
+      <Step title="Wait for confirmation">
+        Your balance updates once the transfer confirms on Solana.
       </Step>
     </Steps>
 
-    - **Limits:** $1 – $100,000 per transaction (limits subject to change)
-    - **Fees:** Kash charges nothing — you only pay the sending network's gas (and bridge costs on cross-chain transfers)
-    - Crypto deposits don't currently require identity verification; Kash applies compliance screening, and verification requirements may change
-
     <Warning>
-    Send **USDC only**, on one of the supported networks, to the exact address shown in the deposit flow. Other tokens are not supported and may be unrecoverable.
+    Send **only USDC on Solana** to this address. Other tokens, or USDC sent on a different network, will not be credited and may be unrecoverable.
     </Warning>
   </Tab>
 </Tabs>
@@ -99,13 +73,13 @@ Everything on Kash runs on **USDC** (a US dollar stablecoin) on the **Base** net
 
 # After your deposit
 
-- **Balance updates automatically** once the deposit is confirmed
-- **Ready to predict immediately** — no waiting periods
-- **Transaction history** is available in your portfolio
-- **Withdraw anytime** — no lock-ups; see the withdrawing guide for limits
+- **Your balance updates automatically** once the deposit confirms
+- **You can trade immediately**, with no waiting period
+- **Your history** is in **Portfolio → Transactions**
+- **Withdraw any time.** There are no lock-ups. See [Withdrawing](/getting-started/guides/withdrawing)
 
 <Tip>
-Start with a small first deposit to get comfortable with the flow, and save your deposit address for future crypto transfers.
+Start with a small first deposit to get comfortable with the flow.
 </Tip>
 
 <CardGroup cols={2}>
@@ -121,6 +95,6 @@ Start with a small first deposit to get comfortable with the flow, and save your
     icon="arrow-left"
     href="/getting-started/guides/withdrawing"
   >
-    How to withdraw your winnings
+    How to move USDC out of your wallet
   </Card>
 </CardGroup>

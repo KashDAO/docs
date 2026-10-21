@@ -7,13 +7,13 @@ description: 'HTTP 401 — Authentication required'
 
 ## When it fires
 
-A route that requires authentication received a request with no `X-API-Key` header.
+An endpoint that requires authentication received a request with no `X-API-Key` header.
 
 ## Why it happens
 
-- The request was sent without the header (most common — first integration).
+- The request was sent without the header (most common on a first integration).
 - A reverse proxy or HTTP client stripped the header.
-- The wrong base URL — the documented endpoints live under `/v1/*`; some other route may not require auth.
+- The wrong base URL. The documented endpoints live under `/v1/*`.
 
 ## How to fix
 
@@ -23,10 +23,12 @@ Host: api.kash.bot
 X-API-Key: kash_live_<your-key-here>
 ```
 
-- Pass the key on every authenticated request. Keys are issued via the webapp Settings → API Keys page or `kash-admin api-keys issue`.
-- The plaintext is shown once at issuance. If you've lost it, revoke and re-issue.
+- Send the key on every authenticated request. Keys are issued from the Kash app (Settings → API Keys).
+- The full key is shown once, at issuance. If you have lost it, revoke it and issue a new one.
+
+See [Authentication](/developer-docs/rest-api/authentication).
 
 ## Related codes
 
-- [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED) — header present but doesn't match the `kash_(live|test)_*` shape
-- [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) — header well-formed but no row matches
+- [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED) — header present but not in the `kash_(live|test)_*` shape
+- [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) — header well formed but unknown

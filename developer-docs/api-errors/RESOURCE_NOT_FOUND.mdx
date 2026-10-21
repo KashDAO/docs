@@ -7,22 +7,23 @@ description: 'HTTP 404 — Not Found'
 
 ## When it fires
 
-A request for a specific resource (trade, key, webhook event, etc.) didn't find a matching row that the caller is authorised to see.
+A request for a specific resource found nothing the caller is allowed to see. Returned by `GET /v1/trades/{id}`, `POST /v1/trades/{id}/confirm`, `GET /v1/traces/{correlationId}`, `/v1/markets/{id}/disputes` and `POST /v1/webhooks/events/{eventId}/redeliver`, among others.
 
-This is the generic catch-all 404. Specific resource types may have their own dedicated codes (e.g., [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND)) where there's value in distinguishing the resource type to the caller.
+This is the generic 404. Some resources have their own code where the distinction helps, such as [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND).
 
 ## Why it happens
 
-- The id is wrong (typo, cross-environment confusion).
-- The resource exists but belongs to a different user — we return 404 (not 403) deliberately, so attackers can't probe for the existence of resources they don't own.
+- The id is wrong (a typo or cross-environment confusion).
+- The resource exists but belongs to another account. Kash returns 404 rather than 403 deliberately, so nobody can probe for resources they don't own.
 - The resource was deleted.
 
 ## How to fix
 
-- Re-check the id (capitalisation, hyphens, environment).
-- If the resource should exist but you can't see it, confirm you're authenticated as the owner.
-- For webhook events: events are retained for 90 days; older events return 404.
+- Re-check the id (case, hyphens, environment).
+- If the resource should exist but you can't see it, confirm you are authenticated as its owner.
+
+A request to a path that is not an API endpoint at all returns a 404 with `code: "ROUTE_NOT_FOUND"` and `type: "about:blank"`, not this code. Check the path against the [Endpoint reference](/developer-docs/rest-api/endpoint-reference).
 
 ## Related codes
 
-- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) — specific case for markets
+- [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) — specific to markets

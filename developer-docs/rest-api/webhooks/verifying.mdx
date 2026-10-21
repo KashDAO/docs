@@ -1,9 +1,9 @@
 ---
 title: 'Verifying Webhook Signatures'
-description: 'Stripe-compatible HMAC-SHA256 verification — one-line constant change from any Stripe library.'
+description: 'HMAC-SHA256 webhook signature verification, with reference code in four languages.'
 ---
 
-The signature format matches Stripe's exactly so any Stripe-compatible verification library works with one constant changed (header name → `X-Kash-Signature`).
+The scheme is modelled on Stripe's, with two differences that matter if you adapt a Stripe verifier: the header is `X-Kash-Signature`, and the timestamp `t=` is in Unix **milliseconds**, not seconds.
 
 <Warning>
 **Always** verify signatures on incoming webhook requests. An unsigned or invalid request must be rejected — the only way to know an event truly came from Kash is to verify its HMAC.
@@ -34,18 +34,17 @@ X-Kash-Signature: t=1730000000000,v1=<current-hmac>,v1=<previous-hmac>
 4. Compute `expected = HMAC_SHA256(secret, "${t}.${rawBody}")` and hex-encode it.
 5. For each `v1=` entry in the header, compare with `expected` using a **constant-time** comparator. If any matches, accept.
 
-That's it. A 20-line function in any language with a crypto stdlib.
+That is the whole algorithm. Respond `400` to a request that fails verification: Kash does not retry a `400`.
 
 ## Reference implementations
 
 ### TypeScript / Node.js (the SDK does this for you)
 
-The simplest path — let `@kashdao/sdk` verify and parse in one line:
-
 ```ts
-import { KashClient } from '@kashdao/sdk';
+import express from 'express';
+import { KashClient, KashWebhookSignatureError } from '@kashdao/sdk';
 
-const kash = new KashClient({ apiKey, webhookSecret: process.env.KASH_WEBHOOK_SECRET! });
+const kash = new KashClient({ apiKey: process.env.KASH_API_KEY! });
 
 app.post('/webhooks/kash',
   express.raw({ type: 'application/json' }),
@@ -53,19 +52,20 @@ app.post('/webhooks/kash',
     try {
       const event = await kash.webhooks.constructEvent(
         req.body.toString('utf8'),
-        req.header('x-kash-signature')!,
-        process.env.KASH_WEBHOOK_SECRET!
+        req.header('x-kash-signature') ?? '',
+        process.env.KASH_WEBHOOK_SECRET!,
       );
-      // event is fully typed (TradeCompletedEvent | TradeFailedEvent | ...)
-      handleEvent(event);
+      await handleEvent(event); // typed by event.type
       res.sendStatus(200);
     } catch (err) {
-      // KashWebhookSignatureError on bad signature, expired, or missing
-      res.sendStatus(401);
+      if (err instanceof KashWebhookSignatureError) return res.sendStatus(400);
+      throw err;
     }
-  }
+  },
 );
 ```
+
+`kash.webhooks.verifySignature(body, header, secret)` returns `{ valid, reason }` without parsing, if you only need the check.
 
 ### TypeScript / Node.js (no SDK)
 
@@ -212,7 +212,7 @@ pub fn verify_kash_signature(payload: &[u8], signature: &str, secret: &str, tole
 
 ## Testing your verifier locally
 
-The CLI can sign a payload exactly like the production worker (`t=<unix-ms>,v1=<hex>`) and POST it to your endpoint:
+The CLI can sign a payload the same way Kash does (`t=<unix-ms>,v1=<hex>`) and POST it to your endpoint:
 
 ```bash
 kash webhooks replay payload.json \
@@ -220,18 +220,11 @@ kash webhooks replay payload.json \
   --secret $KASH_WEBHOOK_SECRET
 ```
 
-This POSTs your captured (or hand-written) event body, properly signed, to your endpoint so you can verify your handler's signature path before going live. Pass `--timestamp-ms` to test your replay-window enforcement, and use `kash webhooks verify` for offline signature checks.
+This POSTs your captured (or hand-written) event body, signed, to your endpoint so you can test your handler's signature path before going live. Pass `--timestamp-ms` to test your freshness check, and use `kash webhooks verify` to check a signature offline.
 
-## Reporting verification bugs
+## Reporting verification problems
 
-If the production worker is sending signatures your code can't verify, please open a GitHub issue with:
-
-- The raw `X-Kash-Signature` header value
-- The raw body bytes (or a hash of them)
-- Your `webhook_secret`'s `rotatedAt` timestamp (don't share the secret itself)
-- Your verification code
-
-We've cross-tested against Stripe's verifier with a header-name swap and it accepts our signatures, so most "doesn't verify" bugs are receiver-side body re-serialisation issues.
+If deliveries fail to verify, email [dev@kash.bot](mailto:dev@kash.bot) with the raw `X-Kash-Signature` header, the `X-Kash-Event-Id`, and your verification code. Never send the secret itself. Most failures come from verifying a re-serialised body instead of the raw bytes.
 
 ## Next
 

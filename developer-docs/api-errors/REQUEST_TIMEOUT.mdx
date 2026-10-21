@@ -3,23 +3,26 @@ title: 'REQUEST_TIMEOUT'
 description: 'HTTP 504 — Gateway timeout'
 ---
 
-**HTTP status:** 504 · **Title:** "Gateway timeout" · **Retry-After:** 5s
+**HTTP status:** 504 · **Title:** "Gateway timeout" · **Retry-After:** computed per response
 
 ## When it fires
 
-The per-request server timeout fired (default 30 s). Bounded by `bodyLimit` + Fastify timeout config to keep slow upstreams from blocking healthy traffic.
+The server did not finish handling the request within its 30-second processing budget.
+
+This response is produced by the API's framework layer, so its body differs slightly from catalogue errors: `type` is `about:blank` and `title` is `"Request Timeout"`. Branch on `code` (`REQUEST_TIMEOUT`) or the 504 status, never on `title`.
 
 ## Why it happens
 
-- An unusually slow downstream call (Postgres lock contention, RPC latency spike, etc.).
-- A request that does too much work in one call — most reads complete in <100 ms.
-- Network path degradation between you and our edge (rare but possible).
+- An unusually slow dependency (database contention or a blockchain RPC latency spike).
+- A request that asks for too much in one call.
+- Network degradation between you and Kash (rare).
 
 ## How to fix
 
-- Retry once with backoff. Most timeouts are transient.
-- If you're consistently timing out on the same endpoint, narrow the request — pass `limit` parameters, fetch one resource at a time.
-- For long-running operations, use webhooks instead of waiting on the response.
+- Retry once with backoff. Most timeouts are transient. Retry writes with the same `Idempotency-Key`, because the original may still have completed. See [Idempotency](/developer-docs/rest-api/idempotency).
+- If one endpoint times out consistently, narrow the request: use smaller `limit` values and fetch one resource at a time.
+- For long-running operations, use [webhooks](/developer-docs/rest-api/webhooks/overview) rather than waiting on a response.
+- The TypeScript SDK raises this as `KashServerError` and retries it automatically.
 
 ## Related codes
 

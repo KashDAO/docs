@@ -1,0 +1,97 @@
+---
+title: 'Trades'
+description: 'Create a trade, confirm a high-value trade, list your trades and read one trade.'
+---
+
+| Method | Path                       | Scope          | Rate-limit class | Idempotency-Key |
+| ------ | -------------------------- | -------------- | ---------------- | --------------- |
+| `POST` | `/v1/trades`               | `trades:write` | write            | honoured        |
+| `POST` | `/v1/trades/{id}/confirm`  | `trades:write` | write            | honoured        |
+| `GET`  | `/v1/trades`               | `trades:read`  | read             |                 |
+| `GET`  | `/v1/trades/{id}`          | `trades:read`  | read             |                 |
+
+A trade is executed from the smart account of the user who owns the API key. Trades work on both API versions. On `2026-08-19` the trade resource also carries `chainRef`, and `txHash` is returned for every chain; on a pinned `2026-04-29` a Solana trade's `txHash` is `null`.
+
+## The trade resource
+
+| Field             | Type              | Notes |
+| ----------------- | ----------------- | ----- |
+| `id`              | uuid              | |
+| `marketId`        | uuid              | |
+| `outcomeIndex`    | integer           | |
+| `amount`          | string            | USDC as a decimal string, up to 6 decimals (`"100"`, `"100.5"`). |
+| `side`            | `buy` \| `sell`   | |
+| `status`          | enum              | `pending_confirmation`, `pending`, `validating`, `executing`, `completed`, `failed`, `rejected`. |
+| `correlationId`   | uuid              | Pass to [`GET /v1/traces/{correlationId}`](/developer-docs/rest-api/endpoints/account-and-traces). |
+| `clientRequestId` | string \| null    | The value you sent, if any. |
+| `chainRef`        | string            | Version `2026-08-19` only. For example `solana:mainnet-beta`. |
+| `txHash`          | string \| null    | Chain transaction id: a base58 Solana signature or an EVM `0x` hash. Set once completed. |
+| `tokensOut`       | string \| null    | Outcome tokens received, 18-decimal (WAD) integer string. |
+| `errorCode`       | string \| null    | Set when `failed` or `rejected`. |
+| `errorMessage`    | string \| null    | Human-readable reason. |
+| `webhookDelivery` | object            | `{ status, attempts, lastAttemptedAt, lastStatusCode, lastFailureCode, terminalFailureAt }`. `status` is `none`, `pending`, `delivered`, `retrying` or `failed`. |
+| `metadata`        | object            | Your string tags from create. |
+| `createdAt`       | date-time         | |
+| `updatedAt`       | date-time         | |
+
+Status lifecycle: `pending → validating → executing → completed`, ending in `failed` or `rejected` instead when something stops it. A high-value trade starts in `pending_confirmation`.
+
+## `POST /v1/trades`
+
+| Body field        | Type     | Notes |
+| ----------------- | -------- | ----- |
+| `marketId`        | uuid, required | |
+| `outcomeIndex`    | integer, required | Zero-based. |
+| `amount`          | string, required | USDC decimal string matching `^\d+(\.\d{1,6})?$`, on both sides. |
+| `side`            | `buy` \| `sell`, required | |
+| `clientRequestId` | string   | 1 to 128 characters from `A-Z a-z 0-9 _ - : .`. See [Idempotency](/developer-docs/rest-api/idempotency). |
+| `metadata`        | object   | Up to 10 string tags. Keys are 1 to 64 characters from `a-z A-Z 0-9 _ - .`; values are at most 500 characters. Echoed on the trade and on every trade webhook. |
+| `ambassadorToken` | string   | Optional Market Ambassadors referral-link token, used for referral attribution. 1 to 128 characters from `A-Z a-z 0-9 _ -`. |
+
+```bash
+curl -X POST https://api.kash.bot/v1/trades \
+  -H "X-API-Key: $KASH_API_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{ "marketId": "…", "outcomeIndex": 0, "amount": "10", "side": "buy" }'
+```
+
+Responses:
+
+- **`201 Created`**: the trade entered the pipeline. Body `{ trade, data, _meta }` where `_meta.idempotent` is `false`.
+- **`200 OK`**: a repeat of an earlier request with the same `clientRequestId` and the same body. The existing trade is returned with `_meta.idempotent: true`.
+- **`202 Accepted`**: the amount reached your key's high-value threshold. The trade is held in `pending_confirmation` and the body adds `confirmation: { token, expiresAt }`. The token expires **60 seconds** after issue. Release the trade with `POST /v1/trades/{id}/confirm`.
+
+Before anything is written, the request is checked in this order of concern: the market (`404 MARKET_NOT_FOUND`, `409 MARKET_NOT_TRADEABLE`, `400 CHAIN_NOT_SUPPORTED`, `400 OUTCOME_INDEX_INVALID`), the amount (`400 AMOUNT_TOO_LARGE`), your account (`409 SMART_ACCOUNT_NOT_PROVISIONED`, `409 WALLET_DELEGATION_NOT_ENABLED`), the key's per-trade cap (`409 SPENDING_LIMIT_EXCEEDED`), and admission control (`429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` when the account already has its tier's maximum of unfinished trades, `503 TRADE_ADMISSION_BUSY` while the pipeline works through a backlog; both carry `Retry-After`). A reused `clientRequestId` with a different body is `409 CLIENT_REQUEST_ID_CONFLICT`. API trading can be temporarily unavailable (`503 API_TRADE_PROCESSING_HALTED`, with `Retry-After`).
+
+Some checks run after the trade is accepted. The key's **daily** spending cap, the smart account's USDC balance and other risk rules are evaluated in the pipeline. A trade that fails them moves to `rejected` (with a `trade.rejected` webhook) rather than being refused synchronously.
+
+## `POST /v1/trades/{id}/confirm`
+
+Releases a trade in `pending_confirmation` into the pipeline.
+
+| Body field | Type   | Notes |
+| ---------- | ------ | ----- |
+| `token`    | string, required | The `confirmation.token` from the `202` response (40 to 64 characters). |
+
+Response `200`: `{ trade, data, _meta }` with the trade in `pending`.
+
+Errors: `404 RESOURCE_NOT_FOUND`, `409 TRADE_NOT_AWAITING_CONFIRMATION`, `409 CONFIRMATION_TOKEN_INVALID`, `409 CONFIRMATION_TOKEN_USED` (single-use), `409 CONFIRMATION_EXPIRED`. Release goes through the same admission control as create (`429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED`, `503 TRADE_ADMISSION_BUSY`); a refused confirm writes nothing, so the token stays valid for a retry until it expires.
+
+## `GET /v1/trades`
+
+Your trades, newest first, cursor-paginated.
+
+| Query      | Type    | Notes |
+| ---------- | ------- | ----- |
+| `cursor`   | string  | |
+| `limit`    | integer | 1 to 100, default 20. |
+| `status`   | string  | Comma-separated statuses, for example `pending,completed`. An unknown value is `400 VALIDATION_FAILED`. |
+| `marketId` | uuid    | |
+
+Response `200`: `{ data: Trade[], pagination, _meta }`.
+
+## `GET /v1/trades/{id}`
+
+Response `200`: `{ trade, data, _meta }`. A trade that does not exist, or that belongs to another user, is `404 RESOURCE_NOT_FOUND`.

@@ -1,656 +1,143 @@
 ---
-title: 'HTML/JavaScript Examples'
-description: 'Complete vanilla HTML and JavaScript examples for embedding Kash markets'
+title: 'HTML Examples'
+description: 'Copy-paste HTML pages that embed Kash markets'
 ---
 
-Complete, production-ready examples for embedding Kash prediction markets using vanilla HTML and JavaScript. Copy and adapt these examples for your website.
+Each example is a complete page. Save it as an `.html` file and open it in a browser.
 
----
+## Single market
 
-## Basic Embed
-
-Simple thread embed with no JavaScript:
-
-```html
+```html market.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2024 Election Markets</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live prediction</title>
+  <link rel="preconnect" href="https://app.kash.bot" />
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #f9fafb;
-    }
-
-    h1 {
-      margin: 0 0 20px 0;
-    }
-
-    .embed-container {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    iframe {
-      width: 100%;
-      border: 0;
-      border-radius: 4px;
-    }
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    iframe { width: 100%; height: 520px; border: 0; border-radius: 12px; }
   </style>
 </head>
 <body>
-  <h1>2024 Presidential Election Markets</h1>
-
-  <div class="embed-container">
-    <iframe
-      src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
-      height="900"
-      loading="lazy"
-      title="2024 Presidential Election prediction markets"
-    ></iframe>
-  </div>
-</body>
-</html>
-```
-
----
-
-## Embed with Event Listeners
-
-Listen for events from the embed:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kash Markets - With Events</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .status {
-      margin: 10px 0;
-      padding: 12px;
-      background: #f0f9ff;
-      border-left: 3px solid #3b82f6;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    #kash-embed {
-      width: 100%;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Live Prediction Markets</h1>
-  
-  <div class="status" id="status">Loading markets...</div>
-
+  <h1>What do you think?</h1>
   <iframe
-    id="kash-embed"
-    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
-    height="900"
+    src="https://app.kash.bot/markets/93f1445c-912c-47b4-8065-d1ff5a6b8dfc/iframe"
+    loading="lazy"
+    allow="clipboard-write"
+    title="Kash prediction market"
   ></iframe>
-
-  <script>
-    const status = document.getElementById('status');
-    
-    // Listen for embed events
-    window.addEventListener('message', function(event) {
-      // Security: Verify origin
-      if (event.origin !== 'https://app.kash.bot') {
-        return;
-      }
-
-      const { type, data } = event.data;
-
-      switch (type) {
-        case 'kash-iframe-ready':
-          status.textContent = `✅ Loaded ${data.marketCount} markets`;
-          console.log('Embed ready:', data);
-          break;
-
-        case 'kash-market-clicked':
-          status.textContent = `👆 Market clicked: ${data.marketId}`;
-          console.log('Market clicked:', data);
-          break;
-      }
-    });
-  </script>
 </body>
 </html>
 ```
 
----
+## Thread
 
-## Responsive Sidebar Widget
+```html thread.html
+<iframe
+  src="https://app.kash.bot/threads/00000001-0000-4000-a000-000000000003/iframe"
+  width="100%"
+  height="900"
+  frameborder="0"
+  loading="lazy"
+  allow="clipboard-write"
+  title="Kash prediction markets"
+></iframe>
+```
 
-Compact widget perfect for sidebars:
+## Custom cards without an iframe
 
-```html
+This page fetches live markets from the public API, renders its own cards, and gives each outcome a "Predict on X" button that uses the deep-link endpoint.
+
+```html custom-cards.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Widget</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live markets</title>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      padding: 20px;
-      background: #f3f4f6;
-    }
-
-    .sidebar-widget {
-      max-width: 350px;
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    }
-
-    .widget-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .widget-title {
-      font-size: 18px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .widget-badge {
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    #widget-iframe {
-      width: 100%;
-      border: 0;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar-widget {
-        max-width: 100%;
-      }
-    }
+    body { font-family: system-ui, sans-serif; max-width: 1100px; margin: 2rem auto; padding: 0 1rem; background: #111; color: #eee; }
+    #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .card { background: #1c1c1c; border-radius: 12px; padding: 16px; }
+    .card h3 { font-size: 1rem; margin: 0 0 12px; }
+    .card a { color: inherit; text-decoration: none; }
+    .card button { margin: 4px 4px 0 0; padding: 6px 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #eee; cursor: pointer; }
+    .meta { color: #999; font-size: 0.8rem; margin-top: 8px; }
   </style>
 </head>
 <body>
-  <div class="sidebar-widget">
-    <div class="widget-header">
-      <div class="widget-title">
-        📊 Live Markets
-      </div>
-      <span class="widget-badge" id="market-count">Loading...</span>
-    </div>
-
-    <iframe
-      id="widget-iframe"
-      src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
-      height="400"
-    ></iframe>
-  </div>
+  <h1>Live prediction markets</h1>
+  <div id="grid">Loading…</div>
 
   <script>
-    window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://app.kash.bot') return;
+    const API = 'https://app.kash.bot/api';
+    const AMOUNT = 10; // whole USDC
 
-      if (event.data.type === 'kash-iframe-ready') {
-        const badge = document.getElementById('market-count');
-        badge.textContent = `${event.data.data.marketCount} markets`;
+    function usd(atomic) {
+      return '$' + Math.round(Number(atomic) / 1e6).toLocaleString();
+    }
+
+    async function predict(marketId, outcomeIndex) {
+      const tab = window.open('', '_blank'); // open now so popup blockers allow it
+      const res = await fetch(`${API}/markets/${marketId}/twitter-link?outcomeIndex=${outcomeIndex}&amount=${AMOUNT}`);
+      const body = await res.json();
+      if (!res.ok) { tab && tab.close(); alert(body.message); return; }
+      if (tab) tab.location.href = body.twitterUrl;
+    }
+
+    function render(markets) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      for (const m of markets) {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const link = document.createElement('a');
+        link.href = `https://app.kash.bot/markets/${m.id}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        const title = document.createElement('h3');
+        title.textContent = m.title;
+        link.appendChild(title);
+        card.appendChild(link);
+
+        for (const o of m.outcomes) {
+          const btn = document.createElement('button');
+          btn.textContent = `${o.label} · ${Math.round(o.impliedChance * 100)}%`;
+          btn.disabled = !m.tradable;
+          btn.onclick = () => predict(m.id, o.outcomeIndex);
+          card.appendChild(btn);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = `${usd(m.totalVolume)} volume · ${m.participantCount} traders`;
+        card.appendChild(meta);
+
+        grid.appendChild(card);
       }
-    });
+    }
+
+    fetch(`${API}/markets?status=active&tradableOnly=true&sortBy=total_volume&limit=12`)
+      .then((r) => r.json())
+      .then(({ markets }) => render(markets))
+      .catch(() => { document.getElementById('grid').textContent = 'Could not load markets.'; });
   </script>
 </body>
 </html>
 ```
 
----
+The page sets `textContent` rather than `innerHTML`, so market titles are never interpreted as HTML.
 
-## Multi-Thread Dashboard
-
-Display multiple thread embeds on one page:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Dashboard</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f9fafb;
-    }
-
-    .dashboard {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      margin: 0 0 20px 0;
-    }
-
-    .thread-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .thread-card {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .thread-header {
-      margin-bottom: 12px;
-    }
-
-    .thread-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0 0 4px 0;
-    }
-
-    .thread-meta {
-      font-size: 13px;
-      color: #6b7280;
-    }
-
-    .thread-iframe {
-      width: 100%;
-      border: 0;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 768px) {
-      .thread-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="dashboard">
-    <h1>📈 Market Dashboard</h1>
-    <p>Live prediction markets across multiple categories</p>
-
-    <div class="thread-grid" id="thread-grid">
-      <!-- Threads will be loaded here -->
-    </div>
-  </div>
-
-  <script>
-    const threads = [
-      {
-        id: 'politics-2024',
-        title: '2024 Presidential Election',
-        category: 'Politics'
-      },
-      {
-        id: 'sports-nfl',
-        title: 'NFL Season Winners',
-        category: 'Sports'
-      },
-      {
-        id: 'crypto-btc',
-        title: 'Bitcoin Price Predictions',
-        category: 'Crypto'
-      }
-    ];
-
-    // Load threads
-    const grid = document.getElementById('thread-grid');
-
-    threads.forEach((thread, index) => {
-      const card = document.createElement('div');
-      card.className = 'thread-card';
-      card.innerHTML = `
-        <div class="thread-header">
-          <h2 class="thread-title">${thread.title}</h2>
-          <div class="thread-meta">
-            ${thread.category} • <span id="count-${index}">Loading...</span>
-          </div>
-        </div>
-        <iframe
-          id="iframe-${index}"
-          class="thread-iframe"
-          src="https://app.kash.bot/threads/${thread.id}/iframe?source=my-site"
-          height="500"
-        ></iframe>
-      `;
-      grid.appendChild(card);
-    });
-
-    // Listen for all iframe messages
-    window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://app.kash.bot') return;
-
-      if (event.data.type === 'kash-iframe-ready') {
-        // Find which iframe sent this
-        const iframes = document.querySelectorAll('iframe');
-        iframes.forEach((iframe, index) => {
-          if (iframe.contentWindow === event.source) {
-            const countEl = document.getElementById(`count-${index}`);
-            if (countEl) {
-              countEl.textContent = `${event.data.data.marketCount} markets`;
-            }
-          }
-        });
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
----
-
-## Loading States and Error Handling
-
-Robust error handling and fallbacks:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kash Markets - Error Handling</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .error {
-      background: #fee2e2;
-      border-left: 4px solid #dc2626;
-      padding: 16px;
-      border-radius: 4px;
-      margin: 20px 0;
-      display: none;
-    }
-
-    .error.show {
-      display: block;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #6b7280;
-    }
-
-    #kash-embed {
-      width: 100%;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      display: none;
-    }
-
-    #kash-embed.loaded {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <h1>Prediction Markets</h1>
-
-  <div class="error" id="error-message"></div>
-
-  <div class="loading" id="loading">
-    Loading markets...
-  </div>
-
-  <iframe
-    id="kash-embed"
-    src="https://app.kash.bot/threads/abc123/iframe?source=my-site"
-    height="900"
-  ></iframe>
-
-  <script>
-    const iframe = document.getElementById('kash-embed');
-    const loading = document.getElementById('loading');
-    const errorEl = document.getElementById('error-message');
-
-    let loadTimeout;
-    let retryCount = 0;
-    const MAX_RETRIES = 3;
-
-    // Show error
-    function showError(message) {
-      errorEl.textContent = message;
-      errorEl.classList.add('show');
-      loading.style.display = 'none';
-    }
-
-    // Hide error
-    function hideError() {
-      errorEl.classList.remove('show');
-    }
-
-    // Retry loading
-    function retryLoad() {
-      if (retryCount >= MAX_RETRIES) {
-        showError('Failed to load markets after multiple attempts. Please refresh the page.');
-        return;
-      }
-
-      retryCount++;
-      console.log(`Retry attempt ${retryCount}/${MAX_RETRIES}`);
-
-      // Reload iframe
-      const src = iframe.src;
-      iframe.src = '';
-      setTimeout(() => {
-        iframe.src = src;
-        startLoadTimeout();
-      }, 1000 * retryCount); // Exponential backoff
-    }
-
-    // Start timeout
-    function startLoadTimeout() {
-      loadTimeout = setTimeout(() => {
-        console.error('Embed load timeout');
-        retryLoad();
-      }, 15000); // 15 second timeout
-    }
-
-    // Listen for messages
-    window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://app.kash.bot') return;
-
-      if (event.data.type === 'kash-iframe-ready') {
-        clearTimeout(loadTimeout);
-        loading.style.display = 'none';
-        iframe.classList.add('loaded');
-        hideError();
-        console.log('Embed loaded successfully');
-      }
-    });
-
-    // Detect iframe load errors
-    iframe.addEventListener('error', function() {
-      clearTimeout(loadTimeout);
-      showError('Failed to load embed. Please check your internet connection.');
-    });
-
-    // Start initial timeout
-    startLoadTimeout();
-  </script>
-</body>
-</html>
-```
-
----
-
-## Complete Production Example
-
-Full production-ready example with all best practices:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Prediction Markets</title>
-  
-  <!-- Preconnect for faster loading -->
-  <link rel="preconnect" href="https://app.kash.bot">
-  <link rel="dns-prefetch" href="https://app.kash.bot">
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9fafb;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-
-    .status {
-      margin: 10px 0;
-      padding: 12px;
-      background: #f0f9ff;
-      border-left: 3px solid #3b82f6;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .embed-wrapper {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    #kash-embed {
-      width: 100%;
-      border: 0;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 768px) {
-      #kash-embed {
-        height: 700px !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>🎲 Prediction Markets</h1>
-      <p>Live probabilities on politics, sports, and current events</p>
-    </header>
-
-    <div class="status" id="status">Loading markets...</div>
-
-    <div class="embed-wrapper">
-      <iframe
-        id="kash-embed"
-        src="https://app.kash.bot/threads/abc123/iframe?source=my-website"
-        height="900"
-        title="Prediction markets"
-        loading="lazy"
-        allow="clipboard-write"
-      ></iframe>
-    </div>
-  </div>
-
-  <script>
-    const status = document.getElementById('status');
-
-    // Listen for embed events
-    window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://app.kash.bot') return;
-
-      const { type, data } = event.data;
-
-      switch (type) {
-        case 'kash-iframe-ready':
-          status.textContent = `✅ Loaded ${data.marketCount} markets • $${(data.totalVolume / 100).toLocaleString()} total volume`;
-          break;
-
-        case 'kash-market-clicked':
-          status.textContent = `👆 Viewing market: ${data.marketId}`;
-          break;
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
----
-
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
-  <Card title="React Examples" href="/developer-docs/public-embed-api/examples/react">
-    React component examples
+  <Card title="Market and thread iframes" href="/developer-docs/public-embed-api/guides/thread-iframe">
+    Attributes, sandboxing and events
   </Card>
-  <Card title="Iframe Guide" href="/developer-docs/public-embed-api/guides/thread-iframe">
-    Complete iframe embedding guide
+  <Card title="JavaScript examples" href="/developer-docs/public-embed-api/examples/javascript">
+    A reusable API client
   </Card>
 </CardGroup>

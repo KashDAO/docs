@@ -1,140 +1,97 @@
 ---
 title: 'Rate Limits'
-description: 'Per-key quotas, X-RateLimit-* response headers, and how to handle 429s.'
+description: 'Request quotas and spending caps, the X-RateLimit-* headers, and how to handle 429s.'
 ---
 
-The REST API enforces a per-key sliding-window quota. When a key exceeds it, the next request returns `429 RATE_LIMIT_EXCEEDED` with `Retry-After` and `X-RateLimit-*` headers so you can back off cleanly.
+Every authenticated route is rate-limited per minute. When you exceed the limit, the request is refused with `429 RATE_LIMIT_EXCEEDED`, a `Retry-After` header and the `X-RateLimit-*` headers, so you can back off cleanly.
 
-## Per-tier defaults
+## Limits set by your key's tier
 
-| Tier         | Rate limit (req/min) | Daily spend cap | Per-trade cap | High-value confirm gate |
-| ------------ | -------------------- | --------------- | ------------- | ----------------------- |
-| `free`       | 60                   | 1,000 USDC      | 500 USDC      | none                    |
-| `developer`  | 300                  | 10,000 USDC     | 2,500 USDC    | none                    |
-| `enterprise` | Custom (admin-set)   | 100,000 USDC    | 25,000 USDC   | 25,000 USDC             |
-| `mm`         | Custom (admin-set)   | 1,000,000 USDC  | 50,000 USDC   | 50,000 USDC             |
+Your key's tier sets its limits. Read the live values from the `X-RateLimit-*` headers and from the bodies of `409` and `429` refusals rather than hard-coding them.
 
 A tier sets four independent limits:
 
-- **Rate limit** — HTTP requests per minute, sliding window. Hit this and you get `429 RATE_LIMIT_EXCEEDED`.
-- **Daily spend cap** — rolling 24h aggregate USDC volume per key. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "daily_volume"`. Sells and close-position intents do NOT draw against this cap.
-- **Per-trade cap** — single-trade USDC amount. Hit this and you get `409 SPENDING_LIMIT_EXCEEDED` with `extensions.cap = "per_trade"`.
-- **High-value confirm gate** — for tiers that have one, any trade ≥ this amount returns `202 Accepted` with the token nested as `confirmation: { token, expiresAt }`; you then `POST /v1/trades/{id}/confirm` with `confirmation.token` to actually execute. Two-step flow lets you catch a runaway bot before it commits a six-figure trade.
+- **Request rate.** Requests per minute. Exceeding it returns `429 RATE_LIMIT_EXCEEDED`.
+- **Per-trade cap.** The USDC amount of one trade. A larger trade is refused at once with `409 SPENDING_LIMIT_EXCEEDED`.
+- **Daily spend cap.** Total USDC bought through the key since 00:00 UTC. This is checked after the trade is accepted: a buy that would exceed it moves to `rejected` and fires a `trade.rejected` webhook. Sells do not count against it.
+- **High-value confirmation.** On tiers that have one, a trade at or above the threshold returns `202 Accepted` with `confirmation: { token, expiresAt }`. Release it before `expiresAt` with `POST /v1/trades/{id}/confirm`. This gives your system a chance to stop a runaway bot before it commits a large trade.
 
-The rate-limit window is **per `user_id`**, not per individual key. If a single user holds two keys, HTTP requests across both share the quota — so issuing extra keys doesn't multiply your throughput. The **spending caps**, however, are **per key** — each key gets its own daily allotment.
+There is also a cap on **unfinished trades** per account: a new trade while the account already has its tier's maximum in flight is refused with `429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` and a short `Retry-After`.
 
-Each user can hold at most **5 active keys** at a time (revoked keys don't count). This guards against quota-pooling abuse patterns.
+## Who shares a quota
 
-## Why these caps exist
+- The **request rate** is counted per **user**, across every key that user holds, so extra keys do not add throughput. Each key is also counted on its own, with the same limit.
+- **Spending caps** are per **key**.
+- Read routes and write routes draw from **separate** budgets, each at the tier's per-minute limit:
+  - **Read** routes (every `GET`) use a sliding window: smooth, with no bursting.
+  - **Write** routes (every rate-limited `POST`) use a token bucket: its capacity equals the limit and it refills continuously, so short bursts are allowed.
 
-The caps are not punitive. Five concrete reasons:
+The [endpoint reference](/developer-docs/rest-api/endpoint-reference) shows each route's class.
 
-1. **Blast radius on key compromise.** API keys leak — committed to git, dumped in error reports, laptop stolen. The cap bounds the loss between leak-time and revoke-time.
-2. **Runaway-bot circuit breaker.** A trading loop misfires (off-by-one in your sizing, retry storm on a timeout, missing dedup on a webhook). The cap is a hard stop you cannot disable from inside your own code.
-3. **AMM stability.** Kash markets use a Pythagorean AMM with thin per-outcome liquidity. A trade consuming more than ~5% of available liquidity moves the price substantially. Per-trade caps protect the AMM curve for everyone.
-4. **Compliance ladder.** Higher daily volumes implicitly require enhanced KYC, ToS attestation, and sanctions screening. The tier names map to that ladder.
-5. **Delegation guardrails.** API keys are a scoped delegation against the user's Privy-managed smart account — Kash never holds the keys or the funds, but for the duration of the delegation a leaked key (or a runaway bot) can move balance up to whatever the smart account holds. Caps bound that blast radius. The user can revoke any key at any time; the cap is the runtime safety net while it's active.
+## Response headers
 
-If you want a surface with no caps, the self-orchestrated track (`@kashdao/protocol-sdk`) is the right product — you sign and submit every transaction yourself with your own signer/RPC/bundler, and bear the full operational risk. Both paths are non-custodial; this one just removes the platform-side guardrails along with the platform-side orchestration.
-
-## Response headers (every response)
-
-Every response — `200`, `4xx`, `429` — carries the live state of your bucket:
+Every rate-limited response, successful or not, carries the state of the budget closest to running out:
 
 ```
-X-RateLimit-Limit:     300
-X-RateLimit-Remaining: 287
-X-RateLimit-Reset:     1730000060   # Unix epoch seconds; when remaining refills
+X-RateLimit-Limit:     100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset:     1792000060
 ```
 
-- `X-RateLimit-Limit` — your configured quota for the window.
-- `X-RateLimit-Remaining` — how many requests you can still send before the window resets.
-- `X-RateLimit-Reset` — Unix epoch seconds when `Remaining` refills back to `Limit`.
+- `X-RateLimit-Limit`: the per-minute limit.
+- `X-RateLimit-Remaining`: requests left before you are refused.
+- `X-RateLimit-Reset`: Unix time in **seconds** when the budget is full again.
 
-Use these to pace yourself proactively rather than waiting for a `429`.
+Pace yourself from these rather than waiting for a `429`.
 
 ## Hitting the limit
-
-When you exceed the quota:
 
 ```http
 HTTP/1.1 429 Too Many Requests
 Content-Type: application/problem+json
-Retry-After: 38
-X-RateLimit-Limit: 300
+Retry-After: 12
+X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1730000098
+X-RateLimit-Reset: 1792000072
 
 {
   "type": "https://docs.kash.bot/developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
   "title": "Rate limit exceeded",
   "status": 429,
   "code": "RATE_LIMIT_EXCEEDED",
-  "detail": "API key has exceeded its 300 req/min quota.",
-  "requestId": "req_..."
+  "detail": "…",
+  "instance": "/v1/markets",
+  "requestId": "…"
 }
 ```
 
-**Always** respect `Retry-After` (seconds). The TypeScript SDK does this automatically with exponential backoff and jitter.
+`Retry-After` is computed for your bucket: the seconds until it admits another request. Always honour it. The TypeScript SDK does this automatically.
 
-## Algorithm
+If the rate limiter itself is briefly unavailable, requests are refused with `503 RATE_LIMIT_UNAVAILABLE` and a short `Retry-After`. That is not a quota event; retry it.
 
-The rate limiter uses a **sliding window** for read paths (markets, portfolio, account, traces, webhooks list) and a **token bucket** for write paths (`POST /v1/trades`, `POST /v1/trades/{id}/confirm`).
+## Temporarily disabled routes
 
-- **Sliding window** — smooth, no burst. Best for sustained polling.
-- **Token bucket** — allows short bursts (capacity = limit; refill = limit/60 per second). Best for human-driven actions.
-
-Both algorithms are keyed on `user:{userId}`.
-
-## Per-route rate limit policies
-
-Most endpoints share the per-key tier quota. A few are tighter:
-
-| Endpoint pattern                         | Algorithm        | Notes                                                   |
-| ---------------------------------------- | ---------------- | ------------------------------------------------------- |
-| `GET /v1/markets*`, `GET /v1/portfolio*` | sliding-window   | Standard tier quota.                                    |
-| `GET /v1/markets/{id}/quote`             | sliding-window   | Standard tier quota; backed by RPC.                     |
-| `POST /v1/trades`, `POST /v1/trades/{id}/confirm` | token-bucket | Tighter — write paths cost more.               |
-| `POST /v1/webhooks/events/{id}/redeliver`| token-bucket     | Replay amplification cap (max 5 redeliveries per event).|
+Separately from rate limiting, an individual route can be temporarily unavailable, returning `503 ROUTE_DISABLED` with a `Retry-After` header. API trade writes can also be temporarily unavailable, returning `503 API_TRADE_PROCESSING_HALTED` with a `Retry-After` header on trade creation and confirmation while reads keep working. Back off and retry in both cases.
 
 ## Best practices
 
-- **Read your headers.** Cheaper than retry-after-rejection. Aim to keep `X-RateLimit-Remaining` above 10% of `X-RateLimit-Limit` under steady-state load.
-- **Use ETags on read paths.** A `304 Not Modified` still consumes one request from your quota (rate limiting runs before the ETag check) — the savings are bandwidth and server work, not quota. See **[ETags](/developer-docs/rest-api/etags)**.
-- **Use the SDK.** It handles `Retry-After`, exponential backoff, jitter, and idempotency-safe retries automatically.
-- **Distribute across keys carefully.** Rate-limit quota is per-`user_id`, so multiple keys for the same user don't help with HTTP throughput. (Spending caps ARE per-key.) If you need higher throughput, the upgrade path is below.
-- **Don't hammer the quote endpoint.** Quotes are RPC-heavy. Cache results client-side for the freshness window your strategy can tolerate (typically 5–15s).
+- **Read the headers** and keep `X-RateLimit-Remaining` comfortably above zero under steady load.
+- **Use conditional requests** for polling. A `304 Not Modified` still counts as a request, but it is cheap. See [ETags](/developer-docs/rest-api/etags).
+- **Prefer webhooks to polling** trade status.
+- **Cache quotes briefly.** Quote responses carry a short `Cache-Control` max-age.
+- **Use the SDK.** It honours `Retry-After` with exponential backoff and jitter, and sends an idempotency key on writes so retries are safe.
 
-## Kill switches
+## Upgrading your tier
 
-Independent from rate limiting, every route has an ops-controlled kill switch. When triggered (rare — usually during chain RPC degradation), the route returns:
+Repeated `RATE_LIMIT_EXCEEDED` or `SPENDING_LIMIT_EXCEEDED` during normal operation means you have outgrown your tier:
 
-```http
-503 Service Unavailable
-Content-Type: application/problem+json
-
-{
-  "code": "ROUTE_DISABLED",
-  "title": "Route temporarily disabled",
-  "detail": "This endpoint is currently disabled by ops. Try again later."
-}
-```
-
-Treat `503 ROUTE_DISABLED` like `Retry-After` — back off and retry. Most kill switches are toggled off within minutes.
-
-## How to upgrade your tier
-
-Hitting `RATE_LIMIT_EXCEEDED` or `SPENDING_LIMIT_EXCEEDED` repeatedly during normal operation means you've outgrown your tier — that's the signal to upgrade. Today, every tier above `free` is provisioned manually:
-
-- **`free` → `developer`** (5× rate limit, 10× spending caps): email **[support@kash.bot](mailto:support@kash.bot)** with your account email and a one-line description of your use case. Self-serve via Stripe is on the roadmap; until it ships we provision developer-tier keys on a case-by-case basis.
-- **Anywhere → `enterprise`** ($100k/day, $25k/trade, custom rate limit): **[contact sales](mailto:sales@kash.bot)**. Custom pricing based on volume commitment.
-- **Anywhere → `mm`** ($1M/day, $50k/trade, full counterparty terms): **[contact partnerships](mailto:partnerships@kash.bot)**. KYB, ToS attestation, and possibly escrow arrangements — this is a relationship, not a pricing tier.
-
-`enterprise` and `mm` tiers can override any of the four axes per-key as part of the contract — a key can have a different `daily_spend_limit_usdc`, `per_trade_limit_usdc`, or `high_value_trade_threshold_usdc` than the tier default.
+- **`free` → `developer`**: email [support@kash.bot](mailto:support@kash.bot) with your account email and a one-line description of your use case.
+- **`enterprise`**: [contact sales](mailto:sales@kash.bot).
+- **`mm`**: [contact sales](mailto:sales@kash.bot).
 
 ## Telemetry
 
-Your per-key telemetry — including 24h `rateLimitRejections` count — is exposed via `GET /v1/account/usage`. If you're seeing unexpected `429`s, that's the first place to check.
+`GET /v1/account/usage` (scope `auth:manage`) reports the calling key's rate-limit rejections over the last 24 hours, among other figures:
 
 ```bash
 curl https://api.kash.bot/v1/account/usage \
@@ -145,9 +102,9 @@ curl https://api.kash.bot/v1/account/usage \
 
 <CardGroup cols={2}>
   <Card title="Errors" icon="circle-exclamation" href="/developer-docs/rest-api/errors">
-    The full RFC 7807 error format and code catalog.
+    The RFC 7807 error format and code catalogue.
   </Card>
   <Card title="ETags" icon="bolt" href="/developer-docs/rest-api/etags">
-    `If-None-Match` short-circuits — free quota for unchanged data.
+    Conditional requests for cheap polling.
   </Card>
 </CardGroup>

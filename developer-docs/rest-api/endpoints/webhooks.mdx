@@ -1,0 +1,81 @@
+---
+title: 'Webhook Management'
+description: 'List webhook deliveries, replay one, and rotate the webhook signing secret.'
+---
+
+| Method | Path                                             | Scope             | Rate-limit class | Idempotency-Key |
+| ------ | ------------------------------------------------ | ----------------- | ---------------- | --------------- |
+| `GET`  | `/v1/webhooks/events`                            | `webhooks:manage` | read             |                 |
+| `POST` | `/v1/webhooks/events/{eventId}/redeliver`        | `webhooks:manage` | write            | honoured        |
+| `POST` | `/v1/auth/api-keys/me/webhook-secret/rotate`     | `webhooks:manage` | write            |                 |
+
+Everything here is scoped to the **calling API key**: you see and act on that key's webhook events only. The webhook URL itself is set on the key in the Kash app (**Settings → API Keys**). For the event payloads see [Webhooks](/developer-docs/rest-api/webhooks/overview).
+
+## `GET /v1/webhooks/events`
+
+Newest first, cursor-paginated.
+
+| Query    | Type    | Notes |
+| -------- | ------- | ----- |
+| `cursor` | string  | |
+| `limit`  | integer | 1 to 100, default 25. |
+| `status` | string  | Comma-separated: `none`, `pending`, `retrying`, `delivered`, `failed`. Absent means all. |
+
+Unknown query parameters are refused with `400 VALIDATION_FAILED`.
+
+Each item:
+
+| Field             | Notes |
+| ----------------- | ----- |
+| `id`              | The event id; the same value as `X-Kash-Event-Id`. |
+| `eventType`       | For example `trade.completed`. |
+| `tradeRequestId`  | The trade it concerns, or `null`. |
+| `emittedAt`       | When the event was created. |
+| `outboxEmittedAt` | When it was queued for delivery, or `null` if not yet. |
+| `replayCount`     | Manual replays so far (at most 5). |
+| `status`          | `none` (not queued yet), `pending` (queued, no attempt yet), `retrying` (attempted, no success or terminal failure yet), `delivered` (an attempt got a `2xx`), `failed` (terminal failure, no more automatic attempts). |
+| `delivery`        | `{ attempts, lastAttemptedAt, lastDeliveredAt, lastStatusCode, lastFailureCode, lastErrorMessage, terminalFailureAt }`. |
+
+## `POST /v1/webhooks/events/{eventId}/redeliver`
+
+Queues the event for delivery again. The replay carries the **same** `X-Kash-Event-Id` and body `id` as the original, so a receiver that dedupes on it treats the replay as a no-op. It is signed with the key's current secret.
+
+Response `202`:
+
+```json
+{
+  "event": {
+    "id": "…",
+    "eventType": "trade.completed",
+    "apiKeyId": "…",
+    "tradeRequestId": "…",
+    "emittedAt": "…",
+    "lastDeliveredAt": null,
+    "deliveryAttempts": 4
+  },
+  "data": { "…": "same as event" },
+  "_meta": { "requestId": "…", "timestamp": "…", "message": "…" }
+}
+```
+
+Errors: `404 RESOURCE_NOT_FOUND`, and `429 WEBHOOK_REPLAY_LIMIT_REACHED` after **5** replays of one event.
+
+## `POST /v1/auth/api-keys/me/webhook-secret/rotate`
+
+Rotates the signing secret of the key that makes the call. Send no body (or an empty one). The new secret is returned **once**.
+
+Response `200`:
+
+```json
+{
+  "webhookSecret": {
+    "secret": "whsec_…",
+    "rotatedAt": "2026-10-20T12:00:00.000Z",
+    "previousRetainedUntil": "2026-10-27T12:00:00.000Z"
+  },
+  "data": { "…": "same as webhookSecret" },
+  "_meta": { "requestId": "…", "timestamp": "…", "message": "…" }
+}
+```
+
+The previous secret keeps signing deliveries alongside the new one for 7 days (until `previousRetainedUntil`). A second rotation within 60 seconds is refused with `429 WEBHOOK_SECRET_ROTATION_COOLDOWN`. See [Secret rotation](/developer-docs/rest-api/webhooks/secret-rotation).
