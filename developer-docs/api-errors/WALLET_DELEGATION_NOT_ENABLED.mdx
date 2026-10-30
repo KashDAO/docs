@@ -7,7 +7,7 @@ description: 'HTTP 409 — Wallet delegation not enabled'
 
 ## When it fires
 
-The API cannot act on the self-custodial wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
+ZeroID cannot act on the self-custodial wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
 
 Today this happens when the key is configured to trade from a smart account other than the key owner's own. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
 
