@@ -19,7 +19,7 @@ The package is in beta (`0.3.0b2`, Solana only). Pin the version you test agains
 ## Trust model
 
 The package never holds keys, never sponsors fees and never contacts
-Kash-hosted infrastructure. You bring the RPC endpoint and the signer
+ZeroID-hosted infrastructure. You bring the RPC endpoint and the signer
 (a `solders` `Keypair`, or any object implementing the `SolanaSigner`
 protocol). The SDK builds the instructions, asks your signer to sign,
 and sends through your RPC.

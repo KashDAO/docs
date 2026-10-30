@@ -9,7 +9,7 @@ description: 'List webhook deliveries, replay one, and rotate the webhook signin
 | `POST` | `/v1/webhooks/events/{eventId}/redeliver`        | `webhooks:manage` | write            | honoured        |
 | `POST` | `/v1/auth/api-keys/me/webhook-secret/rotate`     | `webhooks:manage` | write            |                 |
 
-Everything here is scoped to the **calling API key**: you see and act on that key's webhook events only. The webhook URL itself is set on the key in the Kash app (**Settings → API Keys**). For the event payloads see [Webhooks](/developer-docs/rest-api/webhooks/overview).
+Everything here is scoped to the **calling API key**: you see and act on that key's webhook events only. The webhook URL itself is set on the key in the Kash web app (**Settings → API Keys**). For the event payloads see [Webhooks](/developer-docs/rest-api/webhooks/overview).
 
 ## `GET /v1/webhooks/events`
 

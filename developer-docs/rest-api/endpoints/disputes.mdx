@@ -8,7 +8,7 @@ description: 'Dispute a proposed market resolution while its dispute window is o
 | `POST` | `/v1/markets/{id}/disputes`  | `trades:write` | write            | honoured        |
 | `GET`  | `/v1/markets/{id}/disputes`  | `markets:read` | read             |                 |
 
-Outcomes are determined by Kash's automated resolution system from the market's published sources and rules. A market resolves in three steps: the system **proposes** an outcome, a **dispute window** runs until the market's `resolution.finalizableAt`, then the market **settles**. An undisputed proposal settles when its window ends. An open dispute holds settlement while the same automated system reviews it against the market's sources and rules; the market settles on the result of that review.
+Outcomes are proposed by an automated resolution system operated by ZeroID Labs Ltd. ("ZeroID") from the market's published sources and rules. A market resolves in three steps: the system **proposes** an outcome, a **dispute window** runs until the market's `resolution.finalizableAt`, then the market **settles**. An undisputed proposal settles when its window ends. An open dispute holds settlement until ZeroID staff decide it against the market's sources and rules: they keep the proposed outcome, choose a different one, or cancel the market, and the market settles on that decision. See [Market Mechanics](/getting-started/features/market-mechanics#resolution).
 
 Watch `resolution` and `resolutionState` on the [market resource](/developer-docs/rest-api/endpoints/markets#the-market-resource) to know when a proposal exists and when its window closes.
 

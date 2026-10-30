@@ -7,7 +7,7 @@ Webhooks tell your code when something happens to a trade: it needs confirmation
 
 ## Setting it up
 
-Each API key can have a webhook URL. Set it on the key in the Kash app under **Settings → API Keys**. Events for trades placed with that key are POSTed to that URL. The key's signing secret is shown once when it is created, and can be [rotated](/developer-docs/rest-api/webhooks/secret-rotation).
+Each API key can have a webhook URL. Set it on the key in the Kash web app under **Settings → API Keys**. Events for trades placed with that key are POSTed to that URL. The key's signing secret is shown once when it is created, and can be [rotated](/developer-docs/rest-api/webhooks/secret-rotation).
 
 The URL must be publicly reachable. Redirects are not followed, so register the final URL.
 

@@ -20,7 +20,7 @@ This is short-lived by design. If the rate limiter stays unavailable, the API st
 
 - **Honour `Retry-After`.** The TypeScript SDK retries 5xx responses with exponential backoff by default, so most occurrences never reach your code. If you disabled SDK retries (`maxRetries: 0`), add your own backoff.
 - **Don't treat it as quota exhaustion.** [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) (429) means you are over your limit; `RATE_LIMIT_UNAVAILABLE` means the limit could not be checked. Don't show it to users as a quota event.
-- If you see these steadily for several minutes, contact Kash support with a `requestId`.
+- If you see these steadily for several minutes, contact ZeroID support with a `requestId`.
 
 ## Response headers
 

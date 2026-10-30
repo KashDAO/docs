@@ -7,7 +7,7 @@ description: 'HTTP 409 — Position not claimable'
 
 ## When it fires
 
-`POST /v1/redemptions` was called for a `(marketId, outcomeIndex)` that is not currently claimable for your account. Claimability is decided by the same rule the Kash app uses, so any claim the API accepts can be redeemed.
+`POST /v1/redemptions` was called for a `(marketId, outcomeIndex)` that is not currently claimable for your account. Claimability is decided by the same rule the Kash web app uses, so any claim the API accepts can be redeemed.
 
 ## Why it happens
 
@@ -22,7 +22,7 @@ description: 'HTTP 409 — Position not claimable'
 - Redeem the **winning** outcome index. On a cancelled market, redeem an outcome you hold that carries a refund.
 - If the market was redeemed automatically, your USDC is already in your wallet; check `GET /v1/portfolio`.
 - If a claim is **in progress** (not failed), repeating the request returns `200` with the original claim rather than this error.
-- If a previous claim **failed**, contact Kash support so the failed request can be retried.
+- If a previous claim **failed**, contact ZeroID support so the failed request can be retried.
 
 ## Related codes
 

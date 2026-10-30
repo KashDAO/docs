@@ -6,7 +6,7 @@ description: '@kashdao/protocol-sdk — non-custodial TypeScript SDK for the Kas
 `@kashdao/protocol-sdk` is the **direct-to-chain** TypeScript SDK for
 Kash. Its `@kashdao/protocol-sdk/solana` entry point talks straight to
 the Kash market program on Solana mainnet-beta: no Kash backend and no
-REST API in the trade path, no Kash-held keys, no Kash-sponsored fees.
+REST API in the trade path, no ZeroID-held keys, no ZeroID-sponsored fees.
 
 If you want a hosted, API-key-authed integration (the fastest path to a
 first trade), use the [REST API](/developer-docs/rest-api/overview) and
@@ -17,10 +17,10 @@ makers, trading bots, AI agents and on-chain UIs.
 ## Trust model
 
 The package never holds keys, never sponsors fees and never contacts
-Kash-hosted infrastructure. You bring the RPC endpoint (or a
+ZeroID-hosted infrastructure. You bring the RPC endpoint (or a
 `Connection`), the signer and the funded wallet. It builds
 `TransactionInstruction`s for the market program, asks your signer to
-sign, and sends through your RPC. Kash sees only what lands on chain.
+sign, and sends through your RPC. ZeroID sees only what lands on chain.
 
 ## Install
 

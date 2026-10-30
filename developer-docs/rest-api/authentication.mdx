@@ -15,7 +15,7 @@ curl https://api.kash.bot/v1/markets \
   -H "X-Kash-Api-Version: 2026-08-19"
 ```
 
-Keys are issued in the Kash app under **Settings → API Keys**. The plaintext is shown once. A user can hold at most **5 active keys**.
+Keys are issued in the Kash web app under **Settings → API Keys**. The plaintext is shown once. A user can hold at most **5 active keys**.
 
 <Tip>
 With [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) you don't set headers yourself. Construct the client with your key and it authenticates every request; a `kash_test_` key goes to staging and a `kash_live_` key to production.
@@ -57,10 +57,10 @@ Each key has a tier, which sets its rate limit and spending caps. See [Rate limi
 
 | Tier         | How to get it |
 | ------------ | ------------- |
-| `free`       | Self-serve in the Kash app. |
+| `free`       | Self-serve in the Kash web app. |
 | `developer`  | On request to [support@kash.bot](mailto:support@kash.bot). |
-| `enterprise` | Issued by Kash. [Contact sales](mailto:sales@kash.bot). |
-| `mm`         | Market-maker tier, issued by Kash. [Contact sales](mailto:sales@kash.bot). |
+| `enterprise` | Issued by ZeroID. [Contact sales](mailto:sales@kash.bot). |
+| `mm`         | Market-maker tier, issued by ZeroID. [Contact sales](mailto:sales@kash.bot). |
 
 ## Account status
 
@@ -74,7 +74,7 @@ Optional, per key. When a key has an allowlist, a request from any other address
 203.0.113.45, 198.51.100.0/24, 2001:db8::/32
 ```
 
-Set it on the key in the Kash app. We strongly recommend an allowlist for production keys.
+Set it on the key in the Kash web app. We strongly recommend an allowlist for production keys.
 
 ## Request signing (optional)
 
@@ -106,7 +106,7 @@ Because the signing secret is the key itself, signing protects body integrity an
 
 Rotate a key when someone with access leaves, when a key may have been logged or committed, or as routine hygiene:
 
-1. Create a new key in the Kash app.
+1. Create a new key in the Kash web app.
 2. Roll it out to your services.
 3. Confirm the old key has gone quiet (`GET /v1/account/usage` with the old key shows no new trades).
 4. Revoke the old key. Revocation takes effect immediately (`401 API_KEY_REVOKED`).

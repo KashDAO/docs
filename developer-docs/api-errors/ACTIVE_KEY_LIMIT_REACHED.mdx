@@ -7,7 +7,7 @@ description: 'HTTP 409 — Active key limit reached'
 
 ## When it fires
 
-You tried to issue a new API key while your account already holds the maximum of **5 active (non-revoked) keys**. The limit is per user, across all environments, and is enforced when a key is issued from the Kash app (Settings → API Keys). It is not returned by the `/v1/*` endpoints themselves.
+You tried to issue a new API key while your account already holds the maximum of **5 active (non-revoked) keys**. The limit is per user, across all environments, and is enforced when a key is issued from the Kash web app (Settings → API Keys). It is not returned by the `/v1/*` endpoints themselves.
 
 ## Why it happens
 
@@ -18,7 +18,7 @@ You tried to issue a new API key while your account already holds the maximum of
 
 - Revoke a key you no longer use (Settings → API Keys → Revoke), then issue the new one.
 - Reuse keys where it makes sense: one `kash_live_…` key for production code and one `kash_test_…` key for everything else.
-- If your integration genuinely needs more active keys, contact Kash support.
+- If your integration genuinely needs more active keys, contact ZeroID support.
 
 ## Related codes
 

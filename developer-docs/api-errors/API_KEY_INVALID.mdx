@@ -17,9 +17,9 @@ The `X-API-Key` header is well formed, but it does not match any key Kash knows 
 
 ## How to fix
 
-- Compare the value you are sending with the key prefix shown in the Kash app (Settings → API Keys).
+- Compare the value you are sending with the key prefix shown in the Kash web app (Settings → API Keys).
 - If the prefix matches nothing in your account, the key has been deleted or was never yours. Issue a new one.
-- If the prefix matches and authentication still fails, contact Kash support with the prefix and the `requestId` from a recent failed call.
+- If the prefix matches and authentication still fails, contact ZeroID support with the prefix and the `requestId` from a recent failed call.
 
 Repeated authentication failures from one source trigger a temporary lockout, answered with [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED). Fix the key before retrying.
 

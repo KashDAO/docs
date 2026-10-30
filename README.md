@@ -9,15 +9,15 @@ Public documentation for **Kash**, a social prediction market on Solana. This re
 
 ## About Kash
 
-Kash is an interface built on an open, permissionless on-chain protocol on Solana that anyone can use directly. Markets on Kash are created and traded on that protocol, and Kash operates the automated market creation and resolution system. Users trade multi-outcome markets in USDC in the web app at [app.kash.bot](https://app.kash.bot) or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Creators connect their X account in the web app and create markets by chatting with Kash AI.
+Kash is an open, permissionless on-chain prediction-market protocol on Solana that anyone can use directly. The Kash web app at [app.kash.bot](https://app.kash.bot) and the X bot are operated by ZeroID Labs Ltd. ("ZeroID"). Users trade multi-outcome markets in USDC through the Kash web app or by replying to market posts on X with [@kash_bot_trade](https://x.com/kash_bot_trade). Creators connect their X account in the web app and create markets by chatting with Kash AI.
 
 Key characteristics documented here:
 
 - **Web app and X**: app.kash.bot for everything, plus trading by reply on X
-- **Non-custodial**: each user has their own embedded Solana wallet; Kash never holds custody of user funds, and the private key can be exported
-- **No SOL needed**: Kash pays the Solana network fees
+- **Non-custodial**: each user has their own self-custodial embedded Solana wallet; ZeroID never holds custody of user funds, and the private key can be exported
+- **No SOL needed**: ZeroID pays the Solana network fees
 - **USDC-denominated**: trading and settlement in USDC on Solana
-- **Chat-created markets**: Kash AI drafts each market; outcomes are determined by Kash's automated resolution system from published sources and rules, with a dispute window
+- **Chat-created markets**: Kash AI drafts each market; outcomes are proposed by an automated resolution system operated by ZeroID from published sources and rules, with a dispute window decided by ZeroID staff
 
 ## Repository Structure
 

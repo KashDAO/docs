@@ -11,13 +11,13 @@ The key is well formed and recognised, but it has been revoked.
 
 ## Why it happens
 
-- You or a teammate revoked it in the Kash app (Settings → API Keys → Revoke).
-- Kash revoked it, for example after a suspected leak.
+- You or a teammate revoked it in the Kash web app (Settings → API Keys → Revoke).
+- ZeroID revoked it, for example after a suspected leak.
 - Automated security controls revoked it after anomalous activity.
 
 ## How to fix
 
-- If the revocation was unexpected, contact Kash support. Every revocation is recorded with who, when and why.
+- If the revocation was unexpected, contact ZeroID support. Every revocation is recorded with who, when and why.
 - If you need to keep working, **issue a new key**. A revoked key cannot be reinstated; that is the security property.
 - Update every place the old key was stored (environment variables, secret stores, CI configuration) when you roll out the new one.
 

@@ -7,7 +7,7 @@ description: 'HTTP 500 — Internal Server Error'
 
 ## When it fires
 
-Something unexpected happened while handling the request. The cause is recorded on Kash's side, and the response carries no internal detail.
+Something unexpected happened while handling the request. The cause is recorded on ZeroID's side, and the response carries no internal detail.
 
 This is the catch-all. Every other code in this catalogue is an anticipated, structured failure; `INTERNAL_ERROR` means Kash hit something it had not categorised.
 
@@ -19,9 +19,9 @@ This is the catch-all. Every other code in this catalogue is an anticipated, str
 
 ## How to fix
 
-- **Include the `requestId` in any support request.** It is Kash's handle into the logs and traces for your call.
+- **Include the `requestId` in any support request.** It is ZeroID's handle into the logs and traces for your call.
 - Retry once. If the problem was transient, the retry may succeed. Retry writes with the same `Idempotency-Key`.
-- If it reproduces for a specific request, send Kash support the request shape (with secrets removed) and the `requestId`.
+- If it reproduces for a specific request, send ZeroID support the request shape (with secrets removed) and the `requestId`.
 - The TypeScript SDK raises this as `KashServerError` with `requestId` set; raw HTTP callers can read `requestId` from the problem body.
 
 ## Related codes

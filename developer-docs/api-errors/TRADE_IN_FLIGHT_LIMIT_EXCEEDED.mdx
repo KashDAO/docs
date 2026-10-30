@@ -9,7 +9,7 @@ description: 'HTTP 429 — Too many trades in flight'
 
 `POST /v1/trades` (or `POST /v1/trades/{id}/confirm` for a high-value trade) when your account already has the
 maximum number of trades **in flight** for your key's tier. A trade is in flight from the moment it is accepted
-until it settles (`completed`, `failed` or `rejected`). Trades placed through the Kash app count too: the limit
+until it settles (`completed`, `failed` or `rejected`). Trades placed through the Kash web app count too: the limit
 is per account, not per key.
 
 **Nothing was placed.** The request was refused before anything was written, so retrying it, with the same

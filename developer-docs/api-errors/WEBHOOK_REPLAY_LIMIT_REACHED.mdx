@@ -21,7 +21,7 @@ The cap stops a leaked key from using the redeliver endpoint to flood your own w
 
 - Stop redelivering this event. The cap is per event, so other events can still be redelivered.
 - Fix the delivery failure first. Check delivery status with `GET /v1/webhooks/events`, or the `webhookDelivery` field on `GET /v1/trades/{id}`.
-- If you legitimately need more redeliveries of one event (for example after a long endpoint outage), contact Kash support.
+- If you legitimately need more redeliveries of one event (for example after a long endpoint outage), contact ZeroID support.
 
 See [Webhooks](/developer-docs/rest-api/webhooks/overview).
 

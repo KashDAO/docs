@@ -7,7 +7,7 @@ description: 'HTTP 409 — Wallet delegation not enabled'
 
 ## When it fires
 
-Kash cannot act on the wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
+The API cannot act on the self-custodial wallet your API key is configured to trade from. Returned by `POST /v1/trades` and `POST /v1/redemptions`.
 
 Today this happens when the key is configured to trade from a smart account other than the key owner's own. API v1 trades and redeems only from the key owner's own account, so such a key is refused before anything is written. The `detail` says so.
 
@@ -20,8 +20,8 @@ Wallet delegation (the permission that lets the Kash app connect your self-custo
 
 ## How to fix
 
-- Use a key configured to trade from your user account. Issue one in the Kash app (Settings → API Keys) or ask Kash support.
-- If delegation is missing, complete the **Approve Kash** step in the Kash app. It is shown again when you next trade there.
+- Use a key configured to trade from your user account. Issue one in the Kash web app (Settings → API Keys) or ask ZeroID support.
+- If delegation is missing, complete the **Approve Kash** step in the Kash web app. It is shown again when you next trade there.
 
 ## Related codes
 

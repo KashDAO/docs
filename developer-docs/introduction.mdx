@@ -5,20 +5,20 @@ description: 'Build with Kash prediction markets'
 
 Welcome to the Kash developer documentation. Build trading bots and agents, trade directly against the on-chain markets, embed markets in your website, and read real-time market data.
 
-Kash markets live on an open, permissionless protocol on **Solana**, and every balance, trade and redemption is in **USDC**. Kash provides an interface on top of that protocol.
+Markets live on the Kash protocol, an open, permissionless protocol on **Solana**, and every balance, trade and redemption is in **USDC**. ZeroID Labs Ltd. ("ZeroID") operates the Kash web app and the hosted developer surfaces below on top of that protocol.
 
 <Note>
-**Kash is non-custodial on every surface.** Kash never holds custody of user funds: they sit in wallets the user owns and controls. The surfaces below differ in **who orchestrates execution**, not in who holds the funds.
+**Every surface is non-custodial.** ZeroID never holds custody of user funds: they sit in self-custodial wallets the user owns and controls. The surfaces below differ in **who orchestrates execution**, not in who holds the funds.
 </Note>
 
 ## Pick your surface
 
 <CardGroup cols={2}>
   <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
-    Kash-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own embedded wallet under the trading permission they granted, and Kash builds the transaction and pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
+    ZeroID-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own self-custodial embedded wallet under the trading permission they granted, and ZeroID builds the transaction and pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
   </Card>
   <Card title="Protocol SDK" icon="cube" href="/developer-docs/protocol-sdk/overview">
-    Self-orchestrated access. Bring your own signer and RPC, and transactions never touch Kash servers. TypeScript and Python implementations, with cross-language parity.
+    Self-orchestrated access. Bring your own signer and RPC, and transactions never touch ZeroID servers. TypeScript and Python implementations, with cross-language parity.
   </Card>
   <Card title="CLI" icon="terminal" href="/developer-docs/cli/overview">
     `kash`: the REST API packaged as a scripting-friendly command-line client. Ideal for one-offs, CI jobs, shell scripts and agent integrations.
@@ -30,7 +30,7 @@ Kash markets live on an open, permissionless protocol on **Solana**, and every b
 
 <Note>
 **Which one do I want?**
-- Want Kash to build, submit and pay for transactions from a user's own embedded wallet? → **REST API**.
+- Want ZeroID to build, submit and pay for transactions from a user's own self-custodial embedded wallet? → **REST API**.
 - Want to sign and submit transactions entirely with your own infrastructure? → **Protocol SDK**.
 - Want to script flows from a terminal or CI? → **CLI**.
 - Embedding markets in a website for people to view? → **Public Embed API**.
