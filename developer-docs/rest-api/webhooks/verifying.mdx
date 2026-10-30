@@ -6,7 +6,7 @@ description: 'HMAC-SHA256 webhook signature verification, with reference code in
 The scheme is modelled on Stripe's, with two differences that matter if you adapt a Stripe verifier: the header is `X-Kash-Signature`, and the timestamp `t=` is in Unix **milliseconds**, not seconds.
 
 <Warning>
-**Always** verify signatures on incoming webhook requests. An unsigned or invalid request must be rejected — the only way to know an event truly came from Kash is to verify its HMAC.
+**Always** verify signatures on incoming webhook requests. An unsigned or invalid request must be rejected — the only way to know an event truly came from the Kash API is to verify its HMAC.
 </Warning>
 
 ## The signature format
@@ -34,7 +34,7 @@ X-Kash-Signature: t=1730000000000,v1=<current-hmac>,v1=<previous-hmac>
 4. Compute `expected = HMAC_SHA256(secret, "${t}.${rawBody}")` and hex-encode it.
 5. For each `v1=` entry in the header, compare with `expected` using a **constant-time** comparator. If any matches, accept.
 
-That is the whole algorithm. Respond `400` to a request that fails verification: Kash does not retry a `400`.
+That is the whole algorithm. Respond `400` to a request that fails verification: The API does not retry a `400`.
 
 ## Reference implementations
 
@@ -212,7 +212,7 @@ pub fn verify_kash_signature(payload: &[u8], signature: &str, secret: &str, tole
 
 ## Testing your verifier locally
 
-The CLI can sign a payload the same way Kash does (`t=<unix-ms>,v1=<hex>`) and POST it to your endpoint:
+The CLI can sign a payload the same way the API does (`t=<unix-ms>,v1=<hex>`) and POST it to your endpoint:
 
 ```bash
 kash webhooks replay payload.json \

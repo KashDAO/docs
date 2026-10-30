@@ -7,8 +7,8 @@ description: 'HTTP 503 — Trading busy'
 
 ## When it fires
 
-`POST /v1/trades` (or `POST /v1/trades/{id}/confirm`) while Kash is working through a trading backlog: the
-oldest queued trade work has waited longer than your key's tier tolerates. Kash refuses new trades at the door rather than
+`POST /v1/trades` (or `POST /v1/trades/{id}/confirm`) while the API is working through a trading backlog: the
+oldest queued trade work has waited longer than your key's tier tolerates. The API refuses new trades at the door rather than
 accepting them and letting them expire in the queue.
 
 **Nothing was placed.** The request was refused before anything was written, so retrying it, with the same

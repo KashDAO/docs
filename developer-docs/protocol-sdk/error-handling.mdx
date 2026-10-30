@@ -18,7 +18,7 @@ uses the same class names and codes.
 | `KashChainError`                     | RPC or on-chain failure. `code` says which (see below)                                                          | Check `isRetryable`        |
 | `KashTransactionExpiredError`        | `TX_EXPIRED`: the blockhash expired and a status check found no trace of the signature, so it did not land      | Yes: rebuild and resend    |
 | `KashTransactionOutcomeUnknownError` | `WAIT_RECEIPT_FAILED`: the transaction **may have landed**                                                       | **No**: look it up first   |
-| `KashSignerError`                    | The signer failed or cannot sign (e.g. `SIGNER_UNSUPPORTED` for a disconnected wallet)                          | No                         |
+| `KashSignerError`                    | The signer failed or cannot sign (e.g. `SIGNER_UNSUPPORTED` for a disconnected self-custodial wallet)                          | No                         |
 
 Refusals checked before signing include `InvalidState` (market not
 active) and a frozen market.

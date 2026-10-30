@@ -14,7 +14,7 @@ This is the generic 404. Some resources have their own code where the distinctio
 ## Why it happens
 
 - The id is wrong (a typo or cross-environment confusion).
-- The resource exists but belongs to another account. Kash returns 404 rather than 403 deliberately, so nobody can probe for resources they don't own.
+- The resource exists but belongs to another account. The API returns 404 rather than 403 deliberately, so nobody can probe for resources they don't own.
 - The resource was deleted.
 
 ## How to fix

@@ -32,8 +32,8 @@ GET https://app.kash.bot/api/markets/:id/leaderboard
 <ResponseField name="entries" type="Entry[]">
   <Expandable title="Entry">
     <ResponseField name="rank" type="integer">1-based rank by `amount`</ResponseField>
-    <ResponseField name="userId" type="string">Kash user UUID</ResponseField>
-    <ResponseField name="address" type="string">Trading wallet address</ResponseField>
+    <ResponseField name="userId" type="string">Kash web app user UUID</ResponseField>
+    <ResponseField name="address" type="string">Self-custodial trading wallet address</ResponseField>
     <ResponseField name="username" type="string | null">Display name</ResponseField>
     <ResponseField name="handle" type="string | null">X handle</ResponseField>
     <ResponseField name="profilePictureUrl" type="string | null">Avatar</ResponseField>

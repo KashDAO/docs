@@ -7,7 +7,7 @@ description: 'HTTP 409 — Insufficient balance'
 
 ## When it fires
 
-`POST /v1/redemptions` was called for an outcome your account holds **none** of. Kash read the account's on-chain balance of that outcome token and it was zero, so there is nothing to redeem.
+`POST /v1/redemptions` was called for an outcome your account holds **none** of. The API read the account's on-chain balance of that outcome token and it was zero, so there is nothing to redeem.
 
 `POST /v1/trades` does not return this code. A trade's USDC balance is checked after the trade is accepted; a trade the account cannot fund ends as `failed` or `rejected`, visible on `GET /v1/trades/{id}` and in trade webhooks.
 
@@ -26,4 +26,4 @@ description: 'HTTP 409 — Insufficient balance'
 ## Related codes
 
 - [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) — you hold the token, but it is not claimable
-- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) — the account has no trading wallet yet
+- [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) — the account has no self-custodial trading wallet yet

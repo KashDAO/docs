@@ -56,7 +56,7 @@ local validator.
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `markets.get(ref)`                                                                                  | Decoded market: status, prices, probabilities                   |
 | `markets.quote_buy` / `quote_sell` / `quote_redeem`                                                 | Exact quotes from the program's integer curve                   |
-| `account.position` / `positions` / `usdc_balance`                                                   | Position balances and the wallet's USDC balance                 |
+| `account.position` / `positions` / `usdc_balance`                                                   | Position balances and the self-custodial wallet's USDC balance                 |
 | `protocol.config` / `template` / `templates`                                                        | Program config and market templates  |
 | `trades.build_buy` / `build_sell` / `build_redeem` / `build_redeem_cancelled` / `build_open_position` / `build_close_position` | A plan: the instructions plus the bounds they encode |
 | `trades.simulate(plan, payer=...)` / `trades.send(plan, signer=...)`                                | Simulate unsigned, or sign, send and confirm                    |

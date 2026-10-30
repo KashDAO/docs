@@ -5,7 +5,7 @@ description: '@kashdao/protocol-sdk — non-custodial TypeScript SDK for the Kas
 
 `@kashdao/protocol-sdk` is the **direct-to-chain** TypeScript SDK for
 Kash. Its `@kashdao/protocol-sdk/solana` entry point talks straight to
-the Kash market program on Solana mainnet-beta: no Kash backend and no
+the Kash market program on Solana mainnet-beta: no ZeroID backend and no
 REST API in the trade path, no ZeroID-held keys, no ZeroID-sponsored fees.
 
 If you want a hosted, API-key-authed integration (the fastest path to a
@@ -18,7 +18,7 @@ makers, trading bots, AI agents and on-chain UIs.
 
 The package never holds keys, never sponsors fees and never contacts
 ZeroID-hosted infrastructure. You bring the RPC endpoint (or a
-`Connection`), the signer and the funded wallet. It builds
+`Connection`), the signer and the funded self-custodial wallet. It builds
 `TransactionInstruction`s for the market program, asks your signer to
 sign, and sends through your RPC. ZeroID sees only what lands on chain.
 
@@ -53,7 +53,7 @@ with four namespaces:
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `markets.get(ref)`                                                                                                    | Decoded market: status (`active` / `frozen` / `resolved` / `cancelled`), prices, probabilities  |
 | `markets.quoteBuy` / `quoteSell` / `quoteRedeem`                                                                      | Exact quotes from the program's own integer curve                                                |
-| `account.position` / `positions` / `usdcBalance`                                                                      | Position balances and the wallet's USDC balance                                                  |
+| `account.position` / `positions` / `usdcBalance`                                                                      | Position balances and the self-custodial wallet's USDC balance                                                  |
 | `protocol.config` / `template` / `templates`                                                                          | Program config and market templates                                   |
 | `trades.buildBuy` / `buildSell` / `buildRedeem` / `buildRedeemCancelled` / `buildOpenPosition` / `buildClosePosition` | A plan: the instructions plus the bounds they encode                                             |
 | `trades.simulate(plan, { payer })` / `trades.send(plan, { signer })`                                                  | Simulate unsigned, or sign, send and confirm                                                     |
@@ -81,7 +81,7 @@ exported too, for composing your own transactions.
   (`minTokensOutWad` / `minAmountOutUsdc`).
 - **Signers.** `keypairSigner(keypair)` for bots and scripts;
   `walletAdapterSigner(wallet)` for `@solana/wallet-adapter`, Phantom or
-  any wallet exposing `publicKey` and `signTransaction`. Pass `feePayer`
+  any self-custodial wallet exposing `publicKey` and `signTransaction`. Pass `feePayer`
   to sponsor fees and rent from a second signer.
 
 ## Where to next

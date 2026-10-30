@@ -9,7 +9,7 @@ description: 'How failed webhook deliveries are retried, when delivery stops, an
 | ---------------------- | ------ |
 | `2xx` | Delivered. No more attempts. |
 | `3xx` | Stopped. Redirects are not followed; register the final URL. |
-| `400`, `404`, `410`, `422` | Stopped. Kash reads these as "don't send me this event". |
+| `400`, `404`, `410`, `422` | Stopped. The API reads these as "don't send me this event". |
 | Any other `4xx` (including `408` and `429`) | Retried. |
 | `5xx` | Retried. |
 | No answer within 10 seconds | Retried. |
@@ -81,7 +81,7 @@ Each event can be replayed at most **5 times** (`429 WEBHOOK_REPLAY_LIMIT_REACHE
 
 ## Testing locally
 
-The `kash` CLI can sign a payload the same way Kash does and POST it to your endpoint, without touching production data:
+The `kash` CLI can sign a payload the same way the API does and POST it to your endpoint, without touching production data:
 
 ```bash
 kash webhooks replay payload.json \

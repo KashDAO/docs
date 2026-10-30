@@ -7,7 +7,7 @@ description: 'HTTP 503 — Rate limit subsystem unavailable'
 
 ## When it fires
 
-Kash could not check your rate limit for this request because the rate-limiting system was briefly unavailable. Rather than serve the request without enforcing your tier's limit, the API refuses it with a retryable error.
+The API could not check your rate limit for this request because the rate-limiting system was briefly unavailable. Rather than serve the request without enforcing your tier's limit, the API refuses it with a retryable error.
 
 This is short-lived by design. If the rate limiter stays unavailable, the API stops returning this code and serves requests without limit enforcement until it recovers.
 

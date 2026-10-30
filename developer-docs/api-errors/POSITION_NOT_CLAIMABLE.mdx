@@ -13,14 +13,14 @@ description: 'HTTP 409 — Position not claimable'
 
 - **The outcome did not win.** On a resolved market only the winning outcome is redeemable. Losing-outcome tokens can still show an on-chain balance but are worthless.
 - **No refund for that outcome.** On a cancelled market, only outcomes with a non-zero refund price are refundable.
-- **The market was redeemed automatically.** It resolved before self-service redemption was available, so winning positions were redeemed to holders' wallets without a claim.
+- **The market was redeemed automatically.** It resolved before self-service redemption was available, so winning positions were redeemed to holders' self-custodial wallets without a claim.
 - **Already redeemed.** The position has been redeemed, or a redemption is in progress.
 - **A previous claim failed.** An earlier claim for this exact position ended as `failed`, and a new claim cannot be created through the API for it. The `detail` says so explicitly.
 
 ## How to fix
 
 - Redeem the **winning** outcome index. On a cancelled market, redeem an outcome you hold that carries a refund.
-- If the market was redeemed automatically, your USDC is already in your wallet; check `GET /v1/portfolio`.
+- If the market was redeemed automatically, your USDC is already in your self-custodial wallet; check `GET /v1/portfolio`.
 - If a claim is **in progress** (not failed), repeating the request returns `200` with the original claim rather than this error.
 - If a previous claim **failed**, contact ZeroID support so the failed request can be retried.
 

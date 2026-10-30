@@ -9,13 +9,13 @@ description: 'HTTP 500 — Internal Server Error'
 
 Something unexpected happened while handling the request. The cause is recorded on ZeroID's side, and the response carries no internal detail.
 
-This is the catch-all. Every other code in this catalogue is an anticipated, structured failure; `INTERNAL_ERROR` means Kash hit something it had not categorised.
+This is the catch-all. Every other code in this catalogue is an anticipated, structured failure; `INTERNAL_ERROR` means the API hit something it had not categorised.
 
 ## Why it happens
 
 - A genuinely unexpected condition.
 - A server-side configuration fault (for example, a supported chain whose configuration is incomplete).
-- A failure mode that does not yet have its own code. Please report it so Kash can add one.
+- A failure mode that does not yet have its own code. Please report it so ZeroID can add one.
 
 ## How to fix
 
@@ -26,4 +26,4 @@ This is the catch-all. Every other code in this catalogue is an anticipated, str
 
 ## Related codes
 
-Every other code in this catalogue is preferable. If you see `INTERNAL_ERROR` consistently for one operation, the right fix is for Kash to add a typed code, not for you to work around it.
+Every other code in this catalogue is preferable. If you see `INTERNAL_ERROR` consistently for one operation, the right fix is for ZeroID to add a typed code, not for you to work around it.

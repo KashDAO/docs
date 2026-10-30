@@ -7,19 +7,19 @@ description: 'HTTP 409 — Smart account not provisioned'
 
 ## When it fires
 
-The account behind your API key does not have a fully set-up trading wallet yet, so nothing can be executed on-chain for it. Returned by `POST /v1/trades`, `POST /v1/redemptions` and `GET /v1/portfolio`.
+The account behind your API key does not have a fully set-up self-custodial trading wallet yet, so nothing can be executed on-chain for it. Returned by `POST /v1/trades`, `POST /v1/redemptions` and `GET /v1/portfolio`.
 
-What "set up" means depends on the market's chain. On EVM chains the account needs a completed smart account; on Solana the account's own wallet is used, and it must exist.
+What "set up" means depends on the market's chain. On EVM chains the account needs a completed smart account; on Solana the account's own self-custodial wallet is used, and it must exist.
 
 ## Why it happens
 
-- A new account that has not finished wallet setup in the Kash web app.
-- Wallet creation is asynchronous and has not completed yet.
+- A new account that has not finished self-custodial wallet setup in the Kash web app.
+- Self-custodial wallet creation is asynchronous and has not completed yet.
 - Rarely, the account's setup is incomplete on ZeroID's side; the `detail` says so and asks you to contact support.
 
 ## How to fix
 
-- Finish onboarding in the Kash web app. Wallet creation normally completes within a few seconds.
+- Finish onboarding in the Kash web app. Self-custodial wallet creation normally completes within a few seconds.
 - If you set up recently, retry after about 30 seconds. If it persists for more than a minute, contact ZeroID support with the `requestId`.
 
 ## Related codes

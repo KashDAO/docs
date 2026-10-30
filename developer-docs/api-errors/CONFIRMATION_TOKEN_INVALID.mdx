@@ -15,7 +15,7 @@ The token sent to `POST /v1/trades/{id}/confirm` does not match the token issued
 - The token was truncated or altered in transit or storage.
 - The token was sent against a different trade from the one that issued it.
 
-Kash never stores the token itself, only a keyed hash of it, and compares in constant time.
+The API never stores the token itself, only a keyed hash of it, and compares in constant time.
 
 ## How to fix
 

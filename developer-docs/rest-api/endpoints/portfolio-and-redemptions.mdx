@@ -41,7 +41,7 @@ This route supports conditional requests. Every `200` carries a weak `ETag` and 
 
 ## `POST /v1/redemptions`
 
-Claims one settled position back to USDC: winning tokens in a resolved market, or a refund of a held outcome in a cancelled market. The claim is recorded, and the redemption is then submitted to the market program from your wallet asynchronously; this call makes no on-chain call itself. Poll `GET /v1/portfolio/positions` (or your wallet balance) for the result.
+Claims one settled position back to USDC: winning tokens in a resolved market, or a refund of a held outcome in a cancelled market. The claim is recorded, and the redemption is then submitted to the market program from your self-custodial wallet asynchronously; this call makes no on-chain call itself. Poll `GET /v1/portfolio/positions` (or your self-custodial wallet balance) for the result.
 
 | Body field     | Type              | Notes |
 | -------------- | ----------------- | ----- |
@@ -50,7 +50,7 @@ Claims one settled position back to USDC: winning tokens in a resolved market, o
 
 Responses:
 
-- **`201 Created`**: the claim was recorded and its redemption will be submitted from your wallet.
+- **`201 Created`**: the claim was recorded and its redemption will be submitted from your self-custodial wallet.
 - **`200 OK`**: this position was already claimed. The original request is returned unchanged with `_meta.idempotent: true`.
 
 ```json

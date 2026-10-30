@@ -24,8 +24,8 @@ A long-running loop that:
 
 ## 1. Prerequisites
 
-- A Kash account — sign up in the [Kash web app](https://app.kash.bot).
-- An **API key** with these scopes (see [Authentication](/developer-docs/rest-api/authentication)): `markets:read`, `markets:quote`, `trades:read`, `trades:write`, `portfolio:read`, `webhooks:manage`. Keys are created in the app (**Settings → API Keys**, mode `Test` for staging) and shown once — capture the plaintext. A `kash_test_*` key targets staging automatically.
+- A Kash web app account — sign up in the [Kash web app](https://app.kash.bot).
+- An **API key** with these scopes (see [Authentication](/developer-docs/rest-api/authentication)): `markets:read`, `markets:quote`, `trades:read`, `trades:write`, `portfolio:read`, `webhooks:manage`. Keys are created in the web app (**Settings → API Keys**, mode `Test` for staging) and shown once — capture the plaintext. A `kash_test_*` key targets staging automatically.
 - Node 22+.
 
 ```bash
@@ -96,7 +96,7 @@ if (trade.confirmation) {
 
 ## 6. Learn the outcome — webhooks (preferred) or poll
 
-**Webhooks** are the production path: Kash POSTs a signed event to your endpoint when the trade completes. Verify the signature with the SDK and dedupe on the event id — **never** trust an unverified body.
+**Webhooks** are the production path: the API POSTs a signed event to your endpoint when the trade completes. Verify the signature with the SDK and dedupe on the event id — **never** trust an unverified body.
 
 ```ts
 import express from 'express';
@@ -149,7 +149,7 @@ const positions = await kash.portfolio.positions({ marketId: market.id }); // Po
 
 ## 8. Redeem winning positions
 
-When a market resolves (or is cancelled), your winning outcome tokens stay in your account until they are claimed. Create a redemption for each `(market, outcome)` you hold; the redemption is then submitted from your wallet and settles on-chain asynchronously.
+When a market resolves (or is cancelled), your winning outcome tokens stay in your account until they are claimed. Create a redemption for each `(market, outcome)` you hold; the redemption is then submitted from your self-custodial wallet and settles on-chain asynchronously.
 
 ```ts
 import { KashConflictError, KashNotFoundError } from '@kashdao/sdk';
