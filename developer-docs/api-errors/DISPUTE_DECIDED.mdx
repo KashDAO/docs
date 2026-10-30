@@ -7,7 +7,7 @@ description: 'HTTP 409 — Dispute already decided'
 
 ## When it fires
 
-`POST /v1/markets/{id}/disputes` was called for a market whose disputes have already been reviewed. When a proposal is disputed, ZeroID staff decide the dispute against the market's published sources and rules, and the market settles on their decision. Once that review is complete the market is settled, and every later filing on the market is refused.
+`POST /v1/markets/{id}/disputes` was called for a market whose disputes have already been reviewed. When a proposal is disputed, Kash's automated resolution system reviews the dispute against the market's published sources and rules, and the market settles on the result. Once that review is complete the market is settled, and every later filing on the market is refused.
 
 ## Why it happens
 
