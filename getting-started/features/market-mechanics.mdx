@@ -27,7 +27,7 @@ icon: 'gears'
     Prices are set by the protocol's [automated market maker](/getting-started/features/custom-amm), a bonding-curve style pricing function: buying an outcome raises its price, and selling lowers it. Each outcome shows an implied chance, computed from how the market's capital is spread across outcomes. Implied chances always sum to 100%.
   </Accordion>
   <Accordion title="Rules and sources">
-    Every market publishes its resolution rules and a primary source (plus a fallback where needed). Kash's automated resolution system determines the result from them, so they're shown on the market page.
+    Every market publishes its resolution rules and a primary source (plus a fallback where needed). The result is determined from them, so they're shown on the market page. See [Resolution](#resolution).
   </Accordion>
 </AccordionGroup>
 
@@ -35,16 +35,16 @@ icon: 'gears'
 
 <Steps>
   <Step title="Creation">
-    A creator connects their X account in the web app and describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. The creator pays to create it from their own funds, at least $20, and owns the market. Every market is reviewed automatically before it goes live. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
+    A creator connects their X account in the web app and describes the market to Kash AI, which drafts the question, outcomes, timing, rules and sources. The creator pays to create it from their own self-custodial wallet, at least $20, and owns the market. Every market created through the web app is reviewed automatically before it goes live. Creating a market directly on the protocol is permissionless. See [Creating Opportunities](/getting-started/guides/creating-opportunities).
   </Step>
   <Step title="Live">
-    The market is created on the open, permissionless Solana protocol with its initial liquidity in place. Anyone can buy or sell any outcome.
+    The market is created on the Kash protocol on Solana with its initial liquidity in place. Anyone can buy or sell any outcome.
   </Step>
   <Step title="Frozen">
     Trading closes shortly before the resolution time, and the market page shows exactly when.
   </Step>
   <Step title="Waiting for resolution">
-    After the resolution time, Kash's automated resolution system proposes the outcome from the market's sources and rules, and a dispute window opens.
+    After the resolution time, an automated resolution system operated by ZeroID proposes the outcome from the market's sources and rules, and a dispute window opens.
   </Step>
   <Step title="Resolved or cancelled">
     With no open dispute when the window closes, the market settles to its winning outcome. A market can instead be cancelled, and then every holder is refunded at the snapshot price.
@@ -57,14 +57,20 @@ icon: 'gears'
 # Resolution
 
 <AccordionGroup>
+  <Accordion title="Who resolves markets">
+    Resolution on the Kash protocol is not open to anyone. Each market has a **resolution authority**, the only account that can settle it on-chain. For markets created through the Kash web app, that authority is a multisig (multi-signature) wallet controlled by ZeroID, and ZeroID operates the automated system that proposes outcomes. Creating a market doesn't give its creator any say in the result.
+  </Accordion>
   <Accordion title="How outcomes are proposed">
-    Outcomes are determined by Kash's automated resolution system from each market's published sources and rules. Once a market reaches its resolution time, the system proposes the outcome. If the evidence isn't available yet, it waits and checks again.
+    Once a market reaches its resolution time, ZeroID's automated resolution system uses AI models to read the market's published sources and apply the rules fixed when the market was created. A second, independent check must reach the same outcome before one is proposed. If the evidence isn't available yet, the system waits and checks again. If it can't reach a confident result, the market is passed to ZeroID staff to resolve from the same sources and rules. Automated systems can make mistakes, which is what the dispute window is for.
   </Accordion>
   <Accordion title="Disputes">
-    A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute holds settlement while the same automated system reviews the dispute against the market's sources and rules, and the market then settles on the result of that review.
+    A proposed outcome opens a short **dispute window**, shown on the market page. Any signed-in user can tap **Dispute outcome** and give a written reason, once per proposal. An open dispute holds settlement until ZeroID staff decide it against the market's sources and rules. They can keep the proposed outcome, choose a different one, or cancel the market, and their decision is final.
+  </Accordion>
+  <Accordion title="Settlement">
+    With no open dispute when the window closes, the resolution authority records the result on-chain and the market settles. Every resolution and settlement is recorded on Solana, so it can be checked independently.
   </Accordion>
   <Accordion title="Cancellation and the refund safety net">
-    A market can be cancelled when its rules require it, for example when the event doesn't take place. And if a market can't be resolved after its resolution time, **anyone** can cancel it. Either way, every holder is refunded at the price snapshotted at cancellation, so live prices no longer matter once a market is cancelled.
+    A market can be cancelled by its resolution authority when its rules require it, for example when the event doesn't take place, or as the outcome of a dispute. And if a market still hasn't been resolved a grace period after its resolution time, **anyone** can cancel it on the protocol. Either way, every holder is refunded at the price snapshotted at cancellation, so live prices no longer matter once a market is cancelled.
   </Accordion>
   <Accordion title="Redemption">
     When a market resolves, the winning outcome's positions can be redeemed. Losing shares are worth nothing. Refunds pay each holder at the cancellation snapshot price.
@@ -73,13 +79,13 @@ icon: 'gears'
 
 # Fees
 
-A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The app always shows the exact fees before you confirm.
+A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The Kash web app always shows the exact fees before you confirm.
 
 # Infrastructure
 
 <AccordionGroup>
   <Accordion title="Solana and USDC">
-    Markets run on an open, permissionless protocol on Solana, and every balance, trade and redemption is in USDC. Your USDC and positions are held in your own Solana wallet, and the USDC you trade into a market sits in that market's on-chain pool. Kash never holds custody of user funds. Kash pays the SOL network fees, so you never need to hold SOL.
+    Markets run on the Kash protocol, an open, permissionless protocol on Solana, and every balance, trade and redemption is in USDC. Your USDC and positions are held in your own self-custodial Solana wallet, and the USDC you trade into a market sits in that market's on-chain pool. ZeroID never holds custody of user funds. ZeroID pays the SOL network fees, so you never need to hold SOL.
   </Accordion>
   <Accordion title="Slippage protection">
     Every trade is quoted before you confirm and carries an on-chain minimum-output guard. If the market moves against you before execution, the trade fails instead of filling at a worse price.

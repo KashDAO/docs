@@ -17,13 +17,13 @@ icon: "lightbulb"
   alt="Hero Dark"
 />
 
-Prediction markets are a great idea with a rough onboarding problem: wallets, gas tokens, seed phrases, order books. Kash removes that friction, and never takes custody of your money.
+Prediction markets are a great idea with a rough onboarding problem: wallets, gas tokens, seed phrases, order books. The Kash web app removes that friction, and ZeroID never takes custody of your money.
 
 ## The differentiators
 
 <AccordionGroup>
   <Accordion title="App-like experience">
-    Sign in with X, Google, email, Telegram or Discord. You get your own embedded Solana wallet, with no seed phrase to write down and no browser extension. Kash pays the network fees, so you never need SOL.
+    Sign in with X, Google, email, Telegram or Discord. You get your own self-custodial embedded Solana wallet, with no seed phrase to write down and no browser extension. ZeroID pays the network fees, so you never need SOL.
   </Accordion>
 
   <Accordion title="Trade where the conversation is">
@@ -31,19 +31,19 @@ Prediction markets are a great idea with a rough onboarding problem: wallets, ga
   </Accordion>
 
   <Accordion title="Anyone can create a market">
-    Connect your X account and describe a question to Kash AI, and it drafts a complete market: outcomes, timing, resolution rules and sources. Every market is reviewed automatically before it goes live. The creator pays to create it from their own funds, at least $20, owns the market, and receives a creator fee on its trades, which depends on trading activity and is not guaranteed.
+    Connect your X account and describe a question to Kash AI, and it drafts a complete market: outcomes, timing, resolution rules and sources. Every market created through the web app is reviewed automatically before it goes live. The creator pays to create it from their own funds, at least $20, owns the market, and receives a creator fee on its trades, which depends on trading activity and is not guaranteed.
   </Accordion>
 
   <Accordion title="Multi-outcome markets with instant liquidity">
     A market can list many outcomes, each priced by an on-chain automated market maker funded when the market is created. You can enter or exit whenever trading is open. See [Custom AMM](/getting-started/features/custom-amm).
   </Accordion>
 
-  <Accordion title="Non-custodial: your own wallet">
-    Markets are created and traded on an open, permissionless protocol on Solana that anyone can use directly. Kash is an interface built on that protocol, and it operates the automated market creation and resolution system. Your USDC and positions stay in your own Solana wallet, Kash never holds custody of them, and you can export the private key from Settings at any time. To trade from the app, chat and X, you approve Kash's app to submit transactions from your wallet on your behalf.
+  <Accordion title="Non-custodial: your own self-custodial wallet">
+    Markets are created and traded on the Kash protocol, an open, permissionless protocol on Solana that anyone can use directly. The Kash web app is an interface built on that protocol. Your USDC and positions stay in your own self-custodial Solana wallet, ZeroID never holds custody of them, and you can export the private key from Settings at any time. All transactions are submitted from your self-custodial wallet to the protocol.
   </Accordion>
 
   <Accordion title="Transparent resolution">
-    Outcomes are determined by Kash's automated resolution system from each market's published sources and rules. Any signed-in user can dispute a proposed result before it settles, and the same automated system reviews the dispute.
+    Outcomes are proposed by an automated resolution system operated by ZeroID, from each market's published sources and rules. Any signed-in user can dispute a proposed result before it settles, and ZeroID staff review and decide the dispute. See [Market Mechanics](/getting-started/features/market-mechanics#resolution).
   </Accordion>
 </AccordionGroup>
 
@@ -51,14 +51,14 @@ Prediction markets are a great idea with a rough onboarding problem: wallets, ga
 
 | | Kash |
 |---|---|
-| **Onboarding** | Social login, your own embedded wallet |
-| **Network fees** | Paid by Kash; you never need SOL |
-| **Custody** | Non-custodial: your own wallet; Kash never holds custody |
+| **Onboarding** | Social login, your own self-custodial embedded wallet |
+| **Network fees** | Paid by ZeroID; you never need SOL |
+| **Custody** | Non-custodial: your own self-custodial wallet; ZeroID never holds custody |
 | **Market structure** | Multiple outcomes per market |
-| **Where you trade** | Web app and X |
+| **Where you trade** | The Kash web app and X |
 | **Fees** | A protocol fee on trades, shown before you confirm |
 
-The app always shows the exact fees before you confirm.
+The web app always shows the exact fees before you confirm.
 
 <CardGroup cols={2}>
   <Card

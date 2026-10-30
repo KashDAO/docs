@@ -1,6 +1,6 @@
 ---
 title: What is Kash?
-description: "An interface to an open, permissionless prediction-market protocol on Solana: trade real-world outcomes in USDC, on the web or straight from X"
+description: "An open, permissionless prediction-market protocol on Solana: trade real-world outcomes in USDC through the Kash web app or straight from X"
 icon: "question"
 ---
 
@@ -17,16 +17,16 @@ icon: "question"
   alt="Hero Dark"
 />
 
-Kash is a place to trade predictions on real-world outcomes. You buy shares in an outcome of an event (a match result, a price target, an election, a product launch) and, if that outcome happens, your shares are redeemable for USDC when the market resolves.
+Kash is a protocol for trading predictions on real-world outcomes. You buy shares in an outcome of an event (a match result, a price target, an election, a product launch) and, if that outcome happens, your shares are redeemable for USDC when the market resolves.
 
-Everything is priced and settled in **USDC** on **Solana**. You trade at [app.kash.bot](https://app.kash.bot), or by replying to a market's post on X with [@kash_bot_trade](https://x.com/kash_bot_trade).
+Everything is priced and settled in **USDC** on **Solana**. You trade through the Kash web app at [app.kash.bot](https://app.kash.bot), or by replying to a market's post on X with [@kash_bot_trade](https://x.com/kash_bot_trade). The web app and the X bot are operated by ZeroID Labs Ltd. ("ZeroID"), the company behind Kash.
 
 ## On-chain and non-custodial
 
-- **The markets live on an open protocol.** Every market is created and traded on a decentralized, permissionless on-chain protocol on Solana that anyone can use directly.
-- **Kash provides the interface and runs market creation and resolution.** Kash is an interface built on that protocol: the Kash web app and the X bot let you use it without dealing with the chain directly. Kash also operates the automated system that creates markets and determines their outcomes.
-- **Kash never holds your funds.** Your USDC and your positions sit in your own wallet, and you can export its private key. So that you can trade from the app, chat and X without a signing prompt each time, you approve Kash's app to submit transactions from your wallet on your behalf. Kash never takes custody of user funds, at any point.
-- **You own what you create.** Your wallet, your positions and the markets you create are yours.
+- **The markets live on an open protocol.** Every market is created and traded on the Kash protocol, a decentralized, permissionless on-chain protocol on Solana that anyone can use directly. Creating a market on the protocol is permissionless.
+- **The web app is an interface to the protocol.** The Kash web app and the X bot let you use the protocol without dealing with the chain directly.
+- **ZeroID never holds your funds.** Your USDC and your positions sit in your own self-custodial wallet, and you can export its private key. All transactions are submitted from your self-custodial wallet to the protocol. ZeroID never takes custody of user funds, at any point.
+- **You own what you create.** Your self-custodial wallet, your positions and the markets you create are yours.
 
 ---
 
@@ -37,8 +37,8 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
     A market isn't limited to Yes/No. "Who wins the final?" can list every plausible answer, each with its own live price. A price reflects the market's implied chance for that outcome.
   </Accordion>
 
-  <Accordion title="Your own wallet, no SOL needed">
-    When you sign in, you get your own embedded Solana wallet. You own it: your USDC stays in it, and you can export its private key at any time to use the wallet anywhere else. Kash pays the Solana network fees, so you never need to hold SOL.
+  <Accordion title="Your own self-custodial wallet, no SOL needed">
+    When you sign in, you get your own self-custodial embedded Solana wallet. You own it: your USDC stays in it, and you can export its private key at any time to use the wallet anywhere else. ZeroID pays the Solana network fees, so you never need to hold SOL.
   </Accordion>
 
   <Accordion title="Instant liquidity">
@@ -46,11 +46,11 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
   </Accordion>
 
   <Accordion title="Markets created by chatting with Kash AI">
-    Anyone can create a market: sign in at [app.kash.bot](https://app.kash.bot), connect your X account and describe the market to **Kash AI**. The assistant drafts the question, outcomes, timing, rules and sources, and every market is reviewed automatically before it goes live. You pay to create it from your own funds, at least $20, and the market is yours.
+    Anyone can create a market: sign in at [app.kash.bot](https://app.kash.bot), connect your X account and describe the market to **Kash AI**. The assistant drafts the question, outcomes, timing, rules and sources, and every market created through the web app is reviewed automatically before it goes live. You pay to create it from your own funds, at least $20, and the market is yours.
   </Accordion>
 
   <Accordion title="Transparent resolution with a dispute window">
-    When a market ends, Kash's automated resolution system proposes its outcome from the published sources and rules, then a short dispute window opens before it settles. Any disputes are reviewed by the same automated system. If a market can't be resolved, it is cancelled and every holder is refunded. See [Market Mechanics](/getting-started/features/market-mechanics).
+    When a market ends, an automated resolution system operated by ZeroID proposes its outcome from the published sources and rules, then a short dispute window opens before it settles. Disputes are reviewed and decided by ZeroID staff. If a market can't be resolved, it is cancelled and every holder is refunded. See [Market Mechanics](/getting-started/features/market-mechanics).
   </Accordion>
 </AccordionGroup>
 
@@ -58,13 +58,13 @@ Everything is priced and settled in **USDC** on **Solana**. You trade at [app.ka
 
 ## Fees
 
-A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The app always shows the exact fees before you confirm. See [Transactions](/getting-started/faqs/transactions) for details.
+A protocol fee applies to buys and sells, and a small sell fee stays in the market's pool. Creating a market costs at least $20. This provides the market's initial liquidity and is not returned to the creator. The web app always shows the exact fees before you confirm. See [Transactions](/getting-started/faqs/transactions) for details.
 
 ## Where you can use it
 
 - **The web app** at [app.kash.bot](https://app.kash.bot): markets, your portfolio, Kash AI market creation, chat, leaderboards and rewards.
 - **X (Twitter):** trade by replying to a market's post. See [Trading on X](/getting-started/features/trading-on-x).
-- **Embeds:** any site can show live Kash markets.
+- **Embeds:** any site can show live markets from the Kash protocol.
 - **Developers:** a REST API, SDKs and a CLI. See the [Developer Docs](/developer-docs/introduction).
 
 <CardGroup cols={2}>

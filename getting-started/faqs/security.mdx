@@ -21,11 +21,11 @@ icon: 'shield'
 
 <AccordionGroup>
   <Accordion title="Who controls my funds?">
-    Your USDC and positions sit in **your own embedded Solana wallet**, set up when you sign up. Kash is a non-custodial interface: it never holds custody of user funds and doesn't pool them. Trades and redemptions move USDC directly between your wallet and the on-chain market. You can export your wallet's private key at any time.
+    Your USDC and positions sit in **your own self-custodial embedded Solana wallet**, set up when you sign up. The Kash web app is a non-custodial interface: ZeroID never holds custody of user funds and doesn't pool them. Trades and redemptions move USDC directly between your self-custodial wallet and the on-chain market. You can export your wallet's private key at any time.
   </Accordion>
 
-  <Accordion title="What can Kash do with my wallet?">
-    When you sign in, the **Approve Kash** step asks you to give Kash's app permission to submit transactions from your wallet on your behalf. Kash uses it to submit the trades and claims you request, in the app, on X, through copy trading or with an API key, without a signing prompt each time. Withdrawals to outside addresses are confirmed by you in the app, and transfers to other Kash users are sent only when you send them.
+  <Accordion title="What can the Kash web app do with my self-custodial wallet?">
+    When you sign in, the **Approve Kash** step asks you to give the Kash app permission to connect your self-custodial wallet to the Kash protocol so that your transactions can be submitted to the protocol, without a signing prompt each time. Withdrawals to outside addresses are confirmed by you in the web app, and transfers to other Kash users are sent only when you send them.
   </Accordion>
 
   <Accordion title="Is there a seed phrase? How does recovery work?">
@@ -33,14 +33,14 @@ icon: 'shield'
   </Accordion>
 
   <Accordion title="How are markets secured?">
-    Markets live on a decentralized, permissionless protocol on Solana that anyone can use directly, so every trade and settlement is recorded on-chain. Outcomes are determined by Kash's automated resolution system from each market's published sources and rules, and go through a dispute window before they settle.
+    Markets live on the Kash protocol, a decentralized, permissionless protocol on Solana that anyone can use directly, so every trade and settlement is recorded on-chain. Outcomes are proposed by an automated resolution system operated by ZeroID from each market's published sources and rules, and go through a dispute window before they settle. ZeroID staff decide any dispute. See [Market Mechanics](/getting-started/features/market-mechanics#resolution).
   </Accordion>
 </AccordionGroup>
 
 # Account security best practices
 
 <AccordionGroup>
-  <Accordion title="How do I secure my Kash account?">
+  <Accordion title="How do I secure my Kash web app account?">
     - Turn on two-factor authentication with your sign-in provider (X, Google, Telegram, Discord or your email account)
     - Add a recovery email or passkey, and link more than one sign-in method
     - Only sign in at **app.kash.bot**
@@ -49,13 +49,13 @@ icon: 'shield'
 
   <Accordion title="What should I do if I suspect unauthorized access?">
     1. Secure the account you sign in with: change its password and review its active sessions
-    2. Sign in to Kash and check **Portfolio → Transactions** and **Withdrawals**
+    2. Sign in to the Kash web app and check **Portfolio → Transactions** and **Withdrawals**
     3. If you still control the account, consider moving your funds to a wallet you control
     4. Contact [support@kash.bot](mailto:support@kash.bot) straight away
   </Accordion>
 
   <Accordion title="What happens if I lose my device?">
-    Your wallet isn't stored only on your device. Sign in on a new device with any linked method. Then secure the lost device's accounts (email, X, Google) with your provider.
+    Your self-custodial wallet isn't stored only on your device. Sign in on a new device with any linked method. Then secure the lost device's accounts (email, X, Google) with your provider.
   </Accordion>
 </AccordionGroup>
 
@@ -63,13 +63,13 @@ icon: 'shield'
 
 <AccordionGroup>
   <Accordion title="How do I spot phishing?">
-    - The app is only at **app.kash.bot**, and the docs at **docs.kash.bot**
-    - Kash will never DM you asking for your private key, a login code or a "verification" deposit
-    - Kash has not launched a token. Any "KASH" presale or airdrop is a scam
+    - The Kash web app is only at **app.kash.bot**, and the docs at **docs.kash.bot**
+    - ZeroID will never DM you asking for your private key, a login code or a "verification" deposit
+    - Neither ZeroID nor the Kash protocol has launched a token. Any "KASH" presale or airdrop is a scam
     - The official X accounts are [@kash_bot](https://x.com/kash_bot) and [@kash_bot_trade](https://x.com/kash_bot_trade)
   </Accordion>
 
-  <Accordion title="Who can use Kash?">
+  <Accordion title="Who can use the Kash web app?">
     Availability, eligibility and any verification requirements are set out in the [Terms of Use](https://kash.bot/terms-of-use). See also [Legal](/getting-started/faqs/legal).
   </Accordion>
 </AccordionGroup>

@@ -50,7 +50,7 @@ Every market shows an **implied chance** for each outcome: the market's current 
   <Tab title="In the web app">
     <Steps>
       <Step title="Find a market">
-        Browse the home feed, categories or search on [app.kash.bot](https://app.kash.bot).
+        Browse the home feed, categories or search in the Kash web app at [app.kash.bot](https://app.kash.bot).
       </Step>
       <Step title="Pick an outcome">
         Tap the outcome you believe in. The trade ticket opens.
@@ -59,7 +59,7 @@ Every market shows an **implied chance** for each outcome: the market's current 
         Enter how much USDC to spend. The ticket shows the fees and your **estimated payout if your outcome wins**.
       </Step>
       <Step title="Confirm">
-        Confirm the trade. It executes from your own wallet, and the position appears in your Portfolio.
+        Confirm the trade. It executes from your own self-custodial wallet, and the position appears in your Portfolio.
       </Step>
     </Steps>
   </Tab>
@@ -71,12 +71,12 @@ Every market shows an **implied chance** for each outcome: the market's current 
     @kash_bot_trade buy $50 of Yes
     ```
 
-    The trade is submitted from your own wallet, and the bot replies with a confirmation and a transaction link. Your Kash account must be connected to X first. Trades on X carry no transaction fee. See [Trading on X](/getting-started/features/trading-on-x) for the full rules.
+    The trade is submitted from your own self-custodial wallet, and the bot replies with a confirmation and a transaction link. Your Kash web app account must be connected to X first. Trades on X carry no transaction fee. See [Trading on X](/getting-started/features/trading-on-x) for the full rules.
   </Tab>
 
   <Tab title="Resolution">
     - Trading closes shortly before the market's resolution time, and positions are locked in
-    - After the resolution time, Kash's automated resolution system proposes the outcome from the market's sources and rules, followed by a short dispute window
+    - After the resolution time, an automated resolution system operated by ZeroID proposes the outcome from the market's sources and rules, followed by a short dispute window. ZeroID staff decide any dispute
     - Winning positions then become **claimable in your Portfolio**
     - If a market is cancelled, positions are refunded at the snapshot price
 
