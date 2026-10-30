@@ -34,7 +34,7 @@ X-Kash-Signature: t=1730000000000,v1=<current-hmac>,v1=<previous-hmac>
 4. Compute `expected = HMAC_SHA256(secret, "${t}.${rawBody}")` and hex-encode it.
 5. For each `v1=` entry in the header, compare with `expected` using a **constant-time** comparator. If any matches, accept.
 
-That is the whole algorithm. Respond `400` to a request that fails verification: The API does not retry a `400`.
+That is the whole algorithm. Respond `400` to a request that fails verification: the API does not retry a `400`.
 
 ## Reference implementations
 

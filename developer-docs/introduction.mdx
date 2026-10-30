@@ -15,7 +15,7 @@ Markets live on the Kash protocol, an open, permissionless protocol on **Solana*
 
 <CardGroup cols={2}>
   <Card title="REST API" icon="bolt" href="/developer-docs/rest-api/overview">
-    ZeroID-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own self-custodial embedded wallet under the trading permission they granted, and ZeroID builds the transaction and pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
+    API-orchestrated programmatic access at `api.kash.bot`. Place trades, manage portfolios and receive HMAC-signed webhooks with an API key. Trades execute from the user's own self-custodial embedded wallet under the trading permission they granted, and the API builds the transaction while ZeroID pays the network fee. The right surface for bots, agents and market makers who want managed execution without running infrastructure.
   </Card>
   <Card title="Protocol SDK" icon="cube" href="/developer-docs/protocol-sdk/overview">
     Self-orchestrated access. Bring your own signer and RPC, and transactions never touch ZeroID servers. TypeScript and Python implementations, with cross-language parity.
@@ -30,7 +30,7 @@ Markets live on the Kash protocol, an open, permissionless protocol on **Solana*
 
 <Note>
 **Which one do I want?**
-- Want ZeroID to build, submit and pay for transactions from a user's own self-custodial embedded wallet? → **REST API**.
+- Want the API to build and submit transactions from a user's own self-custodial embedded wallet, with ZeroID paying the network fee? → **REST API**.
 - Want to sign and submit transactions entirely with your own infrastructure? → **Protocol SDK**.
 - Want to script flows from a terminal or CI? → **CLI**.
 - Embedding markets in a website for people to view? → **Public Embed API**.
