@@ -1,0 +1,38 @@
+---
+title: 'Rate limits'
+description: 'The partner tier: 3,000 requests a minute per organisation and per key, and 60 a minute per account.'
+---
+
+Every partner key is on the `partner` tier. Its request limits are checked together on every request, and the first to run out answers `429 RATE_LIMIT_EXCEEDED` with a `Retry-After` header:
+
+| Limit | Requests a minute | Counted across |
+| ----- | ----------------- | -------------- |
+| Per partner | 3,000 | Every partner key your organisation holds. |
+| Per key | 3,000 | Each key on its own. |
+| Per account | 60 | Each account named in the `Kash-Account` header. The `/v1/partner/accounts` routes, which name the account in the path, count against the per-partner and per-key limits only. |
+
+The per-account limit means one of your users cannot use up your whole allowance. Extra keys do not add throughput beyond the per-partner limit.
+
+Read routes and write routes draw from **separate** budgets at these limits: `GET` routes use a sliding window, and rate-limited `POST` and `PATCH` routes use a token bucket that allows short bursts. The [endpoint reference](/developer-docs/rest-api/endpoint-reference) shows each route's class.
+
+## Headers
+
+Every rate-limited response carries the state of the budget closest to running out:
+
+```
+X-RateLimit-Limit:     60
+X-RateLimit-Remaining: 12
+X-RateLimit-Reset:     1792000060
+```
+
+`X-RateLimit-Reset` is Unix time in seconds. Pace your requests from these headers, and on a `429` wait at least `Retry-After` seconds. `@kashdao/sdk` does this for you.
+
+## No spending caps
+
+Partner accounts have no per-trade cap, no daily spending cap and no high-value confirmation step, the same as a user of the Kash web app. The cap on unfinished trades per account still applies: a new trade while the account has too many in flight is refused with `429 TRADE_IN_FLIGHT_LIMIT_EXCEEDED` and a short `Retry-After`.
+
+## Designing for the limits
+
+- Poll as little as you can. Webhooks tell you when accounts, withdrawals, payouts and trades change; read the API when one arrives.
+- Cache market lists and quotes for a few seconds across your users: those routes act for no account, so they count against your per-partner and per-key budgets only.
+- Spread background work, such as a nightly balance sweep, so that it stays well inside 60 requests a minute for each account and 3,000 in total.

@@ -1,0 +1,300 @@
+---
+title: 'Webhooks'
+description: 'Every event a partner endpoint receives, with its payload; signature verification with the SDK and by hand; retries; at-least-once delivery.'
+---
+
+Webhooks tell your server when an account becomes ready, when a withdrawal moves, when winnings are paid and when a trade ends. They are signed with your key's webhook secret and retried until your endpoint accepts them.
+
+## Who receives what
+
+- **Account, withdrawal and payout events** go to **every active (not revoked, not expired) partner key of your organisation that has a webhook URL**. While two keys have URLs, for example during a key rotation, each receives every event under a different event id, even when both keys share a URL.
+- **Trade events** go only to **the key that placed the trade**, as for any API key.
+
+Set the URL and its secret on the key: see [Keys](/developer-docs/partner-integration/keys#webhook-url-and-secret).
+
+## Events
+
+| Event | When |
+| ----- | ---- |
+| [`account.active`](#account-events) | The account is ready to fund. |
+| [`account.provisioning_failed`](#account-events) | The account could not be created, for good. |
+| [`account.destination_changed`](#account-events) | The account's withdrawal destination was changed. |
+| [`account.released`](#account-events) | Your link to the account ended. |
+| [`withdrawal.submitted`](#withdrawal-events) | A withdrawal was accepted and queued. |
+| [`withdrawal.completed`](#withdrawal-events) | A withdrawal reached its destination. |
+| [`withdrawal.failed`](#withdrawal-events) | A withdrawal ended without delivering. |
+| [`payout.completed`](#payout-events) | Winnings from a resolved market were paid into the account. |
+| [`trade.completed`, `trade.failed`, `trade.rejected`](#trade-events) | A trade ended. |
+
+## Envelope and headers
+
+Every delivery is a `POST` with a JSON body in the same envelope:
+
+```json
+{
+  "id": "6f1c2a3b-9d0e-4f7a-8c1b-6e5d3f4a2c9b",
+  "type": "account.active",
+  "apiVersion": "2026-08-19",
+  "createdAt": "2026-11-06T10:16:00.000Z",
+  "data": { "...": "the payload below" }
+}
+```
+
+| Field | Use |
+| ----- | --- |
+| `id` | The event id, a UUID. **Deduplicate on it.** Same as the `X-Kash-Event-Id` header. |
+| `type` | The event name. Branch on it. |
+| `apiVersion` | The API contract the payload follows. |
+| `createdAt` | When the envelope was built. The same on every retry. |
+| `data` | The payload. |
+
+```
+Content-Type:       application/json
+User-Agent:         Kash-Webhooks/1.0
+X-Kash-Signature:   t=1792000000000,v1=<hex-hmac-sha256>
+X-Kash-Event-Id:    6f1c2a3b-9d0e-4f7a-8c1b-6e5d3f4a2c9b
+X-Kash-Event-Type:  account.active
+X-Kash-Api-Version: 2026-08-19
+```
+
+Amounts are strings in USDC atomic units (6 decimals). Every account, withdrawal and payout event names the account by `accountId` and by your `externalId`.
+
+## Account events
+
+### `account.active`
+
+The account is ready. Send USDC on Solana to `depositAddress` to fund it.
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "status": "active",
+  "depositAddress": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh",
+  "activatedAt": "2026-11-06T10:16:00.000Z"
+}
+```
+
+### `account.provisioning_failed`
+
+The account could not be created, for good. `reason` is `signer_missing`, `no_solana_wallet`, `privy_refused`, `privy_identity_mismatch` or `privy_user_already_linked` (see [Accounts](/developer-docs/partner-integration/accounts#when-provisioning-fails)). Release the account and create it again, which gives it a new `accountId`, and contact ZeroID support if it recurs.
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "status": "provisioning_failed",
+  "reason": "privy_refused",
+  "failedAt": "2026-11-06T10:16:00.000Z"
+}
+```
+
+### `account.destination_changed`
+
+The destination was changed with `PATCH /v1/partner/accounts/{accountId}`. Withdrawals are held for 24 hours from `changedAt`. **If you did not make the change, suspend the account and contact ZeroID support.**
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "previousDestination": { "network": "solana", "address": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh" },
+  "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
+  "changedAt": "2026-11-06T09:30:00.000Z"
+}
+```
+
+Re-sending an account's current destination changes nothing and sends no webhook.
+
+### `account.released`
+
+Your link to the account ended. No further webhooks arrive for it, apart from a destination change made before the release that is delivered after it.
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "status": "released",
+  "releasedAt": "2026-11-06T12:00:00.000Z"
+}
+```
+
+## Withdrawal events
+
+Every withdrawal event carries these fields:
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "withdrawalId": "0b6e1f7a-2c3d-4e5f-8a9b-0c1d2e3f4a5b",
+  "amountAtomic": "2500000",
+  "deliveredAmountAtomic": null,
+  "minimumDeliveredAtomic": "2490000",
+  "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" }
+}
+```
+
+`amountAtomic` is the amount requested. For what `deliveredAmountAtomic` and `minimumDeliveredAtomic` mean on each network, see [Amounts delivered](/developer-docs/partner-integration/withdrawals#amounts-delivered).
+
+### `withdrawal.submitted`
+
+Adds `"status": "pending"` and `submittedAt`.
+
+### `withdrawal.completed`
+
+Adds `"status": "completed"`, `transactionHash` (the Solana transaction that sent the USDC, or `null` if not recorded), `destinationTransactionHash` (the transaction that delivered it: on Arc for an Arc withdrawal, otherwise the same Solana transaction) and `completedAt`.
+
+### `withdrawal.failed`
+
+Adds `status` (`failed` or `cancelled`, as `GET .../withdrawals/{withdrawalId}` returns it), `errorCode`, `errorMessage` and `failedAt`.
+
+| `errorCode` | Meaning |
+| ----------- | ------- |
+| `withdrawal_failed` | The API did not send it. The USDC stayed in the account. |
+| `bridge_refunded` | The bridge to Arc failed and the USDC came back to the account's Solana wallet. |
+| `bridge_failed` | The bridge failed and the USDC did not come back. Contact ZeroID support with the `withdrawalId`. |
+
+## Payout events
+
+### `payout.completed`
+
+Winnings from a resolved market were paid into the account. `amountAtomic` is what arrived in the wallet. This is how you learn that an account's balance rose after a resolution.
+
+```json
+{
+  "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+  "externalId": "hsp-user-8841",
+  "payoutId": "3c4d5e6f-7a8b-4c9d-8e0f-1a2b3c4d5e6f",
+  "marketId": "7a6e9c0a-3f4f-4c43-b6ab-1b2f0c8e3c91",
+  "outcomeIndex": 1,
+  "amountAtomic": "5000000",
+  "chainRef": "solana:mainnet-beta",
+  "transactionHash": "5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW",
+  "paidAt": "2026-11-06T11:00:00.000Z"
+}
+```
+
+## Trade events
+
+`trade.completed`, `trade.failed` and `trade.rejected` have the same payloads as for any API key: `tradeId`, `marketId`, `chainRef`, `outcomeIndex`, `amount` (decimal USDC), `side`, `status` and your `metadata`, plus `txHash` and `tokensOut` on completion, or `errorCode` and `errorMessage` on failure or rejection. See [Webhooks overview](/developer-docs/rest-api/webhooks/overview#common-payload-fields).
+
+Trade payloads do not carry `accountId` or `externalId`. Put your own ids in the trade's `metadata` when you create it.
+
+A partner key has no high-value confirmation step, so it never receives `trade.confirmation-required`.
+
+## Verify every delivery
+
+The `X-Kash-Signature` header is `t=<unix-ms>,v1=<hex>`: an HMAC-SHA256 of `<t>.<raw request body>` under your webhook secret. Reject a delivery whose signature does not match or whose timestamp is more than five minutes from your clock. During a [secret rotation](/developer-docs/rest-api/webhooks/secret-rotation) the header carries two `v1=` values; accept the delivery if either matches.
+
+Verify against the **raw** body. Parsed and re-serialised JSON does not produce the same bytes.
+
+### With the SDK
+
+`kash.webhooks.constructEvent` in `@kashdao/sdk` 0.4.0 verifies the signature and parses every partner event type, as well as the trade events, into a typed `WebhookEvent`. `kash.webhooks.verifySignature` returns `{ valid, reason }` if you only need the check.
+
+```ts
+import express from 'express';
+import { KashClient, KashWebhookSignatureError } from '@kashdao/sdk';
+
+const app = express();
+const kash = new KashClient({ apiKey: process.env.KASH_PARTNER_KEY! });
+
+app.post(
+  '/webhooks/kash',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    let event;
+    try {
+      event = await kash.webhooks.constructEvent(
+        req.body.toString('utf8'),
+        req.header('x-kash-signature') ?? '',
+        process.env.KASH_WEBHOOK_SECRET!,
+      );
+    } catch (err) {
+      if (err instanceof KashWebhookSignatureError) return res.status(400).send('bad signature');
+      throw err;
+    }
+
+    // At-least-once delivery: process each event id once.
+    if (await alreadyProcessed(event.id)) return res.sendStatus(200);
+
+    switch (event.type) {
+      case 'account.active':
+        await markAccountReady(event.data.externalId, event.data.depositAddress);
+        break;
+      case 'account.destination_changed':
+        await checkDestinationChangeWasOurs(event.data.accountId, event.data.changedAt);
+        break;
+      case 'withdrawal.completed':
+      case 'withdrawal.failed':
+      case 'payout.completed':
+        // Treat the event as a prompt: read the current state from the API.
+        await refreshAccount(event.data.accountId);
+        break;
+      default:
+        break;
+    }
+
+    await markProcessed(event.id);
+    res.sendStatus(200);
+  },
+);
+```
+
+The payload schemas and types are also exported from `@kashdao/sdk/webhooks` (`AccountActivePayloadSchema`, `WithdrawalFailedPayload` and so on), for validating one payload on its own.
+
+<Note>
+`WebhookEvent` in 0.4.0 includes the eight partner event types. A `switch` with an exhaustiveness check on the four trade types no longer compiles: add the partner cases or a `default` branch.
+</Note>
+
+### By hand
+
+```ts
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
+export function verifyKashSignature(
+  rawBody: string,
+  header: string,
+  secret: string,
+  toleranceMs = 5 * 60 * 1000,
+): boolean {
+  const entries = header.split(',').map((part) => {
+    const i = part.indexOf('=');
+    return [part.slice(0, i), part.slice(i + 1)] as const;
+  });
+  const t = Number(entries.find(([k]) => k === 't')?.[1]);
+  if (!Number.isFinite(t) || Math.abs(Date.now() - t) > toleranceMs) return false;
+
+  const expected = Buffer.from(
+    createHmac('sha256', secret).update(`${t}.${rawBody}`).digest('hex'),
+    'hex',
+  );
+  return entries.some(([k, v]) => {
+    if (k !== 'v1') return false;
+    const given = Buffer.from(v, 'hex');
+    return given.length === expected.length && timingSafeEqual(given, expected);
+  });
+}
+```
+
+The scheme is Stripe's, except that the header is `X-Kash-Signature` and the timestamp is in **milliseconds**. Python, Go and Rust versions: [Verifying signatures](/developer-docs/rest-api/webhooks/verifying).
+
+## Delivery
+
+- **At least once.** An event can arrive more than once. Process each event id once, and store the ids you have processed.
+- **Possibly out of order.** Deliveries to one key are sent one at a time, but events from different parts of the system can reach the queue in a different order from the order they happened. Treat each event as a prompt to read the current state from the API (`GET /v1/partner/accounts/{accountId}`, `GET .../withdrawals/{withdrawalId}`, `GET /v1/balance`).
+- **Answer `2xx` within 10 seconds.** Do slow work after you respond.
+- **Retries.** A timeout, network error, `5xx`, `408`, `429` or any other `4xx` except those below is retried about every 2 minutes, up to 10 attempts. A `400`, `404`, `410`, `422` or a redirect stops delivery of that event. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries).
+- **A failing event holds back later ones for the same key** until it is delivered or runs out of attempts, so fix a failing endpoint quickly.
+- **Replay.** With the `webhooks:manage` scope, `GET /v1/webhooks/events` lists the key's events and their delivery state, and `POST /v1/webhooks/events/{eventId}/redeliver` sends one again.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Errors" icon="circle-exclamation" href="/developer-docs/partner-integration/errors">
+    Every code a partner integration can meet.
+  </Card>
+  <Card title="Sandbox" icon="flask" href="/developer-docs/partner-integration/sandbox">
+    Test the whole flow on staging.
+  </Card>
+</CardGroup>

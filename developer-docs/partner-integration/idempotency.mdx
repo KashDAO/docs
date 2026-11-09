@@ -1,0 +1,51 @@
+---
+title: 'Idempotency'
+description: 'Retry every partner write safely: the Idempotency-Key header, per-account scoping, and the natural keys on accounts, trades and withdrawals.'
+---
+
+Send an `Idempotency-Key` header on every write, and retry a failed or timed-out write with the **same** key. The general rules are on [Idempotency](/developer-docs/rest-api/idempotency); this page covers what is specific to partner keys.
+
+## The header
+
+- One key per logical operation, at most 255 characters from `A-Z a-z 0-9 _ - : .`. A UUID works; so does an id from your own system, such as `withdrawal-90311`.
+- A `2xx` response is stored for **24 hours**. A retry with the same key and the same request returns the stored response, with its original status and body, plus the header `Idempotent-Replay: true`. Nothing runs again.
+- The same key with a different request is `409 IDEMPOTENCY_KEY_CONFLICT`. The same key while the first request is still running is `409 IDEMPOTENCY_REQUEST_IN_PROGRESS`.
+- Errors are not stored: after a `4xx` or `5xx` you can fix the request and retry with the same key.
+
+## Scope
+
+For a partner key, stored responses are keyed on your organisation, the account and the route:
+
+- on routes that act for an account, the account in `Kash-Account`;
+- on `/v1/partner/accounts/{accountId}/...` routes, the account in the path;
+- on `POST /v1/partner/accounts`, your organisation alone.
+
+So one key used for two of your accounts is two independent requests.
+
+## Per route
+
+| Route | `Idempotency-Key` | Also deduplicated by |
+| ----- | ----------------- | -------------------- |
+| `POST /v1/partner/accounts` | honoured | `externalId`: a create for an `externalId` you already have returns that account with `200` and `_meta.idempotent: true`. |
+| `PATCH /v1/partner/accounts/{accountId}` | honoured | Re-sending the current destination changes nothing. |
+| `POST .../suspend`, `POST .../reactivate` | honoured | Asking for the status the account already has returns `200` with `_meta.idempotent: true`. |
+| `POST .../release` | honoured | A second release without the key answers `404`: the account is no longer yours. |
+| `POST /v1/partner/accounts/{accountId}/withdrawals` | **required** | The key is also stored on the withdrawal: after 24 hours, a retry with it returns that withdrawal with `200` and `_meta.idempotent: true`, or `409 IDEMPOTENCY_KEY_CONFLICT` for a different amount. |
+| `POST /v1/trades` | honoured | `clientRequestId`, kept on the trade for as long as it exists. |
+| `POST /v1/redemptions` | honoured | |
+
+## Creating an account twice
+
+| Retry | Answer |
+| ----- | ------ |
+| Same `Idempotency-Key`, within 24 hours | The stored `202`, with `Idempotent-Replay: true`. |
+| Different `Idempotency-Key`, same `externalId` | `200` with the existing account and `_meta.idempotent: true`. The new body is not applied. |
+| Any key, after the account was released | A new account with a new `accountId`. |
+
+## Detecting a replay
+
+A replay returns the stored body unchanged, so its `_meta.idempotent` is whatever the first answer said. Check the `Idempotent-Replay: true` header to detect an HTTP-level replay.
+
+## With the SDK
+
+`@kashdao/sdk` sends an `Idempotency-Key` on every `POST` automatically and reuses it across its own retries. Pass your own with `{ idempotencyKey }` on `trades.create` when you want the key to survive a restart of your process.

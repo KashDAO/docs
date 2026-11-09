@@ -1,0 +1,196 @@
+---
+title: 'Partner quickstart'
+description: 'End to end on staging: create an account for a user, fund it, trade, receive webhooks and withdraw.'
+---
+
+This walks through one user's journey on staging, first with `curl` and then with `@kashdao/sdk`. You need a partner test key with a webhook URL: see [Keys](/developer-docs/partner-integration/keys#create-a-test-key).
+
+```bash
+export KASH_API=https://api-staging.kash.bot/v1
+export KASH_PARTNER_KEY=kash_test_...   # from your secret store
+```
+
+## 1. Create the user's account
+
+When a user of Harbour Sports Picks opts in, create their account with your own id for them, their own address in your app, their country and their consent:
+
+```bash
+curl -X POST "$KASH_API/partner/accounts" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: create-hsp-user-8841" \
+  -d '{
+    "externalId": "hsp-user-8841",
+    "destination": { "network": "solana", "address": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh" },
+    "country": "GB",
+    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "hsp-kash-terms-2026-11" }
+  }'
+```
+
+The answer is `202` with `account.accountId` and `status: "provisioning"`. Keep the `accountId` with your user:
+
+```bash
+export ACCOUNT_ID=7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f
+```
+
+## 2. Wait for `account.active`
+
+Your webhook endpoint receives `account.active` with the account's Solana `depositAddress`. Or poll until `status` is `active`:
+
+```bash
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID" -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+## 3. Fund it and read the balance
+
+Send staging test USDC on Solana devnet to the `depositAddress` (see [Sandbox](/developer-docs/partner-integration/sandbox#test-usdc)). Then:
+
+```bash
+curl "$KASH_API/balance" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID"
+```
+
+`balance.availableAtomic` is what the account can spend, in atomic USDC: `"25000000"` is 25 USDC.
+
+## 4. Find a market and quote it
+
+Markets and quotes act for no account, so send no `Kash-Account` header:
+
+```bash
+curl "$KASH_API/markets?status=ACTIVE&category=sports&limit=5" \
+  -H "X-API-Key: $KASH_PARTNER_KEY"
+
+export MARKET_ID=...   # a market with "tradeable": true
+
+curl "$KASH_API/markets/$MARKET_ID/quote?outcomeIndex=0&action=buy&amount=10000000" \
+  -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+## 5. Trade
+
+```bash
+curl -X POST "$KASH_API/trades" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "marketId": "'"$MARKET_ID"'",
+    "outcomeIndex": 0,
+    "amount": "10",
+    "side": "buy",
+    "metadata": { "externalId": "hsp-user-8841" }
+  }'
+```
+
+The trade `amount` is decimal USDC (`"10"` is 10 USDC). The answer is `201` with the trade in `pending`, and your endpoint receives `trade.completed`, `trade.failed` or `trade.rejected` when it ends.
+
+## 6. Withdraw
+
+Quote first, then withdraw. `Idempotency-Key` is required:
+
+```bash
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/quote?amountAtomic=5000000" \
+  -H "X-API-Key: $KASH_PARTNER_KEY"
+
+curl -X POST "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: hsp-withdrawal-90311" \
+  -d '{ "amountAtomic": "5000000" }'
+```
+
+The answer is `202` with the withdrawal in `pending`. You receive `withdrawal.submitted`, then `withdrawal.completed` when the USDC reaches the user's destination.
+
+## The same with the SDK
+
+`@kashdao/sdk` 0.4.0 covers markets, quotes, trades, the portfolio and webhook verification. Send `Kash-Account` as a per-request header. It has no methods for the `/v1/partner/accounts` routes or `GET /v1/balance` yet, so this example calls those with `fetch`.
+
+```ts
+import { randomUUID } from 'node:crypto';
+import { KashClient } from '@kashdao/sdk';
+
+const KASH_API = 'https://api-staging.kash.bot/v1';
+const apiKey = process.env.KASH_PARTNER_KEY!;
+const kash = new KashClient({ apiKey }); // a kash_test_ key goes to staging
+
+async function partnerCall<T>(
+  method: 'GET' | 'POST' | 'PATCH',
+  path: string,
+  init: { body?: unknown; idempotencyKey?: string; accountId?: string } = {},
+): Promise<T> {
+  const res = await fetch(`${KASH_API}${path}`, {
+    method,
+    headers: {
+      'X-API-Key': apiKey,
+      ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(init.idempotencyKey ? { 'Idempotency-Key': init.idempotencyKey } : {}),
+      ...(init.accountId ? { 'Kash-Account': init.accountId } : {}),
+    },
+    body: init.body === undefined ? undefined : JSON.stringify(init.body),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(`${json.code}: ${json.detail} (requestId ${json.requestId})`);
+  return json as T;
+}
+
+// 1. Create the account (202, provisioning).
+const created = await partnerCall<{ account: { accountId: string; status: string } }>(
+  'POST',
+  '/partner/accounts',
+  {
+    idempotencyKey: 'create-hsp-user-8841',
+    body: {
+      externalId: 'hsp-user-8841',
+      destination: { network: 'solana', address: '8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh' },
+      country: 'GB',
+      consent: { acceptedAt: new Date().toISOString(), termsVersion: 'hsp-kash-terms-2026-11' },
+    },
+  },
+);
+const accountId = created.account.accountId;
+
+// 2. After account.active, and once funded: read the balance.
+const { balance } = await partnerCall<{ balance: { availableAtomic: string } }>(
+  'GET',
+  '/balance',
+  { accountId },
+);
+if (BigInt(balance.availableAtomic) < 10_000_000n) throw new Error('fund the account first');
+
+// 3. Markets and quotes act for no account.
+const page = await kash.markets.list({ status: 'ACTIVE', category: 'sports', limit: 20 });
+const market = page.data.find((m) => m.tradeable);
+if (!market) throw new Error('no tradeable market');
+const quote = await kash.quotes.buy({ marketId: market.id, outcomeIndex: 0, amountUsdcAtomic: '10000000' });
+console.log('10 USDC buys', quote.tokensOut, 'outcome tokens');
+
+// 4. Trade for the account.
+const trade = await kash.trades.create(
+  { marketId: market.id, outcomeIndex: 0, amount: '10', side: 'buy', metadata: { externalId: 'hsp-user-8841' } },
+  { headers: { 'Kash-Account': accountId } },
+);
+console.log('trade', trade.id, trade.status); // the outcome arrives by webhook
+
+// 5. Quote and request a withdrawal to the registered destination.
+await partnerCall('GET', `/partner/accounts/${accountId}/withdrawals/quote?amountAtomic=5000000`);
+const withdrawalKey = randomUUID(); // keep it with the request on your side, and reuse it on retry
+await partnerCall('POST', `/partner/accounts/${accountId}/withdrawals`, {
+  idempotencyKey: withdrawalKey,
+  body: { amountAtomic: '5000000' },
+});
+```
+
+To receive and verify the webhooks, see the receiver on [Webhooks](/developer-docs/partner-integration/webhooks#with-the-sdk).
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Accounts" icon="user-plus" href="/developer-docs/partner-integration/accounts">
+    The full account lifecycle.
+  </Card>
+  <Card title="Go-live checklist" icon="list-check" href="/developer-docs/partner-integration/go-live">
+    Before production.
+  </Card>
+</CardGroup>

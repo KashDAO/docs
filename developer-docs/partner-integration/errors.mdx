@@ -1,0 +1,80 @@
+---
+title: 'Errors'
+description: 'Every error code a partner integration can meet, its HTTP status and what to do.'
+---
+
+Errors use the API's [RFC 7807 problem format](/developer-docs/api-errors/overview): branch on `code`, never on `detail`, and quote `requestId` to ZeroID support. Each code links to its catalogue page.
+
+## Partner codes
+
+| Code | Status | When | What to do |
+| ---- | ------ | ---- | ---------- |
+| [`ACCOUNT_HEADER_REQUIRED`](/developer-docs/api-errors/ACCOUNT_HEADER_REQUIRED) | 400 | A partner key called a route that acts for one account without `Kash-Account`. | Send `Kash-Account: <accountId>`. |
+| [`ACCOUNT_HEADER_NOT_ALLOWED`](/developer-docs/api-errors/ACCOUNT_HEADER_NOT_ALLOWED) | 400 | `Kash-Account` was sent on a route that acts for no account (markets, quotes, `/v1/partner/accounts`, webhook management), or with a user key. | Remove the header. |
+| [`ACCOUNT_NOT_FOUND`](/developer-docs/api-errors/ACCOUNT_NOT_FOUND) | 404 | The account id is unknown, malformed, released or another organisation's. | Check the id and the environment. Find an account with `GET /v1/partner/accounts?externalId=`. |
+| [`ACCOUNT_NOT_ACTIVE`](/developer-docs/api-errors/ACCOUNT_NOT_ACTIVE) | 409 | The account's status does not allow the call: trading or withdrawing while not `active`, reading a wallet while `provisioning`, or a suspend or reactivate from the wrong status. On suspend, reactivate and withdrawals the `detail` names the status. | Wait for `account.active`, or reactivate a suspended account. |
+| [`RELEASE_REQUIRES_EMPTY_ACCOUNT`](/developer-docs/api-errors/RELEASE_REQUIRES_EMPTY_ACCOUNT) | 409 | Release while the account holds USDC or a position, has something unfinished, or had something finish in the last two minutes. | Follow the `detail`, then release again. See [Release](/developer-docs/partner-integration/release). |
+| [`DESTINATION_NOT_SUPPORTED`](/developer-docs/api-errors/DESTINATION_NOT_SUPPORTED) | 422 | A destination network Kash does not withdraw to, or (on staging) any withdrawal or quote to Arc. | Register a `solana` or `arc` destination. Test withdrawals to Solana on staging. |
+| [`WITHDRAWAL_BELOW_MINIMUM`](/developer-docs/api-errors/WITHDRAWAL_BELOW_MINIMUM) | 400 | Below 1 USDC to Arc, or no larger than the most the network fee can cost. | Withdraw more; `detail` names the figure. |
+| [`WITHDRAWALS_HELD`](/developer-docs/api-errors/WITHDRAWALS_HELD) | 409 | A withdrawal within 24 hours of a destination change. | Wait `Retry-After` seconds. If you did not make the change, suspend the account. |
+| [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) | 409 | A withdrawal above `availableAtomic`, or to Arc above `maxAmountAtomic`. | Quote first and withdraw at most `maxAmountAtomic`. |
+| [`PARTNER_KEY_REQUIRES_IP_ALLOWLIST`](/developer-docs/api-errors/PARTNER_KEY_REQUIRES_IP_ALLOWLIST) | 403 | In production, a live key with no allowlist or an over-broad entry (or a test-type key). | Use a live key with a specific allowlist. |
+
+## Authentication and access
+
+| Code | Status | What to do |
+| ---- | ------ | ---------- |
+| [`API_KEY_MISSING`](/developer-docs/api-errors/API_KEY_MISSING), [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED), [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) | 401 | Send a valid key in `X-API-Key`, for the right environment. |
+| [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) | 401 | The key was revoked, or your organisation's approval for live keys was withdrawn (the `detail` says which). Use another key, or contact ZeroID support. |
+| [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) | 401 | Create a new key. |
+| [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) | 403 | The key lacks the route's scope, or the route is for user keys only (competitions, disputes, revenue share). |
+| [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED) | 403 | The call came from an address not on the key's allowlist. |
+| [`ORGANIZATION_INACTIVE`](/developer-docs/api-errors/ORGANIZATION_INACTIVE) | 403 | Your organisation is suspended or closed. Contact ZeroID support. |
+
+## Requests
+
+| Code | Status | What to do |
+| ---- | ------ | ---------- |
+| [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) | 400 | Fix the field named in `detail`. Also returned for a withdrawal without `Idempotency-Key`, and for more than one `Kash-Account` header. |
+| [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) | 409 | The key was used for a different request. Repeat the original, or use a new key. |
+| [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | 409 | The first request with this key is still running. Retry shortly with the same key. |
+| [`IDEMPOTENCY_KEY_TOO_LONG`](/developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG), [`IDEMPOTENCY_KEY_FORMAT_INVALID`](/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID) | 400 | Use at most 255 characters from `A-Z a-z 0-9 _ - : .`. |
+| [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND) | 404 | A trade or withdrawal that is not this account's, or does not exist. |
+
+## Markets and trades
+
+| Code | Status | What to do |
+| ---- | ------ | ---------- |
+| [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) | 404 | Check the market id. |
+| [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) | 409 | The market is resolved, cancelled, inactive or frozen. Check `tradeable` before offering a trade. |
+| [`MARKET_NOT_QUOTABLE`](/developer-docs/api-errors/MARKET_NOT_QUOTABLE) | 422 | The market cannot be priced right now. |
+| [`OUTCOME_INDEX_INVALID`](/developer-docs/api-errors/OUTCOME_INDEX_INVALID) | 400 | Use an index below the market's `outcomeCount`. |
+| [`NO_POSITION`](/developer-docs/api-errors/NO_POSITION) | 422 | A repeat of a sell that just failed because the account holds nothing on that outcome. Check positions before selling. |
+| [`CLIENT_REQUEST_ID_CONFLICT`](/developer-docs/api-errors/CLIENT_REQUEST_ID_CONFLICT) | 409 | The `clientRequestId` was used for a different trade body. |
+| [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) | 429 | Too many unfinished trades for the account. Wait `Retry-After`. |
+| [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) | 409 | The position cannot be redeemed yet, or at all. |
+
+A trade that is accepted and later fails reports a lowercase `errorCode` on the trade and in its webhook (`insufficient_balance`, `slippage` and so on). Those are outcome codes, a different set from the REST codes on this page.
+
+## Limits and availability
+
+| Code | Status | What to do |
+| ---- | ------ | ---------- |
+| [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) | 429 | Wait `Retry-After` seconds. See [Rate limits](/developer-docs/partner-integration/rate-limits). |
+| [`RATE_LIMIT_UNAVAILABLE`](/developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE) | 503 | Retry after `Retry-After`. |
+| [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) | 503 | Something the API needed could not be read (a balance, the chain, the bridge price, the account store). Nothing changed. Retry with backoff, with the same `Idempotency-Key`. |
+| [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) | 503 | The route is switched off for now. Retry after `Retry-After`. |
+| [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED), [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) | 503 | Trading is paused or busy. Retry after `Retry-After`. |
+| [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT) | 504 | Retry with the same `Idempotency-Key`: the first request may have completed. |
+| [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) | 500 | Retry with backoff; contact ZeroID support with the `requestId` if it persists. |
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Idempotency" icon="repeat" href="/developer-docs/partner-integration/idempotency">
+    Retry every write safely.
+  </Card>
+  <Card title="Error catalogue" icon="book" href="/developer-docs/api-errors/overview">
+    One page per code.
+  </Card>
+</CardGroup>

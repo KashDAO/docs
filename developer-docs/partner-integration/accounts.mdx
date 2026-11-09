@@ -1,0 +1,185 @@
+---
+title: 'Accounts'
+description: 'Create a Kash account for each of your users, follow it through provisioning, change its destination or country, and suspend or reactivate it.'
+---
+
+Each of your users who opts in gets their own Kash account with its own Solana wallet. You create it with your own id for the user, and the API answers with an `accountId`. Send that id in the `Kash-Account` header on every call you make for the user.
+
+All routes on this page need a partner key with the `partner:accounts` scope. They name the account in the path, so they refuse a `Kash-Account` header with `400 ACCOUNT_HEADER_NOT_ALLOWED`.
+
+| Method | Path | What it does |
+| ------ | ---- | ------------ |
+| `POST` | `/v1/partner/accounts` | Create an account |
+| `GET` | `/v1/partner/accounts` | List your accounts, or find one by `externalId` |
+| `GET` | `/v1/partner/accounts/{accountId}` | Read one account |
+| `PATCH` | `/v1/partner/accounts/{accountId}` | Change the destination, the country, or both |
+| `POST` | `/v1/partner/accounts/{accountId}/suspend` | Stop trading and withdrawals |
+| `POST` | `/v1/partner/accounts/{accountId}/reactivate` | Resume a suspended account |
+| `POST` | `/v1/partner/accounts/{accountId}/release` | End your link to an empty account. See [Release](/developer-docs/partner-integration/release). |
+
+## Before you create an account
+
+- **Consent.** Create an account only after the user has agreed in your app, for example by tapping a button. That action is their consent to the API acting on the trade and withdrawal instructions you send for them. Send when they agreed and which terms they saw.
+- **Country.** Send the user's real country. Kash's country rules, including the block on sanctioned countries, apply to it at trade and withdrawal time. Account creation itself does not refuse by country. Update it with `PATCH` if it changes.
+- **Destination.** Register the user's own address in your app. Every withdrawal goes there and nowhere else.
+
+## Create an account
+
+```bash
+curl -X POST "$KASH_API/partner/accounts" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: create-hsp-user-8841" \
+  -d '{
+    "externalId": "hsp-user-8841",
+    "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
+    "country": "GB",
+    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "hsp-kash-terms-2026-11" },
+    "email": "user8841@example.com"
+  }'
+```
+
+| Field | Required | Rules |
+| ----- | -------- | ----- |
+| `externalId` | yes | Your id for the user, unique within your organisation. 1 to 128 characters, no control characters, no leading or trailing whitespace. Matched exactly, case included. |
+| `destination.network` | yes | `solana` or `arc`. Any other network (1 to 32 characters) is refused with `422 DESTINATION_NOT_SUPPORTED`. |
+| `destination.address` | yes | A base58 address for `solana`, or a `0x` address of 40 hex characters for `arc`. An Arc address is stored in lower case. A wrong address for the network is `400 VALIDATION_FAILED`. |
+| `country` | yes | ISO 3166-1 alpha-2 in upper case, such as `GB`. |
+| `consent.acceptedAt` | yes | ISO 8601 with a time zone. Not in the future (a few minutes of clock difference are allowed). |
+| `consent.termsVersion` | yes | The version of the terms the user saw. 1 to 64 characters, no control characters, no leading or trailing whitespace. |
+| `email` | no | A valid address, at most 320 characters. Stored with the account, for reaching the user about it. It is not a login today: the user cannot sign in to Kash with it. |
+
+Unknown fields are refused with `400 VALIDATION_FAILED`.
+
+The answer is `202 Accepted`. The account starts in `provisioning`, with no deposit address yet:
+
+```json
+{
+  "account": {
+    "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+    "externalId": "hsp-user-8841",
+    "status": "provisioning",
+    "depositAddress": null,
+    "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
+    "country": "GB",
+    "createdAt": "2026-11-06T10:15:02.000Z"
+  },
+  "data": { "...": "the same account" },
+  "_meta": { "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H", "timestamp": "2026-11-06T10:15:02.120Z", "idempotent": false }
+}
+```
+
+Every single-resource response carries the resource twice, under its own name (`account`) and under `data`. Read either.
+
+When the wallet is ready you receive the [`account.active`](/developer-docs/partner-integration/webhooks#account-events) webhook with the `depositAddress`. You can also poll `GET /v1/partner/accounts/{accountId}` until `status` is `active`.
+
+### Creating the same account twice
+
+- **Same `Idempotency-Key`** (a retry of the same request): the stored `202` is returned unchanged, with the header `Idempotent-Replay: true`. Nothing runs again.
+- **Different `Idempotency-Key`, same `externalId`**: the existing account is returned with `200` and `_meta.idempotent: true`. The body you sent is not applied to it: to change its destination or country, use `PATCH`.
+- **After a release** the `externalId` is free again. Creating it makes a new account with a new `accountId`.
+
+See [Idempotency](/developer-docs/partner-integration/idempotency).
+
+## Account statuses
+
+| `status` | Meaning | Trades and withdrawals | Can move to |
+| -------- | ------- | ---------------------- | ----------- |
+| `provisioning` | The wallet is being set up. `depositAddress` is `null`. | Refused, `409 ACCOUNT_NOT_ACTIVE` | `active`, `provisioning_failed`, `released` |
+| `active` | Ready. Fund, trade and withdraw. | Allowed | `suspended`, `released` |
+| `suspended` | You suspended it. It keeps its funds and can still be read, can redeem winnings, and can be reactivated or released. | Refused, `409 ACCOUNT_NOT_ACTIVE` | `active`, `released` |
+| `provisioning_failed` | The account could not be set up, for good. | Refused, `409 ACCOUNT_NOT_ACTIVE` | `released` |
+| `released` | Your link to the account has ended. Returned only in the answer to a release. | Not yours any more | |
+
+An account that is `provisioning` or `provisioning_failed` has no wallet, so calls that read the account's wallet (balance, portfolio, positions, trades) are refused with `409 ACCOUNT_NOT_ACTIVE` until it is active.
+
+### When provisioning fails
+
+You receive [`account.provisioning_failed`](/developer-docs/partner-integration/webhooks#account-events) with a `reason`:
+
+| `reason` | Meaning |
+| -------- | ------- |
+| `signer_missing` | The account's wallet was created without the signer the API acts with, and that signer cannot be added later. |
+| `no_solana_wallet` | The wallet provider (Privy) returned the account without a Solana wallet. |
+| `privy_refused` | The wallet provider refused to create the account. |
+| `privy_identity_mismatch` | The wallet provider offered an identity that is not this account's, so the API refused it. Nothing was linked. |
+| `privy_user_already_linked` | The identity offered already belongs to another Kash user, so the API refused it. Nothing was linked. |
+
+Release the account and create it again, which gives it a new `accountId`. If it recurs, contact ZeroID support with the `accountId`.
+
+## Read and find accounts
+
+```bash
+# One account
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID" -H "X-API-Key: $KASH_PARTNER_KEY"
+
+# The account you created for one of your users
+curl "$KASH_API/partner/accounts?externalId=hsp-user-8841" -H "X-API-Key: $KASH_PARTNER_KEY"
+
+# All accounts, newest first
+curl "$KASH_API/partner/accounts?limit=50" -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+`GET /v1/partner/accounts` returns `{ data: Account[], pagination: { cursor, hasMore, limit }, _meta }`, newest first, with [cursor pagination](/developer-docs/rest-api/pagination). `limit` is 1 to 100, default 20. `externalId` is an exact match and returns an empty page when you have no account for that id. Released accounts are not listed.
+
+An account id that is unknown, malformed, released or another organisation's is answered with the same `404 ACCOUNT_NOT_FOUND`, so ids cannot be probed.
+
+## Change the destination or country
+
+```bash
+curl -X PATCH "$KASH_API/partner/accounts/$ACCOUNT_ID" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{ "destination": { "network": "solana", "address": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh" } }'
+```
+
+Send `destination`, `country` or both. The answer is `200` with the account. It works in any status except released.
+
+<Warning>
+A new destination pauses the account's withdrawals for **24 hours**. A withdrawal in that window is refused with `409 WITHDRAWALS_HELD` and a `Retry-After` header. Every change is announced by the [`account.destination_changed`](/developer-docs/partner-integration/webhooks#account-events) webhook. If you receive one you did not make, suspend the account, revoke the key and contact ZeroID support.
+</Warning>
+
+- Sending the destination the account already has changes nothing, does not restart the hold and sends no webhook.
+- A country change takes effect for the next trade and withdrawal. It sends no webhook.
+- A destination change answers `503 ROUTE_DISABLED` when account changes are switched off, and `503 DEPENDENCY_UNAVAILABLE` when that switch cannot be read. Nothing changed; retry.
+
+## Suspend and reactivate
+
+```bash
+curl -X POST "$KASH_API/partner/accounts/$ACCOUNT_ID/suspend" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" -H "Idempotency-Key: $(uuidgen)"
+
+curl -X POST "$KASH_API/partner/accounts/$ACCOUNT_ID/reactivate" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" -H "Idempotency-Key: $(uuidgen)"
+```
+
+- **Suspend** moves an `active` account to `suspended`. Trades and withdrawals are refused until you reactivate it. The account keeps its funds, can still be read and released, and can still redeem winnings.
+- **Reactivate** moves a `suspended` account back to `active`.
+- Asking for the status the account already has answers `200` with `_meta.idempotent: true` and changes nothing.
+- Any other status answers `409 ACCOUNT_NOT_ACTIVE`, and the `detail` names the status. A `provisioning` or `provisioning_failed` account can be neither suspended nor reactivated.
+
+Suspend is how you stop one account quickly, for example when you suspect fraud on your side or receive a destination change you did not make.
+
+## Account resource
+
+| Field | Type | Notes |
+| ----- | ---- | ----- |
+| `accountId` | uuid | Send it in `Kash-Account`. |
+| `externalId` | string | Your id for the user. |
+| `status` | enum | `provisioning`, `active`, `suspended`, `provisioning_failed`, `released`. |
+| `depositAddress` | string or null | The account's Solana wallet. `null` until the account is active. |
+| `destination` | object | `{ network, address }`, where withdrawals go. |
+| `country` | string | ISO 3166-1 alpha-2. |
+| `createdAt` | date-time | |
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Funding and balance" icon="wallet" href="/developer-docs/partner-integration/funding">
+    Fund the deposit address and read what is available.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/partner-integration/webhooks">
+    Account, withdrawal, payout and trade events.
+  </Card>
+</CardGroup>

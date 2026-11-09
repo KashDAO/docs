@@ -1,0 +1,91 @@
+---
+title: 'Funding and balance'
+description: "Fund an account by sending USDC on Solana to its deposit address, and read what it can spend with GET /v1/balance."
+---
+
+## Fund an account
+
+Each active account has its own Solana wallet, its `depositAddress`. You receive it in the [`account.active`](/developer-docs/partner-integration/webhooks#account-events) webhook and on `GET /v1/partner/accounts/{accountId}`.
+
+To fund the account, send **USDC on Solana** to that address, from wherever your platform holds the user's funds.
+
+<Warning>
+Send only USDC on Solana to a deposit address. The API does not bridge funds in from other networks, and does not credit any other token.
+</Warning>
+
+- Moving the user's funds into their account is your responsibility, from whichever network you hold them on.
+- The API sends no webhook when a deposit arrives. Read the balance to see it.
+- On staging the deposit address is on Solana devnet and takes the staging test USDC. See [Sandbox](/developer-docs/partner-integration/sandbox#test-usdc).
+
+## Read the balance
+
+`GET /v1/balance` with the `portfolio:read` scope and the `Kash-Account` header:
+
+```bash
+curl "$KASH_API/balance" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID"
+```
+
+```json
+{
+  "balance": {
+    "usdcAtomic": "25000000",
+    "pendingWithdrawalsAtomic": "0",
+    "availableAtomic": "25000000",
+    "observedAt": "2026-11-06T10:20:00.000Z"
+  },
+  "data": { "...": "the same balance" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+| Field | Meaning |
+| ----- | ------- |
+| `usdcAtomic` | The wallet's USDC on Solana, read from the chain. |
+| `pendingWithdrawalsAtomic` | USDC held by the account's withdrawals that are not final yet (`pending`, `processing`, `confirming` or `bridging`). A withdrawal to Arc also holds its network fee, which is charged on top of its amount: the fee once it is recorded, and before that the most it can cost. |
+| `availableAtomic` | What a trade or a new withdrawal may spend: `usdcAtomic` minus `pendingWithdrawalsAtomic`, never below zero. Show this to your users as their balance. |
+| `observedAt` | When the on-chain balance was read. |
+
+Every amount is a string of USDC atomic units, with 6 decimals: `"25000000"` is 25 USDC. Parse amounts as integers (`BigInt` in JavaScript), never as floating-point numbers.
+
+- A balance that cannot be read answers `503 DEPENDENCY_UNAVAILABLE`, never zero. Retry it.
+- The balance needs an account with a wallet: a `provisioning` or `provisioning_failed` account answers `409 ACCOUNT_NOT_ACTIVE`. A suspended account can still be read.
+- Trades reserve nothing; only pending withdrawals are held, in `availableAtomic`. A trade and a withdrawal that race for the same USDC are decided on chain: one of them fails cleanly, and the account is never overdrawn.
+
+### With the SDK
+
+`@kashdao/sdk` 0.4.0 has no method for `GET /v1/balance`. Call it over HTTP as above, with any HTTP client.
+
+## Positions and the portfolio
+
+`GET /v1/portfolio` and `GET /v1/portfolio/positions` work for a partner account exactly as for a user key, with the `Kash-Account` header. See [Portfolio & redemptions](/developer-docs/rest-api/endpoints/portfolio-and-redemptions).
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+
+const kash = new KashClient({ apiKey: process.env.KASH_PARTNER_KEY! });
+const accountId = '7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f'; // from POST /v1/partner/accounts
+const forUser = { headers: { 'Kash-Account': accountId } };
+
+const portfolio = await kash.portfolio.get(forUser);
+const positions = await kash.portfolio.positions({}, forUser);
+console.log(portfolio, positions.length);
+```
+
+## Winnings
+
+When a market resolves, the account's winnings are paid into its wallet automatically, and you receive [`payout.completed`](/developer-docs/partner-integration/webhooks#payout-events) with the amount that arrived. It is how you learn that an account's balance rose after a resolution.
+
+If automatic payouts are ever paused, a winning position can be claimed with `POST /v1/redemptions` and the `Kash-Account` header, as for any user. See [Portfolio & redemptions](/developer-docs/rest-api/endpoints/portfolio-and-redemptions).
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Markets, quotes and trading" icon="chart-line" href="/developer-docs/partner-integration/trading">
+    Show prices and place trades for an account.
+  </Card>
+  <Card title="Withdrawals" icon="arrow-up-from-bracket" href="/developer-docs/partner-integration/withdrawals">
+    Send USDC back to the user's registered destination.
+  </Card>
+</CardGroup>

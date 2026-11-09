@@ -1,0 +1,84 @@
+---
+title: 'Partner integration'
+description: 'Offer Kash prediction markets inside your own app, to your own users, through the REST API.'
+---
+
+A partner is a company that offers Kash markets to its own users from its own app. You build the interface. Your server calls the [REST API](/developer-docs/rest-api/overview) with one **partner key**, and creates a Kash account for each user who opts in. The API then trades for that account on your instruction, pays its winnings into it, and sends its withdrawals to the address you registered for the user.
+
+This section is written for the engineers who build that integration. In the examples the partner is a fictional sports app, Harbour Sports Picks.
+
+## Concepts
+
+| Concept | What it is |
+| ------- | ---------- |
+| **Partner organisation** | Your company on Kash. Partner keys, accounts and webhooks all belong to it. |
+| **Partner key** | An API key that belongs to your organisation and has no user of its own. A test key starts `kash_test_` and works on staging; a live key starts `kash_live_` and works in production. See [Keys, approval and IP allowlists](/developer-docs/partner-integration/keys). |
+| **Partner account** | The Kash account of one of your users. You create it with your own id for the user (`externalId`), and the API answers with its `accountId`. See [Accounts](/developer-docs/partner-integration/accounts). |
+| **`Kash-Account` header** | How a partner key says which account a call is for. Send `Kash-Account: <accountId>` on balance, trade, portfolio, position, redemption and trace calls. |
+| **Deposit address** | The account's own Solana wallet. You fund it by sending USDC on Solana to this address. |
+| **Destination** | The user's own address in your app, on Solana or on Arc. Withdrawals go only there. |
+
+One key acts for every one of your users, the pattern of Stripe Connect's `Stripe-Account` header. A key per user would put thousands of secrets on the same server without narrowing what a breach exposes. What bounds a leaked partner key is the rule that money leaves an account only to that user's registered destination, together with the request [rate limits](/developer-docs/partner-integration/rate-limits), suspension of one account in one call, and the 24-hour hold on withdrawals after a destination change.
+
+## Who does what
+
+| | You | The API |
+| --- | --- | --- |
+| User interface | Build every screen your users see. | Provides no interface for partner users. |
+| Accounts | Collect each user's consent and true country, then create the account. | Sets up the account and its Solana wallet, and tells you when it is ready. |
+| Funding | Move each user's USDC from wherever your platform holds it to the account's Solana deposit address. | Does not bridge funds in, and does not notify you of deposits. |
+| Trading | Send the user's trade instructions. | Executes them on the Kash protocol and reports each outcome by webhook. |
+| Winnings | Nothing. | Pays a resolved market's winnings into the account automatically and sends `payout.completed`. |
+| Withdrawals | Request them, with an amount. | Sends the USDC to the destination you registered: directly on Solana, or through the Relay bridge to Arc. |
+| Network fees | Nothing for trades. | ZeroID pays the Solana network fee of trades. A withdrawal's network fee is charged to the account in USDC (see [Withdrawals](/developer-docs/partner-integration/withdrawals)). |
+| Support | Support your users for everything on your side, including moving their funds into their accounts. | ZeroID support helps you with the API and your accounts. |
+
+## Where the money is
+
+- An account's USDC and positions are held on chain, in that account's own Solana wallet. Your server never holds a key to it.
+- The API moves funds out of an account only to carry out the trades and withdrawals you request, and to charge a withdrawal's network fee. A withdrawal always goes to the user's registered destination: the request cannot name another address.
+- Partner accounts have no per-trade or daily spending caps, the same as a user of the Kash web app.
+- A user has no Kash login yet, so they reach their account only through your app. That is why an account must be empty before you can [release](/developer-docs/partner-integration/release) it.
+
+## The flow
+
+<Steps>
+  <Step title="Get a test key">
+    Create a partner key for staging in the Kash web app, with a webhook URL. See [Keys](/developer-docs/partner-integration/keys).
+  </Step>
+  <Step title="Create an account">
+    `POST /v1/partner/accounts` when a user opts in. You receive `account.active` with the account's Solana `depositAddress`.
+  </Step>
+  <Step title="Fund it">
+    Send USDC on Solana to the deposit address, then read `GET /v1/balance`.
+  </Step>
+  <Step title="Trade">
+    Read markets and quotes, then `POST /v1/trades` with the `Kash-Account` header. Outcomes arrive by webhook.
+  </Step>
+  <Step title="Withdraw">
+    Quote, then `POST /v1/partner/accounts/{accountId}/withdrawals`. The USDC goes to the user's registered destination.
+  </Step>
+  <Step title="Go live">
+    Ask ZeroID to approve your organisation, create a live key with an IP allowlist, and switch your base URL. See the [go-live checklist](/developer-docs/partner-integration/go-live).
+  </Step>
+</Steps>
+
+## Base URLs
+
+| Environment | Base URL | Network | Keys |
+| ----------- | -------- | ------- | ---- |
+| Staging (sandbox) | `https://api-staging.kash.bot/v1` | Solana devnet, test USDC | `kash_test_` |
+| Production | `https://api.kash.bot/v1` | Solana mainnet, real USDC | `kash_live_` |
+
+[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) picks the base URL from the key's prefix.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/developer-docs/partner-integration/quickstart">
+    Create an account, fund it, trade and withdraw on staging.
+  </Card>
+  <Card title="Keys and approval" icon="key" href="/developer-docs/partner-integration/keys">
+    Test and live keys, approval and the IP allowlist.
+  </Card>
+</CardGroup>

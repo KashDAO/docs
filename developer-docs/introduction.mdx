@@ -64,6 +64,9 @@ Markets live on the Kash protocol, an open, permissionless protocol on **Solana*
 ### Trading bots and agents
 Use the [REST API](/developer-docs/rest-api/overview) to place trades, monitor portfolios and react to market events through webhooks. It supports idempotent retries, per-key spending limits and per-key rate limiting. Users create keys in **Settings → API keys** on [app.kash.bot](https://app.kash.bot).
 
+### Prediction markets inside your own app
+Use [Partner integration](/developer-docs/partner-integration/overview) to offer Kash markets to your own users from your own interface. Your server holds one partner key, creates a Kash account for each user who opts in, and trades and withdraws for them through the REST API.
+
 ### Self-orchestrated trading and market making
 Use the [Protocol SDK](/developer-docs/protocol-sdk/overview) (TypeScript or [Python](/developer-docs/protocol-sdk-python/overview)) to quote, sign and submit transactions yourself against the on-chain markets, with your own signer and RPC.
 

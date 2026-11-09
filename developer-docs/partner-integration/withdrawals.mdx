@@ -1,0 +1,172 @@
+---
+title: 'Withdrawals'
+description: "Send an account's USDC to its registered destination: directly on Solana, or through the Relay bridge to Arc. Quotes, fees, minimums, the 24-hour hold and outcomes."
+---
+
+A withdrawal sends an account's USDC to the destination you registered for the user. The request names only an amount: it cannot name an address, so funds go nowhere else.
+
+| Method | Path | What it does |
+| ------ | ---- | ------------ |
+| `GET` | `/v1/partner/accounts/{accountId}/withdrawals/quote?amountAtomic=` | What a withdrawal would deliver, and the most the account can withdraw now |
+| `POST` | `/v1/partner/accounts/{accountId}/withdrawals` | Request a withdrawal |
+| `GET` | `/v1/partner/accounts/{accountId}/withdrawals` | List the account's withdrawals, newest first |
+| `GET` | `/v1/partner/accounts/{accountId}/withdrawals/{withdrawalId}` | Read one withdrawal |
+
+All four need a partner key with the `partner:accounts` scope, and name the account in the path (no `Kash-Account` header).
+
+## Networks
+
+| Destination network | How it is sent | Minimum | Network fee |
+| ------------------- | -------------- | ------- | ----------- |
+| `solana` | A USDC transfer on Solana from the account's wallet to the destination. | None fixed; the amount must exceed the network fee bound. | Charged in USDC. Paid on top of the amount when the balance allows, otherwise taken out of it. |
+| `arc` | A USDC transfer on Solana to a Relay deposit address bound to the destination, which Relay bridges to Arc. | **1 USDC** (`1000000`) | The Solana network fee is charged in USDC **on top of** the amount. Relay's bridge fee comes out of the amount. |
+
+The network fee is charged in USDC, so an amount no larger than the most the fee can cost is refused with `400 WITHDRAWAL_BELOW_MINIMUM`, whose `detail` names the figure. The bound depends on the SOL price and on whether the recipient's USDC account on Solana must be created; the most a withdrawal is ever charged is 1 USDC.
+
+## Quote first
+
+```bash
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/quote?amountAtomic=2500000" \
+  -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+```json
+{
+  "quote": {
+    "amountAtomic": "2500000",
+    "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
+    "receiveAtomic": "2490000",
+    "receiveEstimated": true,
+    "estimatedSeconds": 30,
+    "maxAmountAtomic": "24980000"
+  },
+  "data": { "...": "the same quote" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+| Field | Meaning |
+| ----- | ------- |
+| `amountAtomic` | The amount you would withdraw. |
+| `destination` | The account's registered destination. |
+| `receiveAtomic` | What would arrive. On Solana it is the amount itself when the balance covers the amount plus the most the fee can cost; otherwise the fee may come out of the amount, and this is the amount less 1 USDC (`1000000`), the least that arrives. On Arc it is the least Relay's quote guarantees to deliver, after its fee. |
+| `receiveEstimated` | `true` when `receiveAtomic` is a lower bound: a Solana withdrawal whose fee may come out of the amount (the whole balance, or close to it), and every withdrawal to Arc, where the bridge usually delivers a little more. |
+| `estimatedSeconds` | The bridge's time estimate for Arc. `null` on Solana and when not quoted. |
+| `maxAmountAtomic` | The most the account can withdraw now. To Arc it is `availableAtomic` less the most the network fee can cost, since that fee is paid on top. To Solana it is `availableAtomic`. `0` when no withdrawal is possible. |
+
+The quote applies the same Arc minimum, network fee and balance rules as the withdrawal, with the same codes. It does not check the account's status or the 24-hour hold, so a quote can succeed for a withdrawal that `ACCOUNT_NOT_ACTIVE` or `WITHDRAWALS_HELD` would refuse. A quote moves nothing and works in any account status that has a wallet. Show your users `receiveAtomic` before they confirm.
+
+## Request a withdrawal
+
+```bash
+curl -X POST "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: hsp-withdrawal-90311" \
+  -d '{ "amountAtomic": "2500000" }'
+```
+
+`amountAtomic` is a positive whole number of USDC atomic units, as a string. **`Idempotency-Key` is required**: without it the request is refused with `400 VALIDATION_FAILED`, because a retry must never become a second withdrawal.
+
+The answer is `202 Accepted` with the withdrawal in `pending`. It completes later; you receive webhooks as it moves.
+
+```json
+{
+  "withdrawal": {
+    "withdrawalId": "0b6e1f7a-2c3d-4e5f-8a9b-0c1d2e3f4a5b",
+    "accountId": "7a1c2e3d-4b5f-4a6e-8d7c-1b2a3c4d5e6f",
+    "amountAtomic": "2500000",
+    "deliveredAmountAtomic": null,
+    "minimumDeliveredAtomic": null,
+    "status": "pending",
+    "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
+    "transactionHash": null,
+    "destinationTransactionHash": null,
+    "createdAt": "2026-11-06T11:00:00.000Z",
+    "updatedAt": "2026-11-06T11:00:00.000Z"
+  },
+  "data": { "...": "the same withdrawal" },
+  "_meta": { "requestId": "…", "timestamp": "…", "idempotent": false }
+}
+```
+
+Retrying with the same `Idempotency-Key` returns the same withdrawal and moves no more money: within 24 hours the stored `202` is replayed with `Idempotent-Replay: true`, and after that the withdrawal is returned with `200` and `_meta.idempotent: true`. The same key with a different amount is refused with `409 IDEMPOTENCY_KEY_CONFLICT`. Keys are scoped to the account.
+
+### Refusals
+
+Each refusal is decided before anything is recorded, so nothing moves.
+
+| Status | `code` | When |
+| ------ | ------ | ---- |
+| 400 | `VALIDATION_FAILED` | No `Idempotency-Key`, or a malformed `amountAtomic`. |
+| 404 | `ACCOUNT_NOT_FOUND` | Not one of your accounts, or released. |
+| 409 | `ACCOUNT_NOT_ACTIVE` | The account is not `active`. |
+| 422 | `DESTINATION_NOT_SUPPORTED` | The destination's network cannot be withdrawn to in this environment. On staging this is every withdrawal to Arc. |
+| 400 | `WITHDRAWAL_BELOW_MINIMUM` | Below 1 USDC to Arc, or no more than the most the network fee can cost. |
+| 409 | `WITHDRAWALS_HELD` | Within 24 hours of a destination change. `Retry-After` gives the seconds left. |
+| 409 | `INSUFFICIENT_BALANCE` | More than `availableAtomic`, or to Arc more than `maxAmountAtomic`. The `detail` gives the figures. |
+| 409 | `IDEMPOTENCY_KEY_CONFLICT` | The key was already used for a different amount. |
+| 503 | `DEPENDENCY_UNAVAILABLE` | The balance, the network fee or the bridge price could not be read, the bridge would cost more than the API allows for this amount right now, or the destination changed while the request ran. Retry shortly. |
+| 503 | `ROUTE_DISABLED` | Withdrawals are switched off for now. Retry after `Retry-After`. |
+
+## Statuses
+
+| `status` | Meaning |
+| -------- | ------- |
+| `pending` | Accepted and queued. |
+| `processing` | Being sent. |
+| `confirming` | Sent; waiting for the Solana network to confirm it. |
+| `bridging` | Arc only: handed to Relay, waiting for delivery on Arc. |
+| `completed` | The USDC reached the destination. |
+| `failed` | The withdrawal ended without delivering. |
+| `cancelled` | The withdrawal was cancelled without delivering. |
+
+A withdrawal is never failed while its transaction can still land: its end is decided from the chain, and for Arc from Relay's status, never from a timeout. A bridge fill that fails is refunded by Relay to the account's Solana wallet.
+
+## Amounts delivered
+
+| Field | Solana | Arc |
+| ----- | ------ | --- |
+| `amountAtomic` | The amount you requested. | The amount you requested. |
+| `deliveredAmountAtomic` | `null` until the transfer is confirmed, then what arrived: the amount itself, except on a withdrawal of the whole balance, where the network fee comes out of it. | Always `null`: the bridge does not report what it delivered. |
+| `minimumDeliveredAtomic` | Always `null`. | `null` until the withdrawal is handed to the bridge, then the least the bridge's quote guarantees to deliver. |
+| `transactionHash` | The Solana transaction, once sent. | The Solana transaction that sent the USDC to the bridge, once sent. |
+| `destinationTransactionHash` | The same Solana transaction, once completed; `null` before and on failure. | The Arc transaction that delivered the USDC, once known. |
+
+On a failed or cancelled withdrawal, `deliveredAmountAtomic` and `minimumDeliveredAtomic` are both `null`: nothing was delivered.
+
+## Webhooks
+
+| Event | When |
+| ----- | ---- |
+| [`withdrawal.submitted`](/developer-docs/partner-integration/webhooks#withdrawal-events) | The withdrawal was accepted and queued. |
+| [`withdrawal.completed`](/developer-docs/partner-integration/webhooks#withdrawal-events) | The USDC reached the destination. |
+| [`withdrawal.failed`](/developer-docs/partner-integration/webhooks#withdrawal-events) | It ended without delivering. `errorCode` is `withdrawal_failed` (not sent), `bridge_refunded` (the bridge failed and the USDC came back to the account's Solana wallet) or `bridge_failed` (the bridge failed and it did not). |
+
+On `bridge_failed`, contact ZeroID support with the `withdrawalId`.
+
+## The 24-hour hold
+
+Changing an account's destination with `PATCH /v1/partner/accounts/{accountId}` pauses its withdrawals for 24 hours from the change. A leaked key therefore cannot redirect an account and empty it at once, and the [`account.destination_changed`](/developer-docs/partner-integration/webhooks#account-events) webhook gives you that window to catch a change you did not make. Re-sending the current destination does not restart the hold.
+
+## Read withdrawals
+
+```bash
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals?limit=20" -H "X-API-Key: $KASH_PARTNER_KEY"
+curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/$WITHDRAWAL_ID" -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+The list is newest first, with [cursor pagination](/developer-docs/rest-api/pagination) (`limit` 1 to 100, default 20). A withdrawal that is not this account's is `404 RESOURCE_NOT_FOUND`.
+
+`@kashdao/sdk` 0.4.0 has no methods for these routes. Call them over HTTP.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Release" icon="link-slash" href="/developer-docs/partner-integration/release">
+    End your link to an empty account.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/partner-integration/webhooks">
+    Withdrawal payloads in full.
+  </Card>
+</CardGroup>

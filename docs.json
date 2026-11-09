@@ -128,6 +128,25 @@
             ]
           },
           {
+            "group": "Partner integration",
+            "pages": [
+              "developer-docs/partner-integration/overview",
+              "developer-docs/partner-integration/quickstart",
+              "developer-docs/partner-integration/keys",
+              "developer-docs/partner-integration/accounts",
+              "developer-docs/partner-integration/funding",
+              "developer-docs/partner-integration/trading",
+              "developer-docs/partner-integration/withdrawals",
+              "developer-docs/partner-integration/release",
+              "developer-docs/partner-integration/webhooks",
+              "developer-docs/partner-integration/errors",
+              "developer-docs/partner-integration/idempotency",
+              "developer-docs/partner-integration/rate-limits",
+              "developer-docs/partner-integration/sandbox",
+              "developer-docs/partner-integration/go-live"
+            ]
+          },
+          {
             "group": "CLI",
             "pages": [
               "developer-docs/cli/overview",
@@ -170,6 +189,10 @@
             "group": "API Error Catalogue",
             "pages": [
               "developer-docs/api-errors/overview",
+              "developer-docs/api-errors/ACCOUNT_HEADER_NOT_ALLOWED",
+              "developer-docs/api-errors/ACCOUNT_HEADER_REQUIRED",
+              "developer-docs/api-errors/ACCOUNT_NOT_ACTIVE",
+              "developer-docs/api-errors/ACCOUNT_NOT_FOUND",
               "developer-docs/api-errors/ACTIVE_KEY_LIMIT_REACHED",
               "developer-docs/api-errors/AMOUNT_TOO_LARGE",
               "developer-docs/api-errors/API_KEY_EXPIRED",
@@ -185,6 +208,7 @@
               "developer-docs/api-errors/CONFIRMATION_TOKEN_INVALID",
               "developer-docs/api-errors/CONFIRMATION_TOKEN_USED",
               "developer-docs/api-errors/DEPENDENCY_UNAVAILABLE",
+              "developer-docs/api-errors/DESTINATION_NOT_SUPPORTED",
               "developer-docs/api-errors/DISPUTE_ALREADY_FILED",
               "developer-docs/api-errors/DISPUTE_DECIDED",
               "developer-docs/api-errors/DISPUTE_WINDOW_CLOSED",
@@ -201,12 +225,15 @@
               "developer-docs/api-errors/MARKET_NOT_FOUND",
               "developer-docs/api-errors/MARKET_NOT_QUOTABLE",
               "developer-docs/api-errors/MARKET_NOT_TRADEABLE",
+              "developer-docs/api-errors/NO_POSITION",
               "developer-docs/api-errors/ORGANIZATION_INACTIVE",
               "developer-docs/api-errors/OUTCOME_INDEX_INVALID",
+              "developer-docs/api-errors/PARTNER_KEY_REQUIRES_IP_ALLOWLIST",
               "developer-docs/api-errors/POSITION_NOT_CLAIMABLE",
               "developer-docs/api-errors/RATE_LIMIT_EXCEEDED",
               "developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE",
               "developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED",
+              "developer-docs/api-errors/RELEASE_REQUIRES_EMPTY_ACCOUNT",
               "developer-docs/api-errors/REQUEST_SIGNATURE_INVALID",
               "developer-docs/api-errors/REQUEST_TIMEOUT",
               "developer-docs/api-errors/RESOURCE_NOT_FOUND",
@@ -219,7 +246,9 @@
               "developer-docs/api-errors/VALIDATION_FAILED",
               "developer-docs/api-errors/WALLET_DELEGATION_NOT_ENABLED",
               "developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED",
-              "developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN"
+              "developer-docs/api-errors/WEBHOOK_SECRET_ROTATION_COOLDOWN",
+              "developer-docs/api-errors/WITHDRAWALS_HELD",
+              "developer-docs/api-errors/WITHDRAWAL_BELOW_MINIMUM"
             ]
           },
           {

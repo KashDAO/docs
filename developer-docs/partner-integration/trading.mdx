@@ -1,0 +1,142 @@
+---
+title: 'Markets, quotes and trading'
+description: 'List markets, quote prices and place trades for a partner account with the Kash-Account header.'
+---
+
+Market and quote routes act for no account: call them with your partner key and **without** `Kash-Account` (they refuse the header with `400 ACCOUNT_HEADER_NOT_ALLOWED`). Trade routes act for one account and need the header (without it, `400 ACCOUNT_HEADER_REQUIRED`).
+
+| Method | Path | Scope | `Kash-Account` |
+| ------ | ---- | ----- | -------------- |
+| `GET` | `/v1/markets` | `markets:read` | refused |
+| `GET` | `/v1/markets/{id}` | `markets:read` | refused |
+| `GET` | `/v1/markets/{id}/predictions` | `markets:read` | refused |
+| `GET` | `/v1/markets/{id}/quote` | `markets:quote` | refused |
+| `POST` | `/v1/trades` | `trades:write` | required; the account must be `active` |
+| `POST` | `/v1/trades/{id}/confirm` | `trades:write` | required; the account must be `active` |
+| `GET` | `/v1/trades` | `trades:read` | required |
+| `GET` | `/v1/trades/{id}` | `trades:read` | required |
+| `GET` | `/v1/traces/{correlationId}` | `trades:read` | required |
+| `POST` | `/v1/redemptions` | `trades:write` | required; the account must be `active` or `suspended` |
+
+The request and response shapes are the same as for any API key: see [Markets](/developer-docs/rest-api/endpoints/markets) and [Trades](/developer-docs/rest-api/endpoints/trades).
+
+## List markets
+
+```bash
+curl "$KASH_API/markets?status=ACTIVE&category=sports&subcategory=football&chain=solana&limit=20" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "X-Kash-Api-Version: 2026-08-19"
+```
+
+| Query | Notes |
+| ----- | ----- |
+| `status` | `UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED`. |
+| `category` | A category slug, such as `sports`. |
+| `subcategory` | A sub-category slug, such as `football`. |
+| `chain` | `solana` or `evm`. |
+| `cursor`, `limit` | [Cursor pagination](/developer-docs/rest-api/pagination); `limit` is 1 to 100, default 20. |
+
+Each market carries its `outcomes[]` with each outcome's `probability` (0 to 1), its `category`, `subcategory` and `chain`, and `tradeable`. Show only markets with `tradeable: true` as open for trading: a market past its freeze deadline keeps `status: "ACTIVE"`.
+
+## Quote a price
+
+```bash
+# What 10 USDC buys on outcome 0
+curl "$KASH_API/markets/$MARKET_ID/quote?outcomeIndex=0&action=buy&amount=10000000" \
+  -H "X-API-Key: $KASH_PARTNER_KEY"
+```
+
+The quote `amount` is in **atomic units**: USDC with 6 decimals for a buy (`10000000` is 10 USDC), outcome tokens with 18 decimals for a sell. The answer carries `tokensOut`, `effectivePrice` and `impliedProbability`.
+
+## Place a trade
+
+```bash
+curl -X POST "$KASH_API/trades" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID" \
+  -H "X-Kash-Api-Version: 2026-08-19" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "marketId": "'"$MARKET_ID"'",
+    "outcomeIndex": 0,
+    "amount": "10",
+    "side": "buy",
+    "clientRequestId": "hsp-order-55120",
+    "metadata": { "externalId": "hsp-user-8841", "orderId": "55120" }
+  }'
+```
+
+The trade `amount` is a **decimal USDC string** (`"10"` is 10 USDC, up to 6 decimals), unlike the atomic amounts elsewhere in the partner routes. The answer is `201 Created` with the trade in `pending`. It then moves through `validating` and `executing` to `completed`, or ends `failed` or `rejected`.
+
+<Tip>
+Trade webhooks do not name the account. Put your own ids in `metadata` (up to 10 string tags): they are echoed on the trade and on every trade webhook, so your handler can route the event without a lookup. Use `clientRequestId` for your order id: it makes the create idempotent for as long as the trade exists.
+</Tip>
+
+What is different for a partner key:
+
+- **No spending caps.** Partner accounts have no per-trade or daily limit, and no high-value confirmation step, so a partner trade never returns `202` with a confirmation token.
+- **The account must be `active`.** A `provisioning`, `provisioning_failed` or `suspended` account is refused with `409 ACCOUNT_NOT_ACTIVE`.
+- **Country rules apply.** The API checks the trade against the country you registered for the account. A refused trade ends `rejected`, and you receive `trade.rejected`.
+- **Balance is checked on chain after the trade is accepted.** A trade the account cannot fund ends `failed` or `rejected`, with a lowercase `errorCode` such as `insufficient_balance`.
+- **Idempotency is per account.** The same `Idempotency-Key` used for two different accounts is two independent requests.
+
+### With the SDK
+
+`@kashdao/sdk` 0.4.0 has no partner option of its own. Pass `Kash-Account` as a per-request header; the SDK adds an `Idempotency-Key` to every `POST`.
+
+```ts
+import { KashClient } from '@kashdao/sdk';
+
+const kash = new KashClient({ apiKey: process.env.KASH_PARTNER_KEY! });
+
+// Markets and quotes act for no account: no Kash-Account header.
+const page = await kash.markets.list({ status: 'ACTIVE', category: 'sports', limit: 20 });
+const market = page.data.find((m) => m.tradeable);
+if (!market) throw new Error('no tradeable market');
+
+const quote = await kash.quotes.buy({
+  marketId: market.id,
+  outcomeIndex: 0,
+  amountUsdcAtomic: '10000000', // 10 USDC, atomic
+});
+console.log('10 USDC buys', quote.tokensOut, 'outcome tokens');
+
+// Trades act for one account.
+const trade = await kash.trades.create(
+  {
+    marketId: market.id,
+    outcomeIndex: 0,
+    amount: '10', // 10 USDC, decimal
+    side: 'buy',
+    clientRequestId: 'hsp-order-55120',
+    metadata: { externalId: 'hsp-user-8841', orderId: '55120' },
+  },
+  { headers: { 'Kash-Account': accountId } },
+);
+console.log('trade', trade.id, trade.status); // the outcome arrives by webhook
+```
+
+Do not set `Kash-Account` in the client-level `headers` option: market and quote calls refuse it.
+
+## Trade outcomes
+
+Trade outcomes arrive as webhooks to the key that placed the trade: `trade.completed`, `trade.failed` and `trade.rejected`. Each carries `tradeId`, `marketId`, `outcomeIndex`, `amount`, `side`, `status` and your `metadata`. See [Webhooks](/developer-docs/partner-integration/webhooks#trade-events).
+
+You can also read a trade with `GET /v1/trades/{id}`, list the account's trades with `GET /v1/trades`, or follow one through the pipeline with `GET /v1/traces/{correlationId}`, each with the `Kash-Account` header.
+
+## Selling and redeeming
+
+- **Sell** with `side: "sell"` and the USDC amount, as for any key. A sell of an outcome the account does not hold fails with `errorCode: "no_position"`, and repeating that sell within the hour, before anything gives the account a position, can be refused at once with `422 NO_POSITION`.
+- **Winnings** from a resolved market are paid into the account automatically, and you receive `payout.completed`. If automatic payouts are paused, claim with `POST /v1/redemptions` and the `Kash-Account` header.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Withdrawals" icon="arrow-up-from-bracket" href="/developer-docs/partner-integration/withdrawals">
+    Send USDC back to the user's registered destination.
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/developer-docs/partner-integration/webhooks">
+    Every event your endpoint receives.
+  </Card>
+</CardGroup>

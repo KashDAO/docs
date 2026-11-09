@@ -1,0 +1,49 @@
+---
+title: 'Sandbox (staging)'
+description: 'Build and test your integration on staging: Solana devnet, test USDC and a self-service test key.'
+---
+
+Staging is the sandbox. It runs the same API as production on Solana devnet, with test USDC that has no value.
+
+| | Staging | Production |
+| --- | --- | --- |
+| Base URL | `https://api-staging.kash.bot/v1` | `https://api.kash.bot/v1` |
+| Keys | `kash_test_`, self-service | `kash_live_`, after approval |
+| Network | Solana devnet | Solana mainnet |
+| USDC | Staging test USDC | Real USDC |
+| IP allowlist | Optional | Required |
+| Withdrawals to Arc | Refused (see below) | Available |
+
+<Note>
+Staging is shared and runs ahead of production, so expect it to change while you build. Nothing on staging is real money.
+</Note>
+
+## Get a test key
+
+Create a partner key in **Settings → API Keys** in the Kash web app on staging. Your first test key can create your partner organisation. See [Keys](/developer-docs/partner-integration/keys#create-a-test-key).
+
+`@kashdao/sdk` sends a `kash_test_` key to staging automatically.
+
+## Test USDC
+
+Staging accounts are funded with the staging test USDC on Solana devnet. It is a token Kash issues for staging, so public devnet USDC faucets do not provide it. Ask ZeroID support for test USDC for your staging integration, from the info button in the Kash web app → **Feedback** or in [Discord](https://discord.com/invite/n9eumqjMPb), and send it from your own devnet wallet to your test accounts' deposit addresses as you would in production.
+
+## What you can test
+
+- Account creation, `account.active` and the account lifecycle: suspend, reactivate, change destination and release.
+- Funding a deposit address and reading `GET /v1/balance`.
+- Markets, quotes and trades with `Kash-Account`, and the trade webhooks.
+- Withdrawals to a **Solana** destination, end to end, with their webhooks.
+- The 24-hour hold after a destination change, and every refusal on the [errors page](/developer-docs/partner-integration/errors).
+- Webhook signature verification, retries and redelivery.
+- Rate limits, which are the same as in production.
+
+## Withdrawals to Arc on staging
+
+The Relay bridge has no route from Solana devnet, so on staging a withdrawal or a withdrawal quote to an Arc destination is refused with `422 DESTINATION_NOT_SUPPORTED` and the detail "Withdrawals to Arc are not available in this environment." You can still register Arc destinations and test the refusal path. To test withdrawals end to end on staging, give a test account a Solana destination.
+
+The Arc lane is identical to the Solana lane up to the bridge: the same request, statuses and webhooks, plus `bridging` and the `bridge_refunded` and `bridge_failed` outcomes. Plan your first production Arc withdrawal as a small amount.
+
+## Moving to production
+
+Nothing in your code changes except the key and, if you set it yourself, the base URL. Work through the [go-live checklist](/developer-docs/partner-integration/go-live).

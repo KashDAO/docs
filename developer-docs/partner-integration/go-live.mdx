@@ -1,0 +1,47 @@
+---
+title: 'Go-live checklist'
+description: 'What to have in place before your partner integration goes to production.'
+---
+
+## Approval and keys
+
+- [ ] ZeroID has approved your organisation for production (one-time; ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb)).
+- [ ] You created a `kash_live_` partner key in **Settings → API Keys** on the production web app.
+- [ ] The key's IP allowlist lists your servers' egress addresses, each a single address, an IPv4 range of `/16` or narrower, or an IPv6 range of `/48` or narrower.
+- [ ] The key has only the scopes you use. Add `webhooks:manage` if you will inspect, replay or rotate webhooks from your server.
+- [ ] Keys and webhook secrets live in your secret store on your servers, never in an app, a browser, a log or a repository.
+- [ ] Your servers call `https://api.kash.bot/v1`, and no test key is configured in production. A staging key is not known there and is refused with `401 API_KEY_INVALID`.
+
+## Webhooks
+
+- [ ] The production webhook URL is set on the live key, uses `https`, and its signing secret is installed.
+- [ ] Your endpoint verifies `X-Kash-Signature` against the raw body and rejects stale timestamps.
+- [ ] It deduplicates on the event id, and stores processed ids.
+- [ ] It answers `2xx` within 10 seconds and does slow work afterwards.
+- [ ] It treats each event as a prompt to read current state, and does not depend on the order events arrive in.
+- [ ] It handles every event type, including `account.provisioning_failed`, `withdrawal.failed` and `account.destination_changed`, and alerts your team on a destination change you did not make.
+
+## Accounts and consent
+
+- [ ] You create an account only after the user's own action in your app, and send `consent.acceptedAt` and the `termsVersion` they saw.
+- [ ] You send each user's true country, and update it with `PATCH` when it changes.
+- [ ] Each user's destination is their own address in your app, on `solana` or `arc`.
+- [ ] You store the `accountId` against your user, and can find it again with `GET /v1/partner/accounts?externalId=`.
+
+## Money
+
+- [ ] You fund accounts only with USDC on Solana, to the account's `depositAddress`.
+- [ ] You show users `availableAtomic` as their balance, and parse every amount as an integer.
+- [ ] You quote every withdrawal first and show `receiveAtomic`, and never request more than `maxAmountAtomic`.
+- [ ] Every withdrawal carries an `Idempotency-Key` you keep with the request on your side, and every retry reuses it.
+- [ ] You handle `WITHDRAWALS_HELD` and its `Retry-After`, and the 1 USDC minimum to Arc.
+- [ ] Your first production withdrawal to Arc is a small amount, and you confirm it arrived before opening Arc withdrawals to users.
+
+## Operations
+
+- [ ] Every write sends an `Idempotency-Key`, and retries reuse it.
+- [ ] You back off on `429` and `503` using `Retry-After`, and stay inside 60 requests a minute per account.
+- [ ] You branch on error `code`, never on `detail`, and log `requestId`.
+- [ ] You know how to suspend one account in one call, and who on your team does it.
+- [ ] You know how to rotate a key and a webhook secret without downtime.
+- [ ] Your support team can help users with funding and everything else on your side, and knows to contact ZeroID support with an `accountId`, `withdrawalId` or `requestId` for anything on Kash's side.

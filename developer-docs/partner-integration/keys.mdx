@@ -1,0 +1,106 @@
+---
+title: 'Keys, approval and IP allowlists'
+description: 'Test keys for the sandbox, live keys after approval, the IP allowlist a live key must carry, scopes and webhook URLs.'
+---
+
+A partner key belongs to your organisation and has no user of its own. It can trade for, and withdraw for, every one of your users, and partner accounts have no spending caps, so treat it as more sensitive than any other API key. Keep partner keys and webhook secrets on your servers only.
+
+Send the key in the `X-API-Key` header, as for any [API key](/developer-docs/rest-api/authentication).
+
+## Test and live keys
+
+| | Test key (`kash_test_`) | Live key (`kash_live_`) |
+| --- | --- | --- |
+| Works on | Staging, `https://api-staging.kash.bot/v1` | Production, `https://api.kash.bot/v1` |
+| Who can create it | Any signed-in user, self-service | An admin of an organisation that ZeroID has approved |
+| IP allowlist | Optional | Required, at least one entry |
+| Creating the organisation | Allowed with your first test key | Not possible: only an approved organisation |
+
+## Create a test key
+
+1. Sign in to the Kash web app on staging and open **Settings → API Keys**.
+2. Create a partner key. If you administer no organisation yet, you are asked for your organisation's name and a contact email. ZeroID uses that address to reach you about approval and incidents.
+3. Store the key on your server. It is shown once and cannot be shown again.
+4. Set the key's webhook URL and store the signing secret. The secret is also shown once. See [Webhook URL and secret](#webhook-url-and-secret).
+
+## Approval for production
+
+Production needs a one-time approval of your organisation by ZeroID. Ask for it from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb).
+
+After approval you manage your own keys and webhook settings on the same screen of the production web app: create, rotate and revoke keys and secrets without asking ZeroID.
+
+Approval is checked again on every request a live key makes. If ZeroID withdraws your organisation's approval, every `kash_live_` partner key you hold stops working on its next request with `401 API_KEY_REVOKED` and the detail "This API key has been revoked: its organisation is no longer approved for live partner keys. Contact Kash to restore access." No new live key can be created until approval is restored. Test keys need no approval and are not affected.
+
+## IP allowlist
+
+A live partner key must carry an IP allowlist: list the egress addresses of the servers that call the API. A call from any other address is refused with `403 IP_NOT_ALLOWED`.
+
+Every entry must be specific:
+
+- a single IPv4 or IPv6 address;
+- an IPv4 range of `/16` or narrower;
+- an IPv6 range of `/48` or narrower.
+
+A broader range, such as `0.0.0.0/0`, `::/0`, `10.0.0.0/8` or `2001:db8::/32`, is refused when you save the key. The web app applies the same rule to test keys, so an allowlist you set up on staging carries over to production unchanged. A key holds at most 50 entries.
+
+A staging key is not known in production and is refused there with `401 API_KEY_INVALID`. As a further safeguard, production refuses every request with `403 PARTNER_KEY_REQUIRES_IP_ALLOWLIST` when a partner key:
+
+- is a test-type (`kash_test_`) key;
+- has no allowlist;
+- has an entry broader than the limits above.
+
+The `detail` says which, and names any over-broad entry.
+
+## Scopes
+
+A new partner key gets these scopes by default:
+
+| Scope | What it allows for a partner key |
+| ----- | -------------------------------- |
+| `partner:accounts` | Every `/v1/partner/accounts` route, including withdrawals. Only partner keys can hold it. |
+| `markets:read` | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` |
+| `markets:quote` | `GET /v1/markets/{id}/quote` |
+| `portfolio:read` | `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions`, for the account in `Kash-Account` |
+| `trades:read` | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}`, for the account in `Kash-Account` |
+| `trades:write` | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, for the account in `Kash-Account` |
+
+Two scopes are opt-in. Add them when you create the key if you need them:
+
+| Scope | What it allows |
+| ----- | -------------- |
+| `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{eventId}/redeliver` and `POST /v1/auth/api-keys/me/webhook-secret/rotate`. Needed to inspect and replay deliveries and to rotate the signing secret from your server. |
+| `auth:manage` | `GET /v1/account/usage` |
+
+A call without the route's scope is refused with `403 INSUFFICIENT_SCOPE`.
+
+Competitions, market disputes and revenue share are for user keys only. A partner key that calls them is refused with `403 INSUFFICIENT_SCOPE`.
+
+## Webhook URL and secret
+
+Each partner key can have one webhook URL, which must use `https`. Set it when you create the key, or later.
+
+- Each URL has its own signing secret, shown once when you set the URL.
+- Replacing the URL creates a new secret, and the old secret stops signing at once, including an older secret still inside a rotation window. Install the new secret on the new endpoint before you switch.
+- To rotate the secret of an unchanged URL, call `POST /v1/auth/api-keys/me/webhook-secret/rotate` from your server with the key itself. It needs the `webhooks:manage` scope. Old and new secrets both sign for 7 days. See [Secret rotation](/developer-docs/rest-api/webhooks/secret-rotation).
+
+See [Webhooks](/developer-docs/partner-integration/webhooks) for what is delivered.
+
+## Key limits and rotation
+
+- An organisation can hold at most **5 active partner keys**.
+- Only an admin of the organisation can see or manage its partner keys.
+- A revoked key stops working on its next request (`401 API_KEY_REVOKED`).
+- Keys are created only by a signed-in person in the web app, never by another key.
+
+To rotate a key, create a new one, deploy it, confirm the old key has gone quiet, then revoke the old key. While two keys have webhook URLs, each receives its own copy of every account, withdrawal and payout event (see [Who receives what](/developer-docs/partner-integration/webhooks#who-receives-what)).
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Accounts" icon="user-plus" href="/developer-docs/partner-integration/accounts">
+    Create an account for each user who opts in.
+  </Card>
+  <Card title="Go-live checklist" icon="list-check" href="/developer-docs/partner-integration/go-live">
+    Everything to have in place before production.
+  </Card>
+</CardGroup>
