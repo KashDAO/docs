@@ -1,0 +1,26 @@
+---
+title: 'DESTINATION_NOT_SUPPORTED'
+description: 'HTTP 422: Destination not supported'
+---
+
+**HTTP status:** 422 · **Title:** "Destination not supported"
+
+## When it fires
+
+- Creating an account, or changing its destination, with a `destination.network` other than `solana` or `arc`.
+- A withdrawal, or a withdrawal quote, to a network Kash does not withdraw to in this environment. On staging this is every withdrawal to Arc: the detail is "Withdrawals to Arc are not available in this environment."
+
+## Why it happens
+
+Withdrawals go to the destination you registered for the user, on its network. Kash sends to Solana directly and to Arc through the Relay bridge. Any other network is refused, so no account holds a destination Kash cannot pay. Relay has no route from Solana devnet, so staging cannot bridge to Arc. Nothing was recorded.
+
+## How to fix
+
+- Register a destination on `solana` or `arc` with `PATCH /v1/partner/accounts/{accountId}`. A change pauses withdrawals for 24 hours.
+- On staging, test withdrawals with a Solana destination.
+- Retrying the same request will not help.
+
+## Related codes
+
+- [`WITHDRAWALS_HELD`](/developer-docs/api-errors/WITHDRAWALS_HELD): the pause that follows a destination change
+- [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED): the address itself is malformed for its network

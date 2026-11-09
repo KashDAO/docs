@@ -1,0 +1,27 @@
+---
+title: 'ACCOUNT_NOT_FOUND'
+description: 'HTTP 404: Account not found'
+---
+
+**HTTP status:** 404 · **Title:** "Account not found"
+
+## When it fires
+
+The account named in the `Kash-Account` header or the `{accountId}` path segment is not one of your partner accounts.
+
+## Why it happens
+
+- The id is mistyped or malformed, or belongs to the other environment (a staging id used against production, or the other way round).
+- You released the account. A released account is no longer yours to act for.
+
+The API gives the same answer whether the id exists under another organisation or not at all, so account ids cannot be probed.
+
+## How to fix
+
+- Check the id against the `accountId` you received when you created the account. Look an account up by your own user id with `GET /v1/partner/accounts?externalId=<your user id>`.
+- Make sure the key and the account id come from the same environment.
+
+## Related codes
+
+- [`ACCOUNT_NOT_ACTIVE`](/developer-docs/api-errors/ACCOUNT_NOT_ACTIVE): the account is yours, but its status does not allow the request
+- [`ACCOUNT_HEADER_REQUIRED`](/developer-docs/api-errors/ACCOUNT_HEADER_REQUIRED)

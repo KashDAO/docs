@@ -1,0 +1,28 @@
+---
+title: 'WITHDRAWAL_BELOW_MINIMUM'
+description: 'HTTP 400: Withdrawal below minimum'
+---
+
+**HTTP status:** 400 · **Title:** "Withdrawal below minimum"
+
+## When it fires
+
+A partner withdrawal, or its quote, asked for less than the account's destination allows:
+
+- to Arc, less than 1 USDC (`1000000` in `amountAtomic`); or
+- on either network, an amount no larger than the most the withdrawal's network fee can cost. The `detail` names that figure.
+
+## Why it happens
+
+Withdrawals to Arc are bridged from Solana, and the bridge needs at least 1 USDC. The Solana network fee is charged in USDC, so an amount the fee could swallow would deliver nothing. The bound depends on the SOL price and on whether the recipient's USDC account on Solana must be created; the most a withdrawal is ever charged is 1 USDC. Nothing was recorded.
+
+## How to fix
+
+- Withdraw more than the figure in `detail`, and at least 1 USDC to Arc.
+- Call `GET /v1/partner/accounts/{accountId}/withdrawals/quote?amountAtomic=` first: it applies the same minimum, fee and balance rules, and shows what would arrive.
+
+See [Withdrawals](/developer-docs/partner-integration/withdrawals).
+
+## Related codes
+
+- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE): the amount is above what the account can withdraw

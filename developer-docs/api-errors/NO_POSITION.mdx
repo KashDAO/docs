@@ -1,0 +1,27 @@
+---
+title: 'NO_POSITION'
+description: 'HTTP 422: No position'
+---
+
+**HTTP status:** 422 · **Title:** "No position"
+
+## When it fires
+
+`POST /v1/trades` refused a **sell** before sending it on, because all of these were true:
+
+- This API key's previous sell of the same `marketId` and `outcomeIndex`, from the same account, failed because the account held nothing on that outcome. That earlier trade reads `status: "failed"` and `errorCode: "no_position"` on `GET /v1/trades/{id}`, and its id is named in `detail`.
+- That failure is less than an hour old.
+- Nothing has given the account a position on that outcome since: no buy of it has landed, through the API or any other Kash channel.
+
+The amount does not matter: an account that holds nothing on an outcome cannot sell any amount of it. Nothing was recorded, so no trade id is returned and no webhook is sent.
+
+## How to fix
+
+- Do not re-send the same sell in a loop. It keeps getting this answer until something changes.
+- Check what the account holds with `GET /v1/portfolio/positions`.
+- Buy the outcome first. Once that buy has landed, a sell is accepted as usual.
+- After an hour a sell is sent on again, and the account's position is checked afresh.
+
+## Related codes
+
+- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE), [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE)

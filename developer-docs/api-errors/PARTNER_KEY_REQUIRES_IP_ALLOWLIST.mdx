@@ -1,0 +1,32 @@
+---
+title: 'PARTNER_KEY_REQUIRES_IP_ALLOWLIST'
+description: 'HTTP 403: Partner key requires an IP allowlist'
+---
+
+**HTTP status:** 403 · **Title:** "Partner key requires an IP allowlist"
+
+## When it fires
+
+A partner key was used in production while it:
+
+- is a test (`kash_test_`) key held in production (a key from staging is not known there and is refused with `401 API_KEY_INVALID` instead);
+- has no IP allowlist; or
+- has an allowlist entry that admits too much: an IPv4 range broader than `/16` or an IPv6 range broader than `/48`, such as `0.0.0.0/0` or `::/0`.
+
+The `detail` says which, and names any such entry.
+
+## Why it happens
+
+A partner key can act for every one of your users, so in production it works only from the server addresses you list for it. A range that broad would let almost anyone use the key, so it does not count as an allowlist. A test key is never bound to your servers, so production refuses it outright. Staging requires neither.
+
+## How to fix
+
+- List your servers' egress addresses, or ranges of `/16` or narrower (IPv4) and `/48` or narrower (IPv6), on the key in **Settings → API Keys** in the production Kash web app, then send the request again.
+- If the `detail` names a test key, use your live (`kash_live_`) partner key in production.
+- Retrying without changing the key will not help.
+
+See [Keys, approval and IP allowlists](/developer-docs/partner-integration/keys#ip-allowlist).
+
+## Related codes
+
+- [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED): the key has an allowlist and the call came from an address not on it

@@ -1,0 +1,28 @@
+---
+title: 'WITHDRAWALS_HELD'
+description: 'HTTP 409: Withdrawals held'
+---
+
+**HTTP status:** 409 · **Title:** "Withdrawals held"
+
+## When it fires
+
+`POST /v1/partner/accounts/{accountId}/withdrawals` was called within 24 hours of a change to the account's destination.
+
+## Why it happens
+
+Withdrawals only ever go to the address you registered for the user. Pausing them for 24 hours after the address changes means a leaked key cannot change the address and take the money out in one go. You also receive an `account.destination_changed` webhook, so an unexpected change can be caught in that window. Nothing was recorded.
+
+## How to fix
+
+- Wait for the time in the `Retry-After` header, then send the withdrawal again with the same `Idempotency-Key`.
+- If you did not make the change, suspend the account (`POST /v1/partner/accounts/{accountId}/suspend`), revoke the key and contact ZeroID support from the info button in the Kash web app → **Feedback**.
+
+## Response headers
+
+- `Retry-After: <seconds>`: how long until the hold ends, 24 hours after the destination change.
+
+## Related codes
+
+- [`DESTINATION_NOT_SUPPORTED`](/developer-docs/api-errors/DESTINATION_NOT_SUPPORTED)
+- [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE)

@@ -7,9 +7,15 @@ description: 'HTTP 409 — Insufficient balance'
 
 ## When it fires
 
-`POST /v1/redemptions` was called for an outcome your account holds **none** of. The API read the account's on-chain balance of that outcome token and it was zero, so there is nothing to redeem.
+It fires on two routes.
+
+**`POST /v1/redemptions`** was called for an outcome your account holds **none** of. The API read the account's on-chain balance of that outcome token and it was zero, so there is nothing to redeem.
+
+**`POST /v1/partner/accounts/{accountId}/withdrawals`** (and its quote) asked for more than the account can withdraw: more than its `availableAtomic` from `GET /v1/balance` (its on-chain USDC less what its pending withdrawals hold), or, to Arc, more than `availableAtomic` less the most the network fee can cost, since that fee is paid on top of the amount. The `detail` gives the figures. Nothing was recorded. Withdraw at most the quote's `maxAmountAtomic`, or wait for pending withdrawals to finish. See [Withdrawals](/developer-docs/partner-integration/withdrawals).
 
 `POST /v1/trades` does not return this code. A trade's USDC balance is checked after the trade is accepted; a trade the account cannot fund ends as `failed` or `rejected`, visible on `GET /v1/trades/{id}` and in trade webhooks.
+
+The rest of this page is about redemptions.
 
 ## Why it happens
 

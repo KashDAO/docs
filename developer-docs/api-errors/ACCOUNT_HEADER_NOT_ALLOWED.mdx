@@ -1,0 +1,27 @@
+---
+title: 'ACCOUNT_HEADER_NOT_ALLOWED'
+description: 'HTTP 400: Kash-Account header not allowed'
+---
+
+**HTTP status:** 400 · **Title:** "Kash-Account header not allowed"
+
+## When it fires
+
+A request carried a `Kash-Account` header where the header is not allowed:
+
+- with a user API key, on any route; or
+- with a partner key, on a route that acts for no account: `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions`, `GET /v1/markets/{id}/quote`, every `/v1/partner/accounts` route (they name the account in the path), webhook management and `GET /v1/account/usage`.
+
+## Why it happens
+
+A user key always acts for the user who owns it. A partner key names an account only on routes that act for one, and a header that looks meaningful is refused, so a call is never mistaken for one scoped to an account. Nothing was done.
+
+## How to fix
+
+- Remove the `Kash-Account` header from the request.
+- With a user key, never send it.
+- As a partner, send it only on balance, trade, portfolio, position, redemption and trace calls. See [Partner integration](/developer-docs/partner-integration/overview).
+
+## Related codes
+
+- [`ACCOUNT_HEADER_REQUIRED`](/developer-docs/api-errors/ACCOUNT_HEADER_REQUIRED): the opposite case, a partner key without the header where it is needed

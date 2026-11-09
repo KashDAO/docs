@@ -1,0 +1,26 @@
+---
+title: 'ACCOUNT_HEADER_REQUIRED'
+description: 'HTTP 400: Kash-Account header required'
+---
+
+**HTTP status:** 400 · **Title:** "Kash-Account header required"
+
+## When it fires
+
+A partner key called a route that acts for one account without a `Kash-Account` header. These routes need it: `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions`, `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` and `POST /v1/redemptions`.
+
+## Why it happens
+
+A partner key has no user of its own. It acts for one of your partner accounts at a time, so each such call must say which one. Nothing was done.
+
+Markets, quotes and the `/v1/partner/accounts` routes need no header: the account routes name the account in the path.
+
+## How to fix
+
+- Send `Kash-Account: <accountId>` with the `accountId` returned when you created the account.
+- Send exactly one: more than one `Kash-Account` header is `400 VALIDATION_FAILED`.
+
+## Related codes
+
+- [`ACCOUNT_NOT_FOUND`](/developer-docs/api-errors/ACCOUNT_NOT_FOUND): the header names an account you do not have
+- [`ACCOUNT_HEADER_NOT_ALLOWED`](/developer-docs/api-errors/ACCOUNT_HEADER_NOT_ALLOWED): the opposite case, the header where it is not allowed

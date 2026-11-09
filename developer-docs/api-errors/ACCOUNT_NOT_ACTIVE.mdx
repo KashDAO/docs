@@ -1,0 +1,35 @@
+---
+title: 'ACCOUNT_NOT_ACTIVE'
+description: 'HTTP 409: Account not active'
+---
+
+**HTTP status:** 409 · **Title:** "Account not active"
+
+## When it fires
+
+A partner account's status does not allow the request. On suspend, reactivate and withdrawal requests the `detail` names the status.
+
+- A trade, trade confirmation or withdrawal for an account that is not `active`.
+- A call that reads the account's wallet (balance, portfolio, positions, trades, redemptions) for an account that is still `provisioning` or is `provisioning_failed`, and so has no wallet yet.
+- A redemption for an account that is not `active` or `suspended`.
+- A suspend of an account that is not `active`, or a reactivate of one that is not `suspended`.
+
+Asking for the status an account already has (suspending a suspended account, reactivating an active one) answers `200` and changes nothing. Reads of the account itself and release work in any status.
+
+## Why it happens
+
+- `provisioning`: the account was created and its wallet is still being set up.
+- `suspended`: you suspended the account.
+- `provisioning_failed`: the account could not be set up.
+
+## How to fix
+
+- `provisioning`: wait for the `account.active` webhook, then send the request again.
+- `suspended`: call `POST /v1/partner/accounts/{accountId}/reactivate` if trading should resume.
+- `provisioning_failed`: release the account and create it again, which gives it a new `accountId`. If it recurs, contact ZeroID support from the info button in the Kash web app → **Feedback**, with the `accountId` and the response's `requestId`.
+
+See [Accounts](/developer-docs/partner-integration/accounts#account-statuses).
+
+## Related codes
+
+- [`ACCOUNT_NOT_FOUND`](/developer-docs/api-errors/ACCOUNT_NOT_FOUND): the account is not yours, or you released it

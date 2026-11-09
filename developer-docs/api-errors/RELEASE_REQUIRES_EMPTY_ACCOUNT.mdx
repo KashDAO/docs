@@ -1,0 +1,34 @@
+---
+title: 'RELEASE_REQUIRES_EMPTY_ACCOUNT'
+description: 'HTTP 409: Account is not empty'
+---
+
+**HTTP status:** 409 · **Title:** "Account is not empty"
+
+## When it fires
+
+`POST /v1/partner/accounts/{accountId}/release` was called while the account:
+
+- holds USDC;
+- holds a position in a market that has not resolved, a winning position it has not redeemed, or a position in a cancelled market;
+- has a trade, redemption, payout, withdrawal, or other transfer or charge on its wallet that has not finished; or
+- had any of those finish less than two minutes ago.
+
+The `detail` says what was found first. A losing position in a resolved market is worth nothing and does not stop a release.
+
+## Why it happens
+
+Once you release an account you can no longer act for it, and the user cannot yet reach the account directly. Releasing it with money inside would leave that money stranded, so the API refuses. Holdings are read from the chain, which can take a moment to show a result that has just finished. Nothing was changed.
+
+## How to fix
+
+1. Sell the account's open positions, or wait for their markets to resolve (`GET /v1/portfolio/positions` lists them).
+2. Withdraw the remaining USDC with `POST /v1/partner/accounts/{accountId}/withdrawals`, and wait for `withdrawal.completed`. A suspended account must be reactivated first, since it cannot withdraw.
+3. Wait two minutes after the last thing finished, then call release again.
+
+See [Release](/developer-docs/partner-integration/release).
+
+## Related codes
+
+- [`WITHDRAWALS_HELD`](/developer-docs/api-errors/WITHDRAWALS_HELD): a withdrawal cannot be made yet after a destination change
+- [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE): the holdings could not be read, so the account was not released; retry
