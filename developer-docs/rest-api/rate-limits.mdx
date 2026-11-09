@@ -22,6 +22,7 @@ There is also a cap on **unfinished trades** per account: a new trade while the 
 
 - The **request rate** is counted per **user**, across every key that user holds, so extra keys do not add throughput. Each key is also counted on its own, with the same limit.
 - **Spending caps** are per **key**.
+- **Partner keys** are on their own `partner` tier, counted per organisation, per key and per account, with no spending caps. See [Partner rate limits](/developer-docs/partner-integration/rate-limits).
 - Read routes and write routes draw from **separate** budgets, each at the tier's per-minute limit:
   - **Read** routes (every `GET`) use a sliding window: smooth, with no bursting.
   - **Write** routes (every rate-limited `POST`) use a token bucket: its capacity equals the limit and it refills continuously, so short bursts are allowed.
@@ -88,6 +89,7 @@ Repeated `RATE_LIMIT_EXCEEDED` or `SPENDING_LIMIT_EXCEEDED` during normal operat
 - **`free` → `developer`**: request it from the info button in the Kash web app → **Feedback**, with a one-line description of your use case.
 - **`enterprise`**: ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb).
 - **`mm`**: ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb).
+- **`partner`**: every partner key is on it, and only partner keys. It is not an upgrade of a user key. See [Partner integration](/developer-docs/partner-integration/overview).
 
 ## Telemetry
 

@@ -38,6 +38,9 @@ The dispute endpoints under `/v1/markets/{id}/disputes` are on the [Market dispu
 | `resolutionState`    | enum \| null      | `resolving`, `proposed`, `settling`, `resolved`, `cancelled`. |
 | `tradeable`          | boolean           | Whether the market accepts trades right now. This is the same rule that refuses a trade with `409 MARKET_NOT_TRADEABLE`. |
 | `notTradeableReason` | enum \| null      | In precedence order: `resolved`, `cancelled`, `inactive`, `frozen`. `null` when `tradeable` is true. |
+| `category`           | string \| null    | The category slug, such as `sports`. `null` when the market has none. Version `2026-08-19` only. |
+| `subcategory`        | string \| null    | The sub-category slug, such as `football`. `null` when the market has none. Version `2026-08-19` only. |
+| `chain`              | enum              | `solana` or `evm`, the chain family. `chainRef` names the exact chain. Version `2026-08-19` only. |
 
 ## `GET /v1/markets`
 
@@ -48,6 +51,9 @@ Lists markets, newest first, with [cursor pagination](/developer-docs/rest-api/p
 | `cursor` | string  | From the previous page's `pagination.cursor`. |
 | `limit`  | integer | 1 to 100, default 20. |
 | `status` | enum    | `UNSEEDED`, `ACTIVE`, `RESOLVED`, `ABANDONED`. Filters on the lifecycle `status`, not on `tradeable`. |
+| `category` | string | Only markets in this category slug, such as `sports`. |
+| `subcategory` | string | Only markets in this sub-category slug, such as `football`. |
+| `chain` | enum | `solana` or `evm`. On a pinned `2026-04-29`, which lists EVM markets only, `solana` answers an empty page. |
 
 Response `200`: `{ data: Market[], pagination: { cursor, hasMore, limit }, _meta }`.
 

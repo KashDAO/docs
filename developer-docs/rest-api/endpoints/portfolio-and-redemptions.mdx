@@ -1,12 +1,13 @@
 ---
 title: 'Portfolio & Redemptions'
-description: 'Read your smart account and positions, and claim settled positions back to USDC.'
+description: 'Read your USDC balance, smart account and positions, and claim settled positions back to USDC.'
 ---
 
 | Method | Path                       | Scope            | Rate-limit class | Idempotency-Key |
 | ------ | -------------------------- | ---------------- | ---------------- | --------------- |
 | `GET`  | `/v1/portfolio`            | `portfolio:read` | read             |                 |
 | `GET`  | `/v1/portfolio/positions`  | `portfolio:read` | read             |                 |
+| `GET`  | `/v1/balance`              | `portfolio:read` | read             |                 |
 | `POST` | `/v1/redemptions`          | `trades:write`   | write            | honoured        |
 
 ## `GET /v1/portfolio`
@@ -26,6 +27,32 @@ The authenticated user's smart account and a summary of open positions.
 ```
 
 `totalCostBasisAtomic` is USDC in atomic units (6 decimals). Returns `409 SMART_ACCOUNT_NOT_PROVISIONED` while the account has no smart account yet.
+
+## `GET /v1/balance`
+
+The account's USDC on Solana, read from the chain, and what it can spend.
+
+```json
+{
+  "balance": {
+    "usdcAtomic": "25000000",
+    "pendingWithdrawalsAtomic": "0",
+    "availableAtomic": "25000000",
+    "observedAt": "2026-11-06T10:15:00.000Z"
+  },
+  "data": { "…": "same as balance" },
+  "_meta": { "requestId": "…", "timestamp": "…" }
+}
+```
+
+| Field | Notes |
+| ----- | ----- |
+| `usdcAtomic` | The wallet's USDC on Solana, atomic units (6 decimals). |
+| `pendingWithdrawalsAtomic` | USDC held by withdrawals that are not final yet (`pending`, `processing`, `confirming` or `bridging`). |
+| `availableAtomic` | What a trade or a new withdrawal may spend: `usdcAtomic` minus `pendingWithdrawalsAtomic`, never below zero. |
+| `observedAt` | When the chain was read. |
+
+A user with no Solana wallet reads a measured zero. A balance that cannot be read answers `503 DEPENDENCY_UNAVAILABLE`, never zero. A partner key names the account in `Kash-Account`: see [Funding and balance](/developer-docs/partner-integration/funding).
 
 ## `GET /v1/portfolio/positions`
 

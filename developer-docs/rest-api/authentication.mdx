@@ -43,11 +43,12 @@ Each key carries a set of scopes, and each route requires one. A key without the
 | ----------------- | ------ |
 | `markets:read`    | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` and `GET /v1/markets/{id}/disputes` |
 | `markets:quote`   | `GET /v1/markets/{id}/quote` |
-| `portfolio:read`  | `GET /v1/portfolio`, `GET /v1/portfolio/positions` |
+| `portfolio:read`  | `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions` |
 | `trades:read`     | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` |
 | `trades:write`    | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions` and `POST /v1/markets/{id}/disputes` |
 | `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{eventId}/redeliver`, `POST /v1/auth/api-keys/me/webhook-secret/rotate` |
 | `auth:manage`     | `GET /v1/account/usage` |
+| `partner:accounts` | Every `/v1/partner/accounts` route. Partner keys only. |
 
 A key created without an explicit scope list gets `markets:read`, `markets:quote` and `portfolio:read`. Choose the scopes you need when you create the key, and no more: a read-only analytics key should never carry `trades:write`.
 
@@ -61,6 +62,11 @@ Each key has a tier, which sets its rate limit and spending caps. See [Rate limi
 | `developer`  | On request, from the info button in the Kash web app → **Feedback**. |
 | `enterprise` | Issued by ZeroID. Ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb). |
 | `mm`         | Market-maker tier, issued by ZeroID. Ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb). |
+| `partner`    | Every partner key, and only partner keys. See [Partner keys](/developer-docs/partner-integration/keys). |
+
+## Partner keys
+
+A partner key belongs to an organisation and has no user of its own. It acts for one of the organisation's partner accounts by sending `Kash-Account: <accountId>`. A user key that sends `Kash-Account` is refused with `400 ACCOUNT_HEADER_NOT_ALLOWED`. In production a partner key must be a live key with a specific IP allowlist (`403 PARTNER_KEY_REQUIRES_IP_ALLOWLIST` otherwise). See [Partner integration](/developer-docs/partner-integration/overview).
 
 ## Account status
 
@@ -126,6 +132,7 @@ Keys can carry an expiry date; an expired key gets `401 API_KEY_EXPIRED`. API ke
 | 403    | `INSUFFICIENT_SCOPE`        | Key lacks the route's scope. |
 | 403    | `ORGANIZATION_INACTIVE`     | The key's account is suspended or closed. |
 | 403    | `IP_NOT_ALLOWED`            | Source address not on the key's allowlist. |
+| 403    | `PARTNER_KEY_REQUIRES_IP_ALLOWLIST` | In production, a partner key that is a test key or lacks a specific IP allowlist. |
 
 Failed authentication is counted per source address: too many failures in a short window lock that address out for a period, answered with `429 RATE_LIMIT_EXCEEDED` and a `Retry-After` header.
 

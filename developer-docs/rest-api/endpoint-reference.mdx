@@ -3,7 +3,7 @@ title: 'Endpoint Reference'
 description: 'Every endpoint of api.kash.bot/v1, with its scope, rate-limit class and reference page.'
 ---
 
-The API serves **31 routes** under `https://api.kash.bot/v1`. Every route except the four health and spec routes needs an [API key](/developer-docs/rest-api/authentication) with the scope shown.
+The API serves the routes below under `https://api.kash.bot/v1`. Every route except the four health and spec routes needs an [API key](/developer-docs/rest-api/authentication) with the scope shown.
 
 The **rate-limit class** says which budget a request draws from: `read` routes use a sliding window, `write` routes use a token bucket, and the two are counted separately. See [Rate limits](/developer-docs/rest-api/rate-limits).
 
@@ -38,6 +38,7 @@ The **rate-limit class** says which budget a request draws from: `read` routes u
 | ------ | ---- | ----- | ----- |
 | `GET`  | [`/v1/portfolio`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `portfolio:read` | read |
 | `GET`  | [`/v1/portfolio/positions`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `portfolio:read` | read |
+| `GET`  | [`/v1/balance`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `portfolio:read` | read |
 | `POST` | [`/v1/redemptions`](/developer-docs/rest-api/endpoints/portfolio-and-redemptions) | `trades:write` | write |
 
 ## Webhook management
@@ -54,6 +55,29 @@ The **rate-limit class** says which budget a request draws from: `read` routes u
 | ------ | ---- | ----- | ----- |
 | `GET`  | [`/v1/account/usage`](/developer-docs/rest-api/endpoints/account-and-traces) | `auth:manage` | read |
 | `GET`  | [`/v1/traces/{correlationId}`](/developer-docs/rest-api/endpoints/account-and-traces) | `trades:read` | read |
+
+## Partner accounts (partner keys only)
+
+| Method | Path | Scope | Class |
+| ------ | ---- | ----- | ----- |
+| `POST` | [`/v1/partner/accounts`](/developer-docs/partner-integration/accounts) | `partner:accounts` | write |
+| `GET`  | [`/v1/partner/accounts`](/developer-docs/partner-integration/accounts) | `partner:accounts` | read |
+| `GET`  | [`/v1/partner/accounts/{accountId}`](/developer-docs/partner-integration/accounts) | `partner:accounts` | read |
+| `PATCH` | [`/v1/partner/accounts/{accountId}`](/developer-docs/partner-integration/accounts) | `partner:accounts` | write |
+| `POST` | [`/v1/partner/accounts/{accountId}/suspend`](/developer-docs/partner-integration/accounts) | `partner:accounts` | write |
+| `POST` | [`/v1/partner/accounts/{accountId}/reactivate`](/developer-docs/partner-integration/accounts) | `partner:accounts` | write |
+| `POST` | [`/v1/partner/accounts/{accountId}/release`](/developer-docs/partner-integration/release) | `partner:accounts` | write |
+
+## Partner withdrawals (partner keys only)
+
+| Method | Path | Scope | Class |
+| ------ | ---- | ----- | ----- |
+| `GET`  | [`/v1/partner/accounts/{accountId}/withdrawals/quote`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | read |
+| `POST` | [`/v1/partner/accounts/{accountId}/withdrawals`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | write |
+| `GET`  | [`/v1/partner/accounts/{accountId}/withdrawals`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | read |
+| `GET`  | [`/v1/partner/accounts/{accountId}/withdrawals/{withdrawalId}`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | read |
+
+A partner key acts for one of its accounts by sending `Kash-Account: <accountId>` on the balance, portfolio, trade, trace and redemption routes above. See [Partner integration](/developer-docs/partner-integration/overview).
 
 ## Health & spec (no key)
 
