@@ -12,6 +12,7 @@ A partner account's status does not allow the request. On suspend, reactivate an
 - A trade, trade confirmation or withdrawal for an account that is not `active`.
 - A call that reads the account's wallet (balance, portfolio, positions, trades, redemptions) for an account that is still `provisioning` or is `provisioning_failed`, and so has no wallet yet.
 - A redemption for an account that is not `active` or `suspended`.
+- A withdrawal quote for an account with no wallet yet (`provisioning` or `provisioning_failed`). The quote does not otherwise check the status: a suspended account can be quoted.
 - A suspend of an account that is not `active`, or a reactivate of one that is not `suspended`.
 
 Asking for the status an account already has (suspending a suspended account, reactivating an active one) answers `200` and changes nothing. Reads of the account itself and release work in any status.

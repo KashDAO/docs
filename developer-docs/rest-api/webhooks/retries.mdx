@@ -21,7 +21,7 @@ A stopped event has `status: "failed"` and a `terminalFailureAt` time in `GET /v
 
 A retryable failure is attempted again about **2 minutes** later, up to **10 attempts in total**, so automatic delivery gives up roughly 20 minutes after the first attempt. Treat the timing as approximate.
 
-Events for one API key are delivered in order, so a failing event holds back later events for the same key until it is delivered or its attempts run out. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
+Delivery order is not guaranteed, even for one API key: several deliveries can be sent at once, and a retried or replayed event arrives after newer ones. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
 
 If your endpoint fails **5 times in a row**, delivery to it pauses for about **60 seconds** before a single trial attempt. Other customers' deliveries are not affected.
 

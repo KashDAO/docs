@@ -190,7 +190,11 @@ Verify against the **raw** body. Parsed and re-serialised JSON does not produce 
 
 ### With the SDK
 
-`kash.webhooks.constructEvent` in `@kashdao/sdk` 0.4.0 verifies the signature and parses every partner event type, as well as the trade events, into a typed `WebhookEvent`. `kash.webhooks.verifySignature` returns `{ valid, reason }` if you only need the check.
+From `@kashdao/sdk` 0.4.0, `kash.webhooks.constructEvent` verifies the signature and parses every partner event type, as well as the trade events, into a typed `WebhookEvent`. `kash.webhooks.verifySignature` returns `{ valid, reason }` if you only need the check.
+
+<Note>
+Partner events parse only from `@kashdao/sdk` **0.4.0**, which is not yet published on npm; the latest published version is 0.3.2. Version 0.3.2 parses only the trade events and refuses the others with `KashValidationError`. With it, verify partner deliveries with `kash.webhooks.verifySignature` and parse the body yourself, as in [By hand](#by-hand).
+</Note>
 
 ```ts
 import express from 'express';
@@ -282,10 +286,10 @@ The scheme is Stripe's, except that the header is `X-Kash-Signature` and the tim
 ## Delivery
 
 - **At least once.** An event can arrive more than once. Process each event id once, and store the ids you have processed.
-- **Possibly out of order.** Deliveries to one key are sent one at a time, but events from different parts of the system can reach the queue in a different order from the order they happened. Treat each event as a prompt to read the current state from the API (`GET /v1/partner/accounts/{accountId}`, `GET .../withdrawals/{withdrawalId}`, `GET /v1/balance`).
+- **No ordering guarantee, even for one key.** Up to 5 deliveries from one batch can be sent at once, events reach the delivery queue from several parts of the system with no common order, and an event sent again later (a redelivery you request, or one recovered after it failed to queue) arrives after newer ones. Compare the timestamps in the payloads (`activatedAt`, `changedAt`, `completedAt` and so on) rather than the order of arrival, and treat each event as a prompt to read the current state from the API (`GET /v1/partner/accounts/{accountId}`, `GET .../withdrawals/{withdrawalId}`, `GET /v1/balance`).
 - **Answer `2xx` within 10 seconds.** Do slow work after you respond.
 - **Retries.** A timeout, network error, `5xx`, `408`, `429` or any other `4xx` except those below is retried about every 2 minutes, up to 10 attempts. A `400`, `404`, `410`, `422` or a redirect stops delivery of that event. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries).
-- **A failing event holds back later ones for the same key** until it is delivered or runs out of attempts, so fix a failing endpoint quickly.
+- **Final answers.** Delivery stops at a `2xx`, or at `400`, `404`, `410` or `422`, which the API treats as final and does not retry. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
 - **Replay.** With the `webhooks:manage` scope, `GET /v1/webhooks/events` lists the key's events and their delivery state, and `POST /v1/webhooks/events/{eventId}/redeliver` sends one again.
 
 ## Next

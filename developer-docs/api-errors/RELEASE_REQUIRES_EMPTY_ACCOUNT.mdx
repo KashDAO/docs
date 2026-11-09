@@ -14,7 +14,7 @@ description: 'HTTP 409: Account is not empty'
 - has a trade, redemption, payout, withdrawal, or other transfer or charge on its wallet that has not finished; or
 - had any of those finish less than two minutes ago.
 
-The `detail` says what was found first. A losing position in a resolved market is worth nothing and does not stop a release.
+The `detail` says which one stopped it. An account still `provisioning`, or whose provisioning failed, has no wallet and is released without these checks. A losing position in a resolved market is worth nothing and does not stop a release.
 
 ## Why it happens
 
@@ -22,9 +22,10 @@ Once you release an account you can no longer act for it, and the user cannot ye
 
 ## How to fix
 
-1. Sell the account's open positions, or wait for their markets to resolve (`GET /v1/portfolio/positions` lists them).
-2. Withdraw the remaining USDC with `POST /v1/partner/accounts/{accountId}/withdrawals`, and wait for `withdrawal.completed`. A suspended account must be reactivated first, since it cannot withdraw.
-3. Wait two minutes after the last thing finished, then call release again.
+1. Sell the account's open positions, or wait for their markets to resolve (`GET /v1/portfolio/positions` lists them). A position in a market that has not resolved can only be sold, or held until it resolves.
+2. Wait for every trade, redemption and payout to finish.
+3. Withdraw the remaining USDC with `POST /v1/partner/accounts/{accountId}/withdrawals`, and wait for `withdrawal.completed`. A suspended account must be reactivated first, since it cannot withdraw.
+4. Check that `GET /v1/balance` shows nothing left, wait two minutes after the last of these finished, then call release again.
 
 See [Release](/developer-docs/partner-integration/release).
 

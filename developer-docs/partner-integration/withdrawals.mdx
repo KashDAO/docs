@@ -18,10 +18,10 @@ All four need a partner key with the `partner:accounts` scope, and name the acco
 
 | Destination network | How it is sent | Minimum | Network fee |
 | ------------------- | -------------- | ------- | ----------- |
-| `solana` | A USDC transfer on Solana from the account's wallet to the destination. | None fixed; the amount must exceed the network fee bound. | Charged in USDC. Paid on top of the amount when the balance allows, otherwise taken out of it. |
+| `solana` | A USDC transfer on Solana from the account's wallet to the destination. | None fixed; the amount must exceed the network fee bound at the current SOL price. | Charged in USDC. Paid on top of the amount when the balance allows, otherwise taken out of it. |
 | `arc` | A USDC transfer on Solana to a Relay deposit address bound to the destination, which Relay bridges to Arc. | **1 USDC** (`1000000`) | The Solana network fee is charged in USDC **on top of** the amount. Relay's bridge fee comes out of the amount. |
 
-The network fee is charged in USDC, so an amount no larger than the most the fee can cost is refused with `400 WITHDRAWAL_BELOW_MINIMUM`, whose `detail` names the figure. The bound depends on the SOL price and on whether the recipient's USDC account on Solana must be created; the most a withdrawal is ever charged is 1 USDC.
+The network fee is charged in USDC, and what Kash collects for it is capped at 1 USDC. The refusal threshold is different: an amount no larger than the most the fee can cost at the current SOL price is refused with `400 WITHDRAWAL_BELOW_MINIMUM`, whose `detail` names that figure in atomic units. The figure is usually a small fraction of 1 USDC, is higher when the recipient's USDC account on Solana must be created, moves with the SOL price, and can exceed 1 USDC when SOL is expensive. A retry of an amount close to it may pass or fail later.
 
 ## Quote first
 
@@ -54,7 +54,14 @@ curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/quote?amountAtomic=2500
 | `estimatedSeconds` | The bridge's time estimate for Arc. `null` on Solana and when not quoted. |
 | `maxAmountAtomic` | The most the account can withdraw now. To Arc it is `availableAtomic` less the most the network fee can cost, since that fee is paid on top. To Solana it is `availableAtomic`. `0` when no withdrawal is possible. |
 
-The quote applies the same Arc minimum, network fee and balance rules as the withdrawal, with the same codes. It does not check the account's status or the 24-hour hold, so a quote can succeed for a withdrawal that `ACCOUNT_NOT_ACTIVE` or `WITHDRAWALS_HELD` would refuse. A quote moves nothing and works in any account status that has a wallet. Show your users `receiveAtomic` before they confirm.
+The quote and the withdrawal share these checks, with the same codes:
+
+- an account with no wallet yet: `409 ACCOUNT_NOT_ACTIVE`;
+- the Arc minimum and the network fee: `400 WITHDRAWAL_BELOW_MINIMUM`;
+- the balance: `409 INSUFFICIENT_BALANCE`;
+- for Arc, the bridge: `422 DESTINATION_NOT_SUPPORTED` where it has no route, `503 DEPENDENCY_UNAVAILABLE` when it would cost more than the API allows or cannot be priced.
+
+Only the withdrawal also checks that the account is `active` (a suspended account can be quoted but not withdrawn from), the 24-hour hold after a destination change (`409 WITHDRAWALS_HELD`) and the `Idempotency-Key`. A quote is therefore not a promise that the withdrawal will be accepted. A quote moves nothing. Show your users `receiveAtomic` before they confirm.
 
 ## Request a withdrawal
 
@@ -101,7 +108,7 @@ Each refusal is decided before anything is recorded, so nothing moves.
 | 400 | `VALIDATION_FAILED` | No `Idempotency-Key`, or a malformed `amountAtomic`. |
 | 404 | `ACCOUNT_NOT_FOUND` | Not one of your accounts, or released. |
 | 409 | `ACCOUNT_NOT_ACTIVE` | The account is not `active`. |
-| 422 | `DESTINATION_NOT_SUPPORTED` | The destination's network cannot be withdrawn to in this environment. On staging this is every withdrawal to Arc. |
+| 422 | `DESTINATION_NOT_SUPPORTED` | The destination's network cannot be withdrawn to in this environment. On staging this is every withdrawal to Arc, after the minimum, fee and balance checks. |
 | 400 | `WITHDRAWAL_BELOW_MINIMUM` | Below 1 USDC to Arc, or no more than the most the network fee can cost. |
 | 409 | `WITHDRAWALS_HELD` | Within 24 hours of a destination change. `Retry-After` gives the seconds left. |
 | 409 | `INSUFFICIENT_BALANCE` | More than `availableAtomic`, or to Arc more than `maxAmountAtomic`. The `detail` gives the figures. |
@@ -158,7 +165,7 @@ curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/$WITHDRAWAL_ID" -H "X-A
 
 The list is newest first, with [cursor pagination](/developer-docs/rest-api/pagination) (`limit` 1 to 100, default 20). A withdrawal that is not this account's is `404 RESOURCE_NOT_FOUND`.
 
-`@kashdao/sdk` 0.4.0 has no methods for these routes. Call them over HTTP.
+`@kashdao/sdk` (0.3.2 published, 0.4.0 coming) has no methods for these routes. Call them over HTTP.
 
 ## Next
 

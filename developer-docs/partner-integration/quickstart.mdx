@@ -105,7 +105,7 @@ The answer is `202` with the withdrawal in `pending`. You receive `withdrawal.su
 
 ## The same with the SDK
 
-`@kashdao/sdk` 0.4.0 covers markets, quotes, trades, the portfolio and webhook verification. Send `Kash-Account` as a per-request header. It has no methods for the `/v1/partner/accounts` routes or `GET /v1/balance` yet, so this example calls those with `fetch`.
+`@kashdao/sdk` covers markets, quotes, trades, the portfolio and webhook verification; parsing partner webhooks needs 0.4.0, which is not yet on npm (the latest published version is 0.3.2). Send `Kash-Account` as a per-request header. It has no methods for the `/v1/partner/accounts` routes or `GET /v1/balance` yet, so this example calls those with `fetch`.
 
 ```ts
 import { randomUUID } from 'node:crypto';

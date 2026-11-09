@@ -91,7 +91,7 @@ X-Kash-Api-Version:  2026-08-19
 ## Delivery semantics
 
 - **At least once.** An event can arrive more than once. Make your handler idempotent by deduplicating on the event id.
-- **In order per key.** Events for one API key are delivered one at a time, in order. A failing event holds back later events for the same key until it is delivered or its attempts run out.
+- **No ordering guarantee, even per key.** Up to 5 deliveries from one batch can be sent at once, events reach the delivery queue with no common order, and a redelivery arrives after newer events. Compare the timestamps in the payloads rather than the order of arrival.
 - **Respond quickly with a `2xx`.** Each attempt times out after **10 seconds**. Do slow work after you respond.
 - **Retries** happen automatically for timeouts, network errors, `5xx` and most `4xx` responses. Responding `400`, `404`, `410` or `422`, or with a redirect, stops delivery of that event. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries).
 

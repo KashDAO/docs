@@ -8,7 +8,7 @@ description: 'HTTP 422: Destination not supported'
 ## When it fires
 
 - Creating an account, or changing its destination, with a `destination.network` other than `solana` or `arc`.
-- A withdrawal, or a withdrawal quote, to a network Kash does not withdraw to in this environment. On staging this is every withdrawal to Arc: the detail is "Withdrawals to Arc are not available in this environment."
+- A withdrawal, or a withdrawal quote, to a network Kash does not withdraw to in this environment. On staging this is every withdrawal and quote to an Arc destination, after the Arc minimum, fee and balance checks: the detail is "Withdrawals to Arc are not available in this environment." Creating an account or changing its destination to Arc still works there.
 
 ## Why it happens
 

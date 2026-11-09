@@ -14,12 +14,15 @@ A partner withdrawal, or its quote, asked for less than the account's destinatio
 
 ## Why it happens
 
-Withdrawals to Arc are bridged from Solana, and the bridge needs at least 1 USDC. The Solana network fee is charged in USDC, so an amount the fee could swallow would deliver nothing. The bound depends on the SOL price and on whether the recipient's USDC account on Solana must be created; the most a withdrawal is ever charged is 1 USDC. Nothing was recorded.
+Withdrawals to Arc are bridged from Solana, and the bridge needs at least 1 USDC. Every withdrawal leaves as a Solana transfer whose network fee the account pays in USDC. The API prices the most that fee can cost at the current SOL price, counting the rent of the recipient's USDC account when it must be created. An amount no larger than that could deliver nothing, so it is refused before anything is sent. The figure is usually a small fraction of 1 USDC, is higher when the recipient's USDC account does not exist yet, moves with the SOL price, and can exceed 1 USDC when SOL is expensive. What Kash actually collects for the fee is capped at 1 USDC.
+
+Solana withdrawals have no fixed minimum beyond this. Nothing was recorded.
 
 ## How to fix
 
-- Withdraw more than the figure in `detail`, and at least 1 USDC to Arc.
-- Call `GET /v1/partner/accounts/{accountId}/withdrawals/quote?amountAtomic=` first: it applies the same minimum, fee and balance rules, and shows what would arrive.
+- To Arc, send at least 1 USDC.
+- On either network, send more than the figure in the `detail`. Because it follows the SOL price, a retry of an amount close to it may pass or fail later.
+- Call `GET /v1/partner/accounts/{accountId}/withdrawals/quote?amountAtomic=` first: it applies the same checks and shows what would arrive.
 
 See [Withdrawals](/developer-docs/partner-integration/withdrawals).
 

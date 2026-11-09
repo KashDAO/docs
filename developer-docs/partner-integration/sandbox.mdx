@@ -40,7 +40,7 @@ Staging accounts are funded with the staging test USDC on Solana devnet. It is a
 
 ## Withdrawals to Arc on staging
 
-The Relay bridge has no route from Solana devnet, so on staging a withdrawal or a withdrawal quote to an Arc destination is refused with `422 DESTINATION_NOT_SUPPORTED` and the detail "Withdrawals to Arc are not available in this environment." You can still register Arc destinations and test the refusal path. To test withdrawals end to end on staging, give a test account a Solana destination.
+The Relay bridge has no route from Solana devnet, so on staging a withdrawal or a withdrawal quote to an Arc destination is refused with `422 DESTINATION_NOT_SUPPORTED` and the detail "Withdrawals to Arc are not available in this environment.", after the checks that come before the bridge (the Arc minimum, the network fee and the balance). Creating an account with an Arc destination, or changing to one, works on staging; only withdrawing to it does not. To test withdrawals end to end on staging, give a test account a Solana destination.
 
 The Arc lane is identical to the Solana lane up to the bridge: the same request, statuses and webhooks, plus `bridging` and the `bridge_refunded` and `bridge_failed` outcomes. Plan your first production Arc withdrawal as a small amount.
 
