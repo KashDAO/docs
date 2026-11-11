@@ -165,7 +165,7 @@ curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/$WITHDRAWAL_ID" -H "X-A
 
 The list is newest first, with [cursor pagination](/developer-docs/rest-api/pagination) (`limit` 1 to 100, default 20). A withdrawal that is not this account's is `404 RESOURCE_NOT_FOUND`.
 
-`@kashdao/sdk` (0.3.2 published, 0.4.0 coming) has no methods for these routes. Call them over HTTP.
+With `@kashdao/sdk` 0.4.0 these routes are on `kash.partnerAccounts.withdrawals`: `quote(accountId, { amountAtomic })`, `create(accountId, { amountAtomic }, { idempotencyKey })` (the key is required), `get(accountId, withdrawalId)`, `list(accountId)` and `waitForCompletion(accountId, withdrawalId)`, which polls until the withdrawal is `completed`, `failed` or `cancelled`.
 
 ## Next
 

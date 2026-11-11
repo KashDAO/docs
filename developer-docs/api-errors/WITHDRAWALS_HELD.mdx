@@ -16,7 +16,7 @@ Withdrawals only ever go to the address you registered for the user. Pausing the
 ## How to fix
 
 - Wait for the time in the `Retry-After` header, then send the withdrawal again with the same `Idempotency-Key`.
-- If you did not make the change, suspend the account (`POST /v1/partner/accounts/{accountId}/suspend`), revoke the key and contact ZeroID support from the info button in the Kash web app → **Feedback**.
+- If you did not make the change, suspend the account (`POST /v1/partner/accounts/{accountId}/suspend`) and contact ZeroID support from the info button in the Kash web app → **Feedback**, with the `accountId` and the id of the key to revoke.
 
 ## Response headers
 

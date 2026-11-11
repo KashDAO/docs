@@ -6,15 +6,16 @@ description: 'What to have in place before your partner integration goes to prod
 ## Approval and keys
 
 - [ ] ZeroID has approved your organisation for production (one-time; ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb)).
-- [ ] You created a `kash_live_` partner key in **Settings → API Keys** on the production web app.
-- [ ] The key's IP allowlist lists your servers' egress addresses, each a single address, an IPv4 range of `/16` or narrower, or an IPv6 range of `/48` or narrower.
-- [ ] The key has only the scopes you use. Add `webhooks:manage` if you will inspect, replay or rotate webhooks from your server.
+- [ ] You sent ZeroID your servers' egress addresses for the IP allowlist, each a single address, an IPv4 range of `/16` or narrower, or an IPv6 range of `/48` or narrower (at most 50).
+- [ ] You sent ZeroID your production webhook URL.
+- [ ] ZeroID issued your `kash_live_` partner key and its webhook secret, and you received them.
+- [ ] If you need `GET /v1/account/usage`, you asked ZeroID for the `auth:manage` scope on the key.
 - [ ] Keys and webhook secrets live in your secret store on your servers, never in an app, a browser, a log or a repository.
 - [ ] Your servers call `https://api.kash.bot/v1`, and no test key is configured in production. A staging key is not known there and is refused with `401 API_KEY_INVALID`.
 
 ## Webhooks
 
-- [ ] The production webhook URL is set on the live key, uses `https`, and its signing secret is installed.
+- [ ] The production webhook URL on the live key uses `https`, and its signing secret is installed.
 - [ ] Your endpoint verifies `X-Kash-Signature` against the raw body and rejects stale timestamps.
 - [ ] It deduplicates on the event id, and stores processed ids.
 - [ ] It answers `2xx` within 10 seconds and does slow work afterwards.
@@ -35,7 +36,7 @@ description: 'What to have in place before your partner integration goes to prod
 - [ ] You quote every withdrawal first and show `receiveAtomic`, and never request more than `maxAmountAtomic`.
 - [ ] Every withdrawal carries an `Idempotency-Key` you keep with the request on your side, and every retry reuses it.
 - [ ] You handle `WITHDRAWALS_HELD` and its `Retry-After`, and the 1 USDC minimum to Arc.
-- [ ] Your first production withdrawal to Arc is a small amount, and you confirm it arrived before opening Arc withdrawals to users.
+- [ ] You use Solana destinations until ZeroID tells you withdrawals to Arc are open in production. Your first production withdrawal to Arc is then a small amount, and you confirm it arrived before opening Arc withdrawals to users.
 
 ## Operations
 
@@ -43,5 +44,5 @@ description: 'What to have in place before your partner integration goes to prod
 - [ ] You back off on `429` and `503` using `Retry-After`, and stay inside 60 requests a minute per account.
 - [ ] You branch on error `code`, never on `detail`, and log `requestId`.
 - [ ] You know how to suspend one account in one call, and who on your team does it.
-- [ ] You know how to rotate a key and a webhook secret without downtime.
+- [ ] You know how to rotate a key (ask ZeroID for a new one, deploy it, then ask ZeroID to revoke the old one) and a webhook secret (the rotate route) without downtime.
 - [ ] Your support team can help users with funding and everything else on your side, and knows to contact ZeroID support with an `accountId`, `withdrawalId` or `requestId` for anything on Kash's side.

@@ -48,4 +48,4 @@ A replay returns the stored body unchanged, so its `_meta.idempotent` is whateve
 
 ## With the SDK
 
-`@kashdao/sdk` sends an `Idempotency-Key` on every `POST` automatically and reuses it across its own retries. Pass your own with `{ idempotencyKey }` on `trades.create` when you want the key to survive a restart of your process.
+`@kashdao/sdk` sends an `Idempotency-Key` on every `POST` automatically and reuses it across its own retries. Pass your own with `{ idempotencyKey }` on `trades.create` when you want the key to survive a restart of your process. In 0.4.0, `partnerAccounts.create` also accepts `{ idempotencyKey }`, and `partnerAccounts.withdrawals.create` requires it.

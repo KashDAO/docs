@@ -10,7 +10,7 @@ Webhooks tell your server when an account becomes ready, when a withdrawal moves
 - **Account, withdrawal and payout events** go to **every active (not revoked, not expired) partner key of your organisation that has a webhook URL**. While two keys have URLs, for example during a key rotation, each receives every event under a different event id, even when both keys share a URL.
 - **Trade events** go only to **the key that placed the trade**, as for any API key.
 
-Set the URL and its secret on the key: see [Keys](/developer-docs/partner-integration/keys#webhook-url-and-secret).
+ZeroID sets the URL on the key and delivers its secret; you can rotate the secret yourself. See [Keys](/developer-docs/partner-integration/keys#webhook-url-and-secret).
 
 ## Events
 
@@ -190,15 +190,15 @@ Verify against the **raw** body. Parsed and re-serialised JSON does not produce 
 
 ### With the SDK
 
-From `@kashdao/sdk` 0.4.0, `kash.webhooks.constructEvent` verifies the signature and parses every partner event type, as well as the trade events, into a typed `WebhookEvent`. `kash.webhooks.verifySignature` returns `{ valid, reason }` if you only need the check.
+From `@kashdao/sdk` 0.4.0, `kash.webhooks.constructEvent` verifies the signature and parses every partner event type, as well as the trade events, into a typed event. An event type the SDK does not know yet does not throw: it comes back as an unknown event, which `isUnknownWebhookEvent` recognises, so acknowledge it and handle it after you upgrade. `kash.webhooks.verifySignature` returns `{ valid, reason }` if you only need the check.
 
 <Note>
-Partner events parse only from `@kashdao/sdk` **0.4.0**, which is not yet published on npm; the latest published version is 0.3.2. Version 0.3.2 parses only the trade events and refuses the others with `KashValidationError`. With it, verify partner deliveries with `kash.webhooks.verifySignature` and parse the body yourself, as in [By hand](#by-hand).
+Versions before 0.4.0 parse only the trade events and refuse the partner events with `KashValidationError`. With an earlier version, verify partner deliveries with `kash.webhooks.verifySignature` and parse the body yourself, as in [By hand](#by-hand).
 </Note>
 
 ```ts
 import express from 'express';
-import { KashClient, KashWebhookSignatureError } from '@kashdao/sdk';
+import { KashClient, KashWebhookSignatureError, isUnknownWebhookEvent } from '@kashdao/sdk';
 
 const app = express();
 const kash = new KashClient({ apiKey: process.env.KASH_PARTNER_KEY! });
@@ -221,6 +221,9 @@ app.post(
 
     // At-least-once delivery: process each event id once.
     if (await alreadyProcessed(event.id)) return res.sendStatus(200);
+
+    // A type newer than this SDK version: acknowledge it and log the type.
+    if (isUnknownWebhookEvent(event)) return res.sendStatus(200);
 
     switch (event.type) {
       case 'account.active':
@@ -245,10 +248,10 @@ app.post(
 );
 ```
 
-The payload schemas and types are also exported from `@kashdao/sdk/webhooks` (`AccountActivePayloadSchema`, `WithdrawalFailedPayload` and so on), for validating one payload on its own.
+The payload schemas and types are also exported from `@kashdao/sdk/webhooks` (`AccountActivePayloadSchema`, `WithdrawalFailedPayload` and so on), for validating one payload on its own. The same schemas are in `@kashdao/sdk/schemas`.
 
 <Note>
-`WebhookEvent` in 0.4.0 includes the eight partner event types. A `switch` with an exhaustiveness check on the four trade types no longer compiles: add the partner cases or a `default` branch.
+If you are upgrading a 0.3 handler: in 0.4.0 `constructEvent` can return an unknown event, so check `isUnknownWebhookEvent(event)` before you read `event.data`, and `WebhookEvent` includes the eight partner event types, so a `switch` with an exhaustiveness check on the four trade types needs the partner cases or a `default` branch.
 </Note>
 
 ### By hand

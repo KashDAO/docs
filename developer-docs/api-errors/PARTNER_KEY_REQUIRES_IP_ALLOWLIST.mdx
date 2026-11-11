@@ -21,7 +21,7 @@ A partner key can act for every one of your users, so in production it works onl
 
 ## How to fix
 
-- List your servers' egress addresses, or ranges of `/16` or narrower (IPv4) and `/48` or narrower (IPv6), on the key in **Settings → API Keys** in the production Kash web app, then send the request again.
+- Send ZeroID the key's id and your servers' egress addresses, or ranges of `/16` or narrower (IPv4) and `/48` or narrower (IPv6), from the info button in the Kash web app → **Feedback**. Once ZeroID has updated the key's allowlist, send the request again.
 - If the `detail` names a test key, use your live (`kash_live_`) partner key in production.
 - Retrying without changing the key will not help.
 

@@ -18,7 +18,7 @@ Errors use the API's [RFC 7807 problem format](/developer-docs/api-errors/overvi
 | [`WITHDRAWAL_BELOW_MINIMUM`](/developer-docs/api-errors/WITHDRAWAL_BELOW_MINIMUM) | 400 | Below 1 USDC to Arc, or no larger than the most the network fee can cost. | Withdraw more; `detail` names the figure. |
 | [`WITHDRAWALS_HELD`](/developer-docs/api-errors/WITHDRAWALS_HELD) | 409 | A withdrawal within 24 hours of a destination change. | Wait `Retry-After` seconds. If you did not make the change, suspend the account. |
 | [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) | 409 | A withdrawal above `availableAtomic`, or to Arc above `maxAmountAtomic`. | Quote first and withdraw at most `maxAmountAtomic`. |
-| [`PARTNER_KEY_REQUIRES_IP_ALLOWLIST`](/developer-docs/api-errors/PARTNER_KEY_REQUIRES_IP_ALLOWLIST) | 403 | In production, a live key with no allowlist or an over-broad entry (or a test-type key). | Use a live key with a specific allowlist. |
+| [`PARTNER_KEY_REQUIRES_IP_ALLOWLIST`](/developer-docs/api-errors/PARTNER_KEY_REQUIRES_IP_ALLOWLIST) | 403 | In production, a live key with no allowlist or an over-broad entry (or a test-type key). | Use your live key. To correct its allowlist, send ZeroID the key's id and the complete list. |
 
 ## Authentication and access
 
@@ -26,7 +26,7 @@ Errors use the API's [RFC 7807 problem format](/developer-docs/api-errors/overvi
 | ---- | ------ | ---------- |
 | [`API_KEY_MISSING`](/developer-docs/api-errors/API_KEY_MISSING), [`API_KEY_MALFORMED`](/developer-docs/api-errors/API_KEY_MALFORMED), [`API_KEY_INVALID`](/developer-docs/api-errors/API_KEY_INVALID) | 401 | Send a valid key in `X-API-Key`, for the right environment. |
 | [`API_KEY_REVOKED`](/developer-docs/api-errors/API_KEY_REVOKED) | 401 | The key was revoked, or your organisation's approval for live keys was withdrawn (the `detail` says which). Use another key, or contact ZeroID support. |
-| [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) | 401 | Create a new key. |
+| [`API_KEY_EXPIRED`](/developer-docs/api-errors/API_KEY_EXPIRED) | 401 | Ask ZeroID for a new key. |
 | [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) | 403 | The key lacks the route's scope, or the route is for user keys only (competitions, disputes, revenue share). |
 | [`IP_NOT_ALLOWED`](/developer-docs/api-errors/IP_NOT_ALLOWED) | 403 | The call came from an address not on the key's allowlist. |
 | [`ORGANIZATION_INACTIVE`](/developer-docs/api-errors/ORGANIZATION_INACTIVE) | 403 | Your organisation is suspended or closed. Contact ZeroID support. |

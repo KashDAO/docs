@@ -24,6 +24,7 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 
 | | You | The API |
 | --- | --- | --- |
+| Keys | Ask ZeroID for a test key, then for approval and a live key. Rotate your webhook secret from your server. | ZeroID issues, changes and revokes partner keys, their webhook URLs and IP allowlists. |
 | User interface | Build every screen your users see. | Provides no interface for partner users. |
 | Accounts | Collect each user's consent and true country, then create the account. | Sets up the account and its Solana wallet, and tells you when it is ready. |
 | Funding | Move each user's USDC from wherever your platform holds it to the account's Solana deposit address. | Does not bridge funds in, and does not notify you of deposits. |
@@ -44,13 +45,13 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 
 <Steps>
   <Step title="Get a test key">
-    Create a partner key for staging in the Kash web app, with a webhook URL. See [Keys](/developer-docs/partner-integration/keys).
+    Ask ZeroID for a staging partner key, and send your webhook URL. See [Keys](/developer-docs/partner-integration/keys).
   </Step>
   <Step title="Create an account">
     `POST /v1/partner/accounts` when a user opts in. You receive `account.active` with the account's Solana `depositAddress`.
   </Step>
   <Step title="Fund it">
-    Send USDC on Solana to the deposit address, then read `GET /v1/balance`.
+    Send USDC on Solana to the deposit address, then read `GET /v1/balance`. On staging, ZeroID funds test accounts with test USDC on request.
   </Step>
   <Step title="Trade">
     Read markets and quotes, then `POST /v1/trades` with the `Kash-Account` header. Outcomes arrive by webhook.
@@ -59,7 +60,7 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
     Quote, then `POST /v1/partner/accounts/{accountId}/withdrawals`. The USDC goes to the user's registered destination.
   </Step>
   <Step title="Go live">
-    Ask ZeroID to approve your organisation, create a live key with an IP allowlist, and switch your base URL. See the [go-live checklist](/developer-docs/partner-integration/go-live).
+    Ask ZeroID to approve your organisation and send your IP allowlist and production webhook URL. ZeroID issues your live key; then switch your base URL. See the [go-live checklist](/developer-docs/partner-integration/go-live).
   </Step>
 </Steps>
 
@@ -70,7 +71,22 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 | Staging (sandbox) | `https://api-staging.kash.bot/v1` | Solana devnet, test USDC | `kash_test_` |
 | Production | `https://api.kash.bot/v1` | Solana mainnet, real USDC | `kash_live_` |
 
-[`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) picks the base URL from the key's prefix.
+## SDK
+
+The TypeScript examples in this section use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) version **0.4.0**, the first version with the partner methods (`kash.partnerAccounts`, `kash.balance` and the `account` option for acting for one account) and the partner webhooks. Earlier versions have none of these. Every route also works over plain HTTP, as the `curl` examples show.
+
+```bash
+npm install @kashdao/sdk@^0.4.0
+```
+
+| Import from | What it holds |
+| ----------- | ------------- |
+| `@kashdao/sdk` | `KashClient`, errors and error codes, guards, and the types of markets, trades, quotes, portfolio, traces and webhooks. Most integrations import only from here. |
+| `@kashdao/sdk/partner` | Types of the partner surface: accounts, balances, withdrawals and their results. Types only; the methods are on `KashClient`. |
+| `@kashdao/sdk/schemas` | Every Zod schema, for validating data yourself. The client already validates each response with them. |
+| `@kashdao/sdk/webhooks` | The partner webhook payload types and schemas. |
+
+The SDK picks the base URL from the key's prefix.
 
 ## Next
 
