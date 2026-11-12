@@ -47,7 +47,7 @@ curl "$KASH_API/balance" \
 | `availableAtomic` | What a trade or a new withdrawal may spend: `usdcAtomic` minus `pendingWithdrawalsAtomic`, never below zero. Show this to your users as their balance. |
 | `observedAt` | When the on-chain balance was read. |
 
-Every amount is a string of USDC atomic units, with 6 decimals: `"25000000"` is 25 USDC. Parse amounts as integers (`BigInt` in JavaScript), never as floating-point numbers.
+Every balance amount is a string of USDC atomic units, with 6 decimals: `"25000000"` is 25 USDC (see [Amounts](/developer-docs/partner-integration/overview#amounts) for the one exception, the trade `amount`). Parse amounts as integers (`BigInt` in JavaScript), never as floating-point numbers.
 
 - A balance that cannot be read answers `503 DEPENDENCY_UNAVAILABLE`, never zero. Retry it.
 - The balance needs an account with a wallet: a `provisioning` or `provisioning_failed` account answers `409 ACCOUNT_NOT_ACTIVE`. A suspended account can still be read.

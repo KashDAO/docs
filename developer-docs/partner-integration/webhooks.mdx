@@ -57,7 +57,7 @@ X-Kash-Event-Type:  account.active
 X-Kash-Api-Version: 2026-08-19
 ```
 
-Amounts are strings in USDC atomic units (6 decimals). Every account, withdrawal and payout event names the account by `accountId` and by your `externalId`.
+Account, withdrawal and payout events carry amounts as strings in USDC atomic units (6 decimals): `"2500000"` is 2.5 USDC. Trade events carry `amount` as a decimal USDC string (`"10"` is 10 USDC), as the trades API does. Every account, withdrawal and payout event names the account by `accountId` and by your `externalId`.
 
 ## Account events
 

@@ -71,6 +71,17 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 | Staging (sandbox) | `https://api-staging.kash.bot/v1` | Solana devnet, test USDC | `kash_test_` |
 | Production | `https://api.kash.bot/v1` | Solana mainnet, real USDC | `kash_live_` |
 
+## Amounts
+
+USDC amounts appear in two forms. Check which one a field uses before you send or display it.
+
+| Form | Example | Where |
+| ---- | ------- | ----- |
+| Decimal USDC string, up to 6 decimals | `"10"` or `"10.500000"` is 10 or 10.5 USDC | The trade `amount` (`POST /v1/trades`, trade responses and the `trade.*` webhooks) |
+| Atomic USDC string, 6 decimals | `"10000000"` is 10 USDC | Everything else: balances, withdrawals and their fees, payouts, the partner webhooks, and a buy quote's `amount` (fields ending in `Atomic`, and the quote parameter) |
+
+Parse atomic amounts as integers (`BigInt` in JavaScript), never as floating-point numbers. A sell quote's `amount` is in outcome tokens, with 18 decimals.
+
 ## SDK
 
 The TypeScript examples in this section use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) version **0.4.0**, the first version with the partner methods (`kash.partnerAccounts`, `kash.balance` and the `account` option for acting for one account) and the partner webhooks. Earlier versions have none of these. Every route also works over plain HTTP, as the `curl` examples show.

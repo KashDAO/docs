@@ -67,6 +67,8 @@ curl "$KASH_API/markets/$MARKET_ID/quote?outcomeIndex=0&action=buy&amount=100000
   -H "X-API-Key: $KASH_PARTNER_KEY"
 ```
 
+The quote `amount` is atomic USDC (`10000000` is 10 USDC); the trade below takes the same 10 USDC as the decimal `"10"`.
+
 ## 5. Trade
 
 ```bash
