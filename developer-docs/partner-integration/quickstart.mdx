@@ -23,7 +23,7 @@ curl -X POST "$KASH_API/partner/accounts" \
     "externalId": "hsp-user-8841",
     "destination": { "network": "solana", "address": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh" },
     "country": "GB",
-    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "hsp-kash-terms-2026-11" }
+    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "kash-terms-of-use-2025-06" }
   }'
 ```
 
@@ -129,7 +129,7 @@ const { account } = await kash.partnerAccounts.create(
     externalId: 'hsp-user-8841',
     destination: { network: 'solana', address: '8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh' },
     country: 'GB',
-    consent: { acceptedAt: new Date().toISOString(), termsVersion: 'hsp-kash-terms-2026-11' },
+    consent: { acceptedAt: new Date().toISOString(), termsVersion: 'kash-terms-of-use-2025-06' },
   },
   { idempotencyKey: onboardingKey },
 );

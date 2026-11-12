@@ -20,7 +20,7 @@ All routes on this page need a partner key with the `partner:accounts` scope. Th
 ## Before you create an account
 
 - **Consent.** Create an account only after the user has agreed in your app, for example by tapping a button. That action is their consent to the API acting on the trade and withdrawal instructions you send for them. Send when they agreed and which terms they saw.
-- **Country.** Send the user's real country. Kash's country rules, including the block on sanctioned countries, apply to it at trade and withdrawal time. Account creation itself does not refuse by country. Update it with `PATCH` if it changes.
+- **Country.** Send the user's real country. Kash's country rules apply to it at trade and withdrawal time; account creation itself does not refuse by country, so screen users at sign-up. Update it with `PATCH` if it changes. See [Restricted countries](#restricted-countries).
 - **Destination.** Register the user's own address in your app. Every withdrawal goes there and nowhere else. On Solana it must be the user's wallet address, not a token account address.
 
 ## Create an account
@@ -34,7 +34,7 @@ curl -X POST "$KASH_API/partner/accounts" \
     "externalId": "hsp-user-8841",
     "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
     "country": "GB",
-    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "hsp-kash-terms-2026-11" },
+    "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "kash-terms-of-use-2025-06" },
     "email": "user8841@example.com"
   }'
 ```
@@ -46,7 +46,7 @@ curl -X POST "$KASH_API/partner/accounts" \
 | `destination.address` | yes | For `solana`, the user's base58 wallet address, not a token account address. A USDC token account address is refused, except the wallet's own standard USDC account, which Kash resolves to the wallet. For `arc`, a `0x` address of 40 hex characters. An Arc address is stored in lower case. A wrong address for the network is `400 VALIDATION_FAILED`. |
 | `country` | yes | ISO 3166-1 alpha-2 in upper case, such as `GB`. |
 | `consent.acceptedAt` | yes | ISO 8601 with a time zone. Not in the future (a few minutes of clock difference are allowed). |
-| `consent.termsVersion` | yes | The version of the terms the user saw. 1 to 64 characters, no control characters, no leading or trailing whitespace. |
+| `consent.termsVersion` | yes | The version of Kash's [Terms of Use](https://kash.bot/terms-of-use) the user accepted, named from the terms' "Last updated" date, such as `kash-terms-of-use-2025-06`. The user accepts them in your app before you create their account. 1 to 64 characters, no control characters, no leading or trailing whitespace. |
 | `email` | no | A valid address, at most 320 characters. Stored with the account, for reaching the user about it. It is not a login today: the user cannot sign in to Kash with it. |
 
 Unknown fields are refused with `400 VALIDATION_FAILED`.
@@ -125,6 +125,16 @@ curl "$KASH_API/partner/accounts?limit=50" -H "X-API-Key: $KASH_PARTNER_KEY"
 `GET /v1/partner/accounts` returns `{ data: Account[], pagination: { cursor, hasMore, limit }, _meta }`, newest first, with [cursor pagination](/developer-docs/rest-api/pagination). `limit` is 1 to 100, default 20. `externalId` is an exact match and returns an empty page when you have no account for that id. Released accounts are not listed.
 
 An account id that is unknown, malformed, released or another organisation's is answered with the same `404 ACCOUNT_NOT_FOUND`, so ids cannot be probed.
+
+## Restricted countries
+
+Users whose registration country is under comprehensive US sanctions cannot trade or withdraw: Cuba (`CU`), Iran (`IR`), North Korea (`KP`), Syria (`SY`), Russia (`RU`), Belarus (`BY`) and Myanmar (`MM`). The list follows OFAC and can change; Kash announces changes to partners.
+
+- A trade is refused before it runs: you receive `trade.rejected` with `errorCode: "sanctioned_country"`.
+- A withdrawal is refused before anything is sent and ends `failed` with `errorCode: "withdrawal_failed"`.
+- Funds already in such an account stay there. Contact your Kash contact on Telegram, who resolves each case. If the country was recorded wrongly, correct it with `PATCH` and the account works again.
+
+Screen users against this list when they sign up, so a restricted user never receives funds.
 
 ## Change the destination or country
 
