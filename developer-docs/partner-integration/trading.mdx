@@ -50,6 +50,8 @@ The quote `amount` is in **atomic units**: USDC with 6 decimals for a buy (`1000
 
 ## Place a trade
 
+The smallest trade is 1 USDC. A smaller one is accepted (`202`) and then rejected: you receive `trade.rejected` with the reason "Trade amount $0.50 is below the minimum of $1.00".
+
 ```bash
 curl -X POST "$KASH_API/trades" \
   -H "X-API-Key: $KASH_PARTNER_KEY" \
