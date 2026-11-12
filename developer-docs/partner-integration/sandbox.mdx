@@ -31,7 +31,7 @@ Staging accounts hold the staging test USDC on Solana devnet. Only ZeroID can mi
 ZeroID funds your test accounts on request. Ask from the info button in the Kash web app → **Feedback**, or in [Discord](https://discord.com/invite/n9eumqjMPb), and send:
 
 - the `accountId` of each account to fund, or its `depositAddress`;
-- the amount of test USDC for each account.
+- the amount of test USDC for each account. There is no fixed allowance: ask for as much as your testing needs, as often as you need it.
 
 Each account must be one of yours and `active`. ZeroID sends the test USDC straight to the account's deposit address and tells you the amount. `GET /v1/balance` with that account's `Kash-Account` header then shows it in `availableAtomic`.
 
