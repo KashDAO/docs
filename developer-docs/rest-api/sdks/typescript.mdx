@@ -1,6 +1,6 @@
 ---
 title: 'TypeScript SDK'
-description: '@kashdao/sdk — typed client for the Kash REST API. Markets, quotes, trades, redemptions, portfolio, webhooks, retries, idempotency.'
+description: '@kashdao/sdk — typed client for the Kash REST API. Markets, quotes, trades, redemptions, portfolio, partner accounts, webhooks, retries, idempotency.'
 ---
 
 The `@kashdao/sdk` package is the official TypeScript client for the REST API. It's the recommended way to integrate from any TS/JS runtime: Node 22+, modern browsers, Deno, Bun, Cloudflare Workers or Vercel Edge. It uses native `fetch` and has one runtime dependency (Zod).
@@ -11,6 +11,18 @@ pnpm add @kashdao/sdk
 # or: yarn add @kashdao/sdk
 # or: bun add @kashdao/sdk
 ```
+
+This page describes version 0.4.0. It is published on npm, with its source and release notes in [KashDAO/sdk-typescript](https://github.com/KashDAO/sdk-typescript).
+
+| Import from             | What it holds                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kashdao/sdk`          | `KashClient`, errors and error codes, guards, chain references, and the types of markets, trades, quotes, portfolio, traces and webhooks |
+| `@kashdao/sdk/partner`  | Types of the partner surface: accounts, balances, withdrawals and their results (the methods are on `KashClient`)                        |
+| `@kashdao/sdk/schemas`  | Every Zod schema, for validating data yourself; the client already validates each response with them                                     |
+| `@kashdao/sdk/webhooks` | Partner webhook payload types and schemas                                                                                                |
+| `@kashdao/sdk/testing`  | A fixture-driven mock client and a test webhook signer                                                                                   |
+
+Most integrations import only from `@kashdao/sdk`. Upgrading from 0.3: the Zod schemas moved from `@kashdao/sdk` to `@kashdao/sdk/schemas` under the same names; the types inferred from them stay on the root.
 
 ## Construct the client
 
@@ -39,7 +51,7 @@ Both URLs are exported as `PRODUCTION_BASE_URL` and `STAGING_BASE_URL`. The key 
 
 Other options: `retryBaseDelayMs` (default 200), `retryMaxDelayMs` (default 10 000), `retryAfterMaxMs` (default 60 000: a server `Retry-After` longer than this surfaces the error instead of sleeping), `headers` (extra default headers such as `traceparent`), `fetch` (custom implementation), `hooks`, `conditionalRequests` (default `true`, see below), `conditionalCacheMaxEntries` (default 256) and `apiVersion`.
 
-The client exposes typed sub-clients: `kash.markets`, `kash.quotes`, `kash.trades`, `kash.redemptions`, `kash.portfolio`, `kash.webhooks`, `kash.account` and `kash.traces`. `kash.healthCheck()` checks connectivity and never throws; it returns `{ ok, latencyMs, status?, version?, requestId? }`.
+The client exposes typed sub-clients: `kash.markets`, `kash.quotes`, `kash.trades`, `kash.redemptions`, `kash.portfolio`, `kash.balance`, `kash.webhooks`, `kash.account` and `kash.traces`, plus `kash.partnerAccounts` for partner keys. A partner acting for one of its users passes `{ account: accountId }` on a call; see [Partner integration](/developer-docs/partner-integration/overview). `kash.healthCheck()` checks connectivity and never throws; it returns `{ ok, latencyMs, status?, version?, requestId? }`.
 
 ## Read markets
 
@@ -188,7 +200,7 @@ app.post('/webhooks/kash',
 );
 ```
 
-`constructEvent(body, signatureHeader, secret, opts?)` checks the `X-Kash-Signature` HMAC and a 5-minute timestamp tolerance (override with `opts.toleranceMs`), accepts any matching `v1=` entry during a secret-rotation overlap, then parses the envelope `{ id, type, apiVersion, createdAt, data }`. `verifySignature` runs the same check and returns `{ valid: true }` or `{ valid: false, reason }` without parsing. It throws `KashConfigurationError` for an empty secret and `KashValidationError` for a body that verifies but isn't a known event.
+`constructEvent(body, signatureHeader, secret, opts?)` checks the `X-Kash-Signature` HMAC and a 5-minute timestamp tolerance (override with `opts.toleranceMs`), accepts any matching `v1=` entry during a secret-rotation overlap, then parses the envelope `{ id, type, apiVersion, createdAt, data }`. `verifySignature` runs the same check and returns `{ valid: true }` or `{ valid: false, reason }` without parsing. It throws `KashConfigurationError` for an empty secret. A verified delivery whose `type` this SDK version does not know is returned as an unknown event, which `isUnknownWebhookEvent` recognises, rather than thrown: acknowledge it and handle it after you upgrade. `constructEvent` throws `KashValidationError` for a body that verifies but is not a well-formed envelope, or a known type whose data does not match its shape.
 
 Webhook management: `kash.webhooks.list({ status, limit, cursor })`, `kash.webhooks.redeliver(eventId)` and `kash.webhooks.rotateSecret()` (returns `{ secret, rotatedAt, previousRetainedUntil }`, the new secret shown once). These need the `webhooks:manage` scope.
 
@@ -306,7 +318,7 @@ The SDK also sends a `User-Agent` of the form `@kashdao/sdk/<version> (<runtime>
 
 ## Versioning and bundle size
 
-The SDK is pre-1.0 (`0.x`): a minor version may include breaking changes, so pin a minor range in `package.json`. Each release is held to a `size-limit` budget, measured excluding Zod: 24 KB for the main entry and 8 KB for `@kashdao/sdk/testing`.
+The SDK is pre-1.0 (`0.x`): a minor version may include breaking changes, so pin a minor range in `package.json`. Each release is held to a `size-limit` budget, measured excluding Zod: 24 KB for the main entry, 8 KB for `@kashdao/sdk/testing`, 5 KB each for `@kashdao/sdk/schemas` and `@kashdao/sdk/webhooks`, and 1 KB for `@kashdao/sdk/partner`.
 
 ## Source
 
