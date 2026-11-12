@@ -95,6 +95,7 @@ const trade = await kash.trades.create({
   outcomeIndex: 0,
   amount:       '100',                     // USDC decimal string, up to 6 fractional digits
   side:         'buy',
+  clientRequestId: 'order-55120',          // your order id: a retry with it returns the trade already placed
   metadata:     { strategy: 'momentum-v2', cohort: 'beta' },
 }, { idempotencyKey: crypto.randomUUID() });
 
@@ -116,7 +117,7 @@ console.log(final.status, final.txHash, final.tokensOut);
 
 On API version `2026-08-19` (the SDK default), `txHash` on a Solana trade is the base58 transaction signature. `waitForCompletion` refuses a trade that is still `pending_confirmation` with a `KashConflictError`; confirm it first. Type guards such as `isCompletedTrade`, `isTerminalTrade` and `isAwaitingConfirmation` narrow a `TradeResource` by status.
 
-**Idempotency.** Every POST the SDK sends carries an `Idempotency-Key`. If you don't pass one, the SDK generates one per call, so its own retries can never duplicate a write. Pass your own key when *your* code may retry the same logical order across calls.
+**Idempotency.** Every POST the SDK sends carries an `Idempotency-Key`. If you don't pass one, the SDK generates one per call, so its own retries can never duplicate a write. The key alone cannot always stop a second trade: the API holds a key's claim for 60 seconds and releases it on any error response, including the `503` it sends when a trade was recorded but its event pipeline was down. So `trades.create` also sends a `clientRequestId` when you pass none, one per call, which the API checks per account with no time limit. Pass your own order id as `clientRequestId` when *your* code may retry the same logical order across calls or after a restart. See [Idempotency](/developer-docs/rest-api/idempotency).
 
 ## Redeem a settled position
 
@@ -179,8 +180,9 @@ app.post('/webhooks/kash',
         process.env.KASH_WEBHOOK_SECRET!
       );
     } catch (err) {
-      // KashWebhookSignatureError: bad, expired or malformed signature
-      return res.sendStatus(400);
+      // KashWebhookSignatureError: bad, expired or malformed signature.
+      // 401, not 400: a 401 is retried, a 400 is final.
+      return res.sendStatus(401);
     }
 
     switch (event.type) {

@@ -114,7 +114,7 @@ app.post('/webhooks/kash', express.raw({ type: 'application/json' }), async (req
     // Verifies the HMAC signature + 5-minute timestamp window, then parses. Throws on a bad signature.
     event = await kash.webhooks.constructEvent(raw, signature, process.env.KASH_WEBHOOK_SECRET!);
   } catch (err) {
-    return res.status(400).send('invalid signature');
+    return res.status(401).send('invalid signature'); // 401 is retried; 400 would drop the event for good
   }
 
   if (alreadyProcessed(eventId)) return res.status(200).send('dup');  // your idempotency store

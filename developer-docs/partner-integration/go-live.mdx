@@ -26,15 +26,17 @@ description: 'What to have in place before your partner integration goes to prod
 
 - [ ] You create an account only after the user's own action in your app, and send `consent.acceptedAt` and the `termsVersion` they saw.
 - [ ] You send each user's true country, and update it with `PATCH` when it changes.
-- [ ] Each user's destination is their own address in your app, on `solana` or `arc`.
+- [ ] Each user's destination is their own address in your app, on `solana` or `arc`. On Solana it is the user's wallet address, never a token account address.
 - [ ] You store the `accountId` against your user, and can find it again with `GET /v1/partner/accounts?externalId=`.
 
 ## Money
 
 - [ ] You fund accounts only with USDC on Solana, to the account's `depositAddress`.
 - [ ] You show users `availableAtomic` as their balance, and parse every amount as an integer.
-- [ ] You quote every withdrawal first and show `receiveAtomic`, and never request more than `maxAmountAtomic`.
+- [ ] You quote every withdrawal first and show `receiveAtomic`, `networkFeeAtomic` and `totalDebitAtomic`, and never request more than `maxAmountAtomic`.
 - [ ] Every withdrawal carries an `Idempotency-Key` you keep with the request on your side, and every retry reuses it.
+- [ ] Every trade carries a `clientRequestId` set to your order id, stored before you send, and every retry of the order reuses it.
+- [ ] Each account create uses a new `Idempotency-Key` per onboarding attempt, so a create after a release does not replay the released account.
 - [ ] You handle `WITHDRAWALS_HELD` and its `Retry-After`, and the 1 USDC minimum to Arc.
 - [ ] You use Solana destinations until ZeroID tells you withdrawals to Arc are open in production. Your first production withdrawal to Arc is then a small amount, and you confirm it arrived before opening Arc withdrawals to users.
 

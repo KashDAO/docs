@@ -77,7 +77,7 @@ The account is ready. Send USDC on Solana to `depositAddress` to fund it.
 
 ### `account.provisioning_failed`
 
-The account could not be created, for good. `reason` is `signer_missing`, `no_solana_wallet`, `privy_refused`, `privy_identity_mismatch` or `privy_user_already_linked` (see [Accounts](/developer-docs/partner-integration/accounts#when-provisioning-fails)). Release the account and create it again, which gives it a new `accountId`, and contact ZeroID support if it recurs.
+The account could not be created, for good. `reason` is `signer_missing`, `no_solana_wallet`, `privy_refused`, `privy_identity_mismatch` or `privy_user_already_linked` (see [Accounts](/developer-docs/partner-integration/accounts#when-provisioning-fails)). Release the account and create it again with a new `Idempotency-Key`, which gives it a new `accountId`, and contact ZeroID support if it recurs.
 
 ```json
 {
@@ -215,7 +215,8 @@ app.post(
         process.env.KASH_WEBHOOK_SECRET!,
       );
     } catch (err) {
-      if (err instanceof KashWebhookSignatureError) return res.status(400).send('bad signature');
+      // 401, not 400: a 401 is retried, so deliveries resume once a wrong secret is fixed.
+      if (err instanceof KashWebhookSignatureError) return res.status(401).send('bad signature');
       throw err;
     }
 
@@ -247,6 +248,8 @@ app.post(
   },
 );
 ```
+
+Answer `401` to a delivery that fails verification, never `400`. The API treats `400`, `404`, `410`, `422` and any `3xx` as final and does not retry them, while a `401` is retried. A secret that is wrong on your side, for example a new secret not yet deployed or the staging and production secrets swapped, then delays genuine deliveries instead of dropping them: they arrive once you fix it within the retry window of about 20 minutes, and you can replay any that ran out of attempts. A forged request gains nothing from a `401`: it fails verification every time. Answer `2xx` only once you have durably accepted the event.
 
 The payload schemas and types are also exported from `@kashdao/sdk/webhooks` (`AccountActivePayloadSchema`, `WithdrawalFailedPayload` and so on), for validating one payload on its own. The same schemas are in `@kashdao/sdk/schemas`.
 
@@ -290,9 +293,9 @@ The scheme is Stripe's, except that the header is `X-Kash-Signature` and the tim
 
 - **At least once.** An event can arrive more than once. Process each event id once, and store the ids you have processed.
 - **No ordering guarantee, even for one key.** Up to 5 deliveries from one batch can be sent at once, events reach the delivery queue from several parts of the system with no common order, and an event sent again later (a redelivery you request, or one recovered after it failed to queue) arrives after newer ones. Compare the timestamps in the payloads (`activatedAt`, `changedAt`, `completedAt` and so on) rather than the order of arrival, and treat each event as a prompt to read the current state from the API (`GET /v1/partner/accounts/{accountId}`, `GET .../withdrawals/{withdrawalId}`, `GET /v1/balance`).
-- **Answer `2xx` within 10 seconds.** Do slow work after you respond.
-- **Retries.** A timeout, network error, `5xx`, `408`, `429` or any other `4xx` except those below is retried about every 2 minutes, up to 10 attempts. A `400`, `404`, `410`, `422` or a redirect stops delivery of that event. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries).
-- **Final answers.** Delivery stops at a `2xx`, or at `400`, `404`, `410` or `422`, which the API treats as final and does not retry. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
+- **Answer `2xx` within 10 seconds,** once you have durably accepted the event. Do slow work after you respond.
+- **Retries.** A timeout, network error, `5xx`, `401`, `403`, `408`, `429` or any other `4xx` except those below is retried about every 2 minutes, up to 10 attempts. A `400`, `404`, `410`, `422` or a `3xx` (redirects are not followed) stops delivery of that event. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries).
+- **Final answers.** Delivery stops at a `2xx`, or at `400`, `404`, `410`, `422` or a `3xx`, which the API treats as final and does not retry. Never answer one of these to a delivery you could not verify or could not store. Fix a failing endpoint quickly, and replay anything that ran out of attempts.
 - **Replay.** With the `webhooks:manage` scope, `GET /v1/webhooks/events` lists the key's events and their delivery state, and `POST /v1/webhooks/events/{eventId}/redeliver` sends one again.
 
 ## Next

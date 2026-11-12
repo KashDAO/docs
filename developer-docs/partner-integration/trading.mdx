@@ -50,7 +50,7 @@ The quote `amount` is in **atomic units**: USDC with 6 decimals for a buy (`1000
 
 ## Place a trade
 
-The smallest trade is 1 USDC. A smaller one is accepted (`202`) and then rejected: you receive `trade.rejected` with the reason "Trade amount $0.50 is below the minimum of $1.00".
+The smallest trade is 1 USDC. A smaller one is accepted (`201`) and then rejected: you receive `trade.rejected` with the reason "Trade amount $0.50 is below the minimum of $1.00".
 
 ```bash
 curl -X POST "$KASH_API/trades" \
@@ -58,7 +58,7 @@ curl -X POST "$KASH_API/trades" \
   -H "Kash-Account: $ACCOUNT_ID" \
   -H "X-Kash-Api-Version: 2026-08-19" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Idempotency-Key: hsp-order-55120" \
   -d '{
     "marketId": "'"$MARKET_ID"'",
     "outcomeIndex": 0,
@@ -71,8 +71,10 @@ curl -X POST "$KASH_API/trades" \
 
 The trade `amount` is a **decimal USDC string** (`"10"` is 10 USDC, up to 6 decimals), unlike the atomic amounts elsewhere in the partner routes. The answer is `201 Created` with the trade in `pending`. It then moves through `validating` and `executing` to `completed`, or ends `failed` or `rejected`.
 
+Send `clientRequestId` on every trade, set to your own order id, and store it with the order before you send. It is kept per account with no time limit, so a retry with the same `clientRequestId` and body, after a timeout, a `503` or a restart of your process, returns the trade already placed (`200`, `_meta.idempotent: true`) instead of placing another. The `Idempotency-Key` alone does not guarantee that: see [Idempotency](/developer-docs/partner-integration/idempotency#trades).
+
 <Tip>
-Trade webhooks do not name the account. Put your own ids in `metadata` (up to 10 string tags): they are echoed on the trade and on every trade webhook, so your handler can route the event without a lookup. Use `clientRequestId` for your order id: it makes the create idempotent for as long as the trade exists.
+Trade webhooks do not name the account. Put your own ids in `metadata` (up to 10 string tags): they are echoed on the trade and on every trade webhook, so your handler can route the event without a lookup.
 </Tip>
 
 What is different for a partner key:
@@ -81,11 +83,11 @@ What is different for a partner key:
 - **The account must be `active`.** A `provisioning`, `provisioning_failed` or `suspended` account is refused with `409 ACCOUNT_NOT_ACTIVE`.
 - **Country rules apply.** The API checks the trade against the country you registered for the account. A refused trade ends `rejected`, and you receive `trade.rejected`.
 - **Balance is checked on chain after the trade is accepted.** A trade the account cannot fund ends `failed` or `rejected`, with a lowercase `errorCode` such as `insufficient_balance`.
-- **Idempotency is per account.** The same `Idempotency-Key` used for two different accounts is two independent requests.
+- **Idempotency is per account.** The same `Idempotency-Key` or `clientRequestId` used for two different accounts is two independent requests.
 
 ### With the SDK
 
-With `@kashdao/sdk` 0.4.0, pass the user's `accountId` as `account` on the trade; the SDK sends it as the `Kash-Account` header and adds an `Idempotency-Key` to every `POST`.
+With `@kashdao/sdk` 0.4.0, pass the user's `accountId` as `account` on the trade; the SDK sends it as the `Kash-Account` header and adds an `Idempotency-Key` to every `POST`. `trades.create` also sends a `clientRequestId` when you pass none, but that one covers only the retries of that one call: pass your order id to cover a retry after a restart.
 
 ```ts
 import { KashClient } from '@kashdao/sdk';

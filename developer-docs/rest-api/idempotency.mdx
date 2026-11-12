@@ -5,7 +5,7 @@ description: 'Retry writes safely with the Idempotency-Key header and the client
 
 Network failures happen mid-request. Idempotency lets you retry a write without risking a duplicate trade.
 
-There are two mechanisms. The `Idempotency-Key` header works at the HTTP layer on every write route listed below. The `clientRequestId` body field works at the trade level on `POST /v1/trades`. Use either, or both.
+There are two mechanisms. The `Idempotency-Key` header works at the HTTP layer on every write route listed below. The `clientRequestId` body field works at the trade level on `POST /v1/trades`. For trades, send `clientRequestId` set to your own order id: it is what prevents a duplicate, and the header alone is not enough (see [Using both](#using-both)).
 
 ## `Idempotency-Key` header
 
@@ -27,8 +27,8 @@ Behaviour:
 - **First request:** runs normally. A `2xx` response is stored under the key for **24 hours**.
 - **Same key, same request:** the stored response is returned with its original status and body, plus the header **`Idempotent-Replay: true`**. Nothing runs again.
 - **Same key, different request:** `409 IDEMPOTENCY_KEY_CONFLICT`. "Same request" means the same method, URL and JSON body.
-- **Same key while the first request is still running:** `409 IDEMPOTENCY_REQUEST_IN_PROGRESS`. Retry a few seconds later with the same key to get the original response.
-- **Errors are not stored.** A `4xx` or `5xx` releases the key, so you can fix the request and retry with the same key.
+- **Same key while the first request is still running:** `409 IDEMPOTENCY_REQUEST_IN_PROGRESS`. The API holds its claim on the key for **60 seconds**, renewed while the first request is still running. Retry a few seconds later with the same key to get the original response.
+- **Errors are not stored.** Any error response releases the key, so you can fix the request and retry with the same key, and that retry runs the route again.
 - **After 24 hours** the key is forgotten, and a request with it runs as new.
 
 Because a replay returns the stored body unchanged, check the `Idempotent-Replay` header rather than `_meta.idempotent` to detect an HTTP-level replay.
@@ -55,11 +55,17 @@ It has no 24-hour limit, and you can see it on the trade, which makes it the rig
 
 ## Using both
 
-They layer cleanly. The header absorbs transient HTTP retries; `clientRequestId` guarantees one trade per logical order for as long as the trade exists. The TypeScript SDK sends an `Idempotency-Key` on every POST automatically.
+They layer cleanly. The header absorbs transient HTTP retries; `clientRequestId` guarantees one trade per logical order, kept per account with no time limit.
+
+The key alone cannot always stop a second trade. The API holds a key's claim for 60 seconds, proceeds without one when it cannot record it, and releases it on any error response, including the `503` it sends when a trade was recorded but its event pipeline was down. A retry in any of those cases runs the trade route again.
+
+So after a timeout, a `409 IDEMPOTENCY_REQUEST_IN_PROGRESS` or a `503`, send the same body with the same `clientRequestId`: the API returns the trade if the first request recorded it, and places it if not. With `curl` or any plain HTTP client, send it yourself on every trade.
+
+The TypeScript SDK sends an `Idempotency-Key` on every POST automatically, and `trades.create` sends a `clientRequestId` when you pass none: one per call, the same on every retry of that call. Pass your own order id as `clientRequestId` to cover a retry after a restart of your process.
 
 ## High-value trades
 
-A trade at or above your key's high-value threshold returns `202` with a one-time confirmation token. Retrying the create with the same `Idempotency-Key` returns that same stored `202`, with the same token, and creates nothing. The token itself is single-use: a second confirm returns `409 CONFIRMATION_TOKEN_USED`. If you lose the confirm response, read the trade with `GET /v1/trades/{id}`.
+A trade at or above your key's high-value threshold returns `202` with a one-time confirmation token. Retrying the create with the same `Idempotency-Key` returns that same stored `202` and creates nothing, but without the `confirmation` block: the token is never stored for replay. The token itself is single-use: a second confirm returns `409 CONFIRMATION_TOKEN_USED`. If you lose the confirm response, read the trade with `GET /v1/trades/{id}`.
 
 ## Conflict response
 

@@ -58,15 +58,18 @@ curl -X POST "$KASH_API/trades" \
   -H "X-API-Key: $KASH_API_KEY" \
   -H "X-Kash-Api-Version: 2026-08-19" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Idempotency-Key: quickstart-order-1" \
   -d '{
     "marketId": "'"$MARKET_ID"'",
     "outcomeIndex": 0,
     "amount": "10",
     "side": "buy",
+    "clientRequestId": "quickstart-order-1",
     "metadata": { "source": "quickstart" }
   }'
 ```
+
+`clientRequestId` is your own id for the order. A retry with the same `clientRequestId` and body returns the trade already placed instead of placing another, so this command is safe to run again. The `Idempotency-Key` alone does not guarantee that: see [Idempotency](/developer-docs/rest-api/idempotency).
 
 The trade `amount` is a **decimal USDC string** (`"10"` is 10 USDC), unlike the atomic amount in the quote. The answer is `201 Created`:
 

@@ -18,7 +18,7 @@ When a user of Harbour Sports Picks opts in, create their account with your own 
 curl -X POST "$KASH_API/partner/accounts" \
   -H "X-API-Key: $KASH_PARTNER_KEY" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: create-hsp-user-8841" \
+  -H "Idempotency-Key: onboard-3f6b2a1c-9d4e-4c7a-8b5f-2e1d0c9a8b7f" \
   -d '{
     "externalId": "hsp-user-8841",
     "destination": { "network": "solana", "address": "8yYpcE7Jx9NmXNMGR6NGumBUu4UBpMTVQW44P9hwikyh" },
@@ -26,6 +26,8 @@ curl -X POST "$KASH_API/partner/accounts" \
     "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "hsp-kash-terms-2026-11" }
   }'
 ```
+
+Use one `Idempotency-Key` per onboarding attempt, stored with that pending onboarding, and reuse it only on retries of this request: a key reused to create the account again after a release would return the released account (see [Idempotency](/developer-docs/partner-integration/idempotency#creating-an-account-twice)). The destination is the user's Solana wallet address, not a token account address.
 
 The answer is `202` with `account.accountId` and `status: "provisioning"`. Keep the `accountId` with your user:
 
@@ -76,15 +78,18 @@ curl -X POST "$KASH_API/trades" \
   -H "X-API-Key: $KASH_PARTNER_KEY" \
   -H "Kash-Account: $ACCOUNT_ID" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Idempotency-Key: hsp-order-55120" \
   -d '{
     "marketId": "'"$MARKET_ID"'",
     "outcomeIndex": 0,
     "amount": "10",
     "side": "buy",
-    "metadata": { "externalId": "hsp-user-8841" }
+    "clientRequestId": "hsp-order-55120",
+    "metadata": { "externalId": "hsp-user-8841", "orderId": "55120" }
   }'
 ```
+
+`clientRequestId` is your own id for the order. It is what makes a retry of this command safe: a repeat with the same `clientRequestId` and body returns the trade already placed instead of placing another, at any age. The `Idempotency-Key` alone does not guarantee that (see [Idempotency](/developer-docs/partner-integration/idempotency#trades)).
 
 The trade `amount` is decimal USDC (`"10"` is 10 USDC). The answer is `201` with the trade in `pending`, and your endpoint receives `trade.completed`, `trade.failed` or `trade.rejected` when it ends.
 
@@ -115,8 +120,10 @@ import { KashClient } from '@kashdao/sdk';
 
 const kash = new KashClient({ apiKey: process.env.KASH_PARTNER_KEY! }); // a kash_test_ key goes to staging
 
-// 1. Create the account when the user opts in. Keep the key with the pending
-//    onboarding and reuse it on every retry.
+// 1. Create the account when the user opts in. Use one key per onboarding
+//    attempt: create it now, keep it with the pending onboarding and reuse it
+//    only on retries of this create.
+const onboardingKey = `onboard-${randomUUID()}`;
 const { account } = await kash.partnerAccounts.create(
   {
     externalId: 'hsp-user-8841',
@@ -124,7 +131,7 @@ const { account } = await kash.partnerAccounts.create(
     country: 'GB',
     consent: { acceptedAt: new Date().toISOString(), termsVersion: 'hsp-kash-terms-2026-11' },
   },
-  { idempotencyKey: 'create-hsp-user-8841' },
+  { idempotencyKey: onboardingKey },
 );
 const accountId = account.accountId;
 
@@ -143,9 +150,18 @@ if (!market) throw new Error('no tradeable market');
 const quote = await kash.quotes.buy({ marketId: market.id, outcomeIndex: 0, amountUsdcAtomic: '10000000' });
 console.log('10 USDC buys', quote.tokensOut, 'outcome tokens');
 
-// 5. Trade for the account. The trade amount is decimal USDC.
+// 5. Trade for the account. The trade amount is decimal USDC. clientRequestId
+//    is your order id: a retry with it, even after a restart, returns the
+//    trade already placed.
 const trade = await kash.trades.create(
-  { marketId: market.id, outcomeIndex: 0, amount: '10', side: 'buy', metadata: { externalId: 'hsp-user-8841' } },
+  {
+    marketId: market.id,
+    outcomeIndex: 0,
+    amount: '10',
+    side: 'buy',
+    clientRequestId: 'hsp-order-55120',
+    metadata: { externalId: 'hsp-user-8841', orderId: '55120' },
+  },
   { account: accountId },
 );
 console.log('trade', trade.id, trade.status); // the outcome arrives by webhook

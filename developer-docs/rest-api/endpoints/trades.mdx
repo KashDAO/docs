@@ -10,7 +10,7 @@ description: 'Create a trade, confirm a high-value trade, list your trades and r
 | `GET`  | `/v1/trades`               | `trades:read`  | read             |                 |
 | `GET`  | `/v1/trades/{id}`          | `trades:read`  | read             |                 |
 
-A trade is executed from the smart account of the user who owns the API key. Trades work on both API versions. On `2026-08-19` the trade resource also carries `chainRef`, and `txHash` is returned for every chain; on a pinned `2026-04-29` a Solana trade's `txHash` is `null`.
+A trade is executed from the smart account of the user who owns the API key. A partner key trades for one of its accounts, named in the `Kash-Account` header: see [Partner trading](/developer-docs/partner-integration/trading). Trades work on both API versions. On `2026-08-19` the trade resource also carries `chainRef`, and `txHash` is returned for every chain; on a pinned `2026-04-29` a Solana trade's `txHash` is `null`.
 
 ## The trade resource
 
@@ -53,9 +53,11 @@ curl -X POST https://api.kash.bot/v1/trades \
   -H "X-API-Key: $KASH_API_KEY" \
   -H "X-Kash-Api-Version: 2026-08-19" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: $(uuidgen)" \
-  -d '{ "marketId": "…", "outcomeIndex": 0, "amount": "10", "side": "buy" }'
+  -H "Idempotency-Key: order-55120" \
+  -d '{ "marketId": "…", "outcomeIndex": 0, "amount": "10", "side": "buy", "clientRequestId": "order-55120" }'
 ```
+
+Send `clientRequestId`, set to your own order id, on every trade. It is what makes a retry safe: see [Idempotency](/developer-docs/rest-api/idempotency).
 
 Responses:
 

@@ -5,7 +5,7 @@ description: 'Offer Kash prediction markets inside your own app, to your own use
 
 A partner is a company that offers Kash markets to its own users from its own app. You build the interface. Your server calls the [REST API](/developer-docs/rest-api/overview) with one **partner key**, and creates a Kash account for each user who opts in. The API then trades for that account on your instruction, pays its winnings into it, and sends its withdrawals to the address you registered for the user.
 
-This section is written for the engineers who build that integration. In the examples the partner is a fictional sports app, Harbour Sports Picks.
+This section is written for the engineers who build that integration. In the examples the partner is a fictional sports app, Harbour Sports Picks. ZeroID, [the company behind Kash](/getting-started/quick-start/what-kash), issues partner keys and runs partner support.
 
 ## Concepts
 
@@ -16,7 +16,7 @@ This section is written for the engineers who build that integration. In the exa
 | **Partner account** | The Kash account of one of your users. You create it with your own id for the user (`externalId`), and the API answers with its `accountId`. See [Accounts](/developer-docs/partner-integration/accounts). |
 | **`Kash-Account` header** | How a partner key says which account a call is for. Send `Kash-Account: <accountId>` on balance, trade, portfolio, position, redemption and trace calls. |
 | **Deposit address** | The account's own Solana wallet. You fund it by sending USDC on Solana to this address. |
-| **Destination** | The user's own address in your app, on Solana or on Arc. Withdrawals go only there. |
+| **Destination** | The user's own address in your app, on Solana or on Arc. On Solana it is a wallet address, not a token account address. Withdrawals go only there. |
 
 One key acts for every one of your users, the pattern of Stripe Connect's `Stripe-Account` header. A key per user would put thousands of secrets on the same server without narrowing what a breach exposes. What bounds a leaked partner key is the rule that money leaves an account only to that user's registered destination, together with the request [rate limits](/developer-docs/partner-integration/rate-limits), suspension of one account in one call, and the 24-hour hold on withdrawals after a destination change.
 

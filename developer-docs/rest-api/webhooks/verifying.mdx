@@ -34,7 +34,7 @@ X-Kash-Signature: t=1730000000000,v1=<current-hmac>,v1=<previous-hmac>
 4. Compute `expected = HMAC_SHA256(secret, "${t}.${rawBody}")` and hex-encode it.
 5. For each `v1=` entry in the header, compare with `expected` using a **constant-time** comparator. If any matches, accept.
 
-That is the whole algorithm. Respond `400` to a request that fails verification: the API does not retry a `400`.
+That is the whole algorithm. Respond `401` to a request that fails verification, never `400`. The API does not retry a `400`, so a secret that is wrong on your side would drop genuine deliveries for good; a `401` is retried, and they arrive once the secret is fixed.
 
 ## Reference implementations
 
@@ -58,7 +58,7 @@ app.post('/webhooks/kash',
       await handleEvent(event); // typed by event.type
       res.sendStatus(200);
     } catch (err) {
-      if (err instanceof KashWebhookSignatureError) return res.sendStatus(400);
+      if (err instanceof KashWebhookSignatureError) return res.sendStatus(401);
       throw err;
     }
   },

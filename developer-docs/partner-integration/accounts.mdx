@@ -21,7 +21,7 @@ All routes on this page need a partner key with the `partner:accounts` scope. Th
 
 - **Consent.** Create an account only after the user has agreed in your app, for example by tapping a button. That action is their consent to the API acting on the trade and withdrawal instructions you send for them. Send when they agreed and which terms they saw.
 - **Country.** Send the user's real country. Kash's country rules, including the block on sanctioned countries, apply to it at trade and withdrawal time. Account creation itself does not refuse by country. Update it with `PATCH` if it changes.
-- **Destination.** Register the user's own address in your app. Every withdrawal goes there and nowhere else.
+- **Destination.** Register the user's own address in your app. Every withdrawal goes there and nowhere else. On Solana it must be the user's wallet address, not a token account address.
 
 ## Create an account
 
@@ -29,7 +29,7 @@ All routes on this page need a partner key with the `partner:accounts` scope. Th
 curl -X POST "$KASH_API/partner/accounts" \
   -H "X-API-Key: $KASH_PARTNER_KEY" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: create-hsp-user-8841" \
+  -H "Idempotency-Key: onboard-3f6b2a1c-9d4e-4c7a-8b5f-2e1d0c9a8b7f" \
   -d '{
     "externalId": "hsp-user-8841",
     "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
@@ -43,7 +43,7 @@ curl -X POST "$KASH_API/partner/accounts" \
 | ----- | -------- | ----- |
 | `externalId` | yes | Your id for the user, unique within your organisation. 1 to 128 characters, no control characters, no leading or trailing whitespace. Matched exactly, case included. |
 | `destination.network` | yes | `solana` or `arc`. Any other network (1 to 32 characters) is refused with `422 DESTINATION_NOT_SUPPORTED`. |
-| `destination.address` | yes | A base58 address for `solana`, or a `0x` address of 40 hex characters for `arc`. An Arc address is stored in lower case. A wrong address for the network is `400 VALIDATION_FAILED`. |
+| `destination.address` | yes | For `solana`, the user's base58 wallet address, not a token account address. A USDC token account address is refused, except the wallet's own standard USDC account, which Kash resolves to the wallet. For `arc`, a `0x` address of 40 hex characters. An Arc address is stored in lower case. A wrong address for the network is `400 VALIDATION_FAILED`. |
 | `country` | yes | ISO 3166-1 alpha-2 in upper case, such as `GB`. |
 | `consent.acceptedAt` | yes | ISO 8601 with a time zone. Not in the future (a few minutes of clock difference are allowed). |
 | `consent.termsVersion` | yes | The version of the terms the user saw. 1 to 64 characters, no control characters, no leading or trailing whitespace. |
@@ -77,7 +77,9 @@ When the wallet is ready you receive the [`account.active`](/developer-docs/part
 
 - **Same `Idempotency-Key`** (a retry of the same request): the stored `202` is returned unchanged, with the header `Idempotent-Replay: true`. Nothing runs again.
 - **Different `Idempotency-Key`, same `externalId`**: the existing account is returned with `200` and `_meta.idempotent: true`. The body you sent is not applied to it: to change its destination or country, use `PATCH`.
-- **After a release** the `externalId` is free again. Creating it makes a new account with a new `accountId`.
+- **After a release** the `externalId` is free again. A create with a new `Idempotency-Key` makes a new account with a new `accountId`. The first create's key, reused within 24 hours, returns the stored `202` of the released account instead.
+
+So use one `Idempotency-Key` per onboarding attempt, for example `onboard-<uuid>` stored with the pending onboarding, rather than a key derived from your user id. `externalId` already stops a second account for the same user; the key only lets a retry get back the exact first answer.
 
 See [Idempotency](/developer-docs/partner-integration/idempotency).
 
@@ -105,7 +107,7 @@ You receive [`account.provisioning_failed`](/developer-docs/partner-integration/
 | `privy_identity_mismatch` | The wallet provider offered an identity that is not this account's, so the API refused it. Nothing was linked. |
 | `privy_user_already_linked` | The identity offered already belongs to another Kash user, so the API refused it. Nothing was linked. |
 
-Release the account and create it again, which gives it a new `accountId`. If it recurs, contact ZeroID support with the `accountId`.
+Release the account and create it again with a new `Idempotency-Key`, which gives it a new `accountId`. If it recurs, contact ZeroID support with the `accountId`.
 
 ## Read and find accounts
 

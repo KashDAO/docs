@@ -49,7 +49,7 @@ Each account must be one of yours and `active`. ZeroID sends the test USDC strai
 
 The Relay bridge has no route from Solana devnet, so on staging a withdrawal or a withdrawal quote to an Arc destination is refused with `422 DESTINATION_NOT_SUPPORTED` and the detail "Withdrawals to Arc are not available in this environment.", after the checks that come before the bridge (the Arc minimum, the network fee and the balance). Creating an account with an Arc destination, or changing to one, works on staging; only withdrawing to it does not. To test withdrawals end to end on staging, give a test account a Solana destination.
 
-The Arc lane is identical to the Solana lane up to the bridge: the same request, statuses and webhooks, plus `bridging` and the `bridge_refunded` and `bridge_failed` outcomes.
+The Arc lane is identical to the Solana lane up to the bridge: the same request, statuses and webhooks, plus the `bridge_refunded` and `bridge_failed` outcomes. An Arc withdrawal stays `confirming` until the bridge has delivered.
 
 In production, use Solana destinations until ZeroID tells you that withdrawals to Arc are open. Plan your first production Arc withdrawal as a small amount.
 

@@ -38,6 +38,9 @@ curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/quote?amountAtomic=2500
     "receiveAtomic": "2490000",
     "receiveEstimated": true,
     "estimatedSeconds": 30,
+    "networkFeeAtomic": "127200",
+    "networkFeeEstimated": true,
+    "totalDebitAtomic": "2627200",
     "maxAmountAtomic": "24980000"
   },
   "data": { "...": "the same quote" },
@@ -49,9 +52,12 @@ curl "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals/quote?amountAtomic=2500
 | ----- | ------- |
 | `amountAtomic` | The amount you would withdraw. |
 | `destination` | The account's registered destination. |
-| `receiveAtomic` | What would arrive. On Solana it is the amount itself when the balance covers the amount plus the most the fee can cost; otherwise the fee may come out of the amount, and this is the amount less 1 USDC (`1000000`), the least that arrives. On Arc it is the least Relay's quote guarantees to deliver, after its fee. |
-| `receiveEstimated` | `true` when `receiveAtomic` is a lower bound: a Solana withdrawal whose fee may come out of the amount (the whole balance, or close to it), and every withdrawal to Arc, where the bridge usually delivers a little more. |
+| `receiveAtomic` | What would arrive. On Solana it is the amount itself when the fee is paid on top, and the amount less `networkFeeAtomic` on a send-all, when the fee comes out of it. On Arc it is the least Relay's quote guarantees to deliver, after its fee. |
+| `receiveEstimated` | `true` when `receiveAtomic` is not guaranteed exactly: a Solana withdrawal whose fee comes out of the amount, or could if the SOL price rose before it is sent (the balance does not cover the amount plus 1 USDC), and every withdrawal to Arc, where the bridge guarantees a minimum and usually delivers more. |
 | `estimatedSeconds` | The bridge's time estimate for Arc. `null` on Solana and when not quoted. |
+| `networkFeeAtomic` | The most the Solana network fee of this withdrawal can cost, including creating the destination's USDC account when it does not exist yet (so a first withdrawal to a destination costs more). For Arc it is the fee of the Solana transfer into the bridge. The account is charged the exact fee when the withdrawal is sent, which is usually less, and never more than 1 USDC. |
+| `networkFeeEstimated` | `true` when `networkFeeAtomic` is an upper bound rather than the exact fee. The exact fee is known only when the withdrawal is sent, so today it is always `true`. |
+| `totalDebitAtomic` | The most that leaves the account's balance: `amountAtomic` plus `networkFeeAtomic` when the fee is on top, and `amountAtomic` itself on a send-all. A withdrawal never debits more than `amountAtomic` plus 1 USDC. |
 | `maxAmountAtomic` | The most the account can withdraw now. To Arc it is `availableAtomic` less the most the network fee can cost, since that fee is paid on top. To Solana it is `availableAtomic`. `0` when no withdrawal is possible. |
 
 The quote and the withdrawal share these checks, with the same codes:
@@ -61,7 +67,9 @@ The quote and the withdrawal share these checks, with the same codes:
 - the balance: `409 INSUFFICIENT_BALANCE`;
 - for Arc, the bridge: `422 DESTINATION_NOT_SUPPORTED` where it has no route, `503 DEPENDENCY_UNAVAILABLE` when it would cost more than the API allows or cannot be priced.
 
-Only the withdrawal also checks that the account is `active` (a suspended account can be quoted but not withdrawn from), the 24-hour hold after a destination change (`409 WITHDRAWALS_HELD`) and the `Idempotency-Key`. A quote is therefore not a promise that the withdrawal will be accepted. A quote moves nothing. Show your users `receiveAtomic` before they confirm.
+Only the withdrawal also checks that the account is `active` (a suspended account can be quoted but not withdrawn from), the 24-hour hold after a destination change (`409 WITHDRAWALS_HELD`) and the `Idempotency-Key`. A quote is therefore not a promise that the withdrawal will be accepted. A quote moves nothing. Show your users `receiveAtomic`, `networkFeeAtomic` and `totalDebitAtomic` before they confirm.
+
+The quote always carries `networkFeeAtomic`, `networkFeeEstimated` and `totalDebitAtomic`, and every withdrawal carries `networkFeeAtomic`. `@kashdao/sdk` 0.4.0 types these fields as optional so that it also reads an API release without them; treat an absent value as not disclosed, never as zero.
 
 ## Request a withdrawal
 
@@ -88,6 +96,7 @@ The answer is `202 Accepted` with the withdrawal in `pending`. It completes late
     "status": "pending",
     "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
     "transactionHash": null,
+    "networkFeeAtomic": null,
     "destinationTransactionHash": null,
     "createdAt": "2026-11-06T11:00:00.000Z",
     "updatedAt": "2026-11-06T11:00:00.000Z"
@@ -122,11 +131,11 @@ Each refusal is decided before anything is recorded, so nothing moves.
 | -------- | ------- |
 | `pending` | Accepted and queued. |
 | `processing` | Being sent. |
-| `confirming` | Sent; waiting for the Solana network to confirm it. |
-| `bridging` | Arc only: handed to Relay, waiting for delivery on Arc. |
+| `confirming` | Sent; waiting for the Solana network to confirm it, and for Arc until the bridge has delivered. |
 | `completed` | The USDC reached the destination. |
 | `failed` | The withdrawal ended without delivering. |
-| `cancelled` | The withdrawal was cancelled without delivering. |
+
+The `status` enum also lists `bridging` and `cancelled`, which a partner withdrawal does not reach today.
 
 A withdrawal is never failed while its transaction can still land: its end is decided from the chain, and for Arc from Relay's status, never from a timeout. A bridge fill that fails is refunded by Relay to the account's Solana wallet.
 
@@ -138,9 +147,10 @@ A withdrawal is never failed while its transaction can still land: its end is de
 | `deliveredAmountAtomic` | `null` until the transfer is confirmed, then what arrived: the amount itself, except on a withdrawal of the whole balance, where the network fee comes out of it. | Always `null`: the bridge does not report what it delivered. |
 | `minimumDeliveredAtomic` | Always `null`. | `null` until the withdrawal is handed to the bridge, then the least the bridge's quote guarantees to deliver. |
 | `transactionHash` | The Solana transaction, once sent. | The Solana transaction that sent the USDC to the bridge, once sent. |
+| `networkFeeAtomic` | `null` until the transaction is signed, then the network fee charged to the account: on top of the amount, or out of it on a send-all. `0` when Kash paid it. | The fee of the Solana transfer into the bridge, `null` until it is signed. |
 | `destinationTransactionHash` | The same Solana transaction, once completed; `null` before and on failure. | The Arc transaction that delivered the USDC, once known. |
 
-On a failed or cancelled withdrawal, `deliveredAmountAtomic` and `minimumDeliveredAtomic` are both `null`: nothing was delivered.
+On a failed withdrawal, `deliveredAmountAtomic` and `minimumDeliveredAtomic` are both `null`: nothing was delivered. `networkFeeAtomic` is `null` too unless the transaction is known to have landed; a failed Arc withdrawal whose deposit reached the bridge reports the fee it paid.
 
 ## Webhooks
 

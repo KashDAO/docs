@@ -1,16 +1,28 @@
 ---
 title: 'Idempotency'
-description: 'Retry every partner write safely: the Idempotency-Key header, per-account scoping, and the natural keys on accounts, trades and withdrawals.'
+description: 'Retry every partner write safely: what the Idempotency-Key header and clientRequestId each protect, for how long, and the natural keys on accounts, trades and withdrawals.'
 ---
 
-Send an `Idempotency-Key` header on every write, and retry a failed or timed-out write with the **same** key. The general rules are on [Idempotency](/developer-docs/rest-api/idempotency); this page covers what is specific to partner keys.
+Send an `Idempotency-Key` header on every write, and retry a failed or timed-out write with the **same** key. On a trade, also send `clientRequestId` set to your order id: for trades it is what prevents a duplicate, and the header alone is not enough. The general rules are on [Idempotency](/developer-docs/rest-api/idempotency); this page covers what is specific to partner keys.
 
 ## The header
 
 - One key per logical operation, at most 255 characters from `A-Z a-z 0-9 _ - : .`. A UUID works; so does an id from your own system, such as `withdrawal-90311`.
+- While the first request runs, the API holds a claim on the key for **60 seconds**, renewed while that request is still running. The same key in that time is `409 IDEMPOTENCY_REQUEST_IN_PROGRESS`.
 - A `2xx` response is stored for **24 hours**. A retry with the same key and the same request returns the stored response, with its original status and body, plus the header `Idempotent-Replay: true`. Nothing runs again.
-- The same key with a different request is `409 IDEMPOTENCY_KEY_CONFLICT`. The same key while the first request is still running is `409 IDEMPOTENCY_REQUEST_IN_PROGRESS`.
-- Errors are not stored: after a `4xx` or `5xx` you can fix the request and retry with the same key.
+- The same key with a different request is `409 IDEMPOTENCY_KEY_CONFLICT`.
+- Errors are not stored. Any error response releases the key, so you can fix the request and retry with the same key, and that retry runs the route again.
+
+## What makes each write safe to retry
+
+| Write | What makes a retry safe | For how long |
+| ----- | ----------------------- | ------------ |
+| Create an account | `externalId` | Until you release the account. |
+| Trade | `clientRequestId`, set to your own order id | Kept per account, with no time limit. |
+| Withdrawal | `Idempotency-Key` (required), also stored on the withdrawal | For as long as the withdrawal exists. |
+| Any other write | `Idempotency-Key` | The 60-second claim while it runs, then 24 hours for a `2xx`. |
+
+Store the id or key with the pending operation on your side **before** you send the request, and send the same value on every retry of it, including a retry after a timeout or a restart of your process.
 
 ## Scope
 
@@ -31,8 +43,19 @@ So one key used for two of your accounts is two independent requests.
 | `POST .../suspend`, `POST .../reactivate` | honoured | Asking for the status the account already has returns `200` with `_meta.idempotent: true`. |
 | `POST .../release` | honoured | A second release without the key answers `404`: the account is no longer yours. |
 | `POST /v1/partner/accounts/{accountId}/withdrawals` | **required** | The key is also stored on the withdrawal: after 24 hours, a retry with it returns that withdrawal with `200` and `_meta.idempotent: true`, or `409 IDEMPOTENCY_KEY_CONFLICT` for a different amount. |
-| `POST /v1/trades` | honoured | `clientRequestId`, kept on the trade for as long as it exists. |
+| `POST /v1/trades` | honoured, but not enough on its own | `clientRequestId`, kept per account with no time limit. Send it on every trade: see [Trades](#trades). |
 | `POST /v1/redemptions` | honoured | |
+
+## Trades
+
+The key alone cannot always stop a second trade. The API holds a key's claim for 60 seconds, proceeds without one when it cannot record it, and releases it on any error response, including the `503` it sends when a trade was recorded but its event pipeline was down. A retry in any of those cases runs the trade route again.
+
+`clientRequestId` is what makes a retried order safe. Set it to your own order id. The API checks it against the account the trade acts for, with no time limit:
+
+- the same `clientRequestId` with the same body returns the trade already recorded, with `200` and `_meta.idempotent: true`, and places nothing;
+- the same `clientRequestId` with a different body is `409 CLIENT_REQUEST_ID_CONFLICT`.
+
+So after a timeout, a `409 IDEMPOTENCY_REQUEST_IN_PROGRESS` or a `503`, send the same body with the same `clientRequestId`: the API returns the trade if the first request recorded it, and places it if not. With `curl` or any plain HTTP client, send `clientRequestId` yourself on every trade.
 
 ## Creating an account twice
 
@@ -40,7 +63,10 @@ So one key used for two of your accounts is two independent requests.
 | ----- | ------ |
 | Same `Idempotency-Key`, within 24 hours | The stored `202`, with `Idempotent-Replay: true`. |
 | Different `Idempotency-Key`, same `externalId` | `200` with the existing account and `_meta.idempotent: true`. The new body is not applied. |
-| Any key, after the account was released | A new account with a new `accountId`. |
+| A new `Idempotency-Key`, after the account was released | A new account with a new `accountId`. |
+| The released account's `Idempotency-Key`, within 24 hours of the first create | The stored `202` of the released account, which no longer exists for you. |
+
+Use one key per onboarding attempt, for example `onboard-<uuid>`, created when the user opts in and stored with that pending onboarding. Do not derive it from your user id. A key reused for a later, different operation gets the first operation's answer back, so a key such as `create-hsp-user-8841` reused to create the account again after a release returns the released `accountId`. `externalId` already stops a second account for the same user; the key only lets a retry get back the exact first answer.
 
 ## Detecting a replay
 
@@ -48,4 +74,4 @@ A replay returns the stored body unchanged, so its `_meta.idempotent` is whateve
 
 ## With the SDK
 
-`@kashdao/sdk` sends an `Idempotency-Key` on every `POST` automatically and reuses it across its own retries. Pass your own with `{ idempotencyKey }` on `trades.create` when you want the key to survive a restart of your process. In 0.4.0, `partnerAccounts.create` also accepts `{ idempotencyKey }`, and `partnerAccounts.withdrawals.create` requires it.
+`@kashdao/sdk` sends an `Idempotency-Key` on every `POST` automatically and reuses it across its own retries. `trades.create` also sends a `clientRequestId` when you pass none: one per call, the same on every retry of that call, so it protects only that call's own retries. Pass your order id as `clientRequestId` so that a retry after a restart of your process, or a second attempt at the same order by your code, returns the trade already placed. In 0.4.0, `partnerAccounts.create` also accepts `{ idempotencyKey }`, and `partnerAccounts.withdrawals.create` requires it.

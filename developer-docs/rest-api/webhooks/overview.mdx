@@ -127,7 +127,7 @@ app.post('/webhooks/kash',
         process.env.KASH_WEBHOOK_SECRET!,
       );
     } catch (err) {
-      if (err instanceof KashWebhookSignatureError) return res.status(400).send('bad signature');
+      if (err instanceof KashWebhookSignatureError) return res.status(401).send('bad signature');
       throw err;
     }
 
@@ -145,7 +145,7 @@ app.post('/webhooks/kash',
 );
 ```
 
-Responding `400` to a bad signature stops retries of that request, which is right: a forged request should not be retried. To verify without the SDK, see [Verifying signatures](/developer-docs/rest-api/webhooks/verifying).
+Answer `401` to a bad signature, never `400`. The API treats `400`, `404`, `410`, `422` and any `3xx` as final and does not retry them, while a `401` is retried, so a secret that is wrong on your side (a new secret not yet deployed, say) delays deliveries instead of dropping them. A forged request gains nothing from a retry: it fails verification every time. See [Retries & redelivery](/developer-docs/rest-api/webhooks/retries). To verify without the SDK, see [Verifying signatures](/developer-docs/rest-api/webhooks/verifying).
 
 ## Next
 

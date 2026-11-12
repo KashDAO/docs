@@ -37,7 +37,7 @@ Errors use the API's [RFC 7807 problem format](/developer-docs/api-errors/overvi
 | ---- | ------ | ---------- |
 | [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) | 400 | Fix the field named in `detail`. Also returned for a withdrawal without `Idempotency-Key`, and for more than one `Kash-Account` header. |
 | [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) | 409 | The key was used for a different request. Repeat the original, or use a new key. |
-| [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | 409 | The first request with this key is still running. Retry shortly with the same key. |
+| [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | 409 | The first request with this key is still running. Retry shortly with the same key; for a trade, with the same body and `clientRequestId`. |
 | [`IDEMPOTENCY_KEY_TOO_LONG`](/developer-docs/api-errors/IDEMPOTENCY_KEY_TOO_LONG), [`IDEMPOTENCY_KEY_FORMAT_INVALID`](/developer-docs/api-errors/IDEMPOTENCY_KEY_FORMAT_INVALID) | 400 | Use at most 255 characters from `A-Z a-z 0-9 _ - : .`. |
 | [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND) | 404 | A trade or withdrawal that is not this account's, or does not exist. |
 
@@ -62,10 +62,10 @@ A trade that is accepted and later fails reports a lowercase `errorCode` on the 
 | ---- | ------ | ---------- |
 | [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) | 429 | Wait `Retry-After` seconds. See [Rate limits](/developer-docs/partner-integration/rate-limits). |
 | [`RATE_LIMIT_UNAVAILABLE`](/developer-docs/api-errors/RATE_LIMIT_UNAVAILABLE) | 503 | Retry after `Retry-After`. |
-| [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) | 503 | Something the API needed could not be read (a balance, the chain, the bridge price, the account store). Nothing changed. Retry with backoff, with the same `Idempotency-Key`. |
+| [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) | 503 | Something the API needed could not be read (a balance, the chain, the bridge price, the account store). Nothing changed, except on `POST /v1/trades`, where it can also mean the trade was recorded but its event pipeline was down. Retry with backoff, with the same `Idempotency-Key`; for a trade, with the same body and `clientRequestId`, which returns the recorded trade instead of placing another. |
 | [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) | 503 | The route is switched off for now. Retry after `Retry-After`. |
 | [`API_TRADE_PROCESSING_HALTED`](/developer-docs/api-errors/API_TRADE_PROCESSING_HALTED), [`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY) | 503 | Trading is paused or busy. Retry after `Retry-After`. |
-| [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT) | 504 | Retry with the same `Idempotency-Key`: the first request may have completed. |
+| [`REQUEST_TIMEOUT`](/developer-docs/api-errors/REQUEST_TIMEOUT) | 504 | The first request may have completed. Retry with the same `Idempotency-Key`; for a trade, with the same body and `clientRequestId`, which returns the trade if it was placed and places it if not. |
 | [`INTERNAL_ERROR`](/developer-docs/api-errors/INTERNAL_ERROR) | 500 | Retry with backoff; contact ZeroID support with the `requestId` if it persists. |
 
 ## Next
