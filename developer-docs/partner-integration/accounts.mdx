@@ -33,7 +33,7 @@ curl -X POST "$KASH_API/partner/accounts" \
   -d '{
     "externalId": "hsp-user-8841",
     "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
-    "country": "GB",
+    "country": "DE",
     "consent": { "acceptedAt": "2026-11-06T10:15:00Z", "termsVersion": "kash-terms-of-use-2025-06" },
     "email": "user8841@example.com"
   }'
@@ -44,7 +44,7 @@ curl -X POST "$KASH_API/partner/accounts" \
 | `externalId` | yes | Your id for the user, unique within your organisation. 1 to 128 characters, no control characters, no leading or trailing whitespace. Matched exactly, case included. |
 | `destination.network` | yes | `solana` or `arc`. Any other network (1 to 32 characters) is refused with `422 DESTINATION_NOT_SUPPORTED`. |
 | `destination.address` | yes | For `solana`, the user's base58 wallet address, not a token account address. A USDC token account address is refused, except the wallet's own standard USDC account, which Kash resolves to the wallet. For `arc`, a `0x` address of 40 hex characters. An Arc address is stored in lower case. A wrong address for the network is `400 VALIDATION_FAILED`. |
-| `country` | yes | ISO 3166-1 alpha-2 in upper case, such as `GB`. |
+| `country` | yes | ISO 3166-1 alpha-2 in upper case, such as `DE`. |
 | `consent.acceptedAt` | yes | ISO 8601 with a time zone. Not in the future (a few minutes of clock difference are allowed). |
 | `consent.termsVersion` | yes | The version of Kash's [Terms of Use](https://kash.bot/terms-of-use) the user accepted, named from the terms' "Last updated" date, such as `kash-terms-of-use-2025-06`. The user accepts them in your app before you create their account. 1 to 64 characters, no control characters, no leading or trailing whitespace. |
 | `email` | no | A valid address, at most 320 characters. Stored with the account, for reaching the user about it. It is not a login today: the user cannot sign in to Kash with it. |
@@ -61,7 +61,7 @@ The answer is `202 Accepted`. The account starts in `provisioning`, with no depo
     "status": "provisioning",
     "depositAddress": null,
     "destination": { "network": "arc", "address": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23" },
-    "country": "GB",
+    "country": "DE",
     "createdAt": "2026-11-06T10:15:02.000Z"
   },
   "data": { "...": "the same account" },
