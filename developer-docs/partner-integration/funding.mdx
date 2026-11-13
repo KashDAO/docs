@@ -80,9 +80,11 @@ console.log(portfolio, positions.length);
 
 ## Winnings
 
-When a market resolves, the account's winnings are paid into its wallet automatically, and you receive [`payout.completed`](/developer-docs/partner-integration/webhooks#payout-events) with the amount that arrived. It is how you learn that an account's balance rose after a resolution.
+Winnings are claimed. When a market resolves, a winning position stays in the account until it is claimed, and when a market is cancelled its positions are refunded the same way. Give your users a way to claim, such as a button on the position.
 
-If automatic payouts are ever paused, a winning position can be claimed with `POST /v1/redemptions` and the `Kash-Account` header, as for any user. See [Portfolio & redemptions](/developer-docs/rest-api/endpoints/portfolio-and-redemptions).
+To claim, call `POST /v1/redemptions` with the `Kash-Account` header, the position's `marketId` and `outcomeIndex`, and an `Idempotency-Key`. Kash redeems the position on-chain and pays the USDC into the account's wallet, usually within seconds, and you receive [`payout.completed`](/developer-docs/partner-integration/webhooks#payout-events) with the amount that arrived. A small Solana network fee for the redemption may be deducted from the amount paid. See [Portfolio & redemptions](/developer-docs/rest-api/endpoints/portfolio-and-redemptions).
+
+`GET /v1/portfolio/positions` lists the account's positions, and `GET /v1/markets/{id}` shows whether each market has resolved and which outcome won. A claim for a position that has nothing to claim is refused with `POSITION_NOT_CLAIMABLE`. Winnings left unclaimed may later be paid out by Kash without a claim, and you receive `payout.completed` in the same way.
 
 ## Next
 

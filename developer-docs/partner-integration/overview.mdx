@@ -29,7 +29,7 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 | Accounts | Collect each user's consent and true country, then create the account. | Sets up the account and its Solana wallet, and tells you when it is ready. |
 | Funding | Move each user's USDC from wherever your platform holds it to the account's Solana deposit address. | Does not bridge funds in, and does not notify you of deposits. |
 | Trading | Send the user's trade instructions. | Executes them on the Kash protocol and reports each outcome by webhook. |
-| Winnings | Nothing. | Pays a resolved market's winnings into the account automatically and sends `payout.completed`. |
+| Winnings | Let users claim their winnings, and send each claim. | Redeems the position on-chain, pays the USDC into the account and sends `payout.completed`. |
 | Withdrawals | Request them, with an amount. | Sends the USDC to the destination you registered: directly on Solana, or through the Relay bridge to Arc. |
 | Network fees | Nothing for trades. | ZeroID pays the Solana network fee of trades. A withdrawal's network fee is charged to the account in USDC (see [Withdrawals](/developer-docs/partner-integration/withdrawals)). |
 | Support | Support your users for everything on your side, including moving their funds into their accounts. | ZeroID support helps you with the API and your accounts. |

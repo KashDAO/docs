@@ -23,7 +23,7 @@ ZeroID sets the URL on the key and delivers its secret; you can rotate the secre
 | [`withdrawal.submitted`](#withdrawal-events) | A withdrawal was accepted and queued. |
 | [`withdrawal.completed`](#withdrawal-events) | A withdrawal reached its destination. |
 | [`withdrawal.failed`](#withdrawal-events) | A withdrawal ended without delivering. |
-| [`payout.completed`](#payout-events) | Winnings from a resolved market were paid into the account. |
+| [`payout.completed`](#payout-events) | Winnings or a refund were paid into the account, after a claim or paid out by Kash. |
 | [`trade.completed`, `trade.failed`, `trade.rejected`](#trade-events) | A trade ended. |
 
 ## Envelope and headers
@@ -158,7 +158,7 @@ Adds `status` (`failed` or `cancelled`, as `GET .../withdrawals/{withdrawalId}` 
 
 ### `payout.completed`
 
-Winnings from a resolved market were paid into the account. `amountAtomic` is what arrived in the wallet. This is how you learn that an account's balance rose after a resolution.
+Winnings from a resolved market, or a refund from a cancelled one, were paid into the account: after your `POST /v1/redemptions` claim, or when Kash paid out unclaimed winnings. `amountAtomic` is what arrived in the wallet, after any network fee.
 
 ```json
 {

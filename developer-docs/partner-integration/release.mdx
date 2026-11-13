@@ -11,7 +11,7 @@ Users have no Kash login yet, so a released account's funds would be out of thei
 
 <Steps>
   <Step title="Close its positions">
-    Sell open positions, or wait for their markets to resolve. `GET /v1/portfolio/positions` with `Kash-Account` lists them. Winnings are paid in automatically when a market resolves.
+    Sell open positions, or wait for their markets to resolve. `GET /v1/portfolio/positions` with `Kash-Account` lists them. Once a market resolves, claim any winnings with `POST /v1/redemptions` (see [Winnings](/developer-docs/partner-integration/funding#winnings)).
   </Step>
   <Step title="Withdraw the USDC">
     Read `maxAmountAtomic` from the [withdrawal quote](/developer-docs/partner-integration/withdrawals#quote-first) and withdraw it. Wait for `withdrawal.completed`.

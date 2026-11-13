@@ -132,7 +132,7 @@ You can also read a trade with `GET /v1/trades/{id}`, list the account's trades 
 ## Selling and redeeming
 
 - **Sell** with `side: "sell"` and the USDC amount, as for any key. A sell of an outcome the account does not hold fails with `errorCode: "no_position"`, and repeating that sell within the hour, before anything gives the account a position, can be refused at once with `422 NO_POSITION`.
-- **Winnings** from a resolved market are paid into the account automatically, and you receive `payout.completed`. If automatic payouts are paused, claim with `POST /v1/redemptions` and the `Kash-Account` header.
+- **Winnings** from a resolved market, and refunds from a cancelled one, are claimed with `POST /v1/redemptions` and the `Kash-Account` header, and you then receive `payout.completed` with the amount paid. See [Winnings](/developer-docs/partner-integration/funding#winnings).
 
 ## Next
 
