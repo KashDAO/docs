@@ -158,9 +158,9 @@ import { randomUUID } from 'node:crypto';
 
 let lastAfter: string | null = null;      // store it with the conversation on your side
 
-const conversation = await kash.marketConversations.start({ idempotencyKey: randomUUID() });
+const { conversation } = await kash.marketConversations.start({ idempotencyKey: randomUUID() });
 
-const message = await kash.marketConversations.sendMessage(
+const { message } = await kash.marketConversations.sendMessage(
   conversation.id,
   {
     content: 'Will Calgary get more than 10 cm of snow on 1 December 2026?',
@@ -170,7 +170,7 @@ const message = await kash.marketConversations.sendMessage(
 );
 
 const reply = await kash.marketConversations.waitForReply(conversation.id, {
-  messageId: message.id,
+  message,                                 // what sendMessage returned
   after: lastAfter,                        // the position you kept from your last read
 });
 
@@ -189,8 +189,8 @@ Every method needs a key with the `markets:write` scope. A partner passes the us
 
 | Method | Route | Returns |
 | ------ | ----- | ------- |
-| `start(opts?)` | `POST /v1/market-conversations` | `{ id, createdAt, idempotentReplay }` |
-| `sendMessage(conversationId, { content, declaredAction?, timezone? }, opts?)` | `POST /v1/market-conversations/{conversationId}/messages` | `{ id, conversationId, createdAt, idempotentReplay }` |
+| `start(opts?)` | `POST /v1/market-conversations` | `{ conversation: { id, createdAt }, idempotentReplay }` |
+| `sendMessage(conversationId, { content, declaredAction?, timezone? }, opts?)` | `POST /v1/market-conversations/{conversationId}/messages` | `{ message: { id, conversationId, createdAt }, idempotentReplay }` |
 | `list({ limit?, cursor? }?, opts?)` | `GET /v1/market-conversations` | `Page<{ id, createdAt }>`, newest first |
 | `get(conversationId, opts?)` | `GET /v1/market-conversations/{conversationId}` | The state: `status`, `queuePosition`, `estimatedWaitSeconds`, `readyToPublish`, `marketRequestId`, `latestMessage` |
 | `messages(conversationId, { after?, limit? }?, opts?)` | `GET /v1/market-conversations/{conversationId}/messages` | `TranscriptPage` |
@@ -206,9 +206,9 @@ The write methods take `{ idempotencyKey?, account?, headers?, timeoutMs?, maxRe
 
 - `outcome: 'replied'`: the conversation is `idle` and the assistant's reply to your message is in the transcript. `turns` holds what is new after `after`, one entry per `turnNumber` at its highest `revision`.
 - `outcome: 'failed'`: your message could not be delivered and will get no reply.
-- `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it.
+- `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it. A `message` that is not in the conversation is refused with `KashValidationError` before any wait.
 - `after` in the result is the position to keep for your next read; `state` is the last state it read.
-- Options: `messageId` (the `id` `sendMessage` returned), `after`, `timeoutMs` (default 180 000), `pollIntervalMs` (default 3 000), `onState` (called with each state it reads), `signal` and `account`. Past `timeoutMs` it throws `KashTimeoutError` with code `SDK_POLL_TIMEOUT`: the reply still lands in the transcript, so keep `after` and read later.
+- Options: `message` (the `message` `sendMessage` returned), `after`, `timeoutMs` (default 180 000), `pollIntervalMs` (default 3 000), `onStatus` (called with each state it reads), `signal` and `account`. Past `timeoutMs` it throws `KashTimeoutError` with code `SDK_POLL_TIMEOUT`: the reply still lands in the transcript, so keep `after` and read later.
 - When today's AI drafting budget is used up, the message is still answered: the assistant's turn says so, and the outcome is `replied`.
 
 Each poll is one read against your key's rate limit.

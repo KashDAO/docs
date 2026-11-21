@@ -220,13 +220,13 @@ From `@kashdao/sdk` 0.5.0, step 7 is `kash.marketConversations`, with the same `
 
 ```ts
 // 7. Draft a market with the user (preview; needs markets:write).
-const conversation = await kash.marketConversations.start({ account: accountId, idempotencyKey: randomUUID() });
-const message = await kash.marketConversations.sendMessage(
+const { conversation } = await kash.marketConversations.start({ account: accountId, idempotencyKey: randomUUID() });
+const { message } = await kash.marketConversations.sendMessage(
   conversation.id,
   { content: 'Will Calgary get more than 10 cm of snow on 1 December 2026?', timezone: 'America/Edmonton' },
   { account: accountId, idempotencyKey: randomUUID() },
 );
-const reply = await kash.marketConversations.waitForReply(conversation.id, { messageId: message.id, account: accountId });
+const reply = await kash.marketConversations.waitForReply(conversation.id, { message, account: accountId });
 if (reply.outcome === 'replied') for (const turn of reply.turns) console.log(turn.role, turn.content);
 // Keep reply.after with the conversation and pass it as `after` on the next read.
 ```
