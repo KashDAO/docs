@@ -110,9 +110,9 @@ curl "$KASH_API/market-conversations/$CONVERSATION_ID" -H "X-API-Key: $KASH_API_
 | `marketRequestId` | uuid \| null | The market request this conversation drafted, once one exists. |
 | `latestMessage` | object \| null | The latest message: `id`, `status` and `createdAt`. `status` is `pending` (accepted, not yet handed to the assistant), `published` (handed over) or `failed` (it could not be delivered and will get no reply). |
 
-Your message has been answered when `status` is `idle` and `latestMessage` is your message with `status: "published"`. Then read the transcript. Two other cases:
+Your message has been answered when `status` is `idle` and `latestMessage` is your message and not `failed`. Then read the transcript after the position you hold: the reply is the assistant turn written after your message. A message the assistant has answered can still read `pending`, so go by `status` rather than waiting for `published`. If the reply is not in the transcript yet, read again a moment later. Two other cases:
 
-- **`latestMessage.status` is `failed` and `status` is `idle`.** No reply will come. Send the message again with a new `Idempotency-Key`.
+- **`latestMessage.status` is `failed`.** No reply will come. Send the message again with a new `Idempotency-Key`.
 - **`latestMessage.id` is not your message's `id`.** A later message has been sent to the same conversation, for example by another process of yours. Read the transcript rather than waiting for your own message.
 
 Each read counts against your key's read budget. Poll every few seconds, not in a tight loop.

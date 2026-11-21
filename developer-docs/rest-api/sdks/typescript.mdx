@@ -200,11 +200,11 @@ The write methods take `{ idempotencyKey?, account?, headers?, timeoutMs?, maxRe
 
 **Idempotency.** `start` and `sendMessage` send an `Idempotency-Key` on every call. Without your own, the SDK generates one per call and reuses it on its own retries, so a lost response never starts a second conversation or sends a message twice. Pass your own `idempotencyKey` to cover a retry from another process or after a restart. `idempotentReplay` is `true` when the API answered from its stored record (the `Idempotent-Replay` header). A content refusal is stored too, so a retry with the same key throws the same refusal.
 
-**Reading the transcript.** `messages()` returns a `TranscriptPage`: `data`, `after`, `hasMore`, `getNextPage()`, and async iteration over every page. `after` is where your next read starts: it is never `null` once the conversation has a turn, even when `hasMore` is `false`, so keep it and pass it back. A reply the assistant rewrites comes back after your position with a higher `revision`, so one walk can yield the same `turnNumber` twice: keep the highest `revision`.
+**Reading the transcript.** `messages()` returns a `TranscriptPage`: `data`, `after`, `hasMore`, `getNextPage()`, `pages()` to walk page by page, and async iteration over every turn. `after` is where your next read starts: it is never `null` once the conversation has a turn, even when `hasMore` is `false`, so keep it and pass it back. A reply the assistant rewrites comes back after your position with a higher `revision`, so one walk can yield the same `turnNumber` twice: keep the highest `revision`.
 
 **`waitForReply`** polls `get()` until your message is answered, then reads the transcript after `after`:
 
-- `outcome: 'replied'`: the conversation is `idle` and your message was handed to the assistant. `turns` holds what is new after `after`, one entry per `turnNumber` at its highest `revision`.
+- `outcome: 'replied'`: the conversation is `idle` and the assistant's reply to your message is in the transcript. `turns` holds what is new after `after`, one entry per `turnNumber` at its highest `revision`.
 - `outcome: 'failed'`: your message could not be delivered and will get no reply.
 - `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it.
 - `after` in the result is the position to keep for your next read; `state` is the last state it read.
