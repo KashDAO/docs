@@ -51,7 +51,7 @@ Both URLs are exported as `PRODUCTION_BASE_URL` and `STAGING_BASE_URL`. The key 
 
 Other options: `retryBaseDelayMs` (default 200), `retryMaxDelayMs` (default 10 000), `retryAfterMaxMs` (default 60 000: a server `Retry-After` longer than this surfaces the error instead of sleeping), `headers` (extra default headers such as `traceparent`), `fetch` (custom implementation), `hooks`, `conditionalRequests` (default `true`, see below), `conditionalCacheMaxEntries` (default 256) and `apiVersion`.
 
-The client exposes typed sub-clients: `kash.markets`, `kash.quotes`, `kash.trades`, `kash.redemptions`, `kash.portfolio`, `kash.balance`, `kash.webhooks`, `kash.account` and `kash.traces`, plus `kash.partnerAccounts` for partner keys. A partner acting for one of its users passes `{ account: accountId }` on a call; see [Partner integration](/developer-docs/partner-integration/overview). `kash.healthCheck()` checks connectivity and never throws; it returns `{ ok, latencyMs, status?, version?, requestId? }`.
+The client exposes typed sub-clients: `kash.markets`, `kash.quotes`, `kash.trades`, `kash.redemptions`, `kash.portfolio`, `kash.balance`, `kash.webhooks`, `kash.account` and `kash.traces`, plus `kash.partnerAccounts` for partner keys and, from 0.5.0, `kash.marketConversations` for the [market creation API](#market-creation-preview) (preview). A partner acting for one of its users passes `{ account: accountId }` on a call; see [Partner integration](/developer-docs/partner-integration/overview). `kash.healthCheck()` checks connectivity and never throws; it returns `{ ok, latencyMs, status?, version?, requestId? }`.
 
 ## Read markets
 
@@ -144,6 +144,94 @@ for await (const current of kash.portfolio.watchPositions({ signal: controller.s
 ```
 
 `watchPositions` polls with conditional GETs and backs off while nothing changes (`minIntervalMs` 5 000, `maxIntervalMs` 60 000, `backoffFactor` 2 by default). With `conditionalRequests` on, the client sends `If-None-Match` on repeat GETs and resolves a `304 Not Modified` from its in-memory copy.
+
+## Market creation (preview)
+
+<Warning>
+**Preview, from version 0.5.0.** `kash.marketConversations` wraps the [market creation API](/developer-docs/rest-api/market-creation), which is switched off until it launches. Until then every method throws `KashMaintenanceError` with code `ROUTE_DISABLED`. The methods may still change in a minor version before launch.
+</Warning>
+
+Start a conversation for the user, send their message, and wait for the assistant's reply:
+
+```ts
+import { randomUUID } from 'node:crypto';
+
+let lastAfter: string | null = null;      // store it with the conversation on your side
+
+const conversation = await kash.marketConversations.start({ idempotencyKey: randomUUID() });
+
+const message = await kash.marketConversations.sendMessage(
+  conversation.id,
+  {
+    content: 'Will Calgary get more than 10 cm of snow on 1 December 2026?',
+    timezone: 'America/Edmonton',          // IANA name, for relative dates; defaults to UTC
+  },
+  { idempotencyKey: randomUUID() },        // keep it with the message on your side, and reuse it on retry
+);
+
+const reply = await kash.marketConversations.waitForReply(conversation.id, {
+  messageId: message.id,
+  after: lastAfter,                        // the position you kept from your last read
+});
+
+switch (reply.outcome) {
+  case 'replied':
+    for (const turn of reply.turns) show(turn.role, turn.content);
+    break;
+  case 'failed':                           // the message could not be delivered: send it again with a new key
+  case 'superseded':                       // a later message was sent to this conversation
+    break;
+}
+lastAfter = reply.after;                   // keep it for the next read
+```
+
+Every method needs a key with the `markets:write` scope. A partner passes the user's account as `account` on every call, reads included; the SDK sends it as `Kash-Account`.
+
+| Method | Route | Returns |
+| ------ | ----- | ------- |
+| `start(opts?)` | `POST /v1/market-conversations` | `{ id, createdAt, idempotentReplay }` |
+| `sendMessage(conversationId, { content, declaredAction?, timezone? }, opts?)` | `POST /v1/market-conversations/{conversationId}/messages` | `{ id, conversationId, createdAt, idempotentReplay }` |
+| `list({ limit?, cursor? }?, opts?)` | `GET /v1/market-conversations` | `Page<{ id, createdAt }>`, newest first |
+| `get(conversationId, opts?)` | `GET /v1/market-conversations/{conversationId}` | The state: `status`, `queuePosition`, `estimatedWaitSeconds`, `readyToPublish`, `marketRequestId`, `latestMessage` |
+| `messages(conversationId, { after?, limit? }?, opts?)` | `GET /v1/market-conversations/{conversationId}/messages` | `TranscriptPage` |
+| `waitForReply(conversationId, options)` | polls the two `GET` routes | `{ outcome, state, turns, after }` |
+
+The write methods take `{ idempotencyKey?, account?, headers?, timeoutMs?, maxRetries?, signal? }`; the read methods take `{ account? }` and the same per-call overrides. The SDK lower-cases a conversation id before it builds the path.
+
+**Idempotency.** `start` and `sendMessage` send an `Idempotency-Key` on every call. Without your own, the SDK generates one per call and reuses it on its own retries, so a lost response never starts a second conversation or sends a message twice. Pass your own `idempotencyKey` to cover a retry from another process or after a restart. `idempotentReplay` is `true` when the API answered from its stored record (the `Idempotent-Replay` header). A content refusal is stored too, so a retry with the same key throws the same refusal.
+
+**Reading the transcript.** `messages()` returns a `TranscriptPage`: `data`, `after`, `hasMore`, `getNextPage()`, and async iteration over every page. `after` is where your next read starts: it is never `null` once the conversation has a turn, even when `hasMore` is `false`, so keep it and pass it back. A reply the assistant rewrites comes back after your position with a higher `revision`, so one walk can yield the same `turnNumber` twice: keep the highest `revision`.
+
+**`waitForReply`** polls `get()` until your message is answered, then reads the transcript after `after`:
+
+- `outcome: 'replied'`: the conversation is `idle` and your message was handed to the assistant. `turns` holds what is new after `after`, one entry per `turnNumber` at its highest `revision`.
+- `outcome: 'failed'`: your message could not be delivered and will get no reply.
+- `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it.
+- `after` in the result is the position to keep for your next read; `state` is the last state it read.
+- Options: `messageId` (the `id` `sendMessage` returned), `after`, `timeoutMs` (default 180 000), `pollIntervalMs` (default 3 000), `onState` (called with each state it reads), `signal` and `account`. Past `timeoutMs` it throws `KashTimeoutError` with code `SDK_POLL_TIMEOUT`: the reply still lands in the transcript, so keep `after` and read later.
+- When today's AI drafting budget is used up, the message is still answered: the assistant's turn says so, and the outcome is `replied`.
+
+Each poll is one read against your key's rate limit.
+
+**Errors.** A content refusal is a `KashValidationError` with code `MARKET_CONTENT_REFUSED`. `isMarketContentRefusal(err)` narrows it and types `err.extensions.reason`:
+
+```ts
+import { isMarketContentRefusal, KashRateLimitError, KASH_ERROR_CODE } from '@kashdao/sdk';
+
+try {
+  await kash.marketConversations.sendMessage(conversationId, { content }, { idempotencyKey });
+} catch (err) {
+  if (isMarketContentRefusal(err)) {
+    return askToRephrase(err.message, err.extensions.reason);   // e.g. 'insider_information'
+  }
+  if (err instanceof KashRateLimitError && err.code === KASH_ERROR_CODE.MARKET_CREATION_DAILY_LIMIT_REACHED) {
+    return tryAgainAfter(err.retryAfterSeconds);                  // seconds to 00:00 UTC
+  }
+  throw err;
+}
+```
+
+`KASH_ERROR_CODE` includes `MARKET_CONTENT_REFUSED`, `MARKET_CONVERSATION_NOT_FOUND` (`KashNotFoundError`), `MARKET_CONVERSATION_NOT_WRITABLE` (`KashConflictError`) and `MARKET_CREATION_DAILY_LIMIT_REACHED` (`KashRateLimitError`). A daily limit's `Retry-After` runs to 00:00 UTC, longer than `retryAfterMaxMs`, so the SDK throws it at once instead of waiting.
 
 ## Pagination — async iteration
 

@@ -20,7 +20,7 @@ Idempotency-Key: c2b9a1f8-7e6d-4b3a-9c1e-5f0d8a3b7c2e
 
 Generate one key per logical operation, for example a random UUID. Keys are at most 255 characters from `A-Z a-z 0-9 _ - : .` (`400 IDEMPOTENCY_KEY_TOO_LONG` or `400 IDEMPOTENCY_KEY_FORMAT_INVALID` otherwise).
 
-Honoured on: `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, `POST /v1/markets/{id}/disputes` and `POST /v1/webhooks/events/{eventId}/redeliver`. Keys are scoped per user and per route.
+Honoured on: `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, `POST /v1/markets/{id}/disputes`, `POST /v1/webhooks/events/{eventId}/redeliver`, and the two market conversation writes, `POST /v1/market-conversations` and `POST /v1/market-conversations/{conversationId}/messages` (see [below](#market-conversation-writes)). Keys are scoped per user and per route.
 
 Behaviour:
 
@@ -82,6 +82,16 @@ A trade at or above your key's high-value threshold returns `202` with a one-tim
 ```
 
 Don't retry with the same key and the new body. Either send the original body again to get the original response, or use a new key for the new request.
+
+## Market conversation writes
+
+`POST /v1/market-conversations` and `POST /v1/market-conversations/{conversationId}/messages` (preview) store their answer in the same database transaction as the write, which changes three of the rules above:
+
+- **A content refusal is stored.** A message refused with `422 MARKET_CONTENT_REFUSED` is replayed under the same key like a `201` or `202`. Every other error stores nothing.
+- **An in-progress wait is short.** A retry that waits more than 2 seconds for the first request to finish answers `409 IDEMPOTENCY_REQUEST_IN_PROGRESS` with `Retry-After: 1`.
+- **`_meta.idempotent` is always `false`** on these two routes. Read the `Idempotent-Replay` header.
+
+Without a key, a retry may start a second conversation or send the message twice. See [Market creation](/developer-docs/rest-api/market-creation#retries-and-idempotency).
 
 ## Routes without `Idempotency-Key`
 

@@ -43,6 +43,7 @@ Each key carries a set of scopes, and each route requires one. A key without the
 | ----------------- | ------ |
 | `markets:read`    | `GET /v1/markets`, `GET /v1/markets/{id}`, `GET /v1/markets/{id}/predictions` and `GET /v1/markets/{id}/disputes` |
 | `markets:quote`   | `GET /v1/markets/{id}/quote` |
+| `markets:write`   | Every `/v1/market-conversations` route, reads included: start a conversation, send messages, read its state and transcript. See [Market creation](/developer-docs/rest-api/market-creation). Preview: switched off until launch. |
 | `portfolio:read`  | `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions` |
 | `trades:read`     | `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` |
 | `trades:write`    | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions` and `POST /v1/markets/{id}/disputes` |
@@ -51,6 +52,8 @@ Each key carries a set of scopes, and each route requires one. A key without the
 | `partner:accounts` | Every `/v1/partner/accounts` route. Partner keys only. |
 
 A key created without an explicit scope list gets `markets:read`, `markets:quote` and `portfolio:read`. Choose the scopes you need when you create the key, and no more: a read-only analytics key should never carry `trades:write`.
+
+`markets:write` is never granted by default, and `markets:read` does not open a market conversation. Ask ZeroID to add `markets:write` to your key.
 
 ## Tiers
 

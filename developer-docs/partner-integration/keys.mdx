@@ -75,11 +75,12 @@ A partner key is issued with these scopes by default:
 | `trades:write` | `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `POST /v1/redemptions`, for the account in `Kash-Account` |
 | `webhooks:manage` | `GET /v1/webhooks/events`, `POST /v1/webhooks/events/{eventId}/redeliver` and `POST /v1/auth/api-keys/me/webhook-secret/rotate`: inspect and replay deliveries, and rotate the signing secret from your server. |
 
-One scope is opt-in. Ask ZeroID to add it when the key is issued if you need it:
+Two scopes are opt-in. Ask ZeroID to add them when the key is issued if you need them:
 
 | Scope | What it allows |
 | ----- | -------------- |
 | `auth:manage` | `GET /v1/account/usage` |
+| `markets:write` | Every `/v1/market-conversations` route, reads included, for the account in `Kash-Account`. Preview: see [Market creation](/developer-docs/rest-api/market-creation). |
 
 A call without the route's scope is refused with `403 INSUFFICIENT_SCOPE`.
 

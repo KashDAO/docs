@@ -110,6 +110,42 @@ curl -X POST "$KASH_API/partner/accounts/$ACCOUNT_ID/withdrawals" \
 
 The answer is `202` with the withdrawal in `pending`. You receive `withdrawal.submitted`, then `withdrawal.completed` when the USDC reaches the user's destination.
 
+## 7. Draft a market with the user (preview)
+
+<Note>
+The market creation API is switched off until it launches. Until then these routes answer `503 ROUTE_DISABLED`. Your key needs the `markets:write` scope, which ZeroID adds on request.
+</Note>
+
+Start a market conversation for the account, then send the user's message. Send `Kash-Account` on every call, and a new `Idempotency-Key` for each start and each message:
+
+```bash
+CONVERSATION_ID=$(curl -sX POST "$KASH_API/market-conversations" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{}' | jq -r .data.id)
+
+curl -X POST "$KASH_API/market-conversations/$CONVERSATION_ID/messages" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" \
+  -H "Kash-Account: $ACCOUNT_ID" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{"content": "Will Calgary get more than 10 cm of snow on 1 December 2026?", "timezone": "America/Edmonton"}'
+```
+
+The start answers `201` with the conversation's `id`, and the message `202`. Read the state until `status` is `idle`, then read the transcript, keeping `pagination.after` for the next read:
+
+```bash
+curl "$KASH_API/market-conversations/$CONVERSATION_ID" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" -H "Kash-Account: $ACCOUNT_ID"
+
+curl "$KASH_API/market-conversations/$CONVERSATION_ID/messages" \
+  -H "X-API-Key: $KASH_PARTNER_KEY" -H "Kash-Account: $ACCOUNT_ID"
+```
+
+A conversation is visible only with the `Kash-Account` that started it. See [Market creation](/developer-docs/rest-api/market-creation) for the state, the transcript cursor and the limits.
+
 ## The same with the SDK
 
 This uses `@kashdao/sdk` 0.4.0 (see [SDK](/developer-docs/partner-integration/overview#sdk)). Pass the user's `accountId` as `account` on the calls made for them; the SDK sends it as the `Kash-Account` header. The `partnerAccounts` methods name the account in the path instead.
@@ -179,6 +215,22 @@ console.log('withdrawal', withdrawal.withdrawalId, withdrawal.status);
 ```
 
 To receive and verify the webhooks, see the receiver on [Webhooks](/developer-docs/partner-integration/webhooks#with-the-sdk).
+
+From `@kashdao/sdk` 0.5.0, step 7 is `kash.marketConversations`, with the same `account` option:
+
+```ts
+// 7. Draft a market with the user (preview; needs markets:write).
+const conversation = await kash.marketConversations.start({ account: accountId, idempotencyKey: randomUUID() });
+const message = await kash.marketConversations.sendMessage(
+  conversation.id,
+  { content: 'Will Calgary get more than 10 cm of snow on 1 December 2026?', timezone: 'America/Edmonton' },
+  { account: accountId, idempotencyKey: randomUUID() },
+);
+const reply = await kash.marketConversations.waitForReply(conversation.id, { messageId: message.id, account: accountId });
+if (reply.outcome === 'replied') for (const turn of reply.turns) console.log(turn.role, turn.content);
+// Keep reply.after with the conversation and pass it as `after` on the next read.
+```
+
 
 ## Next
 

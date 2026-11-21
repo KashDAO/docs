@@ -14,7 +14,7 @@ This section is written for the engineers who build that integration. In the exa
 | **Partner organisation** | Your company on Kash. Partner keys, accounts and webhooks all belong to it. |
 | **Partner key** | An API key that belongs to your organisation and has no user of its own. A test key starts `kash_test_` and works on staging; a live key starts `kash_live_` and works in production. See [Keys, approval and IP allowlists](/developer-docs/partner-integration/keys). |
 | **Partner account** | The Kash account of one of your users. You create it with your own id for the user (`externalId`), and the API answers with its `accountId`. See [Accounts](/developer-docs/partner-integration/accounts). |
-| **`Kash-Account` header** | How a partner key says which account a call is for. Send `Kash-Account: <accountId>` on balance, trade, portfolio, position, redemption and trace calls. |
+| **`Kash-Account` header** | How a partner key says which account a call is for. Send `Kash-Account: <accountId>` on balance, trade, portfolio, position, redemption and trace calls, and on market conversation calls. |
 | **Deposit address** | The account's own Solana wallet. You fund it by sending USDC on Solana to this address. |
 | **Destination** | The user's own address in your app, on Solana or on Arc. On Solana it is a wallet address, not a token account address. Withdrawals go only there. |
 
@@ -63,6 +63,10 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
     Ask ZeroID to approve your organisation and send your IP allowlist and production webhook URL. ZeroID issues your live key; then switch your base URL. See the [go-live checklist](/developer-docs/partner-integration/go-live).
   </Step>
 </Steps>
+
+## Market creation (preview)
+
+Your users can also draft markets with the Kash market assistant from your app. Your server starts a market conversation for the user's account, sends the user's messages and reads the assistant's replies, with `Kash-Account` on every call. It needs the `markets:write` scope, which a partner key does not have by default: ask ZeroID to add it. The market creation API is switched off until it launches, and until then its routes answer `503 ROUTE_DISABLED`. See [Market creation](/developer-docs/rest-api/market-creation#for-partners) and the [quickstart](/developer-docs/partner-integration/quickstart).
 
 ## Base URLs
 
