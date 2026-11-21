@@ -1,0 +1,46 @@
+---
+title: 'MARKET_CONTENT_REFUSED'
+description: 'HTTP 422: Message refused by content rules'
+---
+
+**HTTP status:** 422 · **Title:** "Message refused by content rules"
+
+## When it fires
+
+`POST /v1/market-conversations/{conversationId}/messages` when the message breaks Kash's market content rules, the same rules the Kash app applies before a message reaches the market assistant. Nothing was sent, nothing was charged and nothing counts against your message limits.
+
+Example problem body:
+
+```json
+{
+  "type": "https://docs.kash.bot/developer-docs/api-errors/MARKET_CONTENT_REFUSED",
+  "title": "Message refused by content rules",
+  "status": 422,
+  "code": "MARKET_CONTENT_REFUSED",
+  "detail": "i can't draft a market settled on information you say isn't public. use a source anyone can check.",
+  "reason": "insider_information",
+  "instance": "/v1/market-conversations/5b0f6a52-8c1e-4d3a-9f27-6e4b1c0d9a83/messages",
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
+}
+```
+
+## Why it happens
+
+The body's `reason` member names the rule, and `detail` explains it in words you can show the user:
+
+- `personal_harm`: a market about violence against, or the death or self-harm of, a person.
+- `doxxing`: a market that needs a private person's address, phone number or other identifying details.
+- `insider_information`: the user says they hold non-public information about the outcome.
+- `outcome_manipulation`: the user says they will decide or rig the outcome themselves.
+- `profanity`: the message contains profanity.
+
+Kash records each refusal against the API key and the user.
+
+## How to fix
+
+- Show the user the `detail` and ask them to rephrase. Sending the same text again is refused again.
+- Do not retry automatically: the refusal depends only on the text.
+- A retry with the same `Idempotency-Key` returns the same refusal, with `Idempotent-Replay: true`.
+- The TypeScript SDK raises this as `KashValidationError`; `isMarketContentRefusal(err)` narrows it and types `err.extensions.reason`.
+
+See [Market creation](/developer-docs/rest-api/market-creation#content-rules).

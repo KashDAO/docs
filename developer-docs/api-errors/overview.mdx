@@ -35,7 +35,9 @@ the standard fields: for example
 `inFlight` and `maxInFlight` on
 [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED),
 `queueAgeSeconds` on
-[`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY), and
+[`TRADE_ADMISSION_BUSY`](/developer-docs/api-errors/TRADE_ADMISSION_BUSY),
+`reason` on
+[`MARKET_CONTENT_REFUSED`](/developer-docs/api-errors/MARKET_CONTENT_REFUSED), and
 `requested`, `supported` and `current` on
 [`API_VERSION_UNSUPPORTED`](/developer-docs/api-errors/API_VERSION_UNSUPPORTED).
 Each code's page documents its members.
@@ -177,6 +179,7 @@ a realm boundary (for example between a worker and the main thread).
 
 | Code | Title |
 | ---- | ----- |
+| [`MARKET_CONVERSATION_NOT_FOUND`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_FOUND) | Market conversation not found |
 | [`MARKET_NOT_FOUND`](/developer-docs/api-errors/MARKET_NOT_FOUND) | Market not found |
 | [`REDEMPTIONS_NOT_ENABLED`](/developer-docs/api-errors/REDEMPTIONS_NOT_ENABLED) | Redemptions not enabled |
 | [`RESOURCE_NOT_FOUND`](/developer-docs/api-errors/RESOURCE_NOT_FOUND) | Not Found |
@@ -196,6 +199,7 @@ a realm boundary (for example between a worker and the main thread).
 | [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT) | Idempotency key conflict |
 | [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | Idempotency request in progress |
 | [`INSUFFICIENT_BALANCE`](/developer-docs/api-errors/INSUFFICIENT_BALANCE) | Insufficient balance |
+| [`MARKET_CONVERSATION_NOT_WRITABLE`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_WRITABLE) | Market conversation not writable |
 | [`MARKET_NOT_TRADEABLE`](/developer-docs/api-errors/MARKET_NOT_TRADEABLE) | Market not tradeable |
 | [`POSITION_NOT_CLAIMABLE`](/developer-docs/api-errors/POSITION_NOT_CLAIMABLE) | Position not claimable |
 | [`SMART_ACCOUNT_NOT_PROVISIONED`](/developer-docs/api-errors/SMART_ACCOUNT_NOT_PROVISIONED) | Smart account not provisioned |
@@ -214,6 +218,7 @@ a realm boundary (for example between a worker and the main thread).
 
 | Code | Title |
 | ---- | ----- |
+| [`MARKET_CONTENT_REFUSED`](/developer-docs/api-errors/MARKET_CONTENT_REFUSED) | Message refused by content rules |
 | [`MARKET_NOT_DISPUTABLE`](/developer-docs/api-errors/MARKET_NOT_DISPUTABLE) | Market not disputable |
 | [`MARKET_NOT_QUOTABLE`](/developer-docs/api-errors/MARKET_NOT_QUOTABLE) | Market not quotable |
 
@@ -221,6 +226,7 @@ a realm boundary (for example between a worker and the main thread).
 
 | Code | Title |
 | ---- | ----- |
+| [`MARKET_CREATION_DAILY_LIMIT_REACHED`](/developer-docs/api-errors/MARKET_CREATION_DAILY_LIMIT_REACHED) | Daily market creation limit reached |
 | [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) | Too Many Requests |
 | [`TRADE_IN_FLIGHT_LIMIT_EXCEEDED`](/developer-docs/api-errors/TRADE_IN_FLIGHT_LIMIT_EXCEEDED) | Too many trades in flight |
 | [`WEBHOOK_REPLAY_LIMIT_REACHED`](/developer-docs/api-errors/WEBHOOK_REPLAY_LIMIT_REACHED) | Replay limit reached |

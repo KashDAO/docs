@@ -1,0 +1,30 @@
+---
+title: 'MARKET_CONVERSATION_NOT_FOUND'
+description: 'HTTP 404: Market conversation not found'
+---
+
+**HTTP status:** 404 · **Title:** "Market conversation not found"
+
+## When it fires
+
+A `/v1/market-conversations/{conversationId}` request names a conversation your API key cannot see.
+
+## Why it happens
+
+- The id is mistyped, or belongs to another environment (a staging id used against production, or the other way round).
+- The id is in upper case. The API matches conversation ids in lower case only, as it returns them.
+- Another user's key started it, or another organisation's partner key did.
+- A partner key started it and you are calling with the user's own key, or the other way round. A conversation belongs to the kind of key that started it: a user key sees the conversations user keys started for that user, and a partner key sees the ones its organisation started for the user named in `Kash-Account`.
+- It was started in the Kash app. Conversations from the app are not available through the API.
+
+Kash gives the same answer in every case, so conversation ids cannot be probed.
+
+## How to fix
+
+- Use the `id` returned when you started the conversation, in lower case, or find it with `GET /v1/market-conversations`.
+- Call with a key of the same kind, and for a partner key the same `Kash-Account`, as the one that started it. A new key of the same user or organisation works: rotating a key does not lose its conversations.
+- The TypeScript SDK raises this as `KashNotFoundError`.
+
+## Related codes
+
+- [`MARKET_CONVERSATION_NOT_WRITABLE`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_WRITABLE): 409, the conversation is visible but refused this message.

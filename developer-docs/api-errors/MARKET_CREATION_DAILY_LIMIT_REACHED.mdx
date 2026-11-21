@@ -1,0 +1,44 @@
+---
+title: 'MARKET_CREATION_DAILY_LIMIT_REACHED'
+description: 'HTTP 429: Daily market creation limit reached'
+---
+
+**HTTP status:** 429 · **Title:** "Daily market creation limit reached" · **Retry-After:** until 00:00 UTC
+
+## When it fires
+
+`POST /v1/market-conversations` or `POST /v1/market-conversations/{conversationId}/messages` when the user, or your API key across all its users, has reached today's limit on new market conversations or on market-creation messages. Nothing was written.
+
+Example problem body:
+
+```json
+{
+  "type": "https://docs.kash.bot/developer-docs/api-errors/MARKET_CREATION_DAILY_LIMIT_REACHED",
+  "title": "Daily market creation limit reached",
+  "status": 429,
+  "code": "MARKET_CREATION_DAILY_LIMIT_REACHED",
+  "detail": "This user or API key has sent as many market-creation messages as it may today. Nothing was sent; the limit resets at 00:00 UTC.",
+  "instance": "/v1/market-conversations/5b0f6a52-8c1e-4d3a-9f27-6e4b1c0d9a83/messages",
+  "requestId": "01HQGY8K2N3X4Z5C6D7E8F9G0H"
+}
+```
+
+## Why it happens
+
+- Limits count from 00:00 UTC and reset then. `Retry-After` is the number of seconds until that moment.
+- A user's messages count whether they were sent through the API or in the Kash app.
+- The limits depend on your key's tier. They are set by Kash and are not published.
+
+A replay of a request you already made, with the same `Idempotency-Key`, is never refused and never counted again.
+
+When today's AI drafting budget for your key, or for market creation through the API, is used up, a message is not refused: it is accepted with `202`, and the assistant's reply in the transcript says that the budget is used up and resets at 00:00 UTC.
+
+## How to fix
+
+- Wait for `Retry-After` before trying again. Retrying sooner is refused the same way. Nothing was stored, so a retry with the same `Idempotency-Key` after that is a fresh attempt.
+- If your integration needs higher limits, contact ZeroID about your key's tier.
+- The TypeScript SDK raises this as `KashRateLimitError` with `retryAfterSeconds`. It does not wait for a `Retry-After` longer than its `retryAfterMaxMs` (60 seconds by default), so it throws at once.
+
+## Related codes
+
+- [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED): 429, too many requests in the last minute.

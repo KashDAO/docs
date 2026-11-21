@@ -1,0 +1,24 @@
+---
+title: 'MARKET_CONVERSATION_NOT_WRITABLE'
+description: 'HTTP 409: Market conversation not writable'
+---
+
+**HTTP status:** 409 · **Title:** "Market conversation not writable"
+
+## When it fires
+
+`POST /v1/market-conversations/{conversationId}/messages` when the conversation does not accept a message from this API key for this user. Nothing was sent and nothing counts against your limits.
+
+## Why it happens
+
+It is rare: the conversation was visible when the request arrived, but by the time the message was written the key no longer qualified, for example because it was revoked or expired in between. Kash checks the conversation's owner again where the message is stored, so a message can never reach a conversation that belongs to someone else.
+
+## How to fix
+
+- Check that the key is still live, then send the message again with a live key of the same user, or for a partner the same organisation and `Kash-Account`.
+- If it keeps happening with a live key, contact ZeroID support with the `requestId`.
+- The TypeScript SDK raises this as `KashConflictError`.
+
+## Related codes
+
+- [`MARKET_CONVERSATION_NOT_FOUND`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_FOUND): 404, the key cannot see the conversation at all.
