@@ -88,10 +88,10 @@ Parse atomic amounts as integers (`BigInt` in JavaScript), never as floating-poi
 
 ## SDK
 
-The TypeScript examples in this section use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) version **0.4.0**, the first version with the partner methods (`kash.partnerAccounts`, `kash.balance` and the `account` option for acting for one account) and the partner webhooks. Earlier versions have none of these. Every route also works over plain HTTP, as the `curl` examples show.
+The TypeScript examples in this section use [`@kashdao/sdk`](/developer-docs/rest-api/sdks/typescript) version **0.4.0**, the first version with the partner methods (`kash.partnerAccounts`, `kash.balance` and the `account` option for acting for one account) and the partner webhooks. Earlier versions have none of these. The market creation methods (`kash.marketConversations`) need version **0.5.0**, which the install line below gives you. Every route also works over plain HTTP, as the `curl` examples show.
 
 ```bash
-npm install @kashdao/sdk@^0.4.0
+npm install @kashdao/sdk@^0.5.0
 ```
 
 For a complete working example, the [partner integration sample](https://github.com/KashDAO/partner-integration-sample) creates an account, checks its balance, places a trade, withdraws and receives verified webhooks, one script per step.

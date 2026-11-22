@@ -107,7 +107,7 @@ curl "$KASH_API/market-conversations/$CONVERSATION_ID" -H "X-API-Key: $KASH_API_
 | `queuePosition` | integer \| null | While `queued` behind other conversations: how many are ahead. Approximate. |
 | `estimatedWaitSeconds` | integer \| null | While `queued`: an approximate wait, never a promise. |
 | `readyToPublish` | boolean | The assistant has finished a draft in its latest reply. The API cannot submit it yet: see [What the API does not do yet](#what-the-api-does-not-do-yet). |
-| `marketRequestId` | uuid \| null | The id of the draft market request this conversation has written, once one exists. No API route reads or submits it yet. |
+| `marketRequestId` | uuid \| null | The id of the market request linked to this conversation, once one exists. No API route reads or submits it yet. |
 | `latestMessage` | object \| null | The latest message: `id`, `status` and `createdAt`. `status` is `pending` (accepted, not yet handed to the assistant), `published` (handed over) or `failed` (it could not be delivered and will get no reply). |
 
 Your message has been answered when `status` is `idle` and `latestMessage` is your message and not `failed`. Then read the transcript after the position you hold: the reply is the assistant turn written after your message. A message the assistant has answered can still read `pending`, so go by `status` rather than waiting for `published`. If the reply is not in the transcript yet, read again a moment later. Two other cases:
@@ -271,7 +271,7 @@ See [TypeScript SDK](/developer-docs/rest-api/sdks/typescript#market-creation-pr
 The API stops at the draft. It holds the conversation and reports when the assistant has a draft ready, but it does not yet:
 
 - submit the draft as a market request, or read or change a market request;
-- add the cover image, or quote the market creation fee;
+- generate or read the cover image, or quote the market creation fee;
 - send webhooks about a conversation, so read the state to follow it.
 
 These come in later releases.
