@@ -7,7 +7,7 @@ description: 'HTTP 422: Message refused by content rules'
 
 ## When it fires
 
-`POST /v1/market-conversations/{conversationId}/messages` when the message breaks Kash's market content rules, the same rules the Kash app applies before a message reaches the market assistant. Nothing was sent, nothing was charged and nothing counts against your message limits.
+`POST /v1/market-conversations/{conversationId}/messages` when the message breaks Kash's market content rules, the same rules the Kash app applies before a message reaches the market assistant. Nothing was sent, nothing was charged and nothing counts against your daily limits. It does count toward the 20-a-minute creation limit, which is checked before the message is read.
 
 Example problem body:
 

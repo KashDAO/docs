@@ -148,7 +148,7 @@ for await (const current of kash.portfolio.watchPositions({ signal: controller.s
 ## Market creation (preview)
 
 <Warning>
-**Preview, from version 0.5.0.** `kash.marketConversations` wraps the [market creation API](/developer-docs/rest-api/market-creation), which is switched off until it launches. Until then every method throws `KashMaintenanceError` with code `ROUTE_DISABLED`. The methods may still change in a minor version before launch.
+**Preview, from version 0.5.0.** `kash.marketConversations` wraps the [market creation API](/developer-docs/rest-api/market-creation), which is switched off until it launches. Until then, with a key that holds `markets:write`, every method throws `KashMaintenanceError` with code `ROUTE_DISABLED`; without the scope it throws `KashAuthorizationError` with code `INSUFFICIENT_SCOPE`. The methods may still change in a minor version before launch.
 </Warning>
 
 Start a conversation for the user, send their message, and wait for the assistant's reply:
@@ -200,7 +200,7 @@ The write methods take `{ idempotencyKey?, account?, headers?, timeoutMs?, maxRe
 
 **Idempotency.** `start` and `sendMessage` send an `Idempotency-Key` on every call. Without your own, the SDK generates one per call and reuses it on its own retries, so a lost response never starts a second conversation or sends a message twice. Pass your own `idempotencyKey` to cover a retry from another process or after a restart. `idempotentReplay` is `true` when the API answered from its stored record (the `Idempotent-Replay` header). A content refusal is stored too, so a retry with the same key throws the same refusal.
 
-**Reading the transcript.** `messages()` returns a `TranscriptPage`: `data`, `after`, `hasMore`, `getNextPage()`, `pages()` to walk page by page, and async iteration over every turn. `after` is where your next read starts: it is never `null` once the conversation has a turn, even when `hasMore` is `false`, so keep it and pass it back. A reply the assistant rewrites comes back after your position with a higher `revision`, so one walk can yield the same `turnNumber` twice: keep the highest `revision`.
+**Reading the transcript.** `messages()` returns a `TranscriptPage`: `data`, `after`, `hasMore`, `getNextPage()`, `pages()` to walk page by page, and async iteration over every turn. `after` is where your next read starts, even when `hasMore` is `false`, so keep it and pass it back. It is `null` only when you passed no `after` and the page has no turns (before the first turn, or while the assistant is writing one): then read from the start again next time. A reply the assistant rewrites comes back after your position with a higher `revision`, so one walk can yield the same `turnNumber` twice: keep the highest `revision`.
 
 **`waitForReply`** polls `get()` until your message is answered, then reads the transcript after `after`:
 

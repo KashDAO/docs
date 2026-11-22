@@ -113,7 +113,7 @@ The answer is `202` with the withdrawal in `pending`. You receive `withdrawal.su
 ## 7. Draft a market with the user (preview)
 
 <Note>
-The market creation API is switched off until it launches. Until then these routes answer `503 ROUTE_DISABLED`. Your key needs the `markets:write` scope, which ZeroID adds on request.
+The market creation API is switched off until it launches. Your key needs the `markets:write` scope, which ZeroID adds on request. Until then these routes answer `503 ROUTE_DISABLED` to a key with that scope, and `403 INSUFFICIENT_SCOPE` to a key without it.
 </Note>
 
 Start a market conversation for the account, then send the user's message. Send `Kash-Account` on every call, and a new `Idempotency-Key` for each start and each message:

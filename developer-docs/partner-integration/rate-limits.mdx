@@ -15,6 +15,10 @@ The per-account limit means one of your users cannot use up your whole allowance
 
 Read routes and write routes draw from **separate** budgets at these limits: `GET` routes use a sliding window, and rate-limited `POST` and `PATCH` routes use a token bucket that allows short bursts. The [endpoint reference](/developer-docs/rest-api/endpoint-reference) shows each route's class.
 
+## Market creation limits
+
+The [market creation](/developer-docs/rest-api/market-creation) routes (preview) have limits of their own on top of these: 20 creation requests a minute for each account, and daily limits on new conversations and messages (`429 MARKET_CREATION_DAILY_LIMIT_REACHED`). See [Market creation limits](/developer-docs/rest-api/rate-limits#market-creation-limits).
+
 ## Headers
 
 Every rate-limited response carries the state of the budget closest to running out:

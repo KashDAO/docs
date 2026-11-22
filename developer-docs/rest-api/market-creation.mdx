@@ -4,7 +4,7 @@ description: 'Draft a market with the Kash market assistant from your own app: s
 ---
 
 <Warning>
-**Preview.** The market creation API is switched off until it launches. Until then every route on this page answers `503 ROUTE_DISABLED`. The routes and the SDK methods may still change before launch.
+**Preview.** The market creation API is switched off until it launches. Until then a key that holds `markets:write` gets `503 ROUTE_DISABLED` from every route on this page, and a key without it gets `403 INSUFFICIENT_SCOPE`. The routes and the SDK methods may still change before launch.
 </Warning>
 
 The market creation API lets your server hold the conversation a user would have with the market assistant in the Kash app. You start a conversation for the user, send their messages, and read the assistant's replies, which draft the market. Market text (title, description, resolution criteria and outcome labels) is drafted in English whatever language the user writes in.
@@ -106,8 +106,8 @@ curl "$KASH_API/market-conversations/$CONVERSATION_ID" -H "X-API-Key: $KASH_API_
 | `status` | enum | `queued`: a message is waiting to be picked up. `working`: a reply is being written. `idle`: nothing is in flight. |
 | `queuePosition` | integer \| null | While `queued` behind other conversations: how many are ahead. Approximate. |
 | `estimatedWaitSeconds` | integer \| null | While `queued`: an approximate wait, never a promise. |
-| `readyToPublish` | boolean | The latest reply holds a draft ready to submit as a market request. |
-| `marketRequestId` | uuid \| null | The market request this conversation drafted, once one exists. |
+| `readyToPublish` | boolean | The assistant has finished a draft in its latest reply. The API cannot submit it yet: see [What the API does not do yet](#what-the-api-does-not-do-yet). |
+| `marketRequestId` | uuid \| null | The id of the draft market request this conversation has written, once one exists. No API route reads or submits it yet. |
 | `latestMessage` | object \| null | The latest message: `id`, `status` and `createdAt`. `status` is `pending` (accepted, not yet handed to the assistant), `published` (handed over) or `failed` (it could not be delivered and will get no reply). |
 
 Your message has been answered when `status` is `idle` and `latestMessage` is your message and not `failed`. Then read the transcript after the position you hold: the reply is the assistant turn written after your message. A message the assistant has answered can still read `pending`, so go by `status` rather than waiting for `published`. If the reply is not in the transcript yet, read again a moment later. Two other cases:
@@ -115,7 +115,7 @@ Your message has been answered when `status` is `idle` and `latestMessage` is yo
 - **`latestMessage.status` is `failed`.** No reply will come. Send the message again with a new `Idempotency-Key`.
 - **`latestMessage.id` is not your message's `id`.** A later message has been sent to the same conversation, for example by another process of yours. Read the transcript rather than waiting for your own message.
 
-Each read counts against your key's read budget. Poll every few seconds, not in a tight loop.
+Each read counts against your key's read budget. Poll every few seconds.
 
 ## Read the transcript
 
@@ -162,7 +162,8 @@ The user's messages and the assistant's replies, oldest first. Omit `after` to r
 `pagination.after` works differently from the cursor on other lists:
 
 - It is always the position after the last turn you have seen. Pass it as `after` to read only what follows.
-- It is `null` only before the conversation has any turn. Once a turn exists it is never `null`, even when `hasMore` is `false`. Keep it: it is where your next read starts.
+- On a page with no turns it repeats the `after` you sent, even when `hasMore` is `false`. Keep it: it is where your next read starts.
+- It is `null` only when you sent no `after` and the page has no turns: before the conversation has any turn, or while the assistant is writing one. `null` means read from the start, so omit `after` next time.
 - A reply the assistant rewrites after you read it comes back after your position with a higher `revision`. Keep one entry per `turnNumber`, the one with the highest `revision`.
 - An `after` that is malformed or from another list is refused with `400 VALIDATION_FAILED`.
 
@@ -265,24 +266,34 @@ if (reply.outcome === 'replied') {
 
 See [TypeScript SDK](/developer-docs/rest-api/sdks/typescript#market-creation-preview).
 
+## What the API does not do yet
+
+The API stops at the draft. It holds the conversation and reports when the assistant has a draft ready, but it does not yet:
+
+- submit the draft as a market request, or read or change a market request;
+- add the cover image, or quote the market creation fee;
+- send webhooks about a conversation, so read the state to follow it.
+
+These come in later releases.
+
 ## Errors
 
 | Status | `code` | When |
 | ------ | ------ | ---- |
-| 400 | `VALIDATION_FAILED` | A body, query or `after` the route does not accept. |
-| 400 | `ACCOUNT_HEADER_NOT_ALLOWED` | A user key sent `Kash-Account`. |
-| 400 | `ACCOUNT_HEADER_REQUIRED` | A partner key sent no `Kash-Account`. |
-| 403 | `INSUFFICIENT_SCOPE` | The key lacks `markets:write`. |
-| 404 | `ACCOUNT_NOT_FOUND` | `Kash-Account` names no account of your organisation. |
+| 400 | [`VALIDATION_FAILED`](/developer-docs/api-errors/VALIDATION_FAILED) | A body, query or `after` the route does not accept. |
+| 400 | [`ACCOUNT_HEADER_NOT_ALLOWED`](/developer-docs/api-errors/ACCOUNT_HEADER_NOT_ALLOWED) | A user key sent `Kash-Account`. |
+| 400 | [`ACCOUNT_HEADER_REQUIRED`](/developer-docs/api-errors/ACCOUNT_HEADER_REQUIRED) | A partner key sent no `Kash-Account`. |
+| 403 | [`INSUFFICIENT_SCOPE`](/developer-docs/api-errors/INSUFFICIENT_SCOPE) | The key lacks `markets:write`. |
+| 404 | [`ACCOUNT_NOT_FOUND`](/developer-docs/api-errors/ACCOUNT_NOT_FOUND) | `Kash-Account` names no account of your organisation. |
 | 404 | [`MARKET_CONVERSATION_NOT_FOUND`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_FOUND) | The key cannot see the conversation. |
 | 409 | [`MARKET_CONVERSATION_NOT_WRITABLE`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_WRITABLE) | The key can no longer start a conversation for this user, or the conversation was visible but refused this message. Rare. |
-| 409 | `ACCOUNT_NOT_ACTIVE` | The partner account is still being set up, or is suspended and cannot start a conversation or send a message. |
-| 409 | `IDEMPOTENCY_KEY_CONFLICT`, `IDEMPOTENCY_REQUEST_IN_PROGRESS` | See [Retries and idempotency](#retries-and-idempotency). |
+| 409 | [`ACCOUNT_NOT_ACTIVE`](/developer-docs/api-errors/ACCOUNT_NOT_ACTIVE) | The partner account is still being set up, or is suspended and cannot start a conversation or send a message. |
+| 409 | [`IDEMPOTENCY_KEY_CONFLICT`](/developer-docs/api-errors/IDEMPOTENCY_KEY_CONFLICT), [`IDEMPOTENCY_REQUEST_IN_PROGRESS`](/developer-docs/api-errors/IDEMPOTENCY_REQUEST_IN_PROGRESS) | See [Retries and idempotency](#retries-and-idempotency). |
 | 422 | [`MARKET_CONTENT_REFUSED`](/developer-docs/api-errors/MARKET_CONTENT_REFUSED) | The message breaks the market content rules. |
 | 429 | [`MARKET_CREATION_DAILY_LIMIT_REACHED`](/developer-docs/api-errors/MARKET_CREATION_DAILY_LIMIT_REACHED) | A daily limit is reached. `Retry-After` runs to 00:00 UTC. |
-| 429 | `RATE_LIMIT_EXCEEDED` | Past 20 creation requests a minute for the user, or your key's request rate. |
-| 503 | `ROUTE_DISABLED` | The market creation API is switched off. |
-| 503 | `DEPENDENCY_UNAVAILABLE` | Retry shortly. See [Retries and idempotency](#retries-and-idempotency). |
+| 429 | [`RATE_LIMIT_EXCEEDED`](/developer-docs/api-errors/RATE_LIMIT_EXCEEDED) | Past 20 creation requests a minute for the user, or your key's request rate. |
+| 503 | [`ROUTE_DISABLED`](/developer-docs/api-errors/ROUTE_DISABLED) | The market creation API is switched off. Only a key with `markets:write` gets this answer. |
+| 503 | [`DEPENDENCY_UNAVAILABLE`](/developer-docs/api-errors/DEPENDENCY_UNAVAILABLE) | Retry shortly. See [Retries and idempotency](#retries-and-idempotency). |
 
 ## Next
 

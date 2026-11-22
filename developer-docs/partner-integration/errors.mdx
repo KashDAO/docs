@@ -56,6 +56,17 @@ Errors use the API's [RFC 7807 problem format](/developer-docs/api-errors/overvi
 
 A trade that is accepted and later fails reports a lowercase `errorCode` on the trade and in its webhook (`insufficient_balance`, `slippage` and so on). Those are outcome codes, a different set from the REST codes on this page.
 
+## Market creation (preview)
+
+| Code | Status | What to do |
+| ---- | ------ | ---------- |
+| [`MARKET_CONVERSATION_NOT_FOUND`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_FOUND) | 404 | Use the conversation id in lower case, with the `Kash-Account` that started it. |
+| [`MARKET_CONVERSATION_NOT_WRITABLE`](/developer-docs/api-errors/MARKET_CONVERSATION_NOT_WRITABLE) | 409 | Rare. Check the key and that the account is `active`, then try again. |
+| [`MARKET_CONTENT_REFUSED`](/developer-docs/api-errors/MARKET_CONTENT_REFUSED) | 422 | Show the user the `detail` and ask them to rephrase. Do not retry the same text. |
+| [`MARKET_CREATION_DAILY_LIMIT_REACHED`](/developer-docs/api-errors/MARKET_CREATION_DAILY_LIMIT_REACHED) | 429 | Wait `Retry-After`, which runs to 00:00 UTC. |
+
+See [Market creation](/developer-docs/rest-api/market-creation#errors).
+
 ## Limits and availability
 
 | Code | Status | What to do |

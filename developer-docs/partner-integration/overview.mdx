@@ -66,7 +66,7 @@ One key acts for every one of your users, the pattern of Stripe Connect's `Strip
 
 ## Market creation (preview)
 
-Your users can also draft markets with the Kash market assistant from your app. Your server starts a market conversation for the user's account, sends the user's messages and reads the assistant's replies, with `Kash-Account` on every call. It needs the `markets:write` scope, which a partner key does not have by default: ask ZeroID to add it. The market creation API is switched off until it launches, and until then its routes answer `503 ROUTE_DISABLED`. See [Market creation](/developer-docs/rest-api/market-creation#for-partners) and the [quickstart](/developer-docs/partner-integration/quickstart).
+Your users can also draft markets with the Kash market assistant from your app. Your server starts a market conversation for the user's account, sends the user's messages and reads the assistant's replies, with `Kash-Account` on every call. It needs the `markets:write` scope, which a partner key does not have by default: ask ZeroID to add it. The market creation API is switched off until it launches. Until then its routes answer `503 ROUTE_DISABLED` to a key that holds `markets:write`, and `403 INSUFFICIENT_SCOPE` to a key without it. See [Market creation](/developer-docs/rest-api/market-creation#for-partners) and the [quickstart](/developer-docs/partner-integration/quickstart).
 
 ## Base URLs
 

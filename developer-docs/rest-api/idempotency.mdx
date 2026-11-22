@@ -85,7 +85,7 @@ Don't retry with the same key and the new body. Either send the original body ag
 
 ## Market conversation writes
 
-`POST /v1/market-conversations` and `POST /v1/market-conversations/{conversationId}/messages` (preview) store their answer in the same database transaction as the write, which changes three of the rules above:
+`POST /v1/market-conversations` and `POST /v1/market-conversations/{conversationId}/messages` (preview) store their answer together with the write, which changes three of the rules above:
 
 - **A content refusal is stored.** A message refused with `422 MARKET_CONTENT_REFUSED` is replayed under the same key like a `201` or `202`. Every other error stores nothing.
 - **An in-progress wait is short.** A retry that waits more than 2 seconds for the first request to finish answers `409 IDEMPOTENCY_REQUEST_IN_PROGRESS` with `Retry-After: 1`.
