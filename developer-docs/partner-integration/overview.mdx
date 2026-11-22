@@ -96,12 +96,12 @@ npm install @kashdao/sdk@^0.5.0
 
 For a complete working example, the [partner integration sample](https://github.com/KashDAO/partner-integration-sample) creates an account, checks its balance, places a trade, withdraws and receives verified webhooks, one script per step.
 
-| Import from | What it holds |
-| ----------- | ------------- |
-| `@kashdao/sdk` | `KashClient`, errors and error codes, guards, and the types of markets, trades, quotes, portfolio, traces and webhooks. Most integrations import only from here. |
-| `@kashdao/sdk/partner` | Types of the partner surface: accounts, balances, withdrawals and their results. Types only; the methods are on `KashClient`. |
-| `@kashdao/sdk/schemas` | Every Zod schema, for validating data yourself. The client already validates each response with them. |
-| `@kashdao/sdk/webhooks` | The partner webhook payload types and schemas. |
+| Import from             | What it holds                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kashdao/sdk`          | `KashClient`, errors and error codes, guards, and the types of markets, trades, quotes, portfolio, traces and webhooks. Most integrations import only from here. |
+| `@kashdao/sdk/partner`  | Types of the partner surface: accounts, balances, withdrawals and their results. Types only; the methods are on `KashClient`.                                    |
+| `@kashdao/sdk/schemas`  | Zod schemas, for validating data yourself (market creation's are on `@kashdao/sdk/market-conversations`). The client already validates each response with them.  |
+| `@kashdao/sdk/webhooks` | The partner webhook payload types and schemas.                                                                                                                   |
 
 The SDK picks the base URL from the key's prefix.
 

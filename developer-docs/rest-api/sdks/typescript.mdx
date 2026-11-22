@@ -14,13 +14,14 @@ pnpm add @kashdao/sdk
 
 This page describes version 0.5.0. It is published on npm, with its source and release notes in [KashDAO/sdk-typescript](https://github.com/KashDAO/sdk-typescript).
 
-| Import from             | What it holds                                                                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `@kashdao/sdk`          | `KashClient`, errors and error codes, guards, chain references, and the types of markets, trades, quotes, portfolio, traces and webhooks |
-| `@kashdao/sdk/partner`  | Types of the partner surface: accounts, balances, withdrawals and their results (the methods are on `KashClient`)                        |
-| `@kashdao/sdk/schemas`  | Every Zod schema, for validating data yourself; the client already validates each response with them                                     |
-| `@kashdao/sdk/webhooks` | Partner webhook payload types and schemas                                                                                                |
-| `@kashdao/sdk/testing`  | A fixture-driven mock client and a test webhook signer                                                                                   |
+| Import from                         | What it holds                                                                                                                                                  |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kashdao/sdk`                      | `KashClient`, errors and error codes, guards, chain references, and the types of markets, trades, quotes, portfolio, traces and webhooks                       |
+| `@kashdao/sdk/partner`              | Types of the partner surface: accounts, balances, withdrawals and their results (the methods are on `KashClient`)                                              |
+| `@kashdao/sdk/schemas`              | Zod schemas, for validating data yourself (market creation's are on `@kashdao/sdk/market-conversations`); the client already validates each response with them |
+| `@kashdao/sdk/webhooks`             | Partner webhook payload types and schemas                                                                                                                      |
+| `@kashdao/sdk/market-conversations` | Types and schemas of the market creation API, and `isMarketContentRefusal` (the methods are on `KashClient` as `kash.marketConversations`)                     |
+| `@kashdao/sdk/testing`              | A fixture-driven mock client and a test webhook signer                                                                                                         |
 
 Most integrations import only from `@kashdao/sdk`. Upgrading from 0.3: the Zod schemas moved from `@kashdao/sdk` to `@kashdao/sdk/schemas` under the same names; the types inferred from them stay on the root.
 
@@ -216,7 +217,8 @@ Each poll is one read against your key's rate limit.
 **Errors.** A content refusal is a `KashValidationError` with code `MARKET_CONTENT_REFUSED`. `isMarketContentRefusal(err)` narrows it and types `err.extensions.reason`:
 
 ```ts
-import { isMarketContentRefusal, KashRateLimitError, KASH_ERROR_CODE } from '@kashdao/sdk';
+import { KashRateLimitError, KASH_ERROR_CODE } from '@kashdao/sdk';
+import { isMarketContentRefusal } from '@kashdao/sdk/market-conversations';
 
 try {
   await kash.marketConversations.sendMessage(conversationId, { content }, { idempotencyKey });
@@ -408,7 +410,7 @@ The SDK also sends a `User-Agent` of the form `@kashdao/sdk/<version> (<runtime>
 
 ## Versioning and bundle size
 
-The SDK is pre-1.0 (`0.x`): a minor version may include breaking changes, so pin a minor range in `package.json`. Each release is held to a `size-limit` budget, measured excluding Zod: 24 KB for the main entry, 8 KB for `@kashdao/sdk/testing`, 5 KB each for `@kashdao/sdk/schemas` and `@kashdao/sdk/webhooks`, and 1 KB for `@kashdao/sdk/partner`.
+The SDK is pre-1.0 (`0.x`): a minor version may include breaking changes, so pin a minor range in `package.json`. Each release is held to a `size-limit` budget, measured excluding Zod: 24 KB for the main entry, 9 KB for `@kashdao/sdk/testing`, 5 KB each for `@kashdao/sdk/schemas` and `@kashdao/sdk/webhooks`, 2 KB each for `@kashdao/sdk/claimable` and `@kashdao/sdk/market-conversations`, and 1 KB for `@kashdao/sdk/partner`.
 
 ## Source
 
