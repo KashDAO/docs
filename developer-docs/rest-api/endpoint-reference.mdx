@@ -23,6 +23,18 @@ The **rate-limit class** says which budget a request draws from: `read` routes u
 | `POST` | [`/v1/markets/{id}/disputes`](/developer-docs/rest-api/endpoints/disputes) | `trades:write` | write |
 | `GET`  | [`/v1/markets/{id}/disputes`](/developer-docs/rest-api/endpoints/disputes) | `markets:read` | read |
 
+## Market creation (preview)
+
+| Method | Path | Scope | Class |
+| ------ | ---- | ----- | ----- |
+| `POST` | [`/v1/market-conversations`](/developer-docs/rest-api/market-creation) | `markets:write` | write |
+| `GET`  | [`/v1/market-conversations`](/developer-docs/rest-api/market-creation) | `markets:write` | read |
+| `GET`  | [`/v1/market-conversations/{conversationId}`](/developer-docs/rest-api/market-creation) | `markets:write` | read |
+| `POST` | [`/v1/market-conversations/{conversationId}/messages`](/developer-docs/rest-api/market-creation) | `markets:write` | write |
+| `GET`  | [`/v1/market-conversations/{conversationId}/messages`](/developer-docs/rest-api/market-creation) | `markets:write` | read |
+
+These routes are available when market creation through the API launches; until then each answers `503 ROUTE_DISABLED`. The two `POST` routes also count against the [market creation limits](/developer-docs/rest-api/rate-limits#market-creation-limits).
+
 ## Trades
 
 | Method | Path | Scope | Class |
@@ -77,7 +89,7 @@ The **rate-limit class** says which budget a request draws from: `read` routes u
 | `GET`  | [`/v1/partner/accounts/{accountId}/withdrawals`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | read |
 | `GET`  | [`/v1/partner/accounts/{accountId}/withdrawals/{withdrawalId}`](/developer-docs/partner-integration/withdrawals) | `partner:accounts` | read |
 
-A partner key acts for one of its accounts by sending `Kash-Account: <accountId>` on the balance, portfolio, trade, trace and redemption routes above. See [Partner integration](/developer-docs/partner-integration/overview).
+A partner key acts for one of its accounts by sending `Kash-Account: <accountId>` on the balance, portfolio, trade, trace, redemption and market conversation routes above. See [Partner integration](/developer-docs/partner-integration/overview).
 
 ## Health & spec (no key)
 
