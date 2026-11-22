@@ -206,9 +206,9 @@ The write methods take `{ idempotencyKey?, account?, headers?, timeoutMs?, maxRe
 
 - `outcome: 'replied'`: the conversation is `idle` and the assistant's reply to your message is in the transcript. `turns` holds what is new after `after`, one entry per `turnNumber` at its highest `revision`.
 - `outcome: 'failed'`: your message could not be delivered and will get no reply.
-- `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it. A `message` that is not in the conversation is refused with `KashValidationError` before any wait.
+- `outcome: 'superseded'`: a later message was sent to the same conversation, for example by another process of yours. The helper returns rather than waiting on it. A `message` that is not in the conversation is refused with `KashValidationError`.
 - `after` in the result is the position to keep for your next read; `state` is the last state it read.
-- Options: `message` (the `message` `sendMessage` returned), `after`, `timeoutMs` (default 180 000), `pollIntervalMs` (default 3 000), `onStatus` (called with each state it reads), `signal` and `account`. Past `timeoutMs` it throws `KashTimeoutError` with code `SDK_POLL_TIMEOUT`: the reply still lands in the transcript, so keep `after` and read later.
+- Options: `message` (the `message` `sendMessage` returned), `after`, `timeoutMs` (default 180 000), `pollIntervalMs` (default 3 000), `onStatus` (called with each state it reads), `signal` and `account`. Past `timeoutMs` it throws `KashTimeoutError` with code `SDK_POLL_TIMEOUT`: the reply may still come, so keep `after` and read the transcript later.
 - When today's AI drafting budget is used up, the message is still answered: the assistant's turn says so, and the outcome is `replied`.
 
 Each poll is one read against your key's rate limit.

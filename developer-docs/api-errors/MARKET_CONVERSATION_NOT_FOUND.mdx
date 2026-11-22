@@ -21,7 +21,7 @@ Kash gives the same answer in every case, so conversation ids cannot be probed.
 
 ## How to fix
 
-- Use the `id` returned when you started the conversation, in lower case, or find it with `GET /v1/market-conversations`.
+- Use the `id` returned when you started the conversation, or find it with `GET /v1/market-conversations`.
 - Call with a key of the same kind, and for a partner key the same `Kash-Account`, as the one that started it. A new key of the same user or organisation works: rotating a key does not lose its conversations.
 - The TypeScript SDK raises this as `KashNotFoundError`.
 
