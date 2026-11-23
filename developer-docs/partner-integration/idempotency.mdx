@@ -20,6 +20,7 @@ Send an `Idempotency-Key` header on every write, and retry a failed or timed-out
 | Create an account | `externalId` | Until you release the account. |
 | Trade | `clientRequestId`, set to your own order id | Kept per account, with no time limit. |
 | Withdrawal | `Idempotency-Key` (required), also stored on the withdrawal | For as long as the withdrawal exists. |
+| Market conversation start or message | `Idempotency-Key` | 24 hours for a `2xx` or a `422` content refusal. A retry that waits more than 2 seconds for the first request answers `409` with `Retry-After: 1`. See [Market conversation writes](/developer-docs/rest-api/idempotency#market-conversation-writes). |
 | Any other write | `Idempotency-Key` | The 60-second claim while it runs, then 24 hours for a `2xx`. |
 
 Store the id or key with the pending operation on your side **before** you send the request, and send the same value on every retry of it, including a retry after a timeout or a restart of your process.

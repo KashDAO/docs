@@ -10,7 +10,8 @@ description: 'HTTP 409: Account not active'
 A partner account's status does not allow the request. On suspend, reactivate and withdrawal requests the `detail` names the status.
 
 - A trade, trade confirmation or withdrawal for an account that is not `active`.
-- A call that reads the account's wallet (balance, portfolio, positions, trades, redemptions) for an account that is still `provisioning` or is `provisioning_failed`, and so has no wallet yet.
+- Starting a market conversation or sending a message in one, for an account that is not `active`.
+- A call that reads the account's wallet (balance, portfolio, positions, trades, redemptions) or its market conversations, for an account that is still `provisioning` or is `provisioning_failed`, and so has no wallet yet.
 - A redemption for an account that is not `active` or `suspended`.
 - A withdrawal quote for an account with no wallet yet (`provisioning` or `provisioning_failed`). The quote does not otherwise check the status: a suspended account can be quoted.
 - A suspend of an account that is not `active`, or a reactivate of one that is not `suspended`.

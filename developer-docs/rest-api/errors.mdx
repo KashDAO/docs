@@ -66,7 +66,7 @@ The SDK also throws typed subclasses (`KashRateLimitError`, `KashAuthorizationEr
 | ------ | ---- |
 | `200`  | Successful read, or a replay of an earlier write. |
 | `201`  | A resource was created. |
-| `202`  | Accepted for later work: a high-value trade awaiting confirmation, or a webhook replay. |
+| `202`  | Accepted for later work: a high-value trade awaiting confirmation, a webhook replay, or a message to a market conversation, which the assistant answers later. |
 | `304`  | Conditional request matched; no body. See [ETags](/developer-docs/rest-api/etags). |
 | `400`  | The request is invalid (`VALIDATION_FAILED`, `OUTCOME_INDEX_INVALID`, `CHAIN_NOT_SUPPORTED`, …). |
 | `401`  | Authentication failed (`API_KEY_*`, `REQUEST_SIGNATURE_INVALID`). |
@@ -74,7 +74,7 @@ The SDK also throws typed subclasses (`KashRateLimitError`, `KashAuthorizationEr
 | `404`  | Not found, or not yours. Ownership-checked routes answer `404` rather than `403`, so ids cannot be probed. |
 | `409`  | Conflicts with current state (`MARKET_NOT_TRADEABLE`, `SPENDING_LIMIT_EXCEEDED`, `IDEMPOTENCY_KEY_CONFLICT`, …). |
 | `410`  | `API_VERSION_UNSUPPORTED`. |
-| `422`  | Well-formed but cannot be processed in the current state (`MARKET_NOT_QUOTABLE`, `MARKET_NOT_DISPUTABLE`). |
+| `422`  | Well-formed but cannot be processed in the current state (`MARKET_NOT_QUOTABLE`, `MARKET_NOT_DISPUTABLE`), or a market conversation message refused for its content (`MARKET_CONTENT_REFUSED`). |
 | `429`  | Too many requests or too many unfinished trades. Honour `Retry-After`. |
 | `500`  | `INTERNAL_ERROR`. Include the `requestId` when reporting. |
 | `503`  | Temporarily unavailable (`ROUTE_DISABLED`, `API_TRADE_PROCESSING_HALTED`, `TRADE_ADMISSION_BUSY`, `DEPENDENCY_UNAVAILABLE`, `RATE_LIMIT_UNAVAILABLE`). |

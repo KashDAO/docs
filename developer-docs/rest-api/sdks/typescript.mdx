@@ -20,6 +20,7 @@ This page describes version 0.5.0. It is published on npm, with its source and r
 | `@kashdao/sdk/partner`              | Types of the partner surface: accounts, balances, withdrawals and their results (the methods are on `KashClient`)                                              |
 | `@kashdao/sdk/schemas`              | Zod schemas, for validating data yourself (market creation's are on `@kashdao/sdk/market-conversations`); the client already validates each response with them |
 | `@kashdao/sdk/webhooks`             | Partner webhook payload types and schemas                                                                                                                      |
+| `@kashdao/sdk/claimable`            | Types and schemas of claiming: what `kash.portfolio.claimable()` takes and returns, and the `position.claimable` webhook payload                               |
 | `@kashdao/sdk/market-conversations` | Types and schemas of the market creation API, and `isMarketContentRefusal` (the methods are on `KashClient` as `kash.marketConversations`)                     |
 | `@kashdao/sdk/testing`              | A fixture-driven mock client and a test webhook signer                                                                                                         |
 
@@ -177,7 +178,7 @@ const reply = await kash.marketConversations.waitForReply(conversation.id, {
 
 switch (reply.outcome) {
   case 'replied':
-    for (const turn of reply.turns) show(turn.role, turn.content);
+    for (const turn of reply.turns) console.log(turn.role, turn.content);
     break;
   case 'failed':                           // the message could not be delivered: send it again with a new key
   case 'superseded':                       // a later message was sent to this conversation
@@ -224,10 +225,12 @@ try {
   await kash.marketConversations.sendMessage(conversationId, { content }, { idempotencyKey });
 } catch (err) {
   if (isMarketContentRefusal(err)) {
-    return askToRephrase(err.message, err.extensions.reason);   // e.g. 'insider_information'
+    console.log('Rephrase the message:', err.message, err.extensions.reason);   // e.g. 'insider_information'
+    return;
   }
   if (err instanceof KashRateLimitError && err.code === KASH_ERROR_CODE.MARKET_CREATION_DAILY_LIMIT_REACHED) {
-    return tryAgainAfter(err.retryAfterSeconds);                  // seconds to 00:00 UTC
+    console.log(`Daily limit reached. Try again in ${err.retryAfterSeconds} s`);   // seconds to 00:00 UTC
+    return;
   }
   throw err;
 }
@@ -237,7 +240,7 @@ try {
 
 ## Pagination — async iteration
 
-List methods (`markets.list`, `markets.predictions`, `trades.list`, `webhooks.list`) return a `Page<T>` that's both the first page and an `AsyncIterable<T>`:
+List methods (`markets.list`, `markets.predictions`, `trades.list`, `webhooks.list`, `marketConversations.list`) return a `Page<T>` that's both the first page and an `AsyncIterable<T>`:
 
 ```ts
 const page = await kash.trades.list({ limit: 25, status: 'completed' });

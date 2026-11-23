@@ -13,8 +13,11 @@ List endpoints return one page at a time with an opaque cursor. There is no offs
 | `GET /v1/markets/{id}/predictions` | newest first | 50 | 100 |
 | `GET /v1/trades` | newest first | 20 | 100 |
 | `GET /v1/webhooks/events` | newest first | 25 | 100 |
+| `GET /v1/market-conversations` | newest first | 20 | 100 |
 
 A `limit` outside the allowed range is refused with `400 VALIDATION_FAILED`; it is not clamped.
+
+A market conversation's transcript, `GET /v1/market-conversations/{conversationId}/messages`, is read oldest first from an `after` position rather than with a cursor; see [Read the transcript](/developer-docs/rest-api/market-creation#read-the-transcript).
 
 `GET /v1/portfolio/positions` is **not** paginated: it returns every active position in one `{ data, _meta }` response, optionally filtered with `?marketId=`.
 

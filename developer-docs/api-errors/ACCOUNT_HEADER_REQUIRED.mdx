@@ -7,7 +7,7 @@ description: 'HTTP 400: Kash-Account header required'
 
 ## When it fires
 
-A partner key called a route that acts for one account without a `Kash-Account` header. These routes need it: `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions`, `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}` and `POST /v1/redemptions`.
+A partner key called a route that acts for one account without a `Kash-Account` header. These routes need it: `GET /v1/balance`, `GET /v1/portfolio`, `GET /v1/portfolio/positions`, `POST /v1/trades`, `POST /v1/trades/{id}/confirm`, `GET /v1/trades`, `GET /v1/trades/{id}`, `GET /v1/traces/{correlationId}`, `POST /v1/redemptions`, and the five market creation routes, `POST /v1/market-conversations`, `GET /v1/market-conversations`, `GET /v1/market-conversations/{conversationId}`, `POST /v1/market-conversations/{conversationId}/messages` and `GET /v1/market-conversations/{conversationId}/messages`.
 
 ## Why it happens
 
